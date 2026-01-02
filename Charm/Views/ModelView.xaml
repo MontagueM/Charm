@@ -52,12 +52,17 @@
                 Style="{StaticResource MaterialDesignCheckBox}">
                 Render Details
             </CheckBox>
+
+            <!--  Since SOME people can't behave and screenshot things with this on  -->
+            <!--  You know who you are, and if you're seeing this and are trying to reenable it  -->
+            <!--  Kindly, go fuck yourself :)  -->
             <CheckBox
                 x:Name="TextureCheckBox"
                 Margin="10,0,10,0"
                 VerticalAlignment="Center"
                 VerticalContentAlignment="Center"
                 IsChecked="False"
+                IsEnabled="False"
                 Style="{StaticResource MaterialDesignCheckBox}"
                 ToolTipService.InitialShowDelay="150"
                 Visibility="Collapsed">
@@ -66,6 +71,7 @@
                 </CheckBox.ToolTip>
                 Apply Texture
             </CheckBox>
+
             <CheckBox
                 x:Name="SkeletonCheckBox"
                 Margin="10,0,10,0"

@@ -733,6 +733,16 @@ public static class StyleHelper
         return (Brush)element.GetValue(BackgroundColorProperty);
     }
     #endregion
+
+    #region Toggle Buttons
+    public static readonly DependencyProperty ScaleProperty =
+        DependencyProperty.RegisterAttached(
+            "Scale", typeof(double), typeof(StyleHelper),
+            new PropertyMetadata(1.0));
+
+    public static void SetScale(UIElement element, double value) => element.SetValue(ScaleProperty, value);
+    public static double GetScale(UIElement element) => (double)element.GetValue(ScaleProperty);
+    #endregion
 }
 
 public static class UIHelper
@@ -863,7 +873,7 @@ public static class UIHelper
         return group;
     }
 
-    public static T GetOrAddTransform<T>(TransformGroup group) where T : Transform, new()
+    public static T GetOrAddTransform<T>(TransformGroup group) where T : System.Windows.Media.Transform, new()
     {
         var transform = group.Children.OfType<T>().FirstOrDefault();
         if (transform == null)

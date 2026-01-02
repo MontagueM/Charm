@@ -224,6 +224,18 @@ public static class Helpers
 
         return null;
     }
+
+    public static uint HashCombine(params uint[] values)
+    {
+        unchecked
+        {
+            uint hash = 0;
+            foreach (uint v in values)
+                hash ^= v + 0x9e3779b9u + (hash << 6) + (hash >> 2);
+
+            return hash;
+        }
+    }
 }
 
 public static class NestedTypeHelpers

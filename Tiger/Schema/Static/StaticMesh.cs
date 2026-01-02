@@ -1,6 +1,6 @@
 ﻿using Tiger.Exporters;
 using Tiger.Schema.Entity;
-using Tiger.Schema.Model;
+
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
 
@@ -40,14 +40,25 @@ public class MeshPart
     public List<Vector4> VertexAO = new();
     public Dictionary<int, List<Vector4>> VertexExtraData = new(); //TEXCOORD#, extra data
     public Material? Material;
+    public int VariantShaderIndex = -1;
     public int GroupIndex = 0;
     public int VertexLayoutIndex = -1;
     public int MaxVertexColorIndex = -1;
     public bool Collision = true;
-    public TfxRenderStage RenderStage;
-
     public Vector4 RotationOffset = Vector4.Quaternion;
     public Vector4 TranslationOffset = Vector4.Zero;
+
+    // For Customer Renderer
+    public TfxRenderStage RenderStage;
+    public IndexBuffer IndexBuffer;
+    public VertexBuffer VertexBuffer0;
+    public VertexBuffer? VertexBuffer1;
+    public VertexBuffer? VertexBuffer2;
+    public VertexBuffer? VertexBuffer3; // Skinning buffer for entities
+
+    public Vector4 MeshScale = Vector4.One;
+    public Vector4 MeshTransform = new(1f, 1f, 0f, 0f);
+    public Vector4 UVTransform = new(1f, 1f, 0f, 0f);
 
     /// <summary>
     /// Creates an instance of a specified type, derived from MeshPart, using data from the provided index and vertex buffers and other data.
@@ -148,6 +159,12 @@ public class StaticMesh : Tag<SStaticMesh>
         }
     }
 
+
+    /// <summary>
+    /// Loads both main parts and decal parts of the static mesh.
+    /// </summary>
+    /// <param name="detailLevel"></param>
+    /// <returns></returns>
     public List<StaticPart> Load(ExportDetailLevel detailLevel)
     {
         List<StaticPart> decalParts = LoadDecals(detailLevel);
@@ -161,7 +178,25 @@ public class StaticMesh : Tag<SStaticMesh>
         return Task.Run(() => Load(detailLevel));
     }
 
-    private List<StaticPart> LoadDecals(ExportDetailLevel detailLevel)
+    /// <summary>
+    /// Loads just the main parts of the static mesh (excludes decals).
+    /// </summary>
+    /// <param name="detailLevel"></param>
+    /// <returns></returns>
+    public List<StaticPart> LoadMainParts(ExportDetailLevel detailLevel)
+    {
+        List<StaticPart> decalParts = LoadDecals(detailLevel);
+        List<StaticPart> mainParts = _tag.StaticData.Load(detailLevel, _tag);
+        mainParts.AddRange(decalParts);
+        return mainParts;
+    }
+
+    /// <summary>
+    /// Loads just the decal parts of the static mesh.
+    /// </summary>
+    /// <param name="detailLevel"></param>
+    /// <returns></returns>
+    public List<StaticPart> LoadDecals(ExportDetailLevel detailLevel)
     {
         List<StaticPart> parts = new();
         foreach (SStaticMeshDecal decalPartEntry in _tag.Decals)

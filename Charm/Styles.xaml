@@ -1704,7 +1704,9 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="auto" />
                         </Grid.ColumnDefinitions>
-
+                        <Grid.LayoutTransform>
+                            <ScaleTransform ScaleX="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(charm:StyleHelper.Scale)}" ScaleY="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(charm:StyleHelper.Scale)}" />
+                        </Grid.LayoutTransform>
 
                         <Border
                             Grid.Column="0"

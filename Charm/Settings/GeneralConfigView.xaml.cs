@@ -111,13 +111,29 @@ public partial class GeneralConfigView : UserControl
         hlsl.SettingValue = bVal.ToString();
         hlsl.ChangeButton.Click += SaveShaderHLSL_OnClick;
         MaterialsConfigPanel.Children.Add(hlsl);
+
+        if (App.CharmRenderer is not null)
+        {
+            ConfigSettingToggleControl cusRend = new();
+            cusRend.SettingName = "Custom Renderer";
+            cusRend.SettingLabel = "!!EXPERIMENTAL!! Enables a custom renderer for models. (Lastest version only)";
+            bVal = _config.GetCustomRenderer();
+            cusRend.SettingValue = bVal.ToString();
+            cusRend.ChangeButton.Click += CustomRenderer_OnClick;
+            cusRend.IsEnabled = true;
+
+            if (!Strategy.IsLatest())
+                cusRend.IsEnabled = false;
+
+            MaterialsConfigPanel.Children.Add(cusRend);
+        }
         #endregion
 
         #region Misc
         // ---- Misc settings panel ----
         MiscConfigPanel.Children.Clear();
 
-        // Store all exported map assets in a single "Maps/Assets/" folder  
+        // Store all exported map assets in a single "Maps/Assets/" folder
         // instead of "ExportPath/(MapName)/".
         ConfigSettingToggleControl cfe = new();
         cfe.SettingName = "Unified Map Asset Exports";
@@ -151,6 +167,7 @@ public partial class GeneralConfigView : UserControl
         disHL.SettingValue = bVal.ToString();
         disHL.ChangeButton.Click += HolofoilShader_OnClick;
         MiscConfigPanel.Children.Add(disHL);
+
         #endregion
     }
 
@@ -343,6 +360,28 @@ public partial class GeneralConfigView : UserControl
     {
         _config.SetHolofoilShader(!_config.GetHolofoilShader());
         PopulateConfigPanel();
+    }
+
+    private void CustomRenderer_OnClick(object sender, RoutedEventArgs e)
+    {
+        _config.SetCustomRenderer(!_config.GetCustomRenderer());
+        ExperimentalWarning(_config.GetCustomRenderer());
+
+        PopulateConfigPanel();
+    }
+
+    private void ExperimentalWarning(bool enabled)
+    {
+        string title = !enabled ? "EXPERIMENTAL FEATURE DISABLED!" : "EXPERIMENTAL FEATURE ENABLED!";
+        string desc = !enabled ? "A restart is recommended." : "Things may get a little quirky. Please report any issues you may run into.";
+        NotificationBanner warn = new()
+        {
+            Icon = "⚠️",
+            Title = title,
+            Description = desc,
+            Style = NotificationBanner.PopupStyle.Warning
+        };
+        warn.Show();
     }
 
     private void SaveShaderHLSL_OnClick(object sender, RoutedEventArgs e)

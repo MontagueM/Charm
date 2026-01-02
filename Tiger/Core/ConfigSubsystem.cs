@@ -23,9 +23,10 @@ public class CommonSettings
     public bool AnimatedBackground { get; set; } = true;
     public bool MotionEffects { get; set; } = true;
     public bool HolofoilShader { get; set; } = true;
+    public bool CustomRenderer { get; set; } = false;
     public bool SaveShaderHLSL { get; set; } = false;
 
-    public bool AcceptedAgreementV3 { get; set; } = false;
+    public bool AcceptedAgreementV320 { get; set; } = false;
 }
 
 // [ConfigSubsystem]
@@ -91,12 +92,12 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
     #region General
     public bool GetAcceptedAgreement()
     {
-        return _settings.Common.AcceptedAgreementV3;
+        return _settings.Common.AcceptedAgreementV320;
     }
 
     public void SetAcceptedAgreement(bool b)
     {
-        _settings.Common.AcceptedAgreementV3 = b;
+        _settings.Common.AcceptedAgreementV320 = b;
         Save();
     }
     #endregion
@@ -340,6 +341,17 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
     public bool GetHolofoilShader()
     {
         return _settings.Common.HolofoilShader;
+    }
+
+    public void SetCustomRenderer(bool b)
+    {
+        _settings.Common.CustomRenderer = b;
+        Save();
+    }
+
+    public bool GetCustomRenderer()
+    {
+        return _settings.Common.CustomRenderer;
     }
 
     public void SetSaveShaderHLSL(bool val)

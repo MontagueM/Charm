@@ -134,21 +134,60 @@ public class Entity : Tag<SEntity>
         }
     }
 
-    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel)
+    /// <summary>
+    /// Loads both the normal model and physics model into dynamic mesh parts
+    /// </summary>
+    /// <param name="detailLevel"></param>
+    /// <param name="loadLevel"></param>
+    /// <returns></returns>
+    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, LoadLevel loadLevel = LoadLevel.Full)
     {
         if (!_loaded)
-        {
             Load();
-        }
+
         var dynamicParts = new List<DynamicMeshPart>();
         if (Model != null)
-        {
-            dynamicParts = dynamicParts.Concat(Model.Load(detailLevel, ModelParent, hasSkeleton: Skeleton != null)).ToList();
-        }
+            dynamicParts = dynamicParts.Concat(Model.Load(detailLevel, ModelParent, hasSkeleton: Skeleton != null, loadLevel: loadLevel)).ToList();
+
         if (PhysicsModel != null)
-        {
-            dynamicParts = dynamicParts.Concat(PhysicsModel.Load(detailLevel, PhysicsModelParent, hasSkeleton: Skeleton != null)).ToList();
-        }
+            dynamicParts = dynamicParts.Concat(PhysicsModel.Load(detailLevel, PhysicsModelParent, hasSkeleton: Skeleton != null, loadLevel: loadLevel)).ToList();
+
+        return dynamicParts;
+    }
+
+    /// <summary>
+    /// Loads only the normal model into dynamic mesh parts
+    /// </summary>
+    /// <param name="detailLevel"></param>
+    /// <param name="loadLevel"></param>
+    /// <returns></returns>
+    public List<DynamicMeshPart> LoadModel(ExportDetailLevel detailLevel, LoadLevel loadLevel = LoadLevel.Full)
+    {
+        if (!_loaded)
+            Load();
+
+        var dynamicParts = new List<DynamicMeshPart>();
+        if (Model != null)
+            dynamicParts = dynamicParts.Concat(Model.Load(detailLevel, ModelParent, hasSkeleton: Skeleton != null, loadLevel: loadLevel)).ToList();
+
+        return dynamicParts;
+    }
+
+    /// <summary>
+    /// Loads only the physics model into dynamic mesh parts
+    /// </summary>
+    /// <param name="detailLevel"></param>
+    /// <param name="loadLevel"></param>
+    /// <returns></returns>
+    public List<DynamicMeshPart> LoadPhysicsModel(ExportDetailLevel detailLevel, LoadLevel loadLevel = LoadLevel.Full)
+    {
+        if (!_loaded)
+            Load();
+
+        var dynamicParts = new List<DynamicMeshPart>();
+        if (PhysicsModel != null)
+            dynamicParts = dynamicParts.Concat(PhysicsModel.Load(detailLevel, PhysicsModelParent, hasSkeleton: Skeleton != null, loadLevel: loadLevel)).ToList();
+
         return dynamicParts;
     }
 

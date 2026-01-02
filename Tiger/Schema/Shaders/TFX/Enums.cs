@@ -102,6 +102,7 @@ public enum TfxScope
     PLAYER_CENTERED_CASCADED_GRID,
     GEAR_DYE_012,
     COLOR_GRADING_UBERSHADER,
+    CUI_DRAWING, // Added in Renegades
     WEATHER, // Only in Pre-BL
-    SPEEDTREE_INSTANCE_DATA // Only in D1
+    SPEEDTREE_INSTANCE_DATA, // Only in D1
 }

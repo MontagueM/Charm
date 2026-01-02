@@ -168,6 +168,24 @@ public partial class MainWindow
             UIElement.MouseLeaveEvent,
             new MouseEventHandler(OnAnyButtonMouseLeave)
         );
+
+        // VERY VERY stupid hack to get Helix3D scenes to actually work with the custom renderer enabled.
+        // It only works if Helix3D gets to create a viewport first for whatever reason, so as long as its alive
+        // anything that uses helix will just work fine? Very weird.
+#if !DEBUG // Only for release mode since helix will just crash the program if renderdoc is attached :)
+        if (App.CharmRenderer is not null && config.GetCustomRenderer())
+        {
+            var a = new CubemapView();
+            a.Visibility = Visibility.Hidden;
+            a.Width = 1;
+            a.Height = 1;
+            a.IsHitTestVisible = false;
+            a.Focusable = false;
+            a.CubemapViewport.Camera = null;
+            a.CubemapViewport.FrameRate = 0;
+            ViewboxGrid.Children.Add(a);
+        }
+#endif
     }
 
     private void LogConfigDetails()
@@ -190,18 +208,19 @@ public partial class MainWindow
             Description =
             "Charm is intended for 3D artists, content preservation, and understanding how the Tiger engine works." +
             "\n\nBy using Charm, you agree to the following:" +
-            "\n• You will not use Charm to share spoilers or ruin the experience for others." +
-            "\n• You will not use Charm to leak or distribute unreleased content." +
+            "\n• You WILL NOT use Charm to share spoilers or secrets that may ruin the experience for others." +
+            "\n• You WILL NOT use Charm to leak or distribute unreleased content." +
             "\n     - Including but not limited to screenshots, recordings, or exports." +
-            "\n• You will not use Charm in any way that violates Bungie’s Terms of Service." +
+            "\n• You WILL NOT use Charm in any way that violates Bungie’s Terms of Service." +
             "\n     - Including but not limited to using code to develop cheats and/or exploits." +
-            "\n\nBreaking any of the above reduces the likelihood of future public releases and updates. Don't ruin it for others." +
-            "\nDiscover things the way they were intended!",
+            "\n\nBreaking any of the above WILL reduce public updates and result in the removal of features." +
+            "\n\nTo Colony Deaks/quircii. No one cares about your internet points. Fuck off." +
+            "\nYou will be the reason Charm stops being updated. Getting real tired of it.",
 
             Style = PopupBanner.PopupStyle.Warning,
             UserInput = $"Accept{(!FontHandler.FontsLoaded ? " (Left Mouse)" : "")}",
             UserInputSecondary = $"Reject{(!FontHandler.FontsLoaded ? " (Right Mouse)" : "")}",
-            HoldDuration = 4000,
+            HoldDuration = 8000,
             Progress = true
         };
         warn.MouseRightButtonDown += (s, e) =>
@@ -495,6 +514,10 @@ public partial class MainWindow
             {
                 entityView.Dispose();
             }
+            else if (content is StaticListView staticView)
+            {
+                staticView.Dispose();
+            }
             else if (content is AudioListView audioView)
             {
                 audioView.MusicPlayer.Dispose();
@@ -539,6 +562,10 @@ public partial class MainWindow
     {
         if (e.Key == Key.D && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
         {
+
+            if (CurrentTab.Content is not MainMenuView) // todo, handle properly
+                return;
+
             MakeNewTab("Dev", new DevView());
             SetNewestTabSelected();
         }

@@ -127,9 +127,7 @@ public struct SIndexHeader
 {
     public sbyte Unk00;
     public bool Is32Bit;
-    public short Unk02;
-    public int Zeros04;
-    public long DataSize;
-    public int Deadbeef;
-    public int Zeros14;
+
+    [SchemaField(0x8)]
+    public int DataSize;
 }

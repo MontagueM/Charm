@@ -346,6 +346,11 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         return _inventoryItems.Values;
     }
 
+    public IEnumerable<InventoryItem> GetInventoryItemsUnloaded()
+    {
+        return _inventoryItems.Values;
+    }
+
     #region Strings
     public string GetItemNameSanitized(InventoryItem item)
     {
@@ -881,6 +886,13 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     public TigerHash GetArtArrangementHash(InventoryItem item)
     {
         return _artArrangementMap.TagData.ArtArrangementHashes.ElementAt(_artArrangementMap.GetReader(), item.GetArtArrangementIndex()).ArtArrangementHash;
+    }
+
+    public List<Entity.Entity> GetEntitiesFromHash(InventoryItem item)
+    {
+        int index = item.GetArtArrangementIndex();
+        List<Entity.Entity> entities = GetEntitiesFromArrangementIndex(index);
+        return entities;
     }
 
     public List<Entity.Entity> GetEntitiesFromHash(TigerHash hash)

@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Tiger.Schema;
@@ -8,6 +9,17 @@ public struct VertexWeight
 {
     public IntVector4 WeightValues;
     public IntVector4 WeightIndices;
+}
+
+public struct Transform
+{
+    public Transform() { }
+
+    public Vector3 Position { get; set; } = Vector3.Zero;
+    public Vector3 Rotation { get; set; }
+    public Vector4 Quaternion { get; set; } = Vector4.Quaternion;
+    public Vector3 Scale { get; set; } = Vector3.One;
+    public float Order { get; set; }
 }
 
 /// <summary>
@@ -203,6 +215,11 @@ public struct Vector3
         return new Vector3(x.X - y.X, x.Y - y.Y, x.Z - y.Z);
     }
 
+    public static Vector3 operator *(Vector3 x, Vector3 y)
+    {
+        return new Vector3(x.X * y.X, x.Y * y.Y, x.Z * y.Z);
+    }
+
     public static Vector3 operator *(Vector3 x, float y)
     {
         return new Vector3(x.X * y, x.Y * y, x.Z * y);
@@ -264,6 +281,16 @@ public struct Vector3
     public System.Numerics.Vector3 ToSys()
     {
         return new System.Numerics.Vector3(X, Y, Z);
+    }
+
+    public static implicit operator System.Numerics.Vector3(Vector3 m)
+    {
+        return Unsafe.As<Vector3, System.Numerics.Vector3>(ref m);
+    }
+
+    public static implicit operator Vector3(System.Numerics.Vector3 m)
+    {
+        return Unsafe.As<System.Numerics.Vector3, Vector3>(ref m);
     }
 }
 
@@ -417,12 +444,28 @@ public struct Vector4
         W = 1;
     }
 
+    public Vector4(Vector3 vec3, float w)
+    {
+        X = vec3.X;
+        Y = vec3.Y;
+        Z = vec3.Z;
+        W = w;
+    }
+
     public Vector4(Quaternion quat)
     {
         X = quat.X;
         Y = quat.Y;
         Z = quat.Z;
         W = quat.W;
+    }
+
+    public Vector4(Vector2 xy, Vector2 zw)
+    {
+        X = xy.X;
+        Y = xy.Y;
+        Z = zw.X;
+        W = zw.Y;
     }
 
     public static Vector4 Zero
@@ -490,6 +533,16 @@ public struct Vector4
     public System.Numerics.Vector4 ToSys()
     {
         return new System.Numerics.Vector4(X, Y, Z, W);
+    }
+
+    public static implicit operator System.Numerics.Vector4(Vector4 m)
+    {
+        return Unsafe.As<Vector4, System.Numerics.Vector4>(ref m);
+    }
+
+    public static implicit operator Vector4(System.Numerics.Vector4 m)
+    {
+        return Unsafe.As<System.Numerics.Vector4, Vector4>(ref m);
     }
 
     public System.Numerics.Quaternion ToQuat()
@@ -708,6 +761,11 @@ public struct Vector4
     public bool IsZero()
     {
         return X == 0 && Y == 0 && Z == 0 && W == 0;
+    }
+
+    public float Length()
+    {
+        return MathF.Sqrt(X * X + Y * Y + Z * Z + W * W);
     }
 }
 

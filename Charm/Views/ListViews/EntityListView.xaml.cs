@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Arithmic;
+using Charm.Shared;
 using ConcurrentCollections;
 using Newtonsoft.Json;
 using Tiger;
@@ -28,7 +29,10 @@ public partial class EntityListView : UserControl
     private ConcurrentDictionary<string, List<string>> NamedEntities = new();
 
     private int SortByIndex = 4;
-    private FileHash _currentEntity;
+    private Entity _currentEntity;
+
+    private IRenderer Renderer = null;
+    private EntityView RendererBasic = null;
 
     public EntityListView()
     {
@@ -43,6 +47,20 @@ public partial class EntityListView : UserControl
         {
             await LoadEntityList(item);
         };
+
+        if (App.CharmRenderer is not null && Config.GetCustomRenderer() && Strategy.IsLatest())
+        {
+            Type renderer = App.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
+            Renderer = Activator.CreateInstance(renderer) as IRenderer;
+
+            RendererGrid.Children.Add(Renderer as UserControl);
+        }
+        else
+        {
+            RendererBasic = new EntityView();
+            RendererGrid.Children.Add(RendererBasic);
+            HideBasicRenderer();
+        }
     }
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
@@ -51,7 +69,7 @@ public partial class EntityListView : UserControl
 
     public async void LoadContent()
     {
-        EntityViewer.Visibility = Visibility.Hidden;
+        HideBasicRenderer();
         MainWindow.Progress.SetProgressStages(new List<string>
         {
             "Caching Entity Names, may take some time.",
@@ -121,21 +139,21 @@ public partial class EntityListView : UserControl
     {
         ComboBoxControl sortBy = new();
         sortBy.Text = "Sort By";
-        sortBy.FontSize = 14;
-        sortBy.Combobox.MinWidth = 175;
-        sortBy.Combobox.ItemsSource = new List<ComboBoxItem>()
+        sortBy.TextFontSize = 16;
+        sortBy.Box.MinWidth = 175;
+        sortBy.Box.ItemsSource = new List<ComboBoxItem>()
         {
             new() { Content = "Hash ↓", Tag = 4 },
             new() { Content = "Hash ↑", Tag = 3 },
             new() { Content = "Name ↓", Tag = 2 },
             new() { Content = "Name ↑", Tag = 1 }
         };
-        if (sortBy.Combobox.SelectedIndex == -1)
+        if (sortBy.Box.SelectedIndex == -1)
         {
-            sortBy.Combobox.SelectedIndex = 0;
+            sortBy.Box.SelectedIndex = 0;
         }
 
-        sortBy.Combobox.SelectionChanged += SortBy_OnSelectionChanged;
+        sortBy.Box.SelectionChanged += SortBy_OnSelectionChanged;
         FilterOptions.Children.Add(sortBy);
     }
 
@@ -143,7 +161,7 @@ public partial class EntityListView : UserControl
     {
         await Task.Run(() =>
         {
-            Dispatcher.Invoke(() => EntityViewer.Visibility = Visibility.Hidden);
+            Dispatcher.Invoke(() => ShowBasicRenderer());
             MainWindow.Progress.SetProgressStages(new List<string>
             {
                 "Loading Entities."
@@ -250,11 +268,21 @@ public partial class EntityListView : UserControl
 
     private void LoadEntity(FileHash hash)
     {
+        Log.Info($"Loading entity {hash}");
+
         ExportButton.IsEnabled = true;
-        EntityViewer.LoadEntity(hash);
-        EntityViewer.ModelView.SetModelFunction(() => EntityViewer.LoadEntity(hash));
-        Dispatcher.Invoke(() => EntityViewer.Visibility = Visibility.Visible);
-        _currentEntity = hash;
+        if (RendererBasic is not null)
+        {
+            RendererBasic.LoadEntity(hash);
+            RendererBasic.ModelView.SetModelFunction(() => RendererBasic.LoadEntity(hash));
+            Dispatcher.Invoke(() => RendererBasic.Visibility = Visibility.Visible);
+        }
+        else if (Renderer is not null)
+        {
+            Renderer.LoadEntity(hash);
+        }
+
+        _currentEntity = FileResourcer.Get().GetFile<Entity>(hash);
     }
 
     private void EntitySearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -281,7 +309,7 @@ public partial class EntityListView : UserControl
         bool exportChildren = ExportChildren.IsChecked.Value;
         Dispatcher.Invoke(() =>
         {
-            EntityViewer.ModelView.Visibility = Visibility.Hidden;
+            HideBasicRenderer();
         });
 
         string pkgName = PackageResourcer.Get().GetPackage(items.First().Hash.PackageId).GetPackageMetadata().Name.Split(".")[0];
@@ -293,19 +321,18 @@ public partial class EntityListView : UserControl
         {
             foreach (var item in exportItems)
             {
-                var curEnt = FileResourcer.Get().GetFile<Entity>(item.Hash);
-                List<Entity> entities = new() { curEnt };
+                List<Entity> entities = new() { _currentEntity };
                 if (exportChildren)
-                    entities.AddRange(curEnt.GetEntityChildren());
+                    entities.AddRange(_currentEntity.GetEntityChildren());
 
-                EntityView.Export(entities, curEnt.Hash, savePath);
+                EntityView.Export(entities, _currentEntity.Hash, savePath);
                 MainWindow.Progress.CompleteStage();
             }
         });
 
         Dispatcher.Invoke(() =>
         {
-            EntityViewer.ModelView.Visibility = Visibility.Visible;
+            ShowBasicRenderer();
             NotificationBanner notify = new()
             {
                 Icon = "☑️",
@@ -324,28 +351,27 @@ public partial class EntityListView : UserControl
 
         MainWindow.Progress.SetProgressStages(new List<string>
         {
-            $"Exporting Entity {_currentEntity}",
+            $"Exporting Entity {_currentEntity.Hash}",
         });
 
-        var curEnt = FileResourcer.Get().GetFile<Entity>(_currentEntity);
-        List<Entity> entities = new() { curEnt };
+        List<Entity> entities = new() { _currentEntity };
         Dispatcher.Invoke(() =>
         {
             if (ExportChildren.IsChecked.Value == true)
-                entities.AddRange(curEnt.GetEntityChildren());
+                entities.AddRange(_currentEntity.GetEntityChildren());
 
-            EntityViewer.ModelView.Visibility = Visibility.Hidden;
+            HideBasicRenderer();
         });
 
         await Task.Run(() =>
         {
-            EntityView.Export(entities, _currentEntity);
+            EntityView.Export(entities, _currentEntity.Hash);
             MainWindow.Progress.CompleteStage();
         });
 
         Dispatcher.Invoke(() =>
         {
-            EntityViewer.ModelView.Visibility = Visibility.Visible;
+            ShowBasicRenderer();
             NotificationBanner notify = new()
             {
                 Icon = "☑️",
@@ -355,6 +381,22 @@ public partial class EntityListView : UserControl
             };
             notify.Show();
         });
+    }
+
+    private void ShowBasicRenderer()
+    {
+        if (RendererBasic is not null)
+        {
+            RendererBasic.ModelView.Visibility = Visibility.Visible;
+        }
+    }
+
+    private void HideBasicRenderer()
+    {
+        if (RendererBasic is not null)
+        {
+            RendererBasic.ModelView.Visibility = Visibility.Hidden;
+        }
     }
 
     private CancellationTokenSource _EntitySelectionCts;
@@ -445,6 +487,7 @@ public partial class EntityListView : UserControl
             PackageList.PackageListView.ItemsSource = items;
         });
     }
+
 
     private async void Tag_Loaded(object sender, RoutedEventArgs e)
     {
@@ -735,7 +778,23 @@ public partial class EntityListView : UserControl
 
     public void Dispose()
     {
-        MainViewModel MVM = (MainViewModel)EntityViewer.ModelView.UCModelView.Resources["MVM"];
+        //if (Renderer is not null)
+        //    Renderer.OnClose();
+
+        if (RendererBasic is null)
+            return;
+
+        MainViewModel MVM = (MainViewModel)RendererBasic.ModelView.UCModelView.Resources["MVM"];
         MVM.Dispose();
+    }
+
+    private void UsedMaterial_Click(object sender, RoutedEventArgs e)
+    {
+        var hash = (sender as Button).DataContext as FileHash;
+
+        var materialView = new MaterialView2();
+        materialView.Load(hash);
+        MainWindow.Current.MakeNewTab(hash, materialView);
+        MainWindow.Current.SetNewestTabSelected();
     }
 }

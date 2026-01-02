@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using Arithmic;
+using Charm.Shared;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Investment;
@@ -66,6 +67,8 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
     private DestinyTierType? RarityFilter = null;
     private List<DestinyTraitID>? ReleaseFilter = null;
 
+    private IRenderer Renderer = null;
+
     public DareView2()
     {
         //#if DEBUG
@@ -107,7 +110,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         List<ComboBoxItem> types = new();
         ComboBoxControl presets = new();
         presets.Text = "Type";
-        presets.FontSize = 14;
+        presets.TextFontSize = 16;
         foreach (var type in SortedItems.Keys.Where(x => x.ToString().StartsWith("item_")))
         {
             types.Add(new()
@@ -121,14 +124,14 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         types = types.OrderBy(x => x.Content as string).ToList();
         types.Insert(0, new() { Content = "All", FontSize = 10 });
         types.Insert(1, new() { Content = "Featured", Tag = DestinyTraitID.item_featured, FontSize = 10 });
-        presets.Combobox.ItemsSource = types;
+        presets.Box.ItemsSource = types;
 
-        if (presets.Combobox.SelectedIndex == -1)
+        if (presets.Box.SelectedIndex == -1)
         {
-            presets.Combobox.SelectedIndex = 0;
+            presets.Box.SelectedIndex = 0;
         }
-        presets.Combobox.MinWidth = boxWidth;
-        presets.Combobox.SelectionChanged += Filters_OnSelectionChanged;
+        presets.Box.MinWidth = boxWidth;
+        presets.Box.SelectionChanged += Filters_OnSelectionChanged;
 
         FilterOptions.Children.Add(presets);
 
@@ -137,7 +140,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         List<ComboBoxItem> rarities = new();
         ComboBoxControl rarity_presets = new();
         rarity_presets.Text = "Rarity";
-        rarity_presets.FontSize = 14;
+        rarity_presets.TextFontSize = 16;
 
         var values = Enum.GetValues(typeof(DestinyTierType)).Cast<DestinyTierType>().ToList();
         foreach (var rarity in values.Where(x => x != DestinyTierType.Unknown))
@@ -151,14 +154,14 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         }
 
         rarities.Insert(0, new() { Content = "All", FontSize = 10 });
-        rarity_presets.Combobox.ItemsSource = rarities;
+        rarity_presets.Box.ItemsSource = rarities;
 
-        if (rarity_presets.Combobox.SelectedIndex == -1)
+        if (rarity_presets.Box.SelectedIndex == -1)
         {
-            rarity_presets.Combobox.SelectedIndex = 0;
+            rarity_presets.Box.SelectedIndex = 0;
         }
-        rarity_presets.Combobox.MinWidth = boxWidth;
-        rarity_presets.Combobox.SelectionChanged += RarityFilters_OnSelectionChanged;
+        rarity_presets.Box.MinWidth = boxWidth;
+        rarity_presets.Box.SelectionChanged += RarityFilters_OnSelectionChanged;
         FilterOptions.Children.Add(rarity_presets);
 
         //--------------------------------------------
@@ -166,7 +169,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         List<ComboBoxItem> releases = new();
         ComboBoxControl release_presets = new();
         release_presets.Text = "Release";
-        release_presets.FontSize = 14;
+        release_presets.TextFontSize = 14;
 
         // Groups duplicate EnumDescriptions into one combobox item
         // No more seperate items for "main release, release season" releases
@@ -184,13 +187,13 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
         releases = releases.OrderBy(x => (((List<DestinyTraitID>)x.Tag).First()).ToString().Split("releases_v")[1].Split("_")[0]).ToList();
         releases.Insert(0, new() { Content = "All", FontSize = 10 });
-        release_presets.Combobox.ItemsSource = releases;
+        release_presets.Box.ItemsSource = releases;
 
-        if (release_presets.Combobox.SelectedIndex == -1)
-            release_presets.Combobox.SelectedIndex = 0;
+        if (release_presets.Box.SelectedIndex == -1)
+            release_presets.Box.SelectedIndex = 0;
 
-        release_presets.Combobox.MinWidth = boxWidth;
-        release_presets.Combobox.SelectionChanged += ReleaseFilters_OnSelectionChanged;
+        release_presets.Box.MinWidth = boxWidth;
+        release_presets.Box.SelectionChanged += ReleaseFilters_OnSelectionChanged;
         FilterOptions.Children.Add(release_presets);
     }
 
@@ -542,6 +545,42 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
         e.Handled = true;
         APIPlugItem apiItem = (sender as FrameworkElement).DataContext as APIPlugItem;
+
+
+        if (App.CharmRenderer is not null && ConfigSubsystem.Get().GetCustomRenderer() && Strategy.IsLatest() && Keyboard.IsKeyDown(Key.LeftCtrl))
+        {
+            var item = apiItem.Item;
+            if ((apiItem.Item.Type is "Artifact" or "Seasonal Artifact"))// && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is SC5738080 gearSet)
+            {
+                item = Investment.Get().GetInventoryItem(apiItem.Item.GetItemIndex() + 1);
+                item.Name = apiItem.Item.Name;
+            }
+            if (item.GetArtArrangementIndex() == -1)
+            {
+                NotificationBanner notify = new()
+                {
+                    Icon = "⚠",
+                    Title = "CANNOT PREVIEW ITEM",
+                    Description = $"The selected item does not have a 3D model to preview.",
+                    Style = NotificationBanner.PopupStyle.Warning
+                };
+                notify.Show();
+                return;
+            }
+
+            if (Renderer is null)
+            {
+                Type renderer = App.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
+                Renderer = Activator.CreateInstance(renderer) as IRenderer;
+            }
+
+            MainWindow.Current.MakeNewTab($"{apiItem.Item.Name} - 3D", Renderer as UserControl);
+            MainWindow.Current.SetNewestTabSelected();
+
+            Renderer.LoadInvestmentItem(item);
+
+            return;
+        }
 
         ItemView apiItemView = new(apiItem.Item);
         MainWindow.Current.MakeNewTab(apiItem.Item.Name, apiItemView);

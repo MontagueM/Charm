@@ -14,7 +14,7 @@
 		<Company>MontagueM</Company>
 		<LangVersion>11</LangVersion>
 		<ApplicationIcon>charm.ico</ApplicationIcon>
-		<RunPostBuildEvent>Always</RunPostBuildEvent>
+		<RunPostBuildEvent>Always</RunPostBuildEvent>      <SatelliteResourceLanguages></SatelliteResourceLanguages>
     </PropertyGroup>
 
     <ItemGroup>
@@ -30,20 +30,17 @@
     <ItemGroup>
       <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
       <PackageReference Include="ConcurrentHashSet" Version="1.3.0" />
-      <PackageReference Include="HelixToolkit" Version="2.27.0" />
-      <PackageReference Include="HelixToolkit.SharpDX.Assimp" Version="2.27.0" />
-      <PackageReference Include="HelixToolkit.SharpDX.Core" Version="2.27.0" />
-      <PackageReference Include="HelixToolkit.SharpDX.Core.Wpf" Version="2.27.0" />
       <PackageReference Include="MaterialDesignThemes" Version="5.0.0-ci330" />
-      <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.1.2" />
       <PackageReference Include="NAudio" Version="2.2.1" />
       <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
       <PackageReference Include="Restless.WaveForm" Version="1.1.0" />
+      <PackageReference Include="SharpDX.DirectInput" Version="4.2.0" />
       <PackageReference Include="VersionChecker" Version="1.1.0" />
-      <PackageReference Include="VirtualizingWrapPanel" Version="2.2.1" />
+      <PackageReference Include="VirtualizingWrapPanel" Version="2.3.2" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Charm.Shared\Charm.Shared.csproj" />
       <ProjectReference Include="..\Tiger\Tiger.csproj" />
     </ItemGroup>
 
@@ -159,5 +156,9 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <Exec Command="RD /S /Q &quot;$(TargetDir)cs\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)da\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)de\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)es\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)fa\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)fi\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)fr\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)it\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)ko\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)mk\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)nl\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)pl\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)pt\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)ru\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)sv\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)tr\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)zh-CN\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)ja\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)pt-BR\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)zh-Hans\&quot;&#xD;&#xA;RD /S /Q &quot;$(TargetDir)zh-Hant\&quot;" />
+    </Target>
 
 </Project>

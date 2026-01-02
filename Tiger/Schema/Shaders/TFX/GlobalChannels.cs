@@ -16,6 +16,23 @@ public static class GlobalChannels
         return Globals.Get().GlobalChannelDefaults[hash];
     }
 
+    public static void Set(int index, Vector4 vec)
+    {
+        var key = Globals.Get().GlobalChannelDefaults.Keys.ElementAt(index);
+        Globals.Get().GlobalChannelDefaults[key] = vec;
+    }
+
+    public static void Set(TigerHash hash, Vector4 vec)
+    {
+        Globals.Get().GlobalChannelDefaults[hash] = vec;
+    }
+
+    public static void RestoreDefaults()
+    {
+        Globals.Get().GlobalChannelDefaults.Clear();
+        Globals.Get().FillGlobalChannelDefaults();
+    }
+
     private static void Fill()
     {
         //Channels[10] = Vector4.One;

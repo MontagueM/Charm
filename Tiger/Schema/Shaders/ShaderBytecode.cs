@@ -328,7 +328,8 @@ public enum DXBCSemantic
     SystemInstanceId,
     SystemTarget,
     SystemPosition,
-    SystemIsFrontFace
+    SystemIsFrontFace,
+    SystemDepth
 }
 
 
@@ -368,6 +369,7 @@ public struct DXBCIOSignature
             "SV_VertexID" or "SV_VERTEXID" => DXBCSemantic.SystemVertexId,
             "SV_InstanceID" => DXBCSemantic.SystemInstanceId,
             "SV_Target" or "SV_TARGET" => DXBCSemantic.SystemTarget,
+            "SV_Depth" => DXBCSemantic.SystemDepth,
             _ => throw new NotImplementedException($"Unknown semantic {semanticName}"),
         };
         reader.Seek(offset, SeekOrigin.Begin);
@@ -384,7 +386,8 @@ public struct DXBCIOSignature
             ComponentMask.XY => 2,
             ComponentMask.XYZ => 4,  // XYZ/3 is always padded to 4
             ComponentMask.XYZW => 4,
-            _ => throw new NotImplementedException($"Unknown component mask {Mask}")
+            _ => 4
+            //_ => throw new NotImplementedException($"Unknown component mask {Mask}")
         };
     }
 

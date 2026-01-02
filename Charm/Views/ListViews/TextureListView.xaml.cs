@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Charm.Shared;
 using Tiger;
 using Tiger.Schema;
 using static Charm.PackageList;
@@ -64,8 +65,8 @@ public partial class TextureListView : UserControl
     {
         ComboBoxControl presets = new();
         presets.Text = "Presets";
-        presets.FontSize = 14;
-        presets.Combobox.ItemsSource = new List<ComboBoxItem>()
+        presets.TextFontSize = 16;
+        presets.Box.ItemsSource = new List<ComboBoxItem>()
         {
             new() { Content = "None", Tag = "", FontSize = 10 },
             new() { Content = "(De)Buff Icons", Tag = "75x75", FontSize = 10 },
@@ -80,33 +81,33 @@ public partial class TextureListView : UserControl
             new() { Content = "4K", Tag = "4096", FontSize = 10 }
 
         };
-        if (presets.Combobox.SelectedIndex == -1)
+        if (presets.Box.SelectedIndex == -1)
         {
-            presets.Combobox.SelectedIndex = 0;
+            presets.Box.SelectedIndex = 0;
         }
-        presets.Combobox.MinWidth = 175;
-        presets.Combobox.ToolTip = "Based on texture resolutions";
-        presets.Combobox.SelectionChanged += Presets_OnSelectionChanged;
+        presets.Box.MinWidth = 175;
+        presets.Box.ToolTip = "Based on texture resolutions";
+        presets.Box.SelectionChanged += Presets_OnSelectionChanged;
         FilterOptions.Children.Add(presets);
 
         //----------------------------------------------
 
         ComboBoxControl sortBy = new();
         sortBy.Text = "Sort By";
-        sortBy.FontSize = 14;
-        sortBy.Combobox.ItemsSource = new List<ComboBoxItem>()
+        sortBy.TextFontSize = 16;
+        sortBy.Box.ItemsSource = new List<ComboBoxItem>()
         {
             new() { Content = "Hash ↓", Tag = 4 },
             new() { Content = "Hash ↑", Tag = 3 },
             new() { Content = "Size ↓", Tag = 2 },
             new() { Content = "Size ↑", Tag = 1 }
         };
-        if (sortBy.Combobox.SelectedIndex == -1)
+        if (sortBy.Box.SelectedIndex == -1)
         {
-            sortBy.Combobox.SelectedIndex = 0;
+            sortBy.Box.SelectedIndex = 0;
         }
 
-        sortBy.Combobox.SelectionChanged += SortBy_OnSelectionChanged;
+        sortBy.Box.SelectionChanged += SortBy_OnSelectionChanged;
         FilterOptions.Children.Add(sortBy);
     }
 

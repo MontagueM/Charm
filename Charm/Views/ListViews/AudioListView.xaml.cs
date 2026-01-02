@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Arithmic;
+using Charm.Shared;
 using ConcurrentCollections;
 using NAudio.Wave;
 using Restless.WaveForm.Renderer;
@@ -132,9 +133,9 @@ public partial class AudioListView : UserControl
     {
         ComboBoxControl sortBy = new();
         sortBy.Text = "Sort By";
-        sortBy.FontSize = 14;
-        sortBy.Combobox.MinWidth = 175;
-        sortBy.Combobox.ItemsSource = new List<ComboBoxItem>()
+        sortBy.TextFontSize = 16;
+        sortBy.Box.MinWidth = 175;
+        sortBy.Box.ItemsSource = new List<ComboBoxItem>()
         {
             new() { Content = "Hash ↓", Tag = 5 },
             new() { Content = "Hash ↑", Tag = 4 },
@@ -142,12 +143,12 @@ public partial class AudioListView : UserControl
             new() { Content = "Duration ↑", Tag = 2 },
             new() { Content = "Channels ↓", Tag = 1 }
         };
-        if (sortBy.Combobox.SelectedIndex == -1)
+        if (sortBy.Box.SelectedIndex == -1)
         {
-            sortBy.Combobox.SelectedIndex = 0;
+            sortBy.Box.SelectedIndex = 0;
         }
 
-        sortBy.Combobox.SelectionChanged += SortBy_OnSelectionChanged;
+        sortBy.Box.SelectionChanged += SortBy_OnSelectionChanged;
         FilterOptions.Children.Add(sortBy);
     }
 

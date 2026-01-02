@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using HelixToolkit.SharpDX;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
@@ -96,7 +97,7 @@ public partial class StaticView : UserControl
                 Stream texture = TextureView.RemoveAlpha(part.Material.Pixel.Textures[0].Texture.GetTexture());
                 displayPart.DiffuseMaterial = new()
                 {
-                    DiffuseMap = new HelixToolkit.SharpDX.Core.TextureModel(texture, true),
+                    DiffuseMap = new TextureModel(texture, true),
                 };
             }
 

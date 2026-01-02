@@ -410,6 +410,25 @@ public static class Externs
         WaterDepthPrepass = 80,
     }
 
+    private static readonly TfxExtern[] _externMapD1 = Build<TfxExternD1>();
+    private static readonly TfxExtern[] _externMapD2 = Build<TfxExternD2>();
+    private static readonly TfxExtern[] _externMapD2EoF = Build<TfxExternD2_EoF>();
+
+    private static TfxExtern[] Build<TEnum>() where TEnum : struct, Enum
+    {
+        var values = Enum.GetValues<TEnum>();
+        var map = new TfxExtern[256];
+
+        foreach (var v in values)
+        {
+            var name = v.ToString();
+            if (Enum.TryParse(name, out TfxExtern ext))
+                map[Convert.ToByte(v)] = ext;
+        }
+
+        return map;
+    }
+
     /// <summary>
     /// Remaps the given byte value to the correct Tfx extern depending on the current version.
     /// </summary>
@@ -418,16 +437,14 @@ public static class Externs
     /// <exception cref="InvalidCastException"></exception>
     public static TfxExtern GetExtern(byte value)
     {
-        string name =
-            Strategy.IsD1() ? ((TfxExternD1)value).ToString() :
-            Strategy.IsLatest() ? ((TfxExternD2_EoF)value).ToString() :
-            ((TfxExternD2)value).ToString();
+        return Strategy.CurrentStrategy switch
+        {
+            TigerStrategy.DESTINY1_RISE_OF_IRON => _externMapD1[value],
+            TigerStrategy.DESTINY2_LATEST => _externMapD2EoF[value],
+            _ => _externMapD2[value]
+        };
 
-
-        if (Enum.TryParse(name, out TfxExtern result))
-            return result;
-
-        throw new InvalidCastException($"Couldn't cast extern value {value} ({name}) for {Strategy.CurrentStrategy}");
+        //throw new InvalidCastException($"Couldn't cast extern value {value} ({name}) for {Strategy.CurrentStrategy}");
     }
 
     // TODO s&box, remove InlineOrDefault since they are defined in the shader now since the removal of dynamic expressions

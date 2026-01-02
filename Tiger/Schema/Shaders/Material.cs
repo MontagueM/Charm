@@ -365,6 +365,41 @@ public struct StateSelection
         this.inner = value;
     }
 
+    public StateSelection(
+        int? blendState,
+        int? depthStencilState,
+        int? rasterizerState,
+        int? depthBiasState)
+    {
+        inner = 0;
+
+        inner |= (0x80 | (blendState ?? 0));
+        inner |= (0x80 | (depthStencilState ?? 0)) << 8;
+        inner |= (0x80 | (rasterizerState ?? 0)) << 16;
+        inner |= (0x80 | (depthBiasState ?? 0)) << 24;
+    }
+
+    public StateSelection Select(StateSelection other)
+    {
+        int selfRaw = this.Raw();
+        int otherRaw = other.Raw();
+
+        int newStates = ((otherRaw >> 7) & 0x1010101) * 0xff;
+        newStates = (newStates & (selfRaw ^ otherRaw)) ^ selfRaw;
+
+        return FromRaw(newStates);
+    }
+
+    public static StateSelection FromRaw(int raw)
+    {
+        return new StateSelection { inner = raw };
+    }
+
+    public int Raw()
+    {
+        return inner;
+    }
+
     public int BlendState()
     {
         if ((inner & 0x80) != 0)

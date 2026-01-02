@@ -45,7 +45,7 @@ $@"HEADER
 MODES
 {{
 	Forward();
-	Depth(); 
+	Depth();
 	ToolsShadingComplexity( ""tools_shading_complexity.shader"" );
 }}
 
@@ -137,7 +137,7 @@ PS
             shaderType = ShaderType.Terrain;
         if (Scopes.Contains(TfxScope.INSTANCES))
             shaderType = ShaderType.Decorator;
-        if (Scopes.Contains(TfxScope.DECAL) // bleh 
+        if (Scopes.Contains(TfxScope.DECAL) // bleh
             && (!Scopes.Contains(TfxScope.CHUNK_MODEL)
             && !Scopes.Contains(TfxScope.RIGID_MODEL))
             && !Scopes.Contains(TfxScope.SKINNING))
@@ -941,7 +941,7 @@ PS
                                 case TfxScope.TRANSPARENT:
                                     switch (texIndex)
                                     {
-                                        case 10: // Depth 
+                                        case 10: // Depth
                                             funcDef.AppendLine($"\t\t{equal.TrimStart()}= Depth::GetNormalized({sampleUv}).xxxx; //{equal_post}");
                                             break;
 
@@ -1067,7 +1067,7 @@ PS
                                 case TfxExtern.Water:
                                     switch (index)
                                     {
-                                        case 0x0: // Framebuffer 
+                                        case 0x0: // Framebuffer
                                         case 0x8: // Water UVs
                                         case 0x30: // Water reflection
                                             funcDef.AppendLine(defaultString);
@@ -1190,7 +1190,7 @@ PS
 		float3 normal = o1.xyz * float3(2,2,2) + float3(-1,-1,-1);
 		float length = sqrt(dot(normal.xyz, normal.xyz));
 		normal = normal.xyz / length;
-        
+
 		// Roughness
 		r0.x = length * 4 + -3;
 		r0.y = saturate(-0.5 * r0.x);
@@ -1216,7 +1216,7 @@ PS
         mat.AmbientOcclusion = saturate(o2.y * 2);
         mat.TintMask = 1;
         mat.Opacity = {(bTranslucent || Material.RenderStates.BlendState() != -1 ? "o0.w" : "1")};
-        mat.Emission = emission;       
+        mat.Emission = emission;
         mat.Transmission = o2.z;
 
         // Misc
@@ -1517,13 +1517,13 @@ PS
             RenderStates.BungieBlendDesc blendState = RenderStates.BlendStates[Material.RenderStates.BlendState()];
             renderStates.AppendLine($"\tRenderState(AlphaToCoverageEnable, {blendState.AlphaToCoverageEnable.ToString().ToLower()})");
             renderStates.AppendLine($"\tRenderState(IndependentBlendEnable, {blendState.IndependentBlendEnable.ToString().ToLower()})");
-            renderStates.AppendLine($"\tRenderState(BlendEnable, {blendState.BlendDesc.IsBlendEnabled.ToString().ToLower()})");
-            renderStates.AppendLine($"\tRenderState(SrcBlend, {BlendOptionString(blendState.BlendDesc.SourceBlend)})");
-            renderStates.AppendLine($"\tRenderState(DstBlend, {BlendOptionString(blendState.BlendDesc.DestinationBlend)})");
-            renderStates.AppendLine($"\tRenderState(BlendOp, {BlendOpString(blendState.BlendDesc.BlendOperation)})");
-            renderStates.AppendLine($"\tRenderState(SrcBlendAlpha, {BlendOptionString(blendState.BlendDesc.SourceAlphaBlend)})");
-            renderStates.AppendLine($"\tRenderState(DstBlendAlpha, {BlendOptionString(blendState.BlendDesc.DestinationAlphaBlend)})");
-            renderStates.AppendLine($"\tRenderState(BlendOpAlpha, {BlendOpString(blendState.BlendDesc.AlphaBlendOperation)})\n");
+            renderStates.AppendLine($"\tRenderState(BlendEnable, {blendState.BlendDesc[0].IsBlendEnabled.ToString().ToLower()})");
+            renderStates.AppendLine($"\tRenderState(SrcBlend, {BlendOptionString(blendState.BlendDesc[0].SourceBlend)})");
+            renderStates.AppendLine($"\tRenderState(DstBlend, {BlendOptionString(blendState.BlendDesc[0].DestinationBlend)})");
+            renderStates.AppendLine($"\tRenderState(BlendOp, {BlendOpString(blendState.BlendDesc[0].BlendOperation)})");
+            renderStates.AppendLine($"\tRenderState(SrcBlendAlpha, {BlendOptionString(blendState.BlendDesc[0].SourceAlphaBlend)})");
+            renderStates.AppendLine($"\tRenderState(DstBlendAlpha, {BlendOptionString(blendState.BlendDesc[0].DestinationAlphaBlend)})");
+            renderStates.AppendLine($"\tRenderState(BlendOpAlpha, {BlendOpString(blendState.BlendDesc[0].AlphaBlendOperation)})\n");
         }
 
         if (Material.RenderStates.RasterizerState() != -1)
@@ -1549,7 +1549,7 @@ PS
             renderStates.AppendLine($"\tRenderState(DepthWriteEnable, {(depthStencilState.Depth.WriteMask == 0 ? "false" : "true")})");
             renderStates.AppendLine($"\tRenderState(DepthFunc, {CompareFuncString(depthStencilState.Depth.Func)})\n");
 
-            // TODO: Need correct StencilRef 
+            // TODO: Need correct StencilRef
             //renderStates.AppendLine($"\tRenderState(StencilEnable, {depthStencilState.Stencil.StencilEnable.ToString().ToLower()})");
             //renderStates.AppendLine($"\tRenderState(StencilRef, 36)");
             //renderStates.AppendLine($"\tRenderState(StencilReadMask, {(byte)depthStencilState.Stencil.StencilReadMask})");

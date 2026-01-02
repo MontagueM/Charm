@@ -184,6 +184,7 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
                 part.VertexLayoutIndex = _tag.MaterialAssignments[i].VertexLayoutIndex;
                 part.Material = material;
                 part.Material.RenderStage = (TfxRenderStage)_tag.MaterialAssignments[i].RenderStage;
+                part.RenderStage = (TfxRenderStage)_tag.MaterialAssignments[i].RenderStage;
                 part.MaxVertexColorIndex = (int)_tag.MaxVertexColorIndex;
                 part.GetAllData(mesh, parent);
                 parts.Add(part);

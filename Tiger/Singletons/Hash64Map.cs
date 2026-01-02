@@ -27,6 +27,9 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
 
     public uint GetHash32(ulong tag64)
     {
+        if (tag64 == 0x00000000FFFFFFFF)
+            return FileHash.InvalidHash32;
+
         if (!_map.ContainsKey(tag64))
         {
             Log.Debug($"Hash64 {tag64}/{Endian.U64ToString(tag64)} not found in map");

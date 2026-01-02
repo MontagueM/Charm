@@ -6,6 +6,8 @@ using DirectXTex;
 using DirectXTexNet;
 using Newtonsoft.Json;
 using Tiger.Schema.Entity;
+using static DirectXTex.DirectXTexUtility;
+using TexMetadata = DirectXTexNet.TexMetadata;
 
 namespace Tiger.Schema;
 
@@ -42,6 +44,32 @@ public class Texture : TigerReferenceFile<STextureHeader>
             return TextureDimension.D3;
         else
             return TextureDimension.D2;
+    }
+
+    public byte[] GetRawBytes()
+    {
+        byte[] data;
+        if (Strategy.IsD1())
+        {
+            if (ReferenceHash.IsValid() && ReferenceHash.GetReferenceHash().IsValid())
+                data = PackageResourcer.Get().GetFileData(ReferenceHash.GetReferenceHash());
+            else
+                data = GetReferenceData();
+
+            if ((_tag.Flags1 & 0xC00) != 0x400 || IsCubemap())
+            {
+                GcnSurfaceFormatExtensions.GcnSurfaceFormat gcnformat = GcnSurfaceFormatExtensions.GetFormat(_tag.ROIFormat);
+                data = PS4SwizzleAlgorithm.UnSwizzle(data, _tag.Width, _tag.Height, _tag.ArraySize, gcnformat);
+            }
+        }
+        else
+        {
+            if (_tag.LargeTextureBuffer != null)
+                data = _tag.LargeTextureBuffer.GetData(false);
+            else
+                data = GetReferenceData();
+        }
+        return data;
     }
 
     public byte[] GetDDSBytes(DXGI_FORMAT format)
@@ -330,6 +358,169 @@ public class Texture : TigerReferenceFile<STextureHeader>
 
         return texture.GetTexture();
     }
+
+    public static void ComputePitch(DXGI_FORMAT format, long width, long height, out long rowPitch, out long slicePitch, CPFLAGS flags)
+    {
+        switch (format)
+        {
+            case DXGI_FORMAT.BC1_TYPELESS:
+            case DXGI_FORMAT.BC1_UNORM:
+            case DXGI_FORMAT.BC1_UNORM_SRGB:
+            case DXGI_FORMAT.BC4_TYPELESS:
+            case DXGI_FORMAT.BC4_UNORM:
+            case DXGI_FORMAT.BC4_SNORM:
+                {
+                    if (flags.HasFlag(CPFLAGS.BADDXTNTAILS))
+                    {
+                        long nbw = width >> 2;
+                        long nbh = height >> 2;
+                        rowPitch = Math.Clamp(1, nbw * 8, Int64.MaxValue);
+                        slicePitch = Math.Clamp(1, rowPitch * nbh, Int64.MaxValue);
+                    }
+                    else
+                    {
+                        long nbw = Math.Clamp(1, (width + 3) / 4, Int64.MaxValue);
+                        long nbh = Math.Clamp(1, (height + 3) / 4, Int64.MaxValue);
+                        rowPitch = nbw * 8;
+                        slicePitch = rowPitch * nbh;
+                    }
+                }
+                break;
+            case DXGI_FORMAT.BC2_TYPELESS:
+            case DXGI_FORMAT.BC2_UNORM:
+            case DXGI_FORMAT.BC2_UNORM_SRGB:
+            case DXGI_FORMAT.BC3_TYPELESS:
+            case DXGI_FORMAT.BC3_UNORM:
+            case DXGI_FORMAT.BC3_UNORM_SRGB:
+            case DXGI_FORMAT.BC5_TYPELESS:
+            case DXGI_FORMAT.BC5_UNORM:
+            case DXGI_FORMAT.BC5_SNORM:
+            case DXGI_FORMAT.BC6H_TYPELESS:
+            case DXGI_FORMAT.BC6H_UF16:
+            case DXGI_FORMAT.BC6H_SF16:
+            case DXGI_FORMAT.BC7_TYPELESS:
+            case DXGI_FORMAT.BC7_UNORM:
+            case DXGI_FORMAT.BC7_UNORM_SRGB:
+                {
+                    if (flags.HasFlag(CPFLAGS.BADDXTNTAILS))
+                    {
+                        long nbw = width >> 2;
+                        long nbh = height >> 2;
+                        rowPitch = Math.Clamp(1, nbw * 16, Int64.MaxValue);
+                        slicePitch = Math.Clamp(1, rowPitch * nbh, Int64.MaxValue);
+                    }
+                    else
+                    {
+                        long nbw = Math.Clamp(1, (width + 3) / 4, Int64.MaxValue);
+                        long nbh = Math.Clamp(1, (height + 3) / 4, Int64.MaxValue);
+                        rowPitch = nbw * 16;
+                        slicePitch = rowPitch * nbh;
+                    }
+                }
+                break;
+            case DXGI_FORMAT.R8G8_B8G8_UNORM:
+            case DXGI_FORMAT.G8R8_G8B8_UNORM:
+            case DXGI_FORMAT.YUY2:
+                rowPitch = ((width + 1) >> 1) * 4;
+                slicePitch = rowPitch * height;
+                break;
+            case DXGI_FORMAT.Y210:
+            case DXGI_FORMAT.Y216:
+                rowPitch = ((width + 1) >> 1) * 8;
+                slicePitch = rowPitch * height;
+                break;
+
+            case DXGI_FORMAT.NV12:
+            case DXGI_FORMAT.OPAQUE_420:
+                rowPitch = ((width + 1) >> 1) * 2;
+                slicePitch = rowPitch * (height + ((height + 1) >> 1));
+                break;
+
+            case DXGI_FORMAT.P010:
+            case DXGI_FORMAT.P016:
+                rowPitch = ((width + 1) >> 1) * 4;
+                slicePitch = rowPitch * (height + ((height + 1) >> 1));
+                break;
+            case DXGI_FORMAT.NV11:
+                rowPitch = ((width + 3) >> 2) * 4;
+                slicePitch = rowPitch * height * 2;
+                break;
+            default:
+                {
+
+                    long bpp;
+
+                    if (flags.HasFlag(CPFLAGS.BPP24))
+                        bpp = 24;
+                    else if (flags.HasFlag(CPFLAGS.BPP16))
+                        bpp = 16;
+                    else if (flags.HasFlag(CPFLAGS.BPP8))
+                        bpp = 8;
+                    else
+                        bpp = BitsPerPixel(format);
+
+                    if (flags.HasFlag(CPFLAGS.LEGACYDWORD | CPFLAGS.PARAGRAPH | CPFLAGS.YMM | CPFLAGS.ZMM | CPFLAGS.PAGE4K))
+                    {
+                        if (flags.HasFlag(CPFLAGS.PAGE4K))
+                        {
+                            rowPitch = ((width * bpp + 32767) / 32768) * 4096;
+                            slicePitch = rowPitch * height;
+                        }
+                        else if (flags.HasFlag(CPFLAGS.ZMM))
+                        {
+                            rowPitch = ((width * bpp + 511) / 512) * 64;
+                            slicePitch = rowPitch * height;
+                        }
+                        else if (flags.HasFlag(CPFLAGS.YMM))
+                        {
+                            rowPitch = ((width * bpp + 255) / 256) * 32;
+                            slicePitch = rowPitch * height;
+                        }
+                        else if (flags.HasFlag(CPFLAGS.PARAGRAPH))
+                        {
+                            rowPitch = ((width * bpp + 127) / 128) * 16;
+                            slicePitch = rowPitch * height;
+                        }
+                        else // DWORD alignment
+                        {
+                            // Special computation for some incorrectly created DDS files based on
+                            // legacy DirectDraw assumptions about pitch alignment
+                            rowPitch = ((width * bpp + 31) / 32) * 4;
+                            slicePitch = rowPitch * height;
+                        }
+                    }
+                    else
+                    {
+                        // Default byte alignment
+                        rowPitch = (width * bpp + 7) / 8;
+                        slicePitch = rowPitch * height;
+                    }
+                }
+                break;
+        }
+
+        if (rowPitch <= 0 || slicePitch <= 0)
+            throw new InvalidOperationException($"Invalid pitch: rowPitch={rowPitch}, slicePitch={slicePitch}, format={format}, width={width}, height={height}");
+    }
+
+    private static long BitsPerPixel(DXGI_FORMAT format)
+    {
+        return format switch
+        {
+            DXGI_FORMAT.R32G32B32A32_TYPELESS or DXGI_FORMAT.R32G32B32A32_FLOAT or DXGI_FORMAT.R32G32B32A32_UINT or DXGI_FORMAT.R32G32B32A32_SINT => 128,
+            DXGI_FORMAT.R32G32B32_TYPELESS or DXGI_FORMAT.R32G32B32_FLOAT or DXGI_FORMAT.R32G32B32_UINT or DXGI_FORMAT.R32G32B32_SINT => 96,
+            DXGI_FORMAT.R16G16B16A16_TYPELESS or DXGI_FORMAT.R16G16B16A16_FLOAT or DXGI_FORMAT.R16G16B16A16_UNORM or DXGI_FORMAT.R16G16B16A16_UINT or DXGI_FORMAT.R16G16B16A16_SNORM or DXGI_FORMAT.R16G16B16A16_SINT or DXGI_FORMAT.R32G32_TYPELESS or DXGI_FORMAT.R32G32_FLOAT or DXGI_FORMAT.R32G32_UINT or DXGI_FORMAT.R32G32_SINT or DXGI_FORMAT.R32G8X24_TYPELESS or DXGI_FORMAT.D32_FLOAT_S8X24_UINT or DXGI_FORMAT.R32_FLOAT_X8X24_TYPELESS or DXGI_FORMAT.X32_TYPELESS_G8X24_UINT or DXGI_FORMAT.Y416 or DXGI_FORMAT.Y210 or DXGI_FORMAT.Y216 => 64,
+            DXGI_FORMAT.R10G10B10A2_TYPELESS or DXGI_FORMAT.R10G10B10A2_UNORM or DXGI_FORMAT.R10G10B10A2_UINT or DXGI_FORMAT.R11G11B10_FLOAT or DXGI_FORMAT.R8G8B8A8_TYPELESS or DXGI_FORMAT.R8G8B8A8_UNORM or DXGI_FORMAT.R8G8B8A8_UNORM_SRGB or DXGI_FORMAT.R8G8B8A8_UINT or DXGI_FORMAT.R8G8B8A8_SNORM or DXGI_FORMAT.R8G8B8A8_SINT or DXGI_FORMAT.R16G16_TYPELESS or DXGI_FORMAT.R16G16_FLOAT or DXGI_FORMAT.R16G16_UNORM or DXGI_FORMAT.R16G16_UINT or DXGI_FORMAT.R16G16_SNORM or DXGI_FORMAT.R16G16_SINT or DXGI_FORMAT.R32_TYPELESS or DXGI_FORMAT.D32_FLOAT or DXGI_FORMAT.R32_FLOAT or DXGI_FORMAT.R32_UINT or DXGI_FORMAT.R32_SINT or DXGI_FORMAT.R24G8_TYPELESS or DXGI_FORMAT.D24_UNORM_S8_UINT or DXGI_FORMAT.R24_UNORM_X8_TYPELESS or DXGI_FORMAT.X24_TYPELESS_G8_UINT or DXGI_FORMAT.R9G9B9E5_SHAREDEXP or DXGI_FORMAT.R8G8_B8G8_UNORM or DXGI_FORMAT.G8R8_G8B8_UNORM or DXGI_FORMAT.B8G8R8A8_UNORM or DXGI_FORMAT.B8G8R8X8_UNORM or DXGI_FORMAT.R10G10B10_XR_BIAS_A2_UNORM or DXGI_FORMAT.B8G8R8A8_TYPELESS or DXGI_FORMAT.B8G8R8A8_UNORM_SRGB or DXGI_FORMAT.B8G8R8X8_TYPELESS or DXGI_FORMAT.B8G8R8X8_UNORM_SRGB or DXGI_FORMAT.AYUV or DXGI_FORMAT.Y410 or DXGI_FORMAT.YUY2 => 32,
+            DXGI_FORMAT.P010 or DXGI_FORMAT.P016 => 24,
+            DXGI_FORMAT.R8G8_TYPELESS or DXGI_FORMAT.R8G8_UNORM or DXGI_FORMAT.R8G8_UINT or DXGI_FORMAT.R8G8_SNORM or DXGI_FORMAT.R8G8_SINT or DXGI_FORMAT.R16_TYPELESS or DXGI_FORMAT.R16_FLOAT or DXGI_FORMAT.D16_UNORM or DXGI_FORMAT.R16_UNORM or DXGI_FORMAT.R16_UINT or DXGI_FORMAT.R16_SNORM or DXGI_FORMAT.R16_SINT or DXGI_FORMAT.B5G6R5_UNORM or DXGI_FORMAT.B5G5R5A1_UNORM or DXGI_FORMAT.A8P8 or DXGI_FORMAT.B4G4R4A4_UNORM => 16,
+            DXGI_FORMAT.NV12 or DXGI_FORMAT.OPAQUE_420 or DXGI_FORMAT.NV11 => 12,
+            DXGI_FORMAT.R8_TYPELESS or DXGI_FORMAT.R8_UNORM or DXGI_FORMAT.R8_UINT or DXGI_FORMAT.R8_SNORM or DXGI_FORMAT.R8_SINT or DXGI_FORMAT.A8_UNORM or DXGI_FORMAT.AI44 or DXGI_FORMAT.IA44 or DXGI_FORMAT.P8 => 8,
+            DXGI_FORMAT.R1_UNORM => 1,
+            DXGI_FORMAT.BC1_TYPELESS or DXGI_FORMAT.BC1_UNORM or DXGI_FORMAT.BC1_UNORM_SRGB or DXGI_FORMAT.BC4_TYPELESS or DXGI_FORMAT.BC4_UNORM or DXGI_FORMAT.BC4_SNORM => 4,
+            DXGI_FORMAT.BC2_TYPELESS or DXGI_FORMAT.BC2_UNORM or DXGI_FORMAT.BC2_UNORM_SRGB or DXGI_FORMAT.BC3_TYPELESS or DXGI_FORMAT.BC3_UNORM or DXGI_FORMAT.BC3_UNORM_SRGB or DXGI_FORMAT.BC5_TYPELESS or DXGI_FORMAT.BC5_UNORM or DXGI_FORMAT.BC5_SNORM or DXGI_FORMAT.BC6H_TYPELESS or DXGI_FORMAT.BC6H_UF16 or DXGI_FORMAT.BC6H_SF16 or DXGI_FORMAT.BC7_TYPELESS or DXGI_FORMAT.BC7_UNORM or DXGI_FORMAT.BC7_UNORM_SRGB => 8,
+            _ => (long)0,
+        };
+    }
 }
 
 // todo move this
@@ -351,6 +542,7 @@ public class TexturePlate : Tag<S919E8080>
         bool bSrgb = _tag.PlateTransforms[reader, 0].Texture.IsSrgb();
         ScratchImage outputPlate = TexHelper.Instance.Initialize2D(bSrgb ? DXGI_FORMAT.B8G8R8A8_UNORM_SRGB : DXGI_FORMAT.B8G8R8A8_UNORM, dimension.X, dimension.Y, 1, 0, 0);
 
+        //Debug.Assert(_tag.PlateTransforms.Count == 1, $"{Hash}");
         foreach (S939E8080 transform in _tag.PlateTransforms.Enumerate(reader))
         {
             ScratchImage original = transform.Texture.GetScratchImage();
@@ -359,6 +551,7 @@ public class TexturePlate : Tag<S919E8080>
             original.Dispose();
             resizedOriginal.Dispose();
         }
+
         return outputPlate;
     }
 
@@ -444,6 +637,9 @@ public struct STextureHeader
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public ushort TileCount;
+
+    [SchemaField(0x2D, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public byte MipCount;
 
     [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]

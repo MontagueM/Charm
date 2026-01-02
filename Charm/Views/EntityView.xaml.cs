@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Arithmic;
+using HelixToolkit.SharpDX;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
@@ -25,6 +26,8 @@ public partial class EntityView : UserControl
 
     public bool LoadEntity(FileHash entityHash)
     {
+        Log.Info($"Loading Entity {entityHash}");
+
         Hash = entityHash;
         SetupCheckboxHandlers();
 
@@ -61,43 +64,6 @@ public partial class EntityView : UserControl
         MVM.SubTitle = $"{displayParts.Sum(p => p.BasePart.Indices.Count)} triangles";
 
         return true;
-    }
-
-    public async void LoadEntityFromApi(TigerHash apiHash, FbxHandler fbxHandler)
-    {
-        fbxHandler.Clear();
-        List<Entity> entities = Investment.Get().GetEntitiesFromHash(apiHash);
-        foreach (Entity entity in entities)
-        {
-            // todo find out why sometimes this is null
-            if (entity == null)
-            {
-                continue;
-            }
-            AddEntity(entity, ModelView.GetSelectedLod(), fbxHandler);
-        }
-        LoadUI(fbxHandler);
-    }
-
-    private void AddEntity(Entity entity, ExportDetailLevel detailLevel, FbxHandler fbxHandler)
-    {
-        List<DynamicMeshPart> dynamicParts = entity.Load(detailLevel);
-        ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
-        if (ModelView.GetSelectedGroupIndex() != -1)
-            dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
-        fbxHandler.AddEntityToScene(entity, dynamicParts, detailLevel);
-        Log.Verbose($"Adding entity {entity.Hash}/{entity.Model?.Hash} with {dynamicParts.Sum(p => p.Indices.Count)} vertices to fbx");
-    }
-
-    private bool LoadUI(FbxHandler fbxHandler)
-    {
-        MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
-        ConfigSubsystem config = TigerInstance.GetSubsystem<ConfigSubsystem>();
-        string filePath = $"{config.GetExportSavePath()}/temp.fbx";
-        fbxHandler.ExportScene(filePath);
-        bool loaded = MVM.LoadEntityFromFbx(filePath);
-        fbxHandler.Clear();
-        return loaded;
     }
 
     public static void Export(List<Entity> entities, string name, string overridePath = null, ExportTypeFlag exportType = ExportTypeFlag.Full, EntitySkeleton overrideSkeleton = null)
@@ -323,7 +289,7 @@ public partial class EntityView : UserControl
                         Stream texture = TextureView.RemoveAlpha(part.Material.Pixel.Textures[0].Texture.GetTexture());
                         displayPart.DiffuseMaterial = new()
                         {
-                            DiffuseMap = new HelixToolkit.SharpDX.Core.TextureModel(texture, true),
+                            DiffuseMap = new TextureModel(texture, true),
                         };
                     }
 

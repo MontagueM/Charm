@@ -134,7 +134,7 @@ public class EntityModel : Tag<SEntityModel>
                 dynamicMeshPart.Material.Pixel.Shader is null) // || dynamicMeshPart.Material.Unk08 != 1)
                     continue;
 
-                dynamicMeshPart.Material.RenderStage = (TfxRenderStage)renderStage;
+                dynamicMeshPart.Material.RenderStage = dynamicMeshPart.RenderStage;
                 if (loadLevel == LoadLevel.Full)
                     dynamicMeshPart.GetAllData(mesh, _tag);
 
@@ -198,10 +198,12 @@ public class DynamicMeshPart : MeshPart
         IndexOffset = part.IndexOffset;
         IndexCount = part.IndexCount;
         PrimitiveType = (PrimitiveType)part.PrimitiveType;
-        if (part.VariantShaderIndex == -1)
+        VariantShaderIndex = part.VariantShaderIndex;
+
+        if (VariantShaderIndex == -1)
             Material = part.Material;
         else
-            Material = GetMaterialFromExternalMaterial(part.VariantShaderIndex, parentResource);
+            Material = GetMaterialFromExternalMaterial(VariantShaderIndex, parentResource);
     }
 
     public DynamicMeshPart() : base()
@@ -210,6 +212,12 @@ public class DynamicMeshPart : MeshPart
 
     public void GetAllData(SEntityModelMesh mesh, SEntityModel model)
     {
+        IndexBuffer = mesh.Indices;
+        VertexBuffer0 = mesh.Vertices1;
+        VertexBuffer1 = mesh.Vertices2;
+        VertexBuffer2 = mesh.VertexColour;
+        VertexBuffer3 = mesh.SinglePassSkinningBuffer;
+
         Indices = mesh.Indices.GetIndexData(PrimitiveType, IndexOffset, IndexCount);
 
         // Get unique vertex indices we need to get data for
@@ -256,6 +264,8 @@ public class DynamicMeshPart : MeshPart
     {
         Vector2 texcoordScale = !Strategy.IsD1() ? header.TexcoordScale : mesh.TexcoordScale;
         Vector2 texcoordTranslation = !Strategy.IsD1() ? header.TexcoordTranslation : mesh.TexcoordTranslation;
+
+        UVTransform = new Vector4(texcoordScale, texcoordTranslation);
 
         for (int i = 0; i < VertexTexcoords0.Count; i++)
         {
@@ -315,6 +325,9 @@ public class DynamicMeshPart : MeshPart
         Vector4 modelScale = !Strategy.IsD1() ? header.ModelScale : mesh.ModelScale;
         Vector4 modelTranslation = !Strategy.IsD1() ? header.ModelTranslation : mesh.ModelTranslation;
 
+        MeshScale = modelScale;
+        MeshTransform = modelTranslation;
+
         for (int i = 0; i < VertexPositions.Count; i++)
         {
             VertexPositions[i] = new Vector4(
@@ -326,7 +339,7 @@ public class DynamicMeshPart : MeshPart
         }
     }
 
-    private Material? GetMaterialFromExternalMaterial(short variantShaderIndex, EntityResource parentResource)
+    public static Material? GetMaterialFromExternalMaterial(int variantShaderIndex, EntityResource parentResource)
     {
         using TigerReader reader = parentResource.GetReader();
 
@@ -339,15 +352,20 @@ public class DynamicMeshPart : MeshPart
             ((S8F6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterials;
 
         if (map.Count == 0 || mats.Count == 0)
-        {
             return null;
-        }
+
         if (variantShaderIndex >= map.Count)
             return null; // todo this is actually wrong ig...
 
         SExternalMaterialMapEntry mapEntry = map[reader, variantShaderIndex];
+        int permutationIndex = 0;
+        if (parentResource is EntityModelParent parent && parent.MaterialPermutations is not null)
+        {
+            permutationIndex = parent.MaterialPermutations.OverrideIndex != -1
+                ? parent.MaterialPermutations.OverrideIndex : parent.MaterialPermutations.CalculatePermutationIndex() ?? 0;
+        }
 
-        return mats[reader, mapEntry.MaterialStartIndex + (0 % mapEntry.MaterialCount)].Material;
+        return mats[reader, mapEntry.MaterialStartIndex + (permutationIndex % mapEntry.MaterialCount)].Material;
     }
 
     public static void AddVertexColourSlotInfo(DynamicMeshPart dynamicPart, short w)

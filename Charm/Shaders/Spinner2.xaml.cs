@@ -21,18 +21,20 @@ namespace Charm;
 
 public partial class Spinner2 : UserControl, IDisposable
 {
-    private Device5 _d3d11Device;
-    private DeviceContext4 _d3d11Context;
-
-    private Texture2D _renderTexture;
-    private Texture2D _displayTexture;
-    private RenderTargetView _renderView;
+    private Device5 Device;
+    private DeviceContext4 Context;
     private Direct3DEx _direct3dEx;
     private DeviceEx _deviceEx;
+
+    private Texture2D _renderTarget0;
+    private Texture2D _displayTexture;
     private Texture _direct3D9Texture;
+    private RenderTargetView _renderView;
     private D3DImage _renderedImage;
+
     private SharpDX.Direct3D11.VertexShader _vertexShader;
     private SharpDX.Direct3D11.PixelShader _pixelShader;
+
     private Buffer _constantBuffer;
     private Buffer _posScaleConstantBuffer;
     private Stopwatch clock;
@@ -57,7 +59,7 @@ public partial class Spinner2 : UserControl, IDisposable
 
     private void Load(int width, int height)
     {
-        if (_d3d11Device == null)
+        if (Device == null)
         {
             InitialSetup();
         }
@@ -76,7 +78,7 @@ public partial class Spinner2 : UserControl, IDisposable
     private void ShaderRenderHost_Loaded(object sender, RoutedEventArgs e)
     {
         // Initialize device & context ONCE
-        if (_d3d11Device == null)
+        if (Device == null)
         {
             InitialSetup();
         }
@@ -134,9 +136,9 @@ public partial class Spinner2 : UserControl, IDisposable
 
         using (var device = new SharpDX.Direct3D11.Device(DriverType.Hardware, creationFlags, featureLevels))
         {
-            _d3d11Device = device.QueryInterface<Device5>();
-            _d3d11Context = _d3d11Device.ImmediateContext.QueryInterface<DeviceContext4>();
             Configuration.EnableReleaseOnFinalizer = true;
+            Device = device.QueryInterface<Device5>();
+            Context = Device.ImmediateContext.QueryInterface<DeviceContext4>();
         }
     }
 
@@ -147,12 +149,18 @@ public partial class Spinner2 : UserControl, IDisposable
             if (imageWidth <= 0 || imageHeight <= 0)
                 return;
 
+
+            if (clock is null)
+                clock = new();
+
+            clock.Start();
+
             DisposeRenderingResources();
             _renderedImage?.Lock();
             _renderedImage?.Unlock();
 
             // Start creating the textures
-            _renderTexture = new SharpDX.Direct3D11.Texture2D(_d3d11Device, new SharpDX.Direct3D11.Texture2DDescription
+            _renderTarget0 = new SharpDX.Direct3D11.Texture2D(Device, new SharpDX.Direct3D11.Texture2DDescription
             {
                 Width = imageWidth,
                 Height = imageHeight,
@@ -166,9 +174,9 @@ public partial class Spinner2 : UserControl, IDisposable
                 OptionFlags = SharpDX.Direct3D11.ResourceOptionFlags.None
             });
 
-            _renderView = new RenderTargetView(_d3d11Device, _renderTexture);
+            _renderView = new RenderTargetView(Device, _renderTarget0);
 
-            _displayTexture = new SharpDX.Direct3D11.Texture2D(_d3d11Device, new SharpDX.Direct3D11.Texture2DDescription
+            _displayTexture = new SharpDX.Direct3D11.Texture2D(Device, new SharpDX.Direct3D11.Texture2DDescription
             {
                 Width = imageWidth,
                 Height = imageHeight,
@@ -195,12 +203,13 @@ public partial class Spinner2 : UserControl, IDisposable
                 PresentationInterval = SharpDX.Direct3D9.PresentInterval.One,
             };
 
+            // Dx9 interop
             _direct3dEx = new SharpDX.Direct3D9.Direct3DEx();
             _deviceEx = new SharpDX.Direct3D9.DeviceEx(_direct3dEx, 0, SharpDX.Direct3D9.DeviceType.Hardware, IntPtr.Zero, SharpDX.Direct3D9.CreateFlags.HardwareVertexProcessing, presenterParams);
 
             _direct3D9Texture = new SharpDX.Direct3D9.Texture(_deviceEx, _displayTexture.Description.Width, _displayTexture.Description.Height, 1, SharpDX.Direct3D9.Usage.RenderTarget, SharpDX.Direct3D9.Format.A8R8G8B8, SharpDX.Direct3D9.Pool.Default, ref sharedHandle);
 
-            // This will contain the output image on each render cycle, bind it to an Image control for example.  
+            // This will contain the output image on each render cycle, bind it to an Image control for example.
             _renderedImage = new D3DImage(96, 96);
 
             using (var sur = _direct3D9Texture.GetSurfaceLevel(0))
@@ -210,35 +219,31 @@ public partial class Spinner2 : UserControl, IDisposable
                 _renderedImage.AddDirtyRect(new Int32Rect(0, 0, imageWidth, imageHeight));
                 _renderedImage.Unlock();
             }
+            ////
 
             // Compile Vertex and Pixel shaders
             MemoryStream stream = new MemoryStream(File.ReadAllBytes("shaders/procedural_spinner.vs.cso"));
             var vertexShaderByteCode = SharpDX.D3DCompiler.ShaderBytecode.Load(stream);
-            _vertexShader = new VertexShader(_d3d11Device, vertexShaderByteCode);
+            _vertexShader = new VertexShader(Device, vertexShaderByteCode);
             stream.Dispose();
 
             stream = new MemoryStream(File.ReadAllBytes("shaders/procedural_spinner_dark.ps.cso"));
             var pixelShaderByteCode = SharpDX.D3DCompiler.ShaderBytecode.Load(stream);
-            _pixelShader = new PixelShader(_d3d11Device, pixelShaderByteCode);
+            _pixelShader = new PixelShader(Device, pixelShaderByteCode);
             stream.Dispose();
 
             // Prepare All the stages
-            _d3d11Context.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleStrip;
-            _d3d11Context.VertexShader.Set(_vertexShader);
-            _d3d11Context.PixelShader.Set(_pixelShader);
-            _d3d11Context.Rasterizer.SetViewport(0, 0, imageWidth, imageHeight, 0.0f, 1.0f);
+            Context.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleStrip;
+            Context.VertexShader.Set(_vertexShader);
+            Context.PixelShader.Set(_pixelShader);
+            Context.Rasterizer.SetViewport(0, 0, imageWidth, imageHeight, 0.0f, 1.0f);
 
             // Create Constant Buffer
-            _constantBuffer = new Buffer(_d3d11Device, Utilities.SizeOf<Vector4>(), ResourceUsage.Default, BindFlags.ConstantBuffer, CpuAccessFlags.None, ResourceOptionFlags.None, 0);
-            _posScaleConstantBuffer = new Buffer(_d3d11Device, Utilities.SizeOf<Vector4>(), ResourceUsage.Default, BindFlags.ConstantBuffer, CpuAccessFlags.None, ResourceOptionFlags.None, 0);
+            _constantBuffer = new Buffer(Device, Utilities.SizeOf<Vector4>(), ResourceUsage.Default, BindFlags.ConstantBuffer, CpuAccessFlags.None, ResourceOptionFlags.None, 0);
+            _posScaleConstantBuffer = new Buffer(Device, Utilities.SizeOf<Vector4>(), ResourceUsage.Default, BindFlags.ConstantBuffer, CpuAccessFlags.None, ResourceOptionFlags.None, 0);
 
-            _d3d11Context.VertexShader.SetConstantBuffer(0, _constantBuffer);
-            _d3d11Context.PixelShader.SetConstantBuffer(0, _posScaleConstantBuffer);
-
-            if (clock is null)
-                clock = new();
-
-            clock.Start();
+            Context.VertexShader.SetConstantBuffer(0, _constantBuffer);
+            Context.PixelShader.SetConstantBuffer(0, _posScaleConstantBuffer);
         }
         catch (Exception e)
         {
@@ -250,21 +255,21 @@ public partial class Spinner2 : UserControl, IDisposable
     {
         try
         {
-            _d3d11Context.OutputMerger.SetTargets(_renderView);
-            _d3d11Context.ClearRenderTargetView(_renderView, new RawColor4(0f, 0f, 0f, 1f));
+            Context.OutputMerger.SetTargets(_renderView);
+            Context.ClearRenderTargetView(_renderView, new RawColor4(0f, 0f, 0f, 1f));
 
             // Update the cbuffer with the inverse rez and time
             Vector4 invTime = new Vector4(_invResolution.X, _invResolution.Y, clock.ElapsedMilliseconds / 1000f, 0);
-            _d3d11Context.UpdateSubresource(ref invTime, _constantBuffer);
-            _d3d11Context.UpdateSubresource(ref PositionScale, _posScaleConstantBuffer);
+            Context.UpdateSubresource(ref invTime, _constantBuffer);
+            Context.UpdateSubresource(ref PositionScale, _posScaleConstantBuffer);
 
             // Draw
-            _d3d11Context.Draw(6, 0);
+            Context.Draw(4, 0);
 
-            //IMPORTANT: You need to manually copy the resource from the render texture to the display texture, to avoid artifacts (double buffer).  
-            //Also, flush so your D3D9 resource gets the rendered content.  
-            _d3d11Device!.ImmediateContext.CopyResource(_renderTexture, _displayTexture);
-            _d3d11Device.ImmediateContext.Flush();
+            //IMPORTANT: You need to manually copy the resource from the render texture to the display texture, to avoid artifacts (double buffer).
+            //Also, flush so your D3D9 resource gets the rendered content.
+            Device!.ImmediateContext.CopyResource(_renderTarget0, _displayTexture);
+            Device.ImmediateContext.Flush();
 
             //Call Lock(),AddDirtyRect(), Unlock() in a dispatcher call if you need the screen updated with the new image.
             Dispatcher.BeginInvoke(() =>
@@ -286,12 +291,20 @@ public partial class Spinner2 : UserControl, IDisposable
         _constantBuffer?.Dispose();
         _vertexShader?.Dispose();
         _pixelShader?.Dispose();
-        _renderTexture?.Dispose();
+
+        _renderView?.Dispose();
+        _renderView = null;
+
+        _renderTarget0?.Dispose();
+        _renderTarget0 = null;
+
         _displayTexture?.Dispose();
-        _direct3D9Texture?.Dispose();
-        _renderedImage = null;
-        _renderTexture = null;
         _displayTexture = null;
+
+        _direct3D9Texture?.Dispose();
+        _direct3D9Texture = null;
+
+        _renderedImage = null;
     }
 
     public void DisposeControl()

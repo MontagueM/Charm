@@ -273,9 +273,9 @@ public static class Source2Handler
                 }
             }
 
-            STextureTag diff = dye.TagData.Textures[0];
+            STextureTag diff = dye.TagData.Pixel.Value.Textures[0];
             text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
-            STextureTag norm = dye.TagData.Textures[1];
+            STextureTag norm = dye.TagData.Pixel.Value.Textures[1];
             text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
             dyeIndex++;
         }

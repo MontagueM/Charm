@@ -18,6 +18,7 @@ using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
 using Tiger.Schema.Shaders;
+using static Tiger.Schema.Entity.EntityModelParent;
 using Decorator = Tiger.Schema.Decorator;
 
 namespace Charm;
@@ -207,6 +208,64 @@ public partial class DevView : UserControl
                     List<Entity> entities = new() { entity };
                     entities.AddRange(entity.GetEntityChildren());
 
+                    if (entity.ModelParent is not null)
+                    {
+                        var permutations = entity.ModelParent.GetModelPermutations();
+                        if (permutations is not null)
+                        {
+                            //Console.WriteLine($"Configuration:");
+                            //Console.WriteLine($"Permutation Index: {permutations.CalculatePermutationIndex()}");
+                            //foreach (var kvp in permutations.Configuration)
+                            //{
+                            //    var k = GlobalStrings.Get().GetString(kvp.Key);
+                            //    var v = GlobalStrings.Get().GetString(kvp.Value);
+                            //    Console.WriteLine($"Key: {k}, Value: {v}");
+                            //}
+
+                            Console.WriteLine($"\nKeys:");
+                            foreach (var kvp in permutations.Keys)
+                            {
+                                var k = GlobalStrings.Get().GetString(kvp.Key);
+                                Console.WriteLine($"Key: {k} ({kvp.Key})");
+                                foreach (var v in kvp.Value)
+                                {
+                                    var vn = GlobalStrings.Get().GetString(v);
+                                    Console.WriteLine($"Value: {vn} ({v})");
+                                }
+                            }
+
+                            Console.WriteLine($"\nPairsToPermutation:");
+                            foreach (var kvp in permutations.PairsToPermutation)
+                            {
+                                Console.WriteLine($"Keys for permutation {kvp.Value}:");
+                                foreach (var key in kvp.Key)
+                                {
+                                    var item1 = GlobalStrings.Get().GetString(key.Item1);
+                                    var item2 = GlobalStrings.Get().GetString(key.Item2);
+                                    Console.WriteLine($"{item1} : {item2}");
+                                }
+                            }
+
+                            var newConfig = new Dictionary<uint, uint>
+                            {
+                                { 2954315994, 980603538 }, // color, red
+                                { 4164757166, 84696443 }, // grate, c
+                                { 2995982517, 2256756024 } // invert, enable
+                            };
+
+                            ModelPermutation.UpdateConfiguration(permutations, newConfig);
+
+                            Console.WriteLine($"\nUpdated Configuration:");
+                            Console.WriteLine($"Permutation Index: {permutations.CalculatePermutationIndex()}");
+                            foreach (var kvp in permutations.Configuration)
+                            {
+                                var k = GlobalStrings.Get().GetString(kvp.Key);
+                                var v = GlobalStrings.Get().GetString(kvp.Value);
+                                Console.WriteLine($"Key: {k}, Value: {v}");
+                            }
+                        }
+                    }
+
                     EntityView.Export(entities, hash);
                     _mainWindow.MakeNewTab(hash, entityView);
                     _mainWindow.SetNewestTabSelected();
@@ -305,8 +364,11 @@ public partial class DevView : UserControl
                 // Scopes / gear dye (which is a scope)
                 case 0x80806DBA:
                     Dye scope_data = FileResourcer.Get().GetFile<Dye>(hash);
-                    bytecode = new(TfxBytecodeOp.ParseAll(scope_data.TagData.Bytecode));
-                    _ = bytecode.Evaluate(scope_data.TagData.BytecodeConstants, true);
+
+                    Console.WriteLine($"\n---- PIXEL ----");
+                    _ = scope_data.TagData.Pixel.Value.GetBytecode().Evaluate(scope_data.TagData.Pixel.Value.TFX_Bytecode_Constants, true);
+                    Console.WriteLine($"\n---- Vertex ----");
+                    _ = scope_data.TagData.Vertex.Value.GetBytecode().Evaluate(scope_data.TagData.Vertex.Value.TFX_Bytecode_Constants, true);
                     break;
 
                 case 0x80808AC5:

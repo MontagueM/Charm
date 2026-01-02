@@ -9,6 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Arithmic;
+using Charm.Shared;
 using Tiger;
 using Tiger.Schema;
 using static Charm.PackageList;
@@ -23,6 +25,9 @@ public partial class StaticListView : UserControl
     private int SortByIndex = 2;
     private FileHash _currentStatic;
 
+    private IRenderer StaticRenderer = null;
+    private StaticView StaticRendererBasic = null;
+
     public StaticListView()
     {
         InitializeComponent();
@@ -36,6 +41,23 @@ public partial class StaticListView : UserControl
         {
             await LoadStaticList(item);
         };
+
+        if (App.CharmRenderer is not null && Config.GetCustomRenderer() && Strategy.IsLatest())
+        {
+            Type renderer = App.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
+            StaticRenderer = Activator.CreateInstance(renderer) as IRenderer;
+
+            RendererGrid.Children.Add(StaticRenderer as UserControl);
+        }
+        else
+        {
+            if (App.CharmRenderer is null && Config.GetCustomRenderer())
+                Log.Warning("Renderer unavailable, falling back to basic viewer.");
+
+            StaticRendererBasic = new StaticView();
+            RendererGrid.Children.Add(StaticRendererBasic);
+            HideBasicRenderer();
+        }
     }
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
@@ -44,7 +66,7 @@ public partial class StaticListView : UserControl
 
     public async void LoadContent()
     {
-        StaticViewer.Visibility = Visibility.Hidden;
+        //StaticViewer.Visibility = Visibility.Hidden;
         MainWindow.Progress.SetProgressStages(new List<string>
         {
             "Creating Statics List.",
@@ -60,19 +82,19 @@ public partial class StaticListView : UserControl
     {
         ComboBoxControl sortBy = new();
         sortBy.Text = "Sort By";
-        sortBy.FontSize = 14;
-        sortBy.Combobox.MinWidth = 175;
-        sortBy.Combobox.ItemsSource = new List<ComboBoxItem>()
+        sortBy.TextFontSize = 16;
+        sortBy.Box.MinWidth = 175;
+        sortBy.Box.ItemsSource = new List<ComboBoxItem>()
         {
             new() { Content = "Hash ↓", Tag = 2 },
             new() { Content = "Hash ↑", Tag = 1 },
         };
-        if (sortBy.Combobox.SelectedIndex == -1)
+        if (sortBy.Box.SelectedIndex == -1)
         {
-            sortBy.Combobox.SelectedIndex = 0;
+            sortBy.Box.SelectedIndex = 0;
         }
 
-        sortBy.Combobox.SelectionChanged += SortBy_OnSelectionChanged;
+        sortBy.Box.SelectionChanged += SortBy_OnSelectionChanged;
         FilterOptions.Children.Add(sortBy);
     }
 
@@ -80,7 +102,7 @@ public partial class StaticListView : UserControl
     {
         await Task.Run(() =>
         {
-            Dispatcher.Invoke(() => StaticViewer.Visibility = Visibility.Hidden);
+            Dispatcher.Invoke(() => HideBasicRenderer());
             MainWindow.Progress.SetProgressStages(new List<string>
             {
                 "Loading Statics."
@@ -156,9 +178,17 @@ public partial class StaticListView : UserControl
     private void LoadStatic(FileHash hash)
     {
         ExportButton.IsEnabled = true;
-        StaticViewer.LoadStatic(hash, ExportDetailLevel.MostDetailed);
-        StaticViewer.ModelView.SetModelFunction(() => StaticViewer.LoadStatic(hash, ExportDetailLevel.MostDetailed));
-        Dispatcher.Invoke(() => StaticViewer.Visibility = Visibility.Visible);
+        if (StaticRendererBasic is not null)
+        {
+            StaticRendererBasic.LoadStatic(hash, ExportDetailLevel.MostDetailed);
+            StaticRendererBasic.ModelView.SetModelFunction(() => StaticRendererBasic.LoadStatic(hash, ExportDetailLevel.MostDetailed));
+            Dispatcher.Invoke(() => StaticRendererBasic.Visibility = Visibility.Visible);
+        }
+        else if (StaticRenderer is not null)
+        {
+            StaticRenderer.LoadStatic(hash, new MapTransform { Translation = new Vector4(0f, 0f, 0f, 1f) });
+        }
+
         _currentStatic = hash;
     }
 
@@ -185,7 +215,7 @@ public partial class StaticListView : UserControl
 
         Dispatcher.Invoke(() =>
         {
-            StaticViewer.ModelView.Visibility = Visibility.Hidden;
+            HideBasicRenderer();
         });
 
         string pkgName = PackageResourcer.Get().GetPackage(items.First().Hash.PackageId).GetPackageMetadata().Name.Split(".")[0];
@@ -206,7 +236,7 @@ public partial class StaticListView : UserControl
 
         Dispatcher.Invoke(() =>
         {
-            StaticViewer.ModelView.Visibility = Visibility.Visible;
+            ShowBasicRenderer();
             NotificationBanner notify = new()
             {
                 Icon = "☑️",
@@ -231,14 +261,14 @@ public partial class StaticListView : UserControl
         var curStatic = FileResourcer.Get().GetFile<StaticMesh>(_currentStatic);
         Dispatcher.Invoke(() =>
         {
-            StaticViewer.ModelView.Visibility = Visibility.Hidden;
+            HideBasicRenderer();
         });
         StaticView.ExportStatic(curStatic.Hash, curStatic.Hash, ExportTypeFlag.Full);
         MainWindow.Progress.CompleteStage();
 
         Dispatcher.Invoke(() =>
         {
-            StaticViewer.ModelView.Visibility = Visibility.Visible;
+            ShowBasicRenderer();
             NotificationBanner notify = new()
             {
                 Icon = "☑️",
@@ -248,6 +278,22 @@ public partial class StaticListView : UserControl
             };
             notify.Show();
         });
+    }
+
+    private void ShowBasicRenderer()
+    {
+        if (StaticRendererBasic is not null)
+        {
+            StaticRendererBasic.ModelView.Visibility = Visibility.Visible;
+        }
+    }
+
+    private void HideBasicRenderer()
+    {
+        if (StaticRendererBasic is not null)
+        {
+            StaticRendererBasic.ModelView.Visibility = Visibility.Hidden;
+        }
     }
 
     private CancellationTokenSource _StaticSelectionCts;
@@ -286,6 +332,21 @@ public partial class StaticListView : UserControl
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
 
         public FileHash Hash { get; set; }
+    }
+
+    public void Dispose()
+    {
+        //if (StaticRenderer is not null)
+        //{
+        //    StaticRenderer.OnClose();
+        //    StaticRenderer = null;
+        //}
+
+        if (StaticRendererBasic is null)
+            return;
+
+        MainViewModel MVM = (MainViewModel)StaticRendererBasic.ModelView.UCModelView.Resources["MVM"];
+        MVM.Dispose();
     }
 }
 

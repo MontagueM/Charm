@@ -3,7 +3,7 @@ using DirectXTexNet;
 using Tiger.Schema.Entity;
 using static Tiger.Schema.Globals;
 
-namespace Tiger.Schema.Model;
+namespace Tiger.Schema;
 
 
 public class VertexBuffer : TigerReferenceFile<SVertexHeader>

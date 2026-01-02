@@ -167,6 +167,11 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
         _localizedStringsBias.Clear();
     }
 
+    public string GetString(uint hash)
+    {
+        return GetString(new StringHash(hash));
+    }
+
     public string GetString(TigerHash hash)
     {
         return GetString(new StringHash(hash));

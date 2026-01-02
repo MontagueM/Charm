@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Windows.Controls;
 using DirectXTexNet;
-using HelixToolkit.SharpDX.Core;
+using HelixToolkit.SharpDX;
 using HelixToolkit.Wpf.SharpDX;
 using Tiger;
 using Tiger.Schema;

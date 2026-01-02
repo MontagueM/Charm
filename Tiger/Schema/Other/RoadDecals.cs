@@ -1,6 +1,6 @@
 using Tiger.Exporters;
 using Tiger.Schema.Entity;
-using Tiger.Schema.Model;
+
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;

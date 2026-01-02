@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Tiger.Exporters;
-using Tiger.Schema.Model;
+
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
 

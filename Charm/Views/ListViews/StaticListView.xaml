@@ -160,12 +160,25 @@
                     <RowDefinition Height="10*" />
                 </Grid.RowDefinitions>
 
-                <local:StaticView
-                    x:Name="StaticViewer"
-                    Grid.Row="0"
+                <Grid
+                    x:Name="RendererGrid"
                     Margin="15,15,15,0"
-                    VerticalAlignment="Stretch"
-                    Visibility="Visible" />
+                    VerticalAlignment="Stretch">
+                    <!--
+                    <renderer:RendererViewport
+                        x:Name="StaticRenderer"
+                        Grid.Row="0"
+                        Focusable="True" />-->
+
+                    <!--
+                     <local:StaticView
+                         x:Name="StaticViewer"
+                         Grid.Row="0"
+                         Margin="15,15,15,0"
+                         VerticalAlignment="Stretch"
+                         Visibility="Collapsed" />-->
+                </Grid>
+
 
                 <Border
                     Grid.Row="1"

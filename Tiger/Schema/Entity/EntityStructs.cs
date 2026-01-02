@@ -1,5 +1,4 @@
 ﻿using Tiger.Schema.Investment;
-using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Entity;
@@ -73,6 +72,12 @@ public struct S069B8080  // Entity resource
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "8F6D8080", 0x450)]
 public struct S8F6D8080
 {
+    [SchemaField(0x38, TigerStrategy.DESTINY2_LATEST)]
+    public DynamicArray<SF79A8080> Unk38;
+
+    [SchemaField(0xD0, TigerStrategy.DESTINY2_LATEST)]
+    public AABB BoundingBox;
+
     [SchemaField(0x15C, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x1DC, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x224, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
@@ -101,13 +106,16 @@ public struct S8F6D8080
     [SchemaField(0x3E0, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArrayUnloaded<SExternalMaterialMapEntry> ExternalMaterialsMap;
 
+    [SchemaField(0x400, TigerStrategy.DESTINY2_LATEST)]
+    public DynamicArrayUnloaded<SInt16> Unk400;
+
     [SchemaField(0x260, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x300, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x398, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x3F0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x3F0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     [SchemaField(0x410, TigerStrategy.DESTINY2_LATEST)]
-    public DynamicArrayUnloaded<S986D8080> Unk3F0;
+    public DynamicArrayUnloaded<S986D8080> Unk410;
 
     [SchemaField(0x270, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x310, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
@@ -124,6 +132,12 @@ public struct S8F6D8080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "6C6D8080", 0x480)]
 public struct S6C6D8080
 {
+    [SchemaField(0x38, TigerStrategy.DESTINY2_LATEST)]
+    public DynamicArray<SF79A8080> Unk38;
+
+    [SchemaField(0xD0, TigerStrategy.DESTINY2_LATEST)]
+    public AABB BoundingBox;
+
     [SchemaField(0x15C, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x1DC, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x224, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
@@ -139,11 +153,16 @@ public struct S6C6D8080
     [SchemaField(0x3E0, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArrayUnloaded<SExternalMaterialMapEntry> ExternalMaterialsMap;
 
-    //[SchemaField(0x260, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    //[SchemaField(0x300, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    //[SchemaField(0x398, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    //[SchemaField(0x3F0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    //public DynamicArrayUnloaded<S986D8080> Unk3F0;
+    [SchemaField(0x400, TigerStrategy.DESTINY2_LATEST)]
+    public DynamicArrayUnloaded<SInt16> Unk400;
+
+    [SchemaField(0x260, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x300, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x398, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x3F0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x3F0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    [SchemaField(0x410, TigerStrategy.DESTINY2_LATEST)]
+    public DynamicArrayUnloaded<S986D8080> Unk410;
 
     [SchemaField(0x270, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x310, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
@@ -218,9 +237,9 @@ public struct S939E8080
 public struct S986D8080
 {
     public ushort Unk00;
-    public ushort Unk02;
+    public short Unk02;
     public ushort Unk04;
-    public ushort Unk06;
+    public short Unk06;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "841A8080", 0xC)]
@@ -230,7 +249,7 @@ public struct SExternalMaterialMapEntry
 {
     public int MaterialCount;
     public int MaterialStartIndex;
-    public int Unk08;  // maybe some kind of LOD or dynamic marker
+    public int Unk08;
 }
 
 [SchemaStruct("14008080", 0x4)]
@@ -1287,8 +1306,8 @@ public struct SF79A8080
 [SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "FB9A8080", 0x8)]
 public struct SFB9A8080
 {
-    public TigerHash Unk00; // weapon_type
-    public TigerHash Unk04; // weapon name
+    public TigerHash SwitchKey; // weapon_type "switch_key"
+    public TigerHash Value; // weapon name "value"
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "08068080", 0x40)]

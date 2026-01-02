@@ -1,5 +1,7 @@
-﻿using DirectXTexNet;
+﻿using System.Collections.Concurrent;
+using DirectXTexNet;
 using SharpDX.Direct3D11;
+using Tiger.Schema.Shaders;
 using Tiger.Schema.Strings;
 
 namespace Tiger.Schema;
@@ -8,27 +10,14 @@ namespace Tiger.Schema;
 public class Globals : Strategy.StrategistSingleton<Globals>
 {
     private List<TigerInputLayout> _inputLayouts = new();
+    private ConcurrentDictionary<string, Material> _renderPipelines = new();
+    private ConcurrentDictionary<TfxScope, SScope> _renderScopes = new();
+
     public Dictionary<TigerHash, Vector4> GlobalChannelDefaults = new();
     public Tag<SRenderGlobals> RenderGlobals;
 
     public Globals(TigerStrategy strategy, StrategyConfiguration strategyConfiguration) : base(strategy)
     {
-    }
-
-    public class TigerInputLayout
-    {
-        public List<TigerInputLayoutElement> Elements { get; set; }
-    }
-
-    public class TigerInputLayoutElement
-    {
-        public string HlslType { get; set; }
-        public DXGI_FORMAT Format { get; set; }
-        public uint Stride { get; set; }
-        public string SemanticName { get; set; }
-        public uint SemanticIndex { get; set; }
-        public uint BufferIndex { get; set; }
-        public bool IsInstanceData { get; set; }
     }
 
     protected override void Initialise()
@@ -50,7 +39,51 @@ public class Globals : Strategy.StrategistSingleton<Globals>
     protected override void Reset()
     {
         _inputLayouts.Clear();
+        _renderPipelines.Clear();
         GlobalChannelDefaults.Clear();
+    }
+
+    private void FillRenderPipelines()
+    {
+        var globals = Globals.Get().RenderGlobals;
+        Parallel.ForEach(globals.TagData.Pipelines.Enumerate(globals.GetReader()), pipeline =>
+        {
+            var pipeline_name = pipeline.Name.Value;
+            if (pipeline.Technique.IsInvalid() || _renderPipelines.ContainsKey(pipeline_name))
+                return;
+
+            _renderPipelines.TryAdd(pipeline_name, FileResourcer.Get().GetFile<Material>(pipeline.Technique));
+        });
+    }
+
+    public Material GetPipeline(string name)
+    {
+        if (_renderPipelines.Count == 0)
+            FillRenderPipelines();
+
+        _renderPipelines.TryGetValue(name, out Material pipeline);
+        return pipeline ?? throw new ArgumentException($"Pipeline with name {name} doesnt exist");
+    }
+
+    public ConcurrentDictionary<TfxScope, SScope> GetScopes()
+    {
+        if (_renderScopes.Count == 0)
+        {
+            var globals = Globals.Get().RenderGlobals;
+            Parallel.ForEach(globals.TagData.Scopes.Enumerate(globals.GetReader()), scope =>
+            {
+                if (!Enum.TryParse(scope.Name.Value.ToUpper(), out Tiger.TfxScope result))
+                    throw new Exception($"Unknown TFX Extern: {scope.Name.Value}");
+
+                var scope_name = scope.Name.Value;
+                if (scope.Technique.IsInvalid() || _renderScopes.ContainsKey(result))
+                    return;
+
+                _renderScopes.TryAdd(result, FileResourcer.Get().GetSchemaTag<SScope>(scope.Technique).TagData);
+            });
+        }
+
+        return _renderScopes;
     }
 
     public List<TigerInputLayout> GetInputLayouts()
@@ -127,7 +160,7 @@ public class Globals : Strategy.StrategistSingleton<Globals>
         //}
     }
 
-    private void FillGlobalChannelDefaults()
+    public void FillGlobalChannelDefaults()
     {
         var hashes = RenderGlobals.TagData.GlobalChannelDefaults.TagData.ChannelHashes;
         var values = RenderGlobals.TagData.GlobalChannelDefaults.TagData.ChannelDefaults;
@@ -442,28 +475,44 @@ public class Globals : Strategy.StrategistSingleton<Globals>
             }
         }
     };
+
+    public class TigerInputLayout
+    {
+        public List<TigerInputLayoutElement> Elements { get; set; }
+    }
+
+    public class TigerInputLayoutElement
+    {
+        public string HlslType { get; set; }
+        public DXGI_FORMAT Format { get; set; }
+        public uint Stride { get; set; }
+        public string SemanticName { get; set; }
+        public uint SemanticIndex { get; set; }
+        public uint BufferIndex { get; set; }
+        public bool IsInstanceData { get; set; }
+    }
 }
 
 public static class RenderStates
 {
     public class BungieBlendDesc
     {
-        public bool AlphaToCoverageEnable;
-        public bool IndependentBlendEnable;
-        public RenderTargetBlendDescription BlendDesc;
+        public bool AlphaToCoverageEnable = false;
+        public bool IndependentBlendEnable = true;
+        public RenderTargetBlendDescription[] BlendDesc;
 
         public override string ToString()
         {
             return $"AlphaToCoverageEnable: {AlphaToCoverageEnable}\n" +
                 $"IndependentBlendEnable: {IndependentBlendEnable}\n" +
-                $"IsBlendEnabled: {BlendDesc.IsBlendEnabled}\n" +
-                $"SourceBlend: {BlendDesc.SourceBlend}\n" +
-                $"DestinationBlend: {BlendDesc.DestinationBlend}\n" +
-                $"BlendOperation: {BlendDesc.BlendOperation}\n" +
-                $"SourceAlphaBlend: {BlendDesc.SourceAlphaBlend}\n" +
-                $"DestinationAlphaBlend: {BlendDesc.DestinationAlphaBlend}\n" +
-                $"AlphaBlendOperation: {BlendDesc.AlphaBlendOperation}\n" +
-                $"RenderTargetWriteMask: {BlendDesc.RenderTargetWriteMask}";
+                $"IsBlendEnabled: {BlendDesc[0].IsBlendEnabled}\n" +
+                $"SourceBlend: {BlendDesc[0].SourceBlend}\n" +
+                $"DestinationBlend: {BlendDesc[0].DestinationBlend}\n" +
+                $"BlendOperation: {BlendDesc[0].BlendOperation}\n" +
+                $"SourceAlphaBlend: {BlendDesc[0].SourceAlphaBlend}\n" +
+                $"DestinationAlphaBlend: {BlendDesc[0].DestinationAlphaBlend}\n" +
+                $"AlphaBlendOperation: {BlendDesc[0].AlphaBlendOperation}\n" +
+                $"RenderTargetWriteMask: {BlendDesc[0].RenderTargetWriteMask}";
         }
     }
 
@@ -567,1445 +616,3965 @@ public static class RenderStates
 
     public static readonly BungieBlendDesc[] BlendStates = new BungieBlendDesc[]
     {
-	    // Blend State 0
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 1
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 2
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.One,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 3
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.DestinationColor,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.DestinationAlpha,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 4
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.DestinationColor,
-                DestinationBlend = BlendOption.SourceColor,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.DestinationAlpha,
-                DestinationAlphaBlend = BlendOption.SourceAlpha,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 5
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.SourceAlpha,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 6
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.DestinationAlpha,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 7
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.DestinationAlpha,
-                DestinationBlend = BlendOption.One,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.DestinationAlpha,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 8
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.InverseSourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 9
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.One,
-                BlendOperation = BlendOperation.Minimum,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Minimum,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 10
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.One,
-                BlendOperation = BlendOperation.Maximum,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Maximum,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 11
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.DestinationColor,
-                DestinationBlend = BlendOption.One,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.DestinationAlpha,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 12
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.SourceAlpha,
-                DestinationBlend = BlendOption.InverseSourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.SourceAlpha,
-                DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 13
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.BlendFactor,
-                DestinationBlend = BlendOption.InverseBlendFactor,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.BlendFactor,
-                DestinationAlphaBlend = BlendOption.InverseBlendFactor,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 14
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.InverseSourceAlpha,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.InverseSourceAlpha,
-                DestinationAlphaBlend = BlendOption.SourceAlpha,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 15
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.DestinationAlpha,
-                DestinationBlend = BlendOption.InverseDestinationAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 16
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.InverseSourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 17
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 18
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 19
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 20
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 21
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 22
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 23
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 24
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 25
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 26
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 27
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 28
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 29
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 30
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 31
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 32
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 33
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 34
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 35
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.SourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 36
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 37
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 38
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 39
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 40
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 41
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 42
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 43
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 44
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 45
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 46
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 47
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 48
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 49
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 50
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 51
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 52
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 53
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 54
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 55
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 56
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 57
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 58
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 59
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 60
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 61
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 62
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 63
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 64
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 65
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 66
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 67
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 68
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 69
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 70
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 71
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 72
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 73
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 74
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 75
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 76
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.DestinationColor,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 77
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.DestinationColor,
-                DestinationBlend = BlendOption.SourceColor,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 78
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = false,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.Zero,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.Zero,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 79
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.DestinationAlpha,
-                DestinationBlend = BlendOption.One,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 80
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.InverseDestinationAlpha,
-                DestinationBlend = BlendOption.One,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 81
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.Zero,
-                DestinationBlend = BlendOption.DestinationAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 82
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.Zero,
-                DestinationBlend = BlendOption.InverseDestinationAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 83
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.Zero,
-                DestinationBlend = BlendOption.InverseSourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 84
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.InverseSourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 85
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.InverseSourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 86
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.SecondarySourceColor,
-                DestinationBlend = BlendOption.InverseSecondarySourceColor,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.SecondarySourceAlpha,
-                DestinationAlphaBlend = BlendOption.InverseSecondarySourceAlpha,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 87
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.InverseSourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 88
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.InverseSourceAlpha,
-                BlendOperation = BlendOperation.Add,
-                SourceAlphaBlend = BlendOption.Zero,
-                DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
-                AlphaBlendOperation = BlendOperation.Add,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
-        },
-	    // Blend State 89
-	    new() {
-            AlphaToCoverageEnable = false,
-            IndependentBlendEnable = true,
-            BlendDesc = new RenderTargetBlendDescription
-            {
-                IsBlendEnabled = true,
-                SourceBlend = BlendOption.One,
-                DestinationBlend = BlendOption.One,
-                BlendOperation = BlendOperation.ReverseSubtract,
-                SourceAlphaBlend = BlendOption.One,
-                DestinationAlphaBlend = BlendOption.One,
-                AlphaBlendOperation = BlendOperation.ReverseSubtract,
-                RenderTargetWriteMask = ColorWriteMaskFlags.All
-            }
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.SourceColor,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.SourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.SourceColor,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.SourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.SourceColor,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.SourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.SourceColor,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.SourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.SourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.SourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.SourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.SourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationAlpha,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationAlpha,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationAlpha,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationAlpha,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Minimum,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Minimum,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Minimum,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Minimum,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Minimum,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Minimum,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Minimum,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Minimum,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Maximum,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Maximum,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Maximum,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Maximum,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Maximum,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Maximum,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Maximum,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Maximum,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.DestinationAlpha,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.SourceAlpha,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.SourceAlpha,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.SourceAlpha,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.SourceAlpha,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.SourceAlpha,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.SourceAlpha,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.SourceAlpha,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.SourceAlpha,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.BlendFactor,
+                    DestinationBlend = BlendOption.InverseBlendFactor,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.BlendFactor,
+                    DestinationAlphaBlend = BlendOption.InverseBlendFactor,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.BlendFactor,
+                    DestinationBlend = BlendOption.InverseBlendFactor,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.BlendFactor,
+                    DestinationAlphaBlend = BlendOption.InverseBlendFactor,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.BlendFactor,
+                    DestinationBlend = BlendOption.InverseBlendFactor,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.BlendFactor,
+                    DestinationAlphaBlend = BlendOption.InverseBlendFactor,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.BlendFactor,
+                    DestinationBlend = BlendOption.InverseBlendFactor,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.BlendFactor,
+                    DestinationAlphaBlend = BlendOption.InverseBlendFactor,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.InverseSourceAlpha,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.InverseSourceAlpha,
+                    DestinationAlphaBlend = BlendOption.SourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.InverseSourceAlpha,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.InverseSourceAlpha,
+                    DestinationAlphaBlend = BlendOption.SourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.InverseSourceAlpha,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.InverseSourceAlpha,
+                    DestinationAlphaBlend = BlendOption.SourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.InverseSourceAlpha,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.InverseSourceAlpha,
+                    DestinationAlphaBlend = BlendOption.SourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationAlpha,
+                    DestinationBlend = BlendOption.InverseDestinationAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationAlpha,
+                    DestinationBlend = BlendOption.InverseDestinationAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationAlpha,
+                    DestinationBlend = BlendOption.InverseDestinationAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationAlpha,
+                    DestinationBlend = BlendOption.InverseDestinationAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.SourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.SourceColor,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.SourceColor,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.SourceColor,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationColor,
+                    DestinationBlend = BlendOption.SourceColor,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationAlpha,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationAlpha,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationAlpha,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.DestinationAlpha,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.InverseDestinationAlpha,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.InverseDestinationAlpha,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.InverseDestinationAlpha,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.InverseDestinationAlpha,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.Zero,
+                    DestinationBlend = BlendOption.DestinationAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.Zero,
+                    DestinationBlend = BlendOption.DestinationAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.Zero,
+                    DestinationBlend = BlendOption.DestinationAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.Zero,
+                    DestinationBlend = BlendOption.DestinationAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.Zero,
+                    DestinationBlend = BlendOption.InverseDestinationAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.Zero,
+                    DestinationBlend = BlendOption.InverseDestinationAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.Zero,
+                    DestinationBlend = BlendOption.InverseDestinationAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.Zero,
+                    DestinationBlend = BlendOption.InverseDestinationAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.Zero,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.Zero,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.Zero,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.Zero,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.SecondarySourceColor,
+                    DestinationBlend = BlendOption.InverseSecondarySourceColor,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.SecondarySourceAlpha,
+                    DestinationAlphaBlend = BlendOption.InverseSecondarySourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = false,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.Zero,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.Zero,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = 0,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.Zero,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.Zero,
+                    DestinationBlend = BlendOption.InverseSourceAlpha,
+                    BlendOperation = BlendOperation.Add,
+                    SourceAlphaBlend = BlendOption.Zero,
+                    DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                     AlphaBlendOperation = BlendOperation.Add,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
+        },
+        new() {
+            BlendDesc = new RenderTargetBlendDescription[4] {
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.ReverseSubtract,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                    AlphaBlendOperation = BlendOperation.ReverseSubtract,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.ReverseSubtract,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                    AlphaBlendOperation = BlendOperation.ReverseSubtract,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.ReverseSubtract,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                    AlphaBlendOperation = BlendOperation.ReverseSubtract,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+                new RenderTargetBlendDescription() {
+                    IsBlendEnabled = true,
+                    SourceBlend = BlendOption.One,
+                    DestinationBlend = BlendOption.One,
+                    BlendOperation = BlendOperation.ReverseSubtract,
+                    SourceAlphaBlend = BlendOption.One,
+                    DestinationAlphaBlend = BlendOption.One,
+                    AlphaBlendOperation = BlendOperation.ReverseSubtract,
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                },
+            },
         },
     };
 
@@ -3284,8 +5853,8 @@ public struct SRenderGlobals
 {
     public long FileSize;
     public Tag<SVertexInputLayouts> InputLayouts;
-    //[SchemaField(0x10, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    //public DynamicArrayUnloaded<SRenderGlobalScopes> Scopes;
+    [SchemaField(0x10)]
+    public DynamicArrayUnloaded<SRenderGlobalPipelines> Scopes; // same layout as Pipelines so reusing struct cus im lazy
     [SchemaField(0x20)]
     public DynamicArrayUnloaded<SRenderGlobalPipelines> Pipelines;
     [SchemaField(0x30)]

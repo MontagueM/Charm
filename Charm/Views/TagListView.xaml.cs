@@ -641,10 +641,17 @@ public partial class TagListView : UserControl
                     if (!destinationGlobalTagBag.DestinationGlobalTagBag.IsValid())
                         continue;
 
+                    string name = destinationGlobalTagBag.DestinationGlobalTagBagName;
+                    if (name.Contains("secret") || name.Contains("raid") || name.Contains("dungeon"))
+                        name = destinationGlobalTagBag.DestinationGlobalTagBag;
+#if DEBUG
+                    if (App.CharmRedacted is not null)
+                        name = destinationGlobalTagBag.DestinationGlobalTagBagName;
+#endif
                     _allTagItems.Add(new TagItem
                     {
                         Hash = destinationGlobalTagBag.DestinationGlobalTagBag,
-                        Name = destinationGlobalTagBag.DestinationGlobalTagBagName,
+                        Name = name,
                         Subname = $"{Helpers.GetReadableSize(destinationGlobalTagBag.DestinationGlobalTagBag.GetFileMetadata().Size)}",
                         TagType = ETagListType.DestinationGlobalTagBag
                     });
@@ -689,11 +696,20 @@ public partial class TagListView : UserControl
                     overrideType = reference;
                     break;
             }
+
+            string name = val.TagPath ?? "";
+            if (name.Contains("mechanic") || name.Contains("secret") || name.Contains("raid") || name.Contains("dungeon"))
+                name = val.Tag.Hash;
+
+#if DEBUG
+            if (App.CharmRedacted is not null)
+                name = val.TagPath ?? "";
+#endif
             _allTagItems.Add(new TagItem
             {
                 Hash = val.Tag.Hash,
-                Name = val.TagPath ?? "",
-                Subname = val.TagNote ?? "",
+                Name = name,
+                Subname = "",
                 TagType = tagType,
                 Type = overrideType
             });

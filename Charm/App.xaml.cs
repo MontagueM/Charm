@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Xml;
+using Arithmic;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using Microsoft.Win32;
@@ -16,8 +17,9 @@ namespace Charm;
 /// </summary>
 public partial class App : Application
 {
-    public static ApplicationVersion CurrentVersion = new("3.1.9");
+    public static ApplicationVersion CurrentVersion = new("3.2.0");
     public static Assembly? CharmRedacted = null;
+    public static Assembly? CharmRenderer = null;
 
     private void Application_Startup(object sender, StartupEventArgs e)
     {
@@ -50,13 +52,42 @@ public partial class App : Application
         }
 
         LoadRedactedDLL();
+        IsRendererDllAvailable();
     }
 
     public void LoadRedactedDLL()
     {
         string dllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Charm.Redacted.dll");
         if (File.Exists(dllPath))
-            CharmRedacted = Assembly.LoadFrom(dllPath);
+        {
+            var asm = Assembly.LoadFrom(dllPath);
+
+            Type type = asm.GetType("Charm.Redacted.CharmRedacted");
+            if (type == null)
+                return;
+
+            FieldInfo field = type.GetField("CurrentVersion", BindingFlags.Public | BindingFlags.Static);
+            if (field == null)
+                return;
+
+            var redactedVersion = field.GetValue(null) as ApplicationVersion;
+            if (redactedVersion.Id != CurrentVersion.Id)
+                return;
+
+            Log.Info("Loaded Charm.Redacted");
+            CharmRedacted = asm;
+        }
+    }
+
+    public void IsRendererDllAvailable()
+    {
+        string dllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Charm.Renderer.dll");
+        if (File.Exists(dllPath))
+            CharmRenderer = Assembly.LoadFrom(dllPath);
+        else
+            return;
+
+        Log.Info("Loaded Charm.Renderer");
     }
 
     bool IsVcRedistInstalled()
