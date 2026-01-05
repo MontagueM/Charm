@@ -27,7 +27,7 @@ public partial class HoverPopupWrapper : UserControl
         // If not explicitly set, try to grab the shared app-wide overlay
         if (HoverOverlayTarget == null && Application.Current.MainWindow is MainWindow main)
         {
-            HoverOverlayTarget = main.OverlayRoot;
+            HoverOverlayTarget = EnableMotionEffect ? main.OverlayRoot : main.OverlayRootNoMotion;
         }
 
         if (Target is FrameworkElement target)
@@ -164,6 +164,13 @@ public partial class HoverPopupWrapper : UserControl
     {
         get => (Type)GetValue(PopupParentProperty);
         set => SetValue(PopupParentProperty, value);
+    }
+
+    private bool _enableMotionEffect = true;
+    public bool EnableMotionEffect
+    {
+        get => _enableMotionEffect;
+        set => _enableMotionEffect = value;
     }
 }
 

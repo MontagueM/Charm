@@ -787,14 +787,4 @@ public partial class EntityListView : UserControl
         MainViewModel MVM = (MainViewModel)RendererBasic.ModelView.UCModelView.Resources["MVM"];
         MVM.Dispose();
     }
-
-    private void UsedMaterial_Click(object sender, RoutedEventArgs e)
-    {
-        var hash = (sender as Button).DataContext as FileHash;
-
-        var materialView = new MaterialView2();
-        materialView.Load(hash);
-        MainWindow.Current.MakeNewTab(hash, materialView);
-        MainWindow.Current.SetNewestTabSelected();
-    }
 }

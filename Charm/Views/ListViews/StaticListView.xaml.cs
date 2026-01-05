@@ -186,7 +186,7 @@ public partial class StaticListView : UserControl
         }
         else if (StaticRenderer is not null)
         {
-            StaticRenderer.LoadStatic(hash, new MapTransform { Translation = new Vector4(0f, 0f, 0f, 1f) });
+            StaticRenderer.LoadStatic(hash);
         }
 
         _currentStatic = hash;

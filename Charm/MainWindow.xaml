@@ -39,6 +39,15 @@
                     </Canvas.RenderTransform>
                 </Canvas>
 
+                <Canvas
+                    x:Name="OverlayRootNoMotion"
+                    Panel.ZIndex="90"
+                    IsHitTestVisible="False">
+                    <Canvas.RenderTransform>
+                        <TranslateTransform />
+                    </Canvas.RenderTransform>
+                </Canvas>
+
                 <StackPanel
                     Margin="0,5,10,0"
                     HorizontalAlignment="Right"

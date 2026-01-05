@@ -11,6 +11,7 @@
     <PackageReference Include="HelixToolkit.SharpDX.Assimp" Version="3.1.2" />
     <PackageReference Include="HelixToolkit.Wpf" Version="3.1.2" />
     <PackageReference Include="HelixToolkit.Wpf.SharpDX" Version="3.1.2" />
+    <PackageReference Include="SharpDX.DirectInput" Version="4.2.0" />
   </ItemGroup>
 
   <ItemGroup>

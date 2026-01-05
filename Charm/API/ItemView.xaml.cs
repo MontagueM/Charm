@@ -367,7 +367,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
         }
     }
 
-    public APIPlugItem CreatePlugItem(int index, DestinySocketCategoryStyle parentSocketStyle)
+    public static APIPlugItem CreatePlugItem(int index, DestinySocketCategoryStyle parentSocketStyle)
     {
         if (index == -1)
             return null;
@@ -569,7 +569,6 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
                 Item.ItemBackground = new BitmapImage(new Uri($"https://www.bungie.net/common/destiny2_content/screenshots/{_invItem.ApiHash}.jpg"));
             }
         }
-
     }
 
     // Displays the Stat deltas as green or red bars
@@ -888,6 +887,16 @@ public class APIPlugItem : CharmUIElement
     }
 
     protected internal AsyncImageLoader _iconLoader;
+    public AsyncImageLoader IconLoader
+    {
+        get => _iconLoader;
+        set
+        {
+            _iconLoader = value;
+            OnPropertyChanged(nameof(IconLoader));
+        }
+    }
+
     private readonly AsyncImageLoader _iconBgLoader;
     private readonly AsyncImageLoader _iconOverlayLoader;
     private readonly AsyncImageLoader _watermarkLoader;

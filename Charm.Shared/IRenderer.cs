@@ -1,5 +1,4 @@
 ﻿using Tiger;
-using Tiger.Schema;
 using Tiger.Schema.Investment;
 
 namespace Charm.Shared;
@@ -9,7 +8,7 @@ public interface IRenderer
     //void Start();
     //void Stop();
 
-    void LoadStatic(FileHash hash, MapTransform transform);
+    void LoadStatic(FileHash hash);
     void LoadEntity(FileHash hash);
     void LoadInvestmentItem(InventoryItem item);
 }
