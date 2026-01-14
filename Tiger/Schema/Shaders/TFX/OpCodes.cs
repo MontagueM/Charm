@@ -54,9 +54,11 @@ public static class TfxBytecodeOp
 
     public static TfxData ReadTfxBytecodeOp(BinaryReader reader, BytecodeType type)
     {
+        byte rawOp = reader.ReadByte();
         TfxData tfxData = new()
         {
-            op = RemapOp(reader.ReadByte()),
+            op = RemapOp(rawOp),
+            rawOp = rawOp,
             data = null
         };
         if (type == BytecodeType.Sequencer && tfxData.op == TfxBytecode.PushExternInputMat4)
@@ -894,7 +896,7 @@ public enum TfxBytecode_EoF : byte
     Lerp = 0x10,
     LerpSaturated = 0x11,
     MultiplyAdd = 0x15,
-    Clamp = 0x16,
+    Clamp = 0x16, // is actually 0x13..?
     Unk14 = 0x17,
     Abs = 0x18,
     Sign = 0x19,
@@ -974,6 +976,7 @@ public enum TfxBytecode_EoF : byte
 public struct TfxData
 {
     public TfxBytecode op;
+    public int rawOp; // the raw byte
     public dynamic? data;
 }
 

@@ -63,7 +63,7 @@ public class TfxBytecodeInterpreterHLSL
             {
                 if (print)
                 {
-                    var opString = $"0x{op.op:X} {op.op} : {TfxBytecodeOp.TfxToString(op, constants, material)}";
+                    var opString = $"0x{op.rawOp:X2} {op.op} : {TfxBytecodeOp.TfxToString(op, constants, material)}";
                     PrintedOps.AppendLine(opString);
                 }
 
@@ -459,7 +459,7 @@ public class TfxBytecodeInterpreterHLSL
                         break;
                     default:
                         if (print)
-                            PrintedOps.AppendLine($"Not Implemented: {op.op}");
+                            PrintedOps.AppendLine($"Not Implemented: {op.op} (0x{op.rawOp:X2})");
                         break;
 
                 }

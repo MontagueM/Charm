@@ -1325,6 +1325,11 @@ public partial class TagListView : UserControl
                     Subname = $"{Helpers.GetReadableSize(metadata.Size)}",
                     TagType = ETagListType.Material
                 });
+
+                //Material mat = FileResourcer.Get().GetFile<Material>(val, shouldCache: false);
+                //var matOps = mat.Pixel.GetBytecode();
+                //if (matOps.Opcodes.Any(x => x.op == TfxBytecode.Clamp))
+                //    Console.WriteLine($"{mat.Hash}");
             });
 
             MainWindow.Progress.CompleteStage();
