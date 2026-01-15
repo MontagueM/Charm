@@ -1294,11 +1294,14 @@ public partial class TagListView : UserControl
             MainWindow.Progress.CompleteStage();
 
             // named render global materials
-            ConcurrentBag<FileHash> _added = new();
+            ConcurrentDictionary<string, FileHash> _added = new();
             var globals = Globals.Get().RenderGlobals;
             Parallel.ForEach(globals.TagData.Pipelines.Enumerate(globals.GetReader()), pipeline =>
             {
-                if (pipeline.Technique.IsInvalid() || _added.Contains(pipeline.Technique))
+                if (pipeline.Technique.IsInvalid())
+                    return;
+
+                if (!_added.TryAdd(pipeline.Name, pipeline.Technique))
                     return;
 
                 FileMetadata metadata = pipeline.Technique.GetFileMetadata();
@@ -1306,14 +1309,13 @@ public partial class TagListView : UserControl
                 {
                     Hash = pipeline.Technique,
                     Name = $"Pipeline: {pipeline.Name.Value}",
-                    Subname = $"{Helpers.GetReadableSize(metadata.Size)}",
+                    Subname = Helpers.GetReadableSize(metadata.Size),
                     TagType = ETagListType.Material
                 });
-                _added.Add(pipeline.Technique);
             });
 
             HashSet<FileHash> remainingVals = new HashSet<FileHash>(mats);
-            remainingVals.ExceptWith(_added);
+            remainingVals.ExceptWith(_added.Values);
 
             Parallel.ForEach(remainingVals, val =>
             {
