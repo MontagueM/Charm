@@ -528,7 +528,7 @@
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="ConsumableSocket">
-            <Grid MaxHeight="96" Margin="0,0,0,10">
+            <Grid MaxHeight="96" Margin="0,0,0,0">
                 <local:HoverPopupWrapper PopupParent="{x:Type local:SocketCategory}">
                     <local:HoverPopupWrapper.Target>
                         <ContentControl
@@ -538,28 +538,32 @@
                             ContentTemplate="{StaticResource ConsumableEntry}" />
                     </local:HoverPopupWrapper.Target>
                     <local:HoverPopupWrapper.PopupContent>
-                        <Grid Margin="0,5,0,0">
-                            <Grid.Effect>
-                                <DropShadowEffect
-                                    BlurRadius="10"
-                                    Direction="0"
-                                    ShadowDepth="0"
-                                    Color="#905C5C5C" />
-                            </Grid.Effect>
+                        <!--  -5 on the top so it slightly overlays with the target, just for hittest sake  -->
+                        <Grid Margin="0,-5,0,0">
+                            <Grid Margin="0,5,0,0">
+                                <Grid.Effect>
+                                    <DropShadowEffect
+                                        BlurRadius="10"
+                                        Direction="0"
+                                        ShadowDepth="0"
+                                        Color="#905C5C5C" />
+                                </Grid.Effect>
 
-                            <local:ItemPage
-                                Margin="-40,0,0,0"
-                                CollapsePageButtons="False"
-                                Columns="7"
-                                ItemMargin="4"
-                                ItemTemplate="{StaticResource ConsumableEntry}"
-                                Items="{Binding PlugItems}"
-                                ItemsPerPage="14"
-                                PageBackgroundColor="#53616164"
-                                SelectOnPageChange="False"
-                                SlideDistance="10"
-                                TransitionSpeed="0.125"
-                                UsePlaceholders="True" />
+                                <local:ItemPage
+                                    Margin="-40,0,0,0"
+                                    CollapsePageButtons="False"
+                                    Columns="7"
+                                    ItemMargin="4"
+                                    ItemTemplate="{StaticResource ConsumableEntry}"
+                                    Items="{Binding PlugItems}"
+                                    ItemsPerPage="14"
+                                    PageBackgroundColor="#53616164"
+                                    SelectOnPageChange="False"
+                                    SlideDistance="10"
+                                    TransitionSpeed="0.125"
+                                    UsePlaceholders="True" />
+                            </Grid>
+
                         </Grid>
 
                     </local:HoverPopupWrapper.PopupContent>

@@ -42,20 +42,11 @@ public partial class HoverPopupWrapper : UserControl
         if (_floatingContainer != null || HoverOverlayTarget == null || Target is not FrameworkElement target) return;
         Point position = target.TranslatePoint(new Point(0, target.ActualHeight), HoverOverlayTarget);
 
-        if (_parent is FrameworkElement parent)
-        {
-            position = parent.TransformToVisual(HoverOverlayTarget).Transform(new Point(0, target.ActualHeight));
-        }
-
         _floatingContainer = new Border();
         _floatingContainer.IsHitTestVisible = true;
         var style = (Style)FindResource("FloatingContainerStyle");
         if (style != null)
             _floatingContainer.Style = style;
-
-        // Ensure the object has a RenderTransform that we can animate
-        //var group = UIHelper.EnsureTransformGroup(_floatingContainer);
-        //var scale = UIHelper.GetOrAddTransform<TranslateTransform>(group);
 
         var contentPresenter = new ContentPresenter
         {
@@ -66,11 +57,38 @@ public partial class HoverPopupWrapper : UserControl
         _floatingContainer.MouseEnter += (_, _) => { };
         _floatingContainer.MouseLeave += async (_, _) => await TryClosePopup();
 
+        if (_parent is FrameworkElement parent)
+        {
+            PopupContent.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+
+            double popupHeight = PopupContent.DesiredSize.Height;
+            double popupWidth = PopupContent.DesiredSize.Width;
+
+            double overlayHeight = HoverOverlayTarget.ActualHeight;
+            double overlayWidth = HoverOverlayTarget.ActualWidth;
+
+            Point targetBottom = parent
+                .TransformToVisual(HoverOverlayTarget)
+                .Transform(new Point(0, parent.ActualHeight));
+
+            double x = targetBottom.X;
+            double y = targetBottom.Y;
+            if (y + popupHeight > overlayHeight)
+                y = targetBottom.Y - popupHeight - parent.ActualHeight;
+
+            if (x + popupWidth > overlayWidth)
+                x = targetBottom.X - popupWidth + target.ActualWidth;
+
+            x = Math.Clamp(x, 0, overlayWidth - popupWidth);
+            y = Math.Clamp(y, 0, overlayHeight - popupHeight);
+
+            position = new Point(x, y);
+        }
+
         Canvas.SetLeft(_floatingContainer, position.X);
         Canvas.SetTop(_floatingContainer, position.Y);
 
         UIHelper.AnimateFade(_floatingContainer, 0.125f, 1, 0);
-        //UIHelper.AnimateSlide(_floatingContainer, 0.1f, new(0, 0), new(0, -5));
         UIHelper.AnimateScale(_floatingContainer, 0.15f, new(1, 1), new(0, 0));
 
         HoverOverlayTarget.Children.Add(_floatingContainer);

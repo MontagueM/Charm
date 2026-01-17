@@ -13,6 +13,10 @@ public class EntityModelParent : EntityResource
             _materialPermutations = GetModelPermutations();
             return _materialPermutations;
         }
+        set
+        {
+            _materialPermutations = value;
+        }
     }
 
     public EntityModelParent(FileHash resource) : base(resource)

@@ -11,4 +11,5 @@ public interface IRenderer
     void LoadStatic(FileHash hash);
     void LoadEntity(FileHash hash);
     void LoadInvestmentItem(InventoryItem item);
+    void LoadInvestmentItems(IEnumerable<InventoryItem> items);
 }

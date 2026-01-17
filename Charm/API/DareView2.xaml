@@ -542,22 +542,48 @@
                         <RowDefinition Height="90*" />
                     </Grid.RowDefinitions>
 
-                    <ToggleButton
-                        x:Name="AggregateOutputButton"
+                    <Grid
                         Margin="15,-15,15,0"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        Content="AGGREGATE OUTPUT"
-                        FontSize="18"
-                        Style="{DynamicResource D2StyleToggleBoxButton}">
-                        <local:GenericTooltipProperties.TooltipData>
-                            <local:GenericTooltip
-                                Name="AGGREGATE OUTPUT"
-                                Description="Exports selected items to a singular folder in your Charm output path.&#x0a;&#x0a;The folder will be named 'ApiOutput#', where the hashtag represents the current ApiOutput folder count"
-                                Style="Category"
-                                Type="Export Option" />
-                        </local:GenericTooltipProperties.TooltipData>
-                    </ToggleButton>
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Top">
+                        <ToggleButton
+                            x:Name="AggregateOutputButton"
+                            HorizontalAlignment="Left"
+                            Content="AGGREGATE OUTPUT"
+                            FontSize="18"
+                            Style="{DynamicResource D2StyleToggleBoxButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip
+                                    Name="AGGREGATE OUTPUT"
+                                    Description="Exports selected items to a singular folder in your Charm output path.&#x0a;&#x0a;The folder will be named 'ApiOutput#', where the hashtag represents the current ApiOutput folder count"
+                                    Style="Category"
+                                    Type="Export Option" />
+                            </local:GenericTooltipProperties.TooltipData>
+                        </ToggleButton>
+
+                        <Button
+                            x:Name="Multi3DButton"
+                            Grid.Column="0"
+                            Margin="0,0,0,0"
+                            HorizontalAlignment="Right"
+                            Click="Multi3DItemView"
+                            Style="{DynamicResource D2StyleButton}"
+                            Visibility="Collapsed">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip
+                                    Name="3D View"
+                                    Description="View everything in the export list in 3D."
+                                    Style="Category" />
+                            </local:GenericTooltipProperties.TooltipData>
+                            <TextBlock
+                                Margin="5,0,5,0"
+                                d:FontFamily="Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="16"
+                                Text="View All In 3D" />
+                        </Button>
+                    </Grid>
+
 
                     <Grid Margin="0,15,0,15">
                         <Grid.ColumnDefinitions>

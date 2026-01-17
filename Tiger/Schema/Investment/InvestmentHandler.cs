@@ -890,8 +890,15 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     public List<Entity.Entity> GetEntitiesFromHash(InventoryItem item)
     {
+        List<Entity.Entity> entities = new();
         int index = item.GetArtArrangementIndex();
-        List<Entity.Entity> entities = GetEntitiesFromArrangementIndex(index);
+        if (index == -1)
+        {
+            Log.Warning($"Item {item.Name} ({item.ApiHash}) has no art arrangement index.");
+            return entities;
+        }
+
+        entities = GetEntitiesFromArrangementIndex(index);
         return entities;
     }
 

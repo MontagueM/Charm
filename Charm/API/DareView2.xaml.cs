@@ -92,6 +92,9 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         this.DataContext = this;
         Focusable = true;
         Focus();
+
+        if (CanUseRenderer())
+            Multi3DButton.Visibility = Visibility.Visible;
     }
 
     public async void LoadContent()
@@ -353,6 +356,97 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         }
     }
 
+    private void APIItem_View(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (Strategy.IsD1())
+            return;
+
+        e.Handled = true;
+        APIPlugItem apiItem = (sender as FrameworkElement).DataContext as APIPlugItem;
+
+        if (Keyboard.IsKeyDown(Key.LeftCtrl) && CanUseRenderer())
+        {
+            var item = apiItem.Item;
+            if ((apiItem.Item.Type is "Artifact" or "Seasonal Artifact"))// && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is SC5738080 gearSet)
+            {
+                item = Investment.Get().GetInventoryItem(apiItem.Item.GetItemIndex() + 1);
+                item.Name = apiItem.Item.Name;
+            }
+            if (item.GetArtArrangementIndex() == -1)
+            {
+                NotificationBanner notify = new()
+                {
+                    Icon = "⚠",
+                    Title = "CANNOT PREVIEW ITEM",
+                    Description = $"The selected item does not have a 3D model to preview.",
+                    Style = NotificationBanner.PopupStyle.Warning
+                };
+                notify.Show();
+                return;
+            }
+
+            if (Renderer is null)
+            {
+                Type renderer = App.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
+                Renderer = Activator.CreateInstance(renderer) as IRenderer;
+            }
+
+            MainWindow.Current.MakeNewTab($"{apiItem.Item.Name} - 3D", Renderer as UserControl);
+            MainWindow.Current.SetNewestTabSelected();
+
+            Renderer.LoadInvestmentItem(item);
+
+            return;
+        }
+
+        ItemView apiItemView = new(apiItem.Item);
+        MainWindow.Current.MakeNewTab(apiItem.Item.Name, apiItemView);
+        MainWindow.Current.SetNewestTabSelected();
+    }
+
+    private void Multi3DItemView(object sender, RoutedEventArgs e)
+    {
+        if (!CanUseRenderer())
+            return;
+
+        if (SelectedItems.Count == 0)
+        {
+            NotificationBanner notify = new()
+            {
+                Icon = "⚠",
+                Title = "NOTHING TO VIEW!",
+                Description = $"Select some items, you silly goose!",
+                Style = NotificationBanner.PopupStyle.Warning
+            };
+            notify.Show();
+            return;
+        }
+
+        if (Renderer is null)
+        {
+            Type renderer = App.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
+            Renderer = Activator.CreateInstance(renderer) as IRenderer;
+        }
+
+        List<InventoryItem> items = new();
+        foreach (var item in SelectedItems.Select(x => x.Item))
+        {
+            var curItem = item;
+            if ((item.Type is "Artifact" or "Seasonal Artifact"))// && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is SC5738080 gearSet)
+            {
+                curItem = Investment.Get().GetInventoryItem(item.GetItemIndex() + 1);
+                curItem.Name = item.Name;
+            }
+
+            items.Add(item);
+        }
+
+        MainWindow.Current.MakeNewTab($"API 3D MultiView", Renderer as UserControl);
+        MainWindow.Current.SetNewestTabSelected();
+
+        Renderer.LoadInvestmentItems(items);
+    }
+
     private void ExportButton_Click(object sender, RoutedEventArgs e)
     {
         if (SelectedItems.Count == 0)
@@ -538,55 +632,6 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         }
     }
 
-    private void APIItem_View(object sender, System.Windows.Input.MouseButtonEventArgs e)
-    {
-        if (Strategy.IsD1())
-            return;
-
-        e.Handled = true;
-        APIPlugItem apiItem = (sender as FrameworkElement).DataContext as APIPlugItem;
-
-
-        if (App.CharmRenderer is not null && ConfigSubsystem.Get().GetCustomRenderer() && Strategy.IsLatest() && Keyboard.IsKeyDown(Key.LeftCtrl))
-        {
-            var item = apiItem.Item;
-            if ((apiItem.Item.Type is "Artifact" or "Seasonal Artifact"))// && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is SC5738080 gearSet)
-            {
-                item = Investment.Get().GetInventoryItem(apiItem.Item.GetItemIndex() + 1);
-                item.Name = apiItem.Item.Name;
-            }
-            if (item.GetArtArrangementIndex() == -1)
-            {
-                NotificationBanner notify = new()
-                {
-                    Icon = "⚠",
-                    Title = "CANNOT PREVIEW ITEM",
-                    Description = $"The selected item does not have a 3D model to preview.",
-                    Style = NotificationBanner.PopupStyle.Warning
-                };
-                notify.Show();
-                return;
-            }
-
-            if (Renderer is null)
-            {
-                Type renderer = App.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
-                Renderer = Activator.CreateInstance(renderer) as IRenderer;
-            }
-
-            MainWindow.Current.MakeNewTab($"{apiItem.Item.Name} - 3D", Renderer as UserControl);
-            MainWindow.Current.SetNewestTabSelected();
-
-            Renderer.LoadInvestmentItem(item);
-
-            return;
-        }
-
-        ItemView apiItemView = new(apiItem.Item);
-        MainWindow.Current.MakeNewTab(apiItem.Item.Name, apiItemView);
-        MainWindow.Current.SetNewestTabSelected();
-    }
-
     public static bool ShouldAddToList(InventoryItem item)
     {
         DestinyTraitID[] blacklist = new[]
@@ -684,6 +729,13 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         if (Strategy.IsLatest())
             about.IconImage = ApiImageUtils.MakeBitmapImage(Texture.GetTextureFromHash(new(0x80C0D9B8)), 120, 120);
         about.Show();
+    }
+
+    private bool CanUseRenderer()
+    {
+        return App.CharmRenderer is not null
+            && ConfigSubsystem.Get().GetCustomRenderer()
+            && Strategy.IsLatest();
     }
 
     public class Dare_ItemCategory : CharmUIElement

@@ -948,6 +948,9 @@ public class SocketEntry : CharmUIElement
     public APIPlugItem SingleInitialItem { get; set; }
     public List<APIPlugItem> PlugItems { get; set; } = new();
     public int SocketTypeIndex { get; set; }
+
+    // currently for renderer to get the parent item the shader socket belongs to
+    public APIPlugItem ParentItem { get; set; }
 }
 
 public class StatEntry : CharmUIElement
