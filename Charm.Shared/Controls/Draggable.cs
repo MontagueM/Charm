@@ -7,8 +7,11 @@ namespace Charm.Shared;
 
 public static class Draggable
 {
+    private static readonly HashSet<FrameworkElement> _registered = new HashSet<FrameworkElement>();
+
     private class DragState
     {
+        public SizeChangedEventHandler SizeChangedHandler;
         public bool IsDragging;
         public Point Offset;
         public FrameworkElement Target;
@@ -154,6 +157,16 @@ public static class Draggable
             Target = target,
             Parent = VisualTreeHelper.GetParent(target) as FrameworkElement
         };
+        _registered.Add(state.Target);
+        state.Target.Unloaded += (_, __) =>
+        {
+            _registered.Remove(state.Target);
+            if (state.SizeChangedHandler != null)
+            {
+                target.SizeChanged -= state.SizeChangedHandler;
+                state.SizeChangedHandler = null;
+            }
+        };
 
         var handle = GetHandle(target) ?? target;
         handle.SetValue(DragStateProperty, state);
@@ -163,7 +176,16 @@ public static class Draggable
         handle.MouseLeftButtonDown += OnMouseDown;
         handle.MouseMove += OnMouseMove;
         handle.MouseLeftButtonUp += OnMouseUp;
-        target.SizeChanged += (_, __) => ReClamp(state);
+
+        handle.Unloaded += (_, __) =>
+        {
+            handle.MouseLeftButtonDown -= OnMouseDown;
+            handle.MouseMove -= OnMouseMove;
+            handle.MouseLeftButtonUp -= OnMouseUp;
+        };
+
+        state.SizeChangedHandler = (_, __) => ResolveOverlaps(state);
+        target.SizeChanged += state.SizeChangedHandler;
     }
 
     // ---------------------------
@@ -269,5 +291,89 @@ public static class Draggable
 
         Canvas.SetLeft(state.Target, clampedX);
         Canvas.SetTop(state.Target, clampedY);
+    }
+
+    private static bool _isResolving;
+    private static void ResolveOverlaps(DragState source)
+    {
+        ReClamp(source);
+
+        if (_isResolving)
+            return;
+
+        if (source.Parent == null)
+            return;
+
+        try
+        {
+            _isResolving = true;
+
+            var sourceRect = GetRect(source.Target);
+            var parent = source.Parent;
+
+            foreach (var other in _registered)
+            {
+                if (other == source.Target)
+                    continue;
+
+                var otherRect = GetRect(other);
+
+                if (!sourceRect.IntersectsWith(otherRect))
+                    continue;
+
+                // Decide push axis based on relative center
+                bool pushHorizontally =
+                    Math.Abs(otherRect.X - sourceRect.X) >
+                    Math.Abs(otherRect.Y - sourceRect.Y);
+
+                if (pushHorizontally)
+                {
+                    // Push left or right
+                    bool pushRight = otherRect.X >= sourceRect.X;
+
+                    double newX = pushRight
+                        ? sourceRect.Right
+                        : sourceRect.Left - otherRect.Width;
+
+                    double maxX = Math.Max(
+                        0,
+                        parent.ActualWidth - other.ActualWidth);
+
+                    newX = Clamp(newX, 0, maxX);
+
+                    Canvas.SetLeft(other, newX);
+                }
+                else
+                {
+                    // Push up or down
+                    bool pushDown = otherRect.Y >= sourceRect.Y;
+
+                    double newY = pushDown
+                        ? sourceRect.Bottom
+                        : sourceRect.Top - otherRect.Height;
+
+                    double maxY = Math.Max(
+                        0,
+                        parent.ActualHeight - other.ActualHeight);
+
+                    newY = Clamp(newY, 0, maxY);
+
+                    Canvas.SetTop(other, newY);
+                }
+            }
+        }
+        finally
+        {
+            _isResolving = false;
+        }
+    }
+
+    private static Rect GetRect(FrameworkElement element)
+    {
+        return new Rect(
+            GetLeft(element),
+            GetTop(element),
+            element.ActualWidth,
+            element.ActualHeight);
     }
 }
