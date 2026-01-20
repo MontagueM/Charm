@@ -971,9 +971,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         if (tag.TagData.EntityData.GetReferenceHash() == (_strategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307 ? 0x80809ad8 : 0x80800734))
             return FileResourcer.Get().GetFile<Entity.Entity>(tag.TagData.EntityData);
 
-#if DEBUG
         Log.Warning($"Hash is not an Entity: {tag.TagData.EntityData}");
-#endif
         return null;
     }
 

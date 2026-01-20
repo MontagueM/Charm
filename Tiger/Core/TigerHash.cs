@@ -236,6 +236,11 @@ public static class FileHashExtensions
         return PackageResourcer.Get().GetFileData(fileHash);
     }
 
+    public static bool CheckRedacted(this FileHash fileHash)
+    {
+        return PackageResourcer.Get().CheckRedacted(fileHash);
+    }
+
     // D1 Only, TagGlobals use a non 8080 reference tag that has a reference of 48018080, that "parent" tag has the class hash
     public static FileHash? GetReferenceFromManifest(this FileHash fileHash)
     {

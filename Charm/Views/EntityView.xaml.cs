@@ -156,6 +156,12 @@ public partial class EntityView : UserControl
 
         foreach (Entity entity in entities)
         {
+            if (entity.Hash.CheckRedacted())
+            {
+                Log.Warning($"Entity {entity.Hash} is redacted, can not export.");
+                continue;
+            }
+
             Log.Debug($"Entity {entity?.Hash}: HasGeometry {entity?.HasGeometry()}");
             if (entity.Skeleton == null && overrideSkeleton != null)
                 entity.Skeleton = overrideSkeleton;

@@ -57,6 +57,7 @@ public class TigerFile
         }
     }
 
+
     public override int GetHashCode()
     {
         return (int)Hash.Hash32;

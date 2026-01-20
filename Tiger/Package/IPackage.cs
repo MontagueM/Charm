@@ -485,6 +485,11 @@ public abstract class Package : IPackage
         return GetFileBytes(fileHash.FileIndex);
     }
 
+    public bool CheckRedacted(FileHash fileHash)
+    {
+        return CheckRedacted(fileHash.FileIndex);
+    }
+
     public Span<byte> GetFileSpan(ushort fileIndex)
     {
         return GetFileBytes(fileIndex).AsSpan();
@@ -515,11 +520,6 @@ public abstract class Package : IPackage
         List<D2BlockEntry> blocks = GetBlockEntries(fileEntry.StartingBlockIndex, blockCount);
         foreach (D2BlockEntry blockEntry in blocks)
         {
-            //if ((blockEntry.BitFlag & 0x8) == 8)
-            //{
-            //    return new byte[fileEntry.FileSize];
-            //}
-
             // TigerReader packageHandle = GetPackageHandle(blockEntry.PatchId);
             // todo use spans
             byte[] blockBuffer;
@@ -527,7 +527,6 @@ public abstract class Package : IPackage
             {
                 blockBuffer = ReadBlockBuffer(packageHandle, blockEntry).ToArray();
             }
-
             blockBuffer = DecryptAndDecompressBlockBufferIfRequired(blockBuffer, blockEntry);
 
             bool isFirstBlock = currentBlockId == 0;
@@ -560,6 +559,18 @@ public abstract class Package : IPackage
         }
 
         return finalFileBuffer;
+    }
+
+    public bool CheckRedacted(ushort fileIndex)
+    {
+        if (PackageResourcer.Get().Keys.TryGetValue(GetPackageMetadata().PackageGroup, out _))
+            return false; // assumes the key is correct
+
+        D2FileEntry fileEntry = FileEntries[fileIndex];
+        int blockCount = GetBlockCount(fileEntry);
+
+        List<D2BlockEntry> blocks = GetBlockEntries(fileEntry.StartingBlockIndex, blockCount);
+        return blocks.All(x => (x.BitFlag & 0x8) != 0);
     }
 
     public PackageMetadata GetPackageMetadata()
@@ -670,11 +681,13 @@ public abstract class Package : IPackage
 
         if (redacted) // (block.BitFlag & 0x4) == 0 
         {
-            Dictionary<ulong, Dictionary<byte[], byte[]>> kvp = PackageResourcer.Get().Keys;
-            if (kvp.ContainsKey(GetPackageMetadata().PackageGroup))
+            var kvp = PackageResourcer.Get().Keys;
+            var pkg = GetPackageMetadata();
+            if (kvp.TryGetValue(pkg.PackageGroup, out var group))
             {
-                key = kvp[GetPackageMetadata().PackageGroup].First().Key;
-                iv = kvp[GetPackageMetadata().PackageGroup].First().Value;
+                key = group.AES;
+                iv = group.Nonce;
+                //Log.Debug($"Attempting Key {Convert.ToHexString(key)}:{Convert.ToHexString(iv)} for {pkg.Name} (Group {pkg.PackageGroup:X2})");
             }
             else
                 return decryptedBuffer;

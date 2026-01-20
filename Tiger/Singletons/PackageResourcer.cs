@@ -16,7 +16,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     private PackagePathsCache? _packagePathsCache;
     private Dictionary<uint, string> _activityNames = new();
     private Dictionary<FileHash, TagClassHash> _d1NamedTags = new();
-    private Dictionary<ulong, Dictionary<byte[], byte[]>> _keys = new();
+    private Dictionary<ulong, (byte[] AES, byte[] Nonce)> _keys = new();
 
     public PackagePathsCache PackagePathsCache
     {
@@ -30,7 +30,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         }
     }
 
-    public Dictionary<ulong, Dictionary<byte[], byte[]>> Keys
+    public Dictionary<ulong, (byte[] AES, byte[] Nonce)> Keys
     {
         get
         {
@@ -76,6 +76,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
             return;
 
         string[] txt = File.ReadAllLines("./keys.txt");
+
         foreach (string entry in txt)
         {
             try
@@ -92,14 +93,13 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
                 byte[] key = Helpers.HexStringToByteArray(parts[1].Trim());
                 byte[] nonce = Helpers.HexStringToByteArray(parts[2].Split("//")[0].Trim());
 
-                if (!_keys.ContainsKey(pkgGroup))
-                    _keys[pkgGroup] = new Dictionary<byte[], byte[]>();
-
-                Dictionary<byte[], byte[]> keyDict = _keys[pkgGroup];
-                if (!keyDict.ContainsKey(key))
-                    keyDict[key] = nonce;
-                else
+                if (_keys.ContainsKey(pkgGroup))
+                {
                     Log.Error($"Duplicate key for package group {pkgGroup:X}: {entry}");
+                    continue;
+                }
+
+                _keys[pkgGroup] = (key, nonce);
             }
             catch (Exception ex)
             {
@@ -178,6 +178,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     }
 
     public byte[] GetFileData(FileHash fileHash) { return GetPackage(fileHash).GetFileBytes(fileHash); }
+    public bool CheckRedacted(FileHash fileHash) { return GetPackage(fileHash).CheckRedacted(fileHash); }
 
     private void LoadAllPackages()
     {
