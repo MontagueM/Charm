@@ -25,6 +25,7 @@ public enum LoadLevel
 public class MeshPart
 {
     public int Index;
+    public int MeshIndex;
     public uint IndexOffset;
     public uint IndexCount;
     public PrimitiveType PrimitiveType;

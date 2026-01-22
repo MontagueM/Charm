@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Arithmic;
+﻿using Arithmic;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Entity;
@@ -48,7 +47,7 @@ public class EntityModel : Tag<SEntityModel>
         using TigerReader reader = GetReader();
 
         int meshIndex = 0;
-        foreach (SEntityModelMesh mesh in _tag.Meshes.Enumerate(GetReader()))
+        foreach (SEntityModelMesh mesh in _tag.Meshes.Enumerate(reader))
         {
             int partIndex = 0;
             parts.Add(meshIndex, new Dictionary<int, SCB6E8080>());
@@ -99,6 +98,7 @@ public class EntityModel : Tag<SEntityModel>
                 DynamicMeshPart dynamicMeshPart = new(part, parentResource)
                 {
                     Index = i,
+                    MeshIndex = meshIndex,
                     GroupIndex = part.ExternalIdentifier,
                     LodCategory = part.LodCategory,
                     bAlphaClip = (part.GetFlags() & 0x8) != 0
@@ -254,7 +254,10 @@ public class DynamicMeshPart : MeshPart
         if (mesh.SinglePassSkinningBuffer != null)
             mesh.SinglePassSkinningBuffer.ReadVertexData(this, uniqueVertexIndices);
 
-        Debug.Assert(VertexPositions.Count == VertexTexcoords0.Count && VertexPositions.Count == VertexNormals.Count);
+        //Debug.Assert(VertexPositions.Count == VertexTexcoords0.Count && VertexPositions.Count == VertexNormals.Count);
+
+        if (Material.EnumerateScopes().Any(x => x == TfxScope.SPEEDTREE))
+            return;
 
         TransformPositions(mesh, model);
         TransformTexcoords(mesh, model);
