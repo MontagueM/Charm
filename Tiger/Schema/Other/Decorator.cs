@@ -1,4 +1,5 @@
-﻿using Tiger.Exporters;
+﻿using System.Numerics;
+using Tiger.Exporters;
 using Tiger.Schema.Entity;
 
 namespace Tiger.Schema;
@@ -31,7 +32,6 @@ public class Decorator : Tag<SDecorator>
 
         using TigerReader reader = _tag.BufferData.TagData.InstanceBuffer.GetReferenceReader();
 
-        Console.WriteLine($"Decorator {Hash} : Models {models.Count}, InstanceRanges {_tag.InstanceRanges.Count}");
         for (int i = 0; i < _tag.InstanceRanges.Count - 1; i++)
         {
             int start = _tag.InstanceRanges[i].Value;
@@ -41,23 +41,16 @@ public class Decorator : Tag<SDecorator>
             int dynID = models.Count == 1 ? i : 0;
             Tag<SB26C8080> model = models[models.Count == 1 ? 0 : i].DecoratorModel;
 
-            Console.WriteLine($"{model.Hash} : instance count {count} | dynID {dynID}");
-
-            //if (model.TagData.SpeedTreeData != null)
-            //    continue; // TODO: Trees, skip for now
-
             List<DynamicMeshPart> parts = model.TagData.Model.Load(ExportDetailLevel.MostDetailed, null).Where(x => x.IndexOffset == 0).SkipLast(1).ToList(); //GenerateParts(model.TagData.Model); //.Load(ExportDetailLevel.MostDetailed, null);
             foreach (DynamicMeshPart part in parts)
             {
                 if (part.Material == null) continue;
-                Console.WriteLine($"{i}: mesh index {part.MeshIndex}, part {part.Index} ({part.IndexOffset} : {part.IndexCount}) | {part.GroupIndex}");
                 scene.Materials.Add(new ExportMaterial(part.Material));
-            }
 
-            // Trees need(?) their vertex shader to transform correctly...
-            if (model.TagData.SpeedTreeData != null)
-            {
-                foreach (var part in parts)
+                //part.VertexNormals.Clear();
+                //part.VertexTangents.Clear();
+
+                if (model.TagData.SpeedTreeData != null)
                 {
                     var vecs = model.TagData.SpeedTreeData.TagData.Unk08[part.MeshIndex];
                     var scale = vecs.Unk00;
@@ -97,17 +90,23 @@ public class Decorator : Tag<SDecorator>
 
                 if (model.TagData.SpeedTreeData != null)
                 {
-                    // rotations fucked, idk how to fix
-                    q = Vector4.Quaternion;
+                    System.Numerics.Vector3 r2 = q.ToVec3();
+                    System.Numerics.Vector3 r1 = unk.ToVec3();
+                    System.Numerics.Vector3 r3 = System.Numerics.Vector3.Cross(r1, r2);
 
-                    //var a = new Vector4(rot.Y, rot.Z, rot.X) * new Vector4(unk.Z, unk.X, unk.Y);
-                    //var b = new Vector4(unk.Y, unk.Z, unk.X) * new Vector4(rot.Z, rot.X, rot.Y) - a;
-                    //q = b;
+                    System.Numerics.Matrix4x4 rotationMatrix = new System.Numerics.Matrix4x4(
+                        r2.X, r3.X, r1.X, 0,
+                        r2.Y, r3.Y, r1.Y, 0,
+                        r2.Z, r3.Z, r1.Z, 0,
+                        0, 0, 0, 1
+                    );
+
+                    var quat = Quaternion.CreateFromRotationMatrix(rotationMatrix);
+                    q = new(quat.X, quat.Y, quat.Z, -quat.W);
                 }
                 else
                     parts = parts.Where(x => x.MeshIndex == 0).ToList();
 
-                Console.WriteLine($"Rot {q} (raw {rot}) : Is Tree? {model.TagData.SpeedTreeData != null}");
                 Transform transform = new()
                 {
                     Position = inst.ToVec3(),
