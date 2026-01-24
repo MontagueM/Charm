@@ -42,7 +42,18 @@ public class Decorator : Tag<SDecorator>
             Tag<SB26C8080> model = models[models.Count == 1 ? 0 : i].DecoratorModel;
             var isSpeedTree = model.TagData.SpeedTreeData != null;
 
-            List<DynamicMeshPart> parts = model.TagData.Model.Load(ExportDetailLevel.MostDetailed, null).Where(x => x.IndexOffset == 0).SkipLast(1).ToList(); //GenerateParts(model.TagData.Model); //.Load(ExportDetailLevel.MostDetailed, null);
+            List<DynamicMeshPart> parts = model.TagData.Model.Load(ExportDetailLevel.MostDetailed, null);
+            if (isSpeedTree)
+            {
+                parts = parts.Where(x => x.IndexOffset == 0).ToList();
+                if (parts.Count > 1)
+                    parts = parts.SkipLast(1).ToList();
+            }
+            else
+            {
+                parts = parts.Where(x => x.MeshIndex == 0 && x.GroupIndex == dynID).ToList();
+            }
+
             foreach (DynamicMeshPart part in parts)
             {
                 if (part.Material == null) continue;
@@ -105,8 +116,6 @@ public class Decorator : Tag<SDecorator>
                     var quat = Quaternion.CreateFromRotationMatrix(rotationMatrix);
                     q = new(quat.X, quat.Y, quat.Z, -quat.W);
                 }
-                else
-                    parts = parts.Where(x => x.MeshIndex == 0).ToList();
 
                 Transform transform = new()
                 {
@@ -118,7 +127,7 @@ public class Decorator : Tag<SDecorator>
                 if (isSpeedTree)
                     treesScene.AddMapModelParts($"{model.Hash}_{i}", parts, transform);
                 else
-                    decorsScene.AddMapModelParts($"{model.Hash}_{i}", parts, transform);
+                    decorsScene.AddMapModelParts($"{model.Hash}_{dynID}", parts, transform);
             }
         }
     }
