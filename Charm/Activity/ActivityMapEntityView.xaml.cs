@@ -405,10 +405,10 @@ public partial class ActivityMapEntityView : UserControl
         GlobalExporterScene globalScene = Tiger.Exporters.Exporter.Get().GetOrCreateGlobalScene();
 
         // todo these scenes can be combined
-        //ExporterScene dynamicPointScene = Exporter.Get().CreateScene($"{hash}_EntityPoints", ExportType.EntityPoints, DataExportType.Map);
         ExporterScene entitiesScene = Exporter.Get().CreateScene($"{hash}_Entities", ExportType.Entities, DataExportType.Map);
         ExporterScene skyScene = Exporter.Get().CreateScene($"{hash}_SkyObjects", ExportType.SkyObjects, DataExportType.Map);
         ExporterScene decoratorsScene = Exporter.Get().CreateScene($"{hash}_Decorators", ExportType.Decorators, DataExportType.Map);
+        ExporterScene treesScene = Exporter.Get().CreateScene($"{hash}_SpeedTrees", ExportType.SpeedTrees, DataExportType.Map);
         ExporterScene roadDecalsScene = Exporter.Get().CreateScene($"{hash}_RoadDecals", ExportType.RoadDecals, DataExportType.Map);
         ExporterScene waterDecalsScene = Exporter.Get().CreateScene($"{hash}_WaterDecals", ExportType.WaterDecals, DataExportType.Map);
 
@@ -508,7 +508,7 @@ public partial class ActivityMapEntityView : UserControl
                         case SDecoratorMapResource decorator:
                             decorator.Decorator?.Load();
                             if (decorator.Decorator is not null)
-                                decorator.Decorator.LoadIntoExporter(decoratorsScene, savePath);
+                                decorator.Decorator.LoadIntoExporter(decoratorsScene, treesScene, savePath);
                             break;
 
                         case SMapWaterDecal waterDecal:

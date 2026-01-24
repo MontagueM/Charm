@@ -18,7 +18,6 @@ using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
 using Tiger.Schema.Shaders;
-using static Tiger.Schema.Entity.EntityModelParent;
 using Decorator = Tiger.Schema.Decorator;
 
 namespace Charm;
@@ -343,7 +342,8 @@ public partial class DevView : UserControl
                 case 0x80806C98: // Decorator 986C8080
                     Decorator decorator = FileResourcer.Get().GetFile<Decorator>(hash);
                     ExporterScene decoratorScene = Exporter.Get().CreateScene(hash, ExportType.Decorators);
-                    decorator.LoadIntoExporter(decoratorScene, ConfigSubsystem.Get().GetExportSavePath());
+                    ExporterScene treesScene = Exporter.Get().CreateScene(hash, ExportType.SpeedTrees);
+                    decorator.LoadIntoExporter(decoratorScene, treesScene, ConfigSubsystem.Get().GetExportSavePath());
                     Exporter.Get().Export();
                     break;
 

@@ -12,7 +12,7 @@ public class Decorator : Tag<SDecorator>
 
     }
 
-    public void LoadIntoExporter(ExporterScene scene, string saveDirectory)
+    public void LoadIntoExporter(ExporterScene decorsScene, ExporterScene treesScene, string saveDirectory)
     {
         if (_tag.BufferData is null)
             return;
@@ -40,18 +40,17 @@ public class Decorator : Tag<SDecorator>
 
             int dynID = models.Count == 1 ? i : 0;
             Tag<SB26C8080> model = models[models.Count == 1 ? 0 : i].DecoratorModel;
+            var isSpeedTree = model.TagData.SpeedTreeData != null;
 
             List<DynamicMeshPart> parts = model.TagData.Model.Load(ExportDetailLevel.MostDetailed, null).Where(x => x.IndexOffset == 0).SkipLast(1).ToList(); //GenerateParts(model.TagData.Model); //.Load(ExportDetailLevel.MostDetailed, null);
             foreach (DynamicMeshPart part in parts)
             {
                 if (part.Material == null) continue;
-                scene.Materials.Add(new ExportMaterial(part.Material));
 
-                //part.VertexNormals.Clear();
-                //part.VertexTangents.Clear();
-
-                if (model.TagData.SpeedTreeData != null)
+                if (isSpeedTree)
                 {
+                    treesScene.Materials.Add(new ExportMaterial(part.Material));
+
                     var vecs = model.TagData.SpeedTreeData.TagData.Unk08[part.MeshIndex];
                     var scale = vecs.Unk00;
                     var offset = vecs.Unk10;
@@ -75,6 +74,8 @@ public class Decorator : Tag<SDecorator>
                         );
                     }
                 }
+                else
+                    decorsScene.Materials.Add(new ExportMaterial(part.Material));
             }
 
             for (int j = 0; j < count; j++)
@@ -88,7 +89,7 @@ public class Decorator : Tag<SDecorator>
                 Vector4 q = SpeedtreePlacements[2] * rot + SpeedtreePlacements[3];
                 Vector4 unk = SpeedtreePlacements[4] * v7 + SpeedtreePlacements[5];
 
-                if (model.TagData.SpeedTreeData != null)
+                if (isSpeedTree)
                 {
                     System.Numerics.Vector3 r2 = q.ToVec3();
                     System.Numerics.Vector3 r1 = unk.ToVec3();
@@ -114,7 +115,10 @@ public class Decorator : Tag<SDecorator>
                     Scale = new(inst.W)
                 };
 
-                scene.AddMapModelParts($"{model.Hash}_{i}", parts, transform);
+                if (isSpeedTree)
+                    treesScene.AddMapModelParts($"{model.Hash}_{i}", parts, transform);
+                else
+                    decorsScene.AddMapModelParts($"{model.Hash}_{i}", parts, transform);
             }
         }
     }

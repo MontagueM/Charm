@@ -533,6 +533,7 @@ public enum ExportType
     SkyObjects,
     RoadDecals,
     Decorators,
+    SpeedTrees,
     WaterDecals,
 
     EntityPoints,
