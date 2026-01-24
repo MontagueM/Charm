@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -11,6 +12,7 @@ using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
+using Tiger.Schema.Shaders;
 
 namespace Charm;
 
@@ -124,7 +126,9 @@ public partial class EntityView : UserControl
         Directory.CreateDirectory($"{savePath}/Textures");
         ExporterScene scene = Tiger.Exporters.Exporter.Get().CreateScene(name, Strategy.IsD1() ? ExportType.D1API : ExportType.API);
 
-        ExportGearShader(item, name, savePath);
+        // Dont export gear shader for ghost projections since they dont use it
+        if (!item.GetItemTraits().Any(x => x == DestinyTraitID.item_ghost_hologram))
+            ExportGearShader(item, name, savePath);
 
         // Export the model
         // todo bad, should be replaced
@@ -161,8 +165,15 @@ public partial class EntityView : UserControl
                 Log.Warning($"Entity {entity.Hash} is redacted, can not export.");
                 continue;
             }
-
             Log.Debug($"Entity {entity?.Hash}: HasGeometry {entity?.HasGeometry()}");
+
+            // ghost projections have just a rectangle mesh, we want just the actual projection mesh 
+            if (item.GetItemTraits().Any(x => x == DestinyTraitID.item_ghost_hologram))
+            {
+                ExportGhostProjection(entity, scene);
+                continue;
+            }
+
             if (entity.Skeleton == null && overrideSkeleton != null)
                 entity.Skeleton = overrideSkeleton;
 
@@ -193,6 +204,55 @@ public partial class EntityView : UserControl
             Tiger.Exporters.Exporter.Get().Export(savePath);
 
         Log.Info($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
+    }
+
+    // todo, make more generic for entities
+    public static void ExportGhostProjection(Entity entity, ExporterScene scene)
+    {
+        foreach (FileHash hash in entity.Components)
+        {
+            if (Strategy.IsD1() && hash.GetReferenceHash() != 0x80800861)
+                continue;
+
+            EntityResource resource = FileResourcer.Get().GetFile<EntityResource>(hash);
+            if (resource.TagData.Unk18.GetValue(resource.GetReader()) is S79818080 sequencer)
+            {
+                // only in Array2 afaik
+                foreach (SF1918080 element in sequencer.Array1)
+                {
+                    Debug.Assert(element.Unk10.GetValue(resource.GetReader()) is not SSequenceParticleSystem);
+                }
+
+                foreach (SF1918080 element in sequencer.Array2)
+                {
+                    if (element.Unk10.GetValue(resource.GetReader()) is SSequenceParticleSystem particle)
+                    {
+                        foreach (var entry in particle.Unk28.Select(x => x.ParticleSystem).Where(x => x is not null))
+                        {
+                            var container = entry.TagData.ModelContainer;
+                            if (container is null)
+                                continue;
+
+                            Material overrideMat = null;
+                            if (entry.TagData.UnkMat is not null)
+                            {
+                                overrideMat = entry.TagData.UnkMat;
+                                scene.Materials.Add(new ExportMaterial(overrideMat));
+                            }
+
+                            // Unsure if theres only ever 1 model here
+                            foreach (var model in container.TagData.Models.Enumerate(container.GetReader()).Where(x => x.Model is not null))
+                            {
+                                if (scene.Entities.Any(x => x.Mesh.Hash == model.Model.Hash))
+                                    continue;
+
+                                scene.AddModel(model.Model, overrideMat);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // I don't like this

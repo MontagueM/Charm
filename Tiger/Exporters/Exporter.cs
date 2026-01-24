@@ -364,13 +364,16 @@ public class ExporterScene
         EntityInstances[model.Hash].Add(transform);
     }
 
-    public void AddModel(EntityModel model)
+    public void AddModel(EntityModel model, Material overrideMaterial = null)
     {
         ExporterMesh mesh = new(model.Hash);
         List<DynamicMeshPart> parts = model.Load(ExportDetailLevel.MostDetailed, null);
         for (int i = 0; i < parts.Count; i++)
         {
             DynamicMeshPart part = parts[i];
+            if (overrideMaterial is not null)
+                part.Material = overrideMaterial;
+
             mesh.AddPart(model.Hash, part, i);
         }
         Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = null });

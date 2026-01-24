@@ -987,47 +987,6 @@ public struct SF1918080
 }
 
 
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "B9678080", 0x110)]
-public struct SB9678080
-{
-    [SchemaField(0x28)]
-    public DynamicArray<SBB678080> Unk28;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "BB678080", 0x18)]
-public struct SBB678080
-{
-    [SchemaField(0x10)]
-    public Tag<S20698080> FXContainer;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "20698080", 0x40)]
-public struct S20698080
-{
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)] // TODO
-    [SchemaField(0x14, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x18, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
-    public Material UnkMat;
-
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
-    [SchemaField(0x18, TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Tag64 = true)]
-    [SchemaField(0x20, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
-    public Tag<S29698080> ModelContainer;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "29698080", 0x18)]
-public struct S29698080
-{
-    [SchemaField(0x10)]
-    public DynamicArrayUnloaded<S066F8080> Models;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "066F8080", 4)]
-public struct S066F8080
-{
-    public EntityModel Model;
-}
-
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "9A078080", 0x250)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "D7848080", 0x250)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "79948080", 0x300)]

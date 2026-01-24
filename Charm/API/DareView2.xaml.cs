@@ -636,7 +636,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
     {
         DestinyTraitID[] blacklist = new[]
         {
-            DestinyTraitID.item_ghost_hologram,
+            //DestinyTraitID.item_ghost_hologram,
             DestinyTraitID.item_emote,
             DestinyTraitID.item_finisher,
         };
@@ -645,6 +645,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         {
             // TODO: Add emotes and ghost projections for fx mesh exporting
             DestinyTraitID.item_shader,
+            DestinyTraitID.item_ghost_hologram
         };
 
         if (item.GetItemTraits().Any(trait => blacklist.Contains(trait)))

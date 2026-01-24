@@ -16,12 +16,9 @@ public class Entity : Tag<SEntity>
     public EntityResource? PatternAudioUnnamed { get; private set; }
     public EntityControlRig? ControlRig { get; private set; }
     public EntityResource? CarriedWeapon { get; private set; }
-
     public EntityResource? Attachments { get; private set; }
-
     public EntityResource? EntityChildren { get; private set; }
     public List<EntityResource>? EntityChildren2 { get; private set; } // The Sequencer (tm) ?
-
 
     public EntityModel? Model => ModelParent?.GetModel();
     public EntityModel? PhysicsModel => PhysicsModelParent?.GetModel();
@@ -29,8 +26,9 @@ public class Entity : Tag<SEntity>
     public string? EntityName { get; set; } // Usually just the generic name (Ogre, Vandal, etc)
     public DestinyGenderDefinition Gender { get; set; } = DestinyGenderDefinition.None; // Only used for player armor
 
-    private bool _loaded = false;
+    public IEnumerable<FileHash> Components => _tag.EntityResources.Select(GetReader(), r => r.Resource);
 
+    private bool _loaded = false;
     public Entity(FileHash hash) : base(hash)
     {
         Load();

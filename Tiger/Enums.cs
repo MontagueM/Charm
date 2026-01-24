@@ -227,6 +227,7 @@ public enum DestinyTraitID : uint
 
     [Description("Ghost Shell")]
     item_ghost = 2570676179,
+    [Description("Ghost Projection")]
     item_ghost_hologram = 4118304139,
 
     [Description("Armor Ornament")]
