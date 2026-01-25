@@ -1,6 +1,6 @@
 ﻿namespace Tiger.Schema.Entity;
 
-public class EntityPhysicsModelParent : EntityResource
+public class EntityPhysicsModelParent : EntityComponent
 {
     private ModelPermutation _materialPermutations;
     public ModelPermutation MaterialPermutations

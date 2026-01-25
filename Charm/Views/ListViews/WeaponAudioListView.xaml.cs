@@ -352,14 +352,10 @@ public partial class WeaponAudioListView : UserControl
 
         Entity? val = Investment.Get().GetPatternEntityFromHash(apiHash);
         if (val == null || (val.PatternAudio == null && val.PatternAudioUnnamed == null))
-        {
-            //RefreshSoundList();
             return;
-        }
 
-        TigerReader resourceUnnamedReader = val.PatternAudioUnnamed.GetReader();
-        var resourceUnnamed = (SF42C8080)val.PatternAudioUnnamed.TagData.Unk18.GetValue(resourceUnnamedReader);
-        var resource = (S6E358080)val.PatternAudio.TagData.Unk18.GetValue(val.PatternAudio.GetReader());
+        var resourceUnnamed = (SF42C8080)val.PatternAudioUnnamed.GetUnk18();
+        var resource = (S6E358080)val.PatternAudio.GetUnk18();
 
         InventoryItem item = Investment.Get().GetInventoryItem(apiHash);
         TigerHash weaponContentGroupHash = Investment.Get().GetWeaponContentGroupHash(item);
@@ -424,7 +420,7 @@ public partial class WeaponAudioListView : UserControl
         }
 
         // Unnamed
-        List<WwiseSound> sounds = GetWeaponUnnamedSounds(resourceUnnamed, weaponContentGroupHash, resourceUnnamedReader);
+        List<WwiseSound> sounds = GetWeaponUnnamedSounds(resourceUnnamed, weaponContentGroupHash, val.PatternAudioUnnamed.Reader);
         foreach (WwiseSound categorySounds in sounds)
         {
             if (categorySounds == null)
@@ -557,12 +553,12 @@ public partial class WeaponAudioListView : UserControl
 
         foreach (Entity entity in entities)
         {
-            foreach (FileHash? resourceHash in entity.TagData.EntityResources.Select(entity.GetReader(), r => r.Resource))
+            foreach (FileHash? resourceHash in entity.Components)
             {
                 if (Strategy.IsD1() && resourceHash.GetReferenceHash() != 0x80800861)
                     continue;
 
-                EntityResource e = FileResourcer.Get().GetFile<EntityResource>(resourceHash);
+                EntityComponent e = FileResourcer.Get().GetFile<EntityComponent>(resourceHash);
                 if (e.TagData.Unk18.GetValue(e.GetReader()) is S79818080 a)
                 {
                     var arrays = a.Array1;

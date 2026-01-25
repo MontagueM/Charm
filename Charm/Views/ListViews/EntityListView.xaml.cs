@@ -192,7 +192,7 @@ public partial class EntityListView : UserControl
                             {
                                 Hash = hash,
                                 DisplayName = entry,
-                                ResourceCount = entity.TagData.EntityResources.Count,
+                                ResourceCount = entity.Components.Count(),
                                 HasSkeleton = entity.Skeleton != null,
                             });
                         }
@@ -203,7 +203,7 @@ public partial class EntityListView : UserControl
                         {
                             Hash = hash,
                             DisplayName = $"[{hash}]",
-                            ResourceCount = entity.TagData.EntityResources.Count,
+                            ResourceCount = entity.Components.Count(),
                             HasSkeleton = entity.Skeleton != null,
                         });
                     }
@@ -599,7 +599,7 @@ public partial class EntityListView : UserControl
                 Log.Debug($"Stage 1: SD9128080 Entity Names took {stopwatch.Elapsed.TotalSeconds} seconds to process.");
                 stopwatch = Stopwatch.StartNew();
 
-                // Name is in an EntityResource, with the entity in a map data table in that EntityResource
+                // Name is in an EntityComponent, with the entity in a map data table in that EntityComponent
                 ConcurrentHashSet<FileHash> vals2 = await PackageResourcer.Get().GetAllHashesAsync<SF6038080>();
                 Log.Debug($"{vals2.Count} SF6038080 Tags");
 
@@ -608,11 +608,11 @@ public partial class EntityListView : UserControl
                     Parallel.ForEach(vals2, parallelOptions, val =>
                     {
                         Tag<SF6038080> entry = FileResourcer.Get().GetSchemaTag<SF6038080>(val);
-                        if (entry.TagData.EntityResource is not null)
+                        if (entry.TagData.EntityComponent is not null)
                         {
-                            if (entry.TagData.EntityResource.TagData.Unk10.GetValue(entry.TagData.EntityResource.GetReader()) is S2E098080)
+                            if (entry.TagData.EntityComponent.TagData.Unk10.GetValue(entry.TagData.EntityComponent.GetReader()) is S2E098080)
                             {
-                                var resource = (SDD078080)entry.TagData.EntityResource.TagData.Unk18.GetValue(entry.TagData.EntityResource.GetReader());
+                                var resource = (SDD078080)entry.TagData.EntityComponent.TagData.Unk18.GetValue(entry.TagData.EntityComponent.GetReader());
                                 foreach (SMapDataEntry dataentry in resource.DataEntries)
                                 {
                                     if (dataentry.Entity.Hash.IsValid())
@@ -641,9 +641,9 @@ public partial class EntityListView : UserControl
                     {
                         //Console.WriteLine($"Resource {val}");
                         Tag<S149B8080> entry = FileResourcer.Get().GetSchemaTag<S149B8080>(val);
-                        if (entry.TagData.EntityResource is not null)
+                        if (entry.TagData.EntityComponent is not null)
                         {
-                            EntityResource resource = entry.TagData.EntityResource;
+                            EntityComponent resource = entry.TagData.EntityComponent;
                             if (resource.TagData.Unk10.GetValue(resource.GetReader()) is S3B9A8080)
                             {
                                 var D2Class8F948080 = (S8F948080)resource.TagData.Unk18.GetValue(resource.GetReader());
@@ -707,8 +707,8 @@ public partial class EntityListView : UserControl
                 Log.Debug($"Stage 1: Map Data Table Entity Names took {stopwatch.Elapsed.TotalSeconds} seconds to process.");
                 stopwatch = Stopwatch.StartNew();
 
-                // Name is in an EntityResource, with the entity in a map data table in that EntityResource
-                ConcurrentHashSet<FileHash> resources = await PackageResourcer.Get().GetAllHashesAsync<EntityResource>();
+                // Name is in an EntityComponent, with the entity in a map data table in that EntityComponent
+                ConcurrentHashSet<FileHash> resources = await PackageResourcer.Get().GetAllHashesAsync<EntityComponent>();
                 Log.Debug($"{resources.Count} Entity Resources");
 
                 await Task.Run(() =>
@@ -718,7 +718,7 @@ public partial class EntityListView : UserControl
                         if (!val.ContainsHash(0x8080470E))
                             return;
 
-                        var resource = FileResourcer.Get().GetFile<EntityResource>(val, shouldCache: false);
+                        var resource = FileResourcer.Get().GetFile<EntityComponent>(val, shouldCache: false);
                         var sb546 = (SB5468080)resource.TagData.Unk18.GetValue(resource.GetReader());
                         foreach (S96468080 entry in sb546.Unk80)
                         {

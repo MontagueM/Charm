@@ -139,9 +139,9 @@ namespace Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON
                             items.Add(b.Unk00.Hash);
 
                         // For NPCs, enemies and other AI (it's cool but not really worth adding)
-                        //if (b.Unk00.TagData.EntityResource.TagData.Unk10.GetValue(b.Unk00.TagData.EntityResource.GetReader()) is SBC078080 c)
+                        //if (b.Unk00.TagData.EntityComponent.TagData.Unk10.GetValue(b.Unk00.TagData.EntityComponent.GetReader()) is SBC078080 c)
                         //{
-                        //    var d = (SA7058080)b.Unk00.TagData.EntityResource.TagData.Unk18.GetValue(b.Unk00.TagData.EntityResource.GetReader());
+                        //    var d = (SA7058080)b.Unk00.TagData.EntityComponent.TagData.Unk18.GetValue(b.Unk00.TagData.EntityComponent.GetReader());
                         //    if (!items.Contains(d.Unk68.Hash))
                         //        items.Add(d.Unk68.Hash);
                         //}
@@ -272,7 +272,7 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
         public List<FileHash> GetActivityDialogueTables(FileHash UnkActivity)
         {
             List<FileHash> entries = new();
-            foreach (EntityResource resource in GetActivityResources(UnkActivity))
+            foreach (EntityComponent resource in GetActivityResources(UnkActivity))
             {
                 if (resource.TagData.Unk18.GetValue(resource.GetReader()) is S4C4F8080 d)
                 {
@@ -287,7 +287,7 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
         public List<FileHash> GetActivityDirectiveTables(FileHash UnkActivity)
         {
             List<FileHash> entries = new();
-            foreach (EntityResource resource in GetActivityResources(UnkActivity))
+            foreach (EntityComponent resource in GetActivityResources(UnkActivity))
             {
                 if (resource.TagData.Unk18.GetValue(resource.GetReader()) is S544F8080 d)
                 {
@@ -302,7 +302,7 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
         public List<FileHash> GetActivityMusicList(FileHash UnkActivity)
         {
             List<FileHash> entries = new();
-            foreach (EntityResource resource in GetActivityResources(UnkActivity))
+            foreach (EntityComponent resource in GetActivityResources(UnkActivity))
             {
                 if (resource.TagData.Unk18.GetValue(resource.GetReader()) is S8F4E8080 d)
                 {
@@ -312,10 +312,10 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
             return entries;
         }
 
-        private List<EntityResource> GetActivityResources(FileHash UnkActivity)
+        private List<EntityComponent> GetActivityResources(FileHash UnkActivity)
         {
             Tag<SUnkActivity_SK> activity = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(UnkActivity);
-            List<EntityResource> entries = new();
+            List<EntityComponent> entries = new();
             foreach (DynamicArray<S4F928080>? entry in activity.TagData.Unk50.Select(x => x.Unk08))
             {
                 foreach (S4F928080 entry2 in entry)
@@ -342,7 +342,7 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
                                     continue;
                                 foreach (S139B8080 c in b.Unk00.TagData.Unk10)
                                 {
-                                    EntityResource? resource = c.Unk00.TagData.EntityResource;
+                                    EntityComponent? resource = c.Unk00.TagData.EntityComponent;
                                     if (resource is null)
                                         continue;
 
@@ -455,11 +455,11 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
             Tag<S898E8080> entry = FileResourcer.Get().GetSchemaTag<S898E8080>(hash);
             Tag<SBE8E8080> Unk18 = FileResourcer.Get().GetSchemaTag<SBE8E8080>(entry.TagData.Unk18.Hash);
 
-            foreach (S42898080 resource in Unk18.TagData.EntityResources)
+            foreach (S42898080 resource in Unk18.TagData.EntityComponents)
             {
-                if (resource.EntityResourceParent != null)
+                if (resource.EntityComponentParent != null)
                 {
-                    dynamic? resourceValue = resource.EntityResourceParent.TagData.EntityResource.TagData.Unk18.GetValue(resource.EntityResourceParent.TagData.EntityResource.GetReader());
+                    dynamic? resourceValue = resource.EntityComponentParent.TagData.EntityComponent.TagData.Unk18.GetValue(resource.EntityComponentParent.TagData.EntityComponent.GetReader());
                     switch (resourceValue)
                     {
                         case SD8928080:
@@ -491,11 +491,11 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
             Tag<S898E8080> entry = FileResourcer.Get().GetSchemaTag<S898E8080>(hash);
             Tag<SBE8E8080> Unk18 = FileResourcer.Get().GetSchemaTag<SBE8E8080>(entry.TagData.Unk18.Hash);
 
-            foreach (S42898080 resource in Unk18.TagData.EntityResources)
+            foreach (S42898080 resource in Unk18.TagData.EntityComponents)
             {
-                if (resource.EntityResourceParent != null)
+                if (resource.EntityComponentParent != null)
                 {
-                    dynamic? resourceValue = resource.EntityResourceParent.TagData.EntityResource.TagData.Unk18.GetValue(resource.EntityResourceParent.TagData.EntityResource.GetReader());
+                    dynamic? resourceValue = resource.EntityComponentParent.TagData.EntityComponent.TagData.Unk18.GetValue(resource.EntityComponentParent.TagData.EntityComponent.GetReader());
                     switch (resourceValue)
                     {
                         //This is kinda dumb 
@@ -505,9 +505,9 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
                         case SEF988080:
                         case SF88C8080:
                         case SFA988080:
-                            if (resource.EntityResourceParent.TagData.EntityResource.TagData.UnkHash80 != null)
+                            if (resource.EntityComponentParent.TagData.EntityComponent.TagData.UnkHash80 != null)
                             {
-                                Tag<S6B908080> unk80 = FileResourcer.Get().GetSchemaTag<S6B908080>(resource.EntityResourceParent.TagData.EntityResource.TagData.UnkHash80.Hash);
+                                Tag<S6B908080> unk80 = FileResourcer.Get().GetSchemaTag<S6B908080>(resource.EntityComponentParent.TagData.EntityComponent.TagData.UnkHash80.Hash);
                                 foreach (S029D8080 a in unk80.TagData.Unk08)
                                 {
                                     if (a.Unk00.Value?.Name.Value is not null)

@@ -13,12 +13,12 @@ public struct SEntity
     [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x08, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public DynamicArrayUnloaded<SCD9A8080> EntityResources;
+    public DynamicArrayUnloaded<SCD9A8080> EntityComponents;
 
     [SchemaField(0x68, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x50, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public DynamicArrayUnloaded<SED9A8080> UnkResources; // Basically EntityResources but contains the Resource's Unk10 ClassHash
+    public DynamicArrayUnloaded<SED9A8080> UnkResources; // Basically EntityComponents but contains the Resource's Unk10 ClassHash
 }
 
 

@@ -10,15 +10,17 @@ public class Entity : Tag<SEntity>
     public TfxFeatureRenderer FeatureType = TfxFeatureRenderer.DynamicObjects;
     // Entity features, todo clean this up
     public EntitySkeleton? Skeleton { get; set; }
+    public EntityControlRig? ControlRig { get; private set; }
     public EntityModelParent? ModelParent { get; private set; }
     public EntityPhysicsModelParent? PhysicsModelParent { get; private set; }
-    public EntityResource? PatternAudio { get; private set; }
-    public EntityResource? PatternAudioUnnamed { get; private set; }
-    public EntityControlRig? ControlRig { get; private set; }
-    public EntityResource? CarriedWeapon { get; private set; }
-    public EntityResource? Attachments { get; private set; }
-    public EntityResource? EntityChildren { get; private set; }
-    public List<EntityResource>? EntityChildren2 { get; private set; } // The Sequencer (tm) ?
+
+    public EntityComponent? PatternAudio { get; private set; }
+    public EntityComponent? PatternAudioUnnamed { get; private set; }
+    public EntityComponent? CarriedWeapon { get; private set; }
+    public EntityComponent? Attachments { get; private set; }
+    public EntityComponent? EntityChildren { get; private set; }
+
+    public List<EntitySequencer>? Sequences { get; private set; } // The Sequencer (tm) ?
 
     public EntityModel? Model => ModelParent?.GetModel();
     public EntityModel? PhysicsModel => PhysicsModelParent?.GetModel();
@@ -26,14 +28,9 @@ public class Entity : Tag<SEntity>
     public string? EntityName { get; set; } // Usually just the generic name (Ogre, Vandal, etc)
     public DestinyGenderDefinition Gender { get; set; } = DestinyGenderDefinition.None; // Only used for player armor
 
-    public IEnumerable<FileHash> Components => _tag.EntityResources.Select(GetReader(), r => r.Resource);
+    public IEnumerable<FileHash> Components => _tag.EntityComponents.Select(GetReader(), r => r.Resource);
 
     private bool _loaded = false;
-    public Entity(FileHash hash) : base(hash)
-    {
-        Load();
-    }
-
     public Entity(FileHash hash, bool shouldParse = true) : base(hash, shouldParse)
     {
         if (shouldParse)
@@ -50,14 +47,12 @@ public class Entity : Tag<SEntity>
             return;
 
         _loaded = true;
-        //Debug.Assert(_tag.FileSize != 0); // Is this really needed?
-
-        foreach (FileHash? resourceHash in _tag.EntityResources.Select(GetReader(), r => r.Resource))
+        foreach (FileHash? resourceHash in Components)
         {
             if (Strategy.IsD1() && resourceHash.GetReferenceHash() != 0x80800861)
                 continue;
 
-            EntityResource resource = FileResourcer.Get().GetFile<EntityResource>(resourceHash);
+            EntityComponent resource = FileResourcer.Get().GetFile<EntityComponent>(resourceHash);
             switch (resource.TagData.Unk10.GetValue(resource.GetReader(), false))
             {
                 case S8A6D8080:  // Entity model
@@ -73,15 +68,15 @@ public class Entity : Tag<SEntity>
                     Skeleton = FileResourcer.Get().GetFile<EntitySkeleton>(resource.Hash);
                     break;
 
-                //case S668B8080:  // Entity skeleton IK  todo shadowkeep
+                //case S668B8080:  // Entity skeleton IK 
                 //    ControlRig = FileResourcer.Get().GetFile<EntityControlRig>(resource.Hash);
                 //    break;
 
-                case S97318080: // todo shadowkeep
+                case S97318080: // todo? shadowkeep
                     PatternAudio = resource;
                     break;
 
-                case SF62C8080: // todo shadowkeep
+                case SF62C8080: // todo? shadowkeep
                     PatternAudioUnnamed = resource;
                     break;
 
@@ -106,10 +101,10 @@ public class Entity : Tag<SEntity>
                     break;
 
                 case S79948080:
-                    if (EntityChildren2 is null)
-                        EntityChildren2 = new();
+                    if (Sequences is null)
+                        Sequences = new();
 
-                    EntityChildren2.Add(resource);
+                    Sequences.Add(new(resource.Hash));
                     break;
 
                 case S12848080:
@@ -245,8 +240,8 @@ public class Entity : Tag<SEntity>
         List<Entity> entities = new();
         if (CarriedWeapon is not null)
         {
-            Log.Debug($"CarriedWeapon {CarriedWeapon.Hash}");
-            var weaponEntry = (SEA318080)CarriedWeapon.TagData.Unk18.GetValue(CarriedWeapon.GetReader());
+            var weaponEntry = (SEA318080)CarriedWeapon.GetUnk18();
+            Log.Debug($"CarriedWeapon {CarriedWeapon.Hash} ({weaponEntry.Unk1C0.Count} entries)");
 
             var offsetTrans = Vector4.Zero;
             var offsetRot = Vector4.Quaternion;
@@ -317,8 +312,9 @@ public class Entity : Tag<SEntity>
 
         if (Attachments is not null)
         {
-            Log.Debug($"Attachments {Attachments.Hash} ({Attachments.TagData.Unk18.GetValueRaw(Attachments.GetReader()):X})");
-            var attachmentEntry = (S282C8080)Attachments.TagData.Unk18.GetValue(Attachments.GetReader());
+            var attachmentEntry = (S282C8080)Attachments.GetUnk18();
+            Log.Debug($"Attachments {Attachments.Hash} ({attachmentEntry.Unk1D8.Count} entries)");
+
             foreach (var entry in attachmentEntry.Unk1D8)
             {
                 if (entry.Entity is null || entities.Contains(entry.Entity))
@@ -362,16 +358,20 @@ public class Entity : Tag<SEntity>
             }
         }
 
-        if (EntityChildren2 is not null)
-            entities.AddRange(GetEntityChildren2());
+        if (Sequences is not null)
+        {
+            foreach (var sequence in Sequences)
+            {
+                entities.AddRange(sequence.GetSequencerEntities());
+            }
+        }
 
         if (EntityChildren is null)
             return entities;
 
-
-        if (EntityChildren.TagData.Unk18.GetValue(EntityChildren.GetReader()) is S0E848080)
+        if (EntityChildren.GetUnk18() is S0E848080 children)
         {
-            foreach (S1B848080 entry in ((S0E848080)EntityChildren.TagData.Unk18.GetValue(EntityChildren.GetReader())).Unk88)
+            foreach (S1B848080 entry in children.Unk88)
             {
                 foreach (S1D848080 entry2 in entry.Unk08)
                 {
@@ -390,38 +390,6 @@ public class Entity : Tag<SEntity>
             }
         }
 
-        return entities;
-    }
-
-    public List<Entity> GetEntityChildren2() // THIS SUCKS WHYYY BUNGIEEE
-    {
-        List<Entity> entities = new();
-        if (EntityChildren2 is null)
-            return entities;
-
-        foreach (EntityResource resource in EntityChildren2)
-        {
-            if (resource.TagData.Unk18.GetValue(resource.GetReader()) is S79818080)
-            {
-                foreach (SF1918080 entry in ((S79818080)resource.TagData.Unk18.GetValue(resource.GetReader())).Array2)
-                {
-                    if (entry.Unk10.GetValue(resource.GetReader()) is S81888080 entry2)
-                    {
-                        if (entry2.Entity is null)
-                            continue;
-
-                        Entity entity = FileResourcer.Get().GetFile<Entity>(entry2.Entity.Hash);
-                        if (!entities.Contains(entity) && entity.HasGeometry())
-                        {
-                            entities.Add(entity);
-                            //Just in case
-                            foreach (Entity child in entity.GetEntityChildren())
-                                entities.Add(child);
-                        }
-                    }
-                }
-            }
-        }
         return entities;
     }
 }

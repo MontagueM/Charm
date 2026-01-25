@@ -302,7 +302,7 @@ public partial class MapView : UserControl
 
         List<SMapDataEntry> dataEntries = new();
         if (Strategy.IsD1() && hash.GetReferenceHash().Hash32 == 0x808003F6) //F6038080
-            dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SF6038080>(hash).TagData.EntityResource.CollapseIntoDataEntry());
+            dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SF6038080>(hash).TagData.EntityComponent.CollapseIntoDataEntry());
         else
             dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SMapDataTable>(hash).TagData.DataEntries);
 

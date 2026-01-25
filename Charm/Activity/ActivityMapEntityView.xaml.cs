@@ -267,7 +267,7 @@ public partial class ActivityMapEntityView : UserControl
         {
             List<SMapDataEntry> dataEntries = new();
             if (Strategy.IsD1() && data.GetReferenceHash().Hash32 == 0x808003F6) //F6038080
-                dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SF6038080>(data).TagData.EntityResource.CollapseIntoDataEntry());
+                dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SF6038080>(data).TagData.EntityComponent.CollapseIntoDataEntry());
             else
                 dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SMapDataTable>(data).TagData.DataEntries);
 
@@ -416,7 +416,7 @@ public partial class ActivityMapEntityView : UserControl
         {
             if (Strategy.IsD1() && data.GetReferenceHash().Hash32 == 0x808003F6)
             {
-                List<SMapDataEntry> dataEntries = FileResourcer.Get().GetSchemaTag<SF6038080>(data).TagData.EntityResource.CollapseIntoDataEntry();
+                List<SMapDataEntry> dataEntries = FileResourcer.Get().GetSchemaTag<SF6038080>(data).TagData.EntityComponent.CollapseIntoDataEntry();
                 foreach (SMapDataEntry entry in dataEntries)
                 {
                     Entity entity = FileResourcer.Get().GetFile<Entity>(entry.Entity.Hash);
@@ -442,9 +442,9 @@ public partial class ActivityMapEntityView : UserControl
                     }
                     else
                     {
-                        foreach (FileHash? resourceHash in entity.TagData.EntityResources.Select(entity.GetReader(), r => r.Resource))
+                        foreach (FileHash? resourceHash in entity.Components)
                         {
-                            EntityResource resource = FileResourcer.Get().GetFile<EntityResource>(resourceHash);
+                            EntityComponent resource = FileResourcer.Get().GetFile<EntityComponent>(resourceHash);
                             switch (resource.TagData.Unk10.GetValue(resource.GetReader()))
                             {
                                 case S79948080:
@@ -693,7 +693,7 @@ public partial class ActivityMapEntityView : UserControl
                 {
                     List<SMapDataEntry> dataEntries = new();
                     if (Strategy.IsD1() && datatable.GetReferenceHash().Hash32 == 0x808003F6) //F6038080
-                        dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SF6038080>(datatable).TagData.EntityResource.CollapseIntoDataEntry());
+                        dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SF6038080>(datatable).TagData.EntityComponent.CollapseIntoDataEntry());
                     else
                         dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SMapDataTable>(datatable).TagData.DataEntries);
 

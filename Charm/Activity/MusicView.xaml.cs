@@ -29,9 +29,9 @@ public partial class MusicView : UserControl
         if (extra is Entity entity)
         {
             List<SSequenceAudioEvent> sounds = new();
-            foreach (FileHash? resourceHash in entity.TagData.EntityResources.Select(entity.GetReader(), r => r.Resource))
+            foreach (FileHash? resourceHash in entity.Components)
             {
-                EntityResource e = FileResourcer.Get().GetFile<EntityResource>(resourceHash);
+                EntityComponent e = FileResourcer.Get().GetFile<EntityComponent>(resourceHash);
                 if (e.TagData.Unk18.GetValue(e.GetReader()) is S79818080 a)
                 {
                     foreach (SF1918080 d2ClassF1918080 in a.Array1)
@@ -107,7 +107,7 @@ public partial class MusicView : UserControl
     public void LoadPreBL(FileHash hash)
     {
         List<WwiseSound> sounds = new();
-        EntityResource resource = FileResourcer.Get().GetFile<EntityResource>(hash);
+        EntityComponent resource = FileResourcer.Get().GetFile<EntityComponent>(hash);
         foreach (dynamic? value in ((S8F4E8080)resource.TagData.Unk18.GetValue(resource.GetReader())).Pointers.Select(x => x.Pointer.GetValue(resource.GetReader())))
         {
             switch (value)

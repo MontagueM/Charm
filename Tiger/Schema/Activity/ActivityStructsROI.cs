@@ -161,7 +161,7 @@ public struct S22428080
 public struct SF6038080
 {
     [SchemaField(0xC)]
-    public EntityResource? EntityResource; // Check Unk10 for 2E098080, Unk18 -> DD078080 0x80
+    public EntityComponent? EntityComponent; // Check Unk10 for 2E098080, Unk18 -> DD078080 0x80
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "2E098080", 0x3A0)]

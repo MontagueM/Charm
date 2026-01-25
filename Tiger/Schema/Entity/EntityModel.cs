@@ -18,7 +18,7 @@ public class EntityModel : Tag<SEntityModel>
     /*
      * We need the parent resource to get access to the external materials
      */
-    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, EntityResource parentResource, bool transparentsOnly = false, bool hasSkeleton = false, LoadLevel loadLevel = LoadLevel.Full)
+    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, EntityComponent parentResource, bool transparentsOnly = false, bool hasSkeleton = false, LoadLevel loadLevel = LoadLevel.Full)
     {
         Dictionary<int, Dictionary<int, SCB6E8080>> dynamicParts = GetPartsOfDetailLevel(detailLevel);
         List<DynamicMeshPart> parts = GenerateParts(dynamicParts, parentResource, hasSkeleton, loadLevel);
@@ -79,7 +79,7 @@ public class EntityModel : Tag<SEntityModel>
         return parts;
     }
 
-    private List<DynamicMeshPart> GenerateParts(Dictionary<int, Dictionary<int, SCB6E8080>> dynamicParts, EntityResource parentResource, bool hasSkeleton = false, LoadLevel loadLevel = LoadLevel.Full)
+    private List<DynamicMeshPart> GenerateParts(Dictionary<int, Dictionary<int, SCB6E8080>> dynamicParts, EntityComponent parentResource, bool hasSkeleton = false, LoadLevel loadLevel = LoadLevel.Full)
     {
         List<DynamicMeshPart> parts = new();
         List<int> exportPartRange = new();
@@ -193,7 +193,7 @@ public class DynamicMeshPart : MeshPart
     public bool HasSkeleton;
     public byte GearDyeChangeColorIndex = 0xFF;
 
-    public DynamicMeshPart(SCB6E8080 part, EntityResource parentResource) : base()
+    public DynamicMeshPart(SCB6E8080 part, EntityComponent parentResource) : base()
     {
         IndexOffset = part.IndexOffset;
         IndexCount = part.IndexCount;
@@ -342,7 +342,7 @@ public class DynamicMeshPart : MeshPart
         }
     }
 
-    public static Material? GetMaterialFromExternalMaterial(int variantShaderIndex, EntityResource parentResource)
+    public static Material? GetMaterialFromExternalMaterial(int variantShaderIndex, EntityComponent parentResource)
     {
         using TigerReader reader = parentResource.GetReader();
 

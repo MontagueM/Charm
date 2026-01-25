@@ -178,7 +178,7 @@ public struct S139B8080
 public struct S149B8080
 {
     [SchemaField(0xC)]
-    public EntityResource EntityResource; // Theres another after but its always the same as this one?
+    public EntityComponent EntityComponent; // Theres another after but its always the same as this one?
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "4C4F8080", 0x60)] // Entity Resource 0x18

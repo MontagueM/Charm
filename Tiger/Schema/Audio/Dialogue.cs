@@ -181,20 +181,20 @@ public class DialogueD1
                     {
                         foreach (S22428080 f in e.Unk18)
                         {
-                            if (f.Unk00.TagData.EntityResource is null)
+                            if (f.Unk00.TagData.EntityComponent is null)
                                 continue;
 
-                            if (f.Unk00.TagData.EntityResource.TagData.Unk10.GetValue(f.Unk00.TagData.EntityResource.GetReader()) is SB9268080)
+                            if (f.Unk00.TagData.EntityComponent.TagData.Unk10.GetValue(f.Unk00.TagData.EntityComponent.GetReader()) is SB9268080)
                             {
-                                Entity.Entity? g = ((SDA288080)f.Unk00.TagData.EntityResource.TagData.Unk18.GetValue(f.Unk00.TagData.EntityResource.GetReader())).Unk68;
+                                Entity.Entity? g = ((SDA288080)f.Unk00.TagData.EntityComponent.TagData.Unk18.GetValue(f.Unk00.TagData.EntityComponent.GetReader())).Unk68;
                                 if (g is null)
                                     continue;
 
-                                foreach (FileHash? g2 in g.TagData.EntityResources.Select(g.GetReader(), r => r.Resource))
+                                foreach (FileHash? g2 in g.Components)
                                 {
                                     if (Strategy.IsD1() && g2.GetReferenceHash() != 0x80800861)
                                         continue;
-                                    EntityResource resource = FileResourcer.Get().GetFile<EntityResource>(g2);
+                                    EntityComponent resource = FileResourcer.Get().GetFile<EntityComponent>(g2);
                                     if (resource.TagData.Unk10.GetValue(resource.GetReader()) is S79948080)
                                     {
                                         var h = (S79818080)resource.TagData.Unk18.GetValue(resource.GetReader());

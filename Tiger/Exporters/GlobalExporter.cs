@@ -288,7 +288,7 @@ public class GlobalExporter : AbstractExporter
 
     private void ExportGlobalChannels()
     {
-        if (GlobalScene.Any<EntityResource>())
+        if (GlobalScene.Any<EntityComponent>())
         {
             Dictionary<string, GlobalChannelData> channels = new();
             string dataSavePath = $"{SavePath}/Rendering";
@@ -309,7 +309,7 @@ public class GlobalExporter : AbstractExporter
             }
 
             // Overwrites defaults with any from the scene
-            foreach (EntityResource resource in GlobalScene.GetAllOfType<EntityResource>())
+            foreach (EntityComponent resource in GlobalScene.GetAllOfType<EntityComponent>())
             {
                 switch (resource.TagData.Unk10.GetValue(resource.GetReader()))
                 {

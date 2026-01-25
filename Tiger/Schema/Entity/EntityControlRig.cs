@@ -7,7 +7,7 @@
 /// - if a node has a parent to which it inherits, the value at UnkB8.Unk04/Unk0A are the parent node index
 /// - if the value is instead its own index, its parent is pedestal (ie no parent)
 /// </summary>
-public class EntityControlRig : EntityResource
+public class EntityControlRig : EntityComponent
 {
 #pragma warning disable S1144 // Unused private types or members should be removed
     public EntityControlRig(FileHash resource) : base(resource)

@@ -100,16 +100,16 @@ public partial class DirectiveView : UserControl
                     {
                         foreach (S22428080 f in e.Unk18)
                         {
-                            if (f.Unk00.TagData.EntityResource is null)
+                            if (f.Unk00.TagData.EntityComponent is null)
                                 continue;
 
-                            if (f.Unk00.TagData.EntityResource.TagData.Unk10.GetValue(f.Unk00.TagData.EntityResource.GetReader()) is S90258080)
+                            if (f.Unk00.TagData.EntityComponent.TagData.Unk10.GetValue(f.Unk00.TagData.EntityComponent.GetReader()) is S90258080)
                             {
-                                var g = ((S93298080)f.Unk00.TagData.EntityResource.TagData.Unk18.GetValue(f.Unk00.TagData.EntityResource.GetReader()));
+                                var g = ((S93298080)f.Unk00.TagData.EntityComponent.TagData.Unk18.GetValue(f.Unk00.TagData.EntityComponent.GetReader()));
                                 foreach (SD7318080 directive in g.Directives)
                                 {
                                     // Need to filter out duplicates
-                                    if (!items.Any(item => item.Hash == f.Unk00.TagData.EntityResource.Hash))
+                                    if (!items.Any(item => item.Hash == f.Unk00.TagData.EntityComponent.Hash))
                                     {
                                         items.Add(new DirectiveItem
                                         {
@@ -117,7 +117,7 @@ public partial class DirectiveView : UserControl
                                             Description = GlobalStrings.Get().GetString(directive.Description),
                                             Objective = GlobalStrings.Get().GetString(directive.Objective),
                                             Unknown = g.DevName.Value,
-                                            Hash = f.Unk00.TagData.EntityResource.Hash
+                                            Hash = f.Unk00.TagData.EntityComponent.Hash
                                         });
                                     }
                                 }

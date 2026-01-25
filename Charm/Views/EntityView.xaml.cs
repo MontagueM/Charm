@@ -214,7 +214,7 @@ public partial class EntityView : UserControl
             if (Strategy.IsD1() && hash.GetReferenceHash() != 0x80800861)
                 continue;
 
-            EntityResource resource = FileResourcer.Get().GetFile<EntityResource>(hash);
+            EntityComponent resource = FileResourcer.Get().GetFile<EntityComponent>(hash);
             if (resource.TagData.Unk18.GetValue(resource.GetReader()) is S79818080 sequencer)
             {
                 // only in Array2 afaik

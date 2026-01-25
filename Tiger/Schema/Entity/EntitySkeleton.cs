@@ -2,7 +2,7 @@
 
 namespace Tiger.Schema.Entity;
 
-public class EntitySkeleton : EntityResource
+public class EntitySkeleton : EntityComponent
 {
     private List<BoneNode>? _cachedBoneNodes;
 

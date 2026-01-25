@@ -435,7 +435,7 @@ public struct SMapContainerEntry
 
 /// <summary>
 /// A map resource, contains data used to make a map.
-/// This is quite similar to EntityResource, but with more children.
+/// This is quite similar to EntityComponent, but with more children.
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "548A8080", 0x28)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "548A8080", 0x38)]

@@ -1,6 +1,6 @@
 ﻿namespace Tiger.Schema.Entity;
 
-public class EntityAttachments : EntityResource
+public class EntityAttachments : EntityComponent
 {
     public EntityAttachments(FileHash resource) : base(resource)
     {

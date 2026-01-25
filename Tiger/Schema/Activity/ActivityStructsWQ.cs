@@ -760,13 +760,13 @@ public struct SUnkMusicE8BF8080
 public struct SBE8E8080
 {
     public long FileSize;
-    public DynamicArray<S42898080> EntityResources;
+    public DynamicArray<S42898080> EntityComponents;
 }
 
 [SchemaStruct("42898080", 0x4)]
 public struct S42898080
 {
-    public Tag<S43898080> EntityResourceParent;
+    public Tag<S43898080> EntityComponentParent;
 }
 
 [SchemaStruct("43898080", 0x28)]
@@ -775,7 +775,7 @@ public struct S43898080
     public long FileSize;
     public TigerHash Unk08;
     [SchemaField(0x20)]
-    public EntityResource EntityResource;
+    public EntityComponent EntityComponent;
 }
 
 #endregion
