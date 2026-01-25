@@ -188,16 +188,6 @@ public partial class EntityView : UserControl
             entity.SaveTexturePlates(savePath);
         }
 
-        //if (exportType == ExportTypeFlag.Full)
-        //{
-        //    if (config.GetUnrealInteropEnabled())
-        //    {
-        //        AutomatedExporter.SaveInteropUnrealPythonFile(savePath, name, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
-        //    }
-        //}
-
-        // Scale and rotate
-        // fbxHandler.ScaleAndRotateForBlender(boneNodes[0]);
         if (!aggregateOutput)
             Tiger.Exporters.Exporter.Get().Export();
         else
@@ -223,33 +213,42 @@ public partial class EntityView : UserControl
                     Debug.Assert(element.Unk10.GetValue(resource.GetReader()) is not SSequenceParticleSystem);
                 }
 
+                List<Tag<SParticleSystem>> particles = new();
                 foreach (SF1918080 element in sequencer.Array2)
                 {
                     if (element.Unk10.GetValue(resource.GetReader()) is SSequenceParticleSystem particle)
                     {
                         foreach (var entry in particle.Unk28.Select(x => x.ParticleSystem).Where(x => x is not null))
                         {
-                            var container = entry.TagData.ModelContainer;
-                            if (container is null)
+                            if (entry.TagData.ModelContainer is null)
                                 continue;
 
-                            Material overrideMat = null;
-                            if (entry.TagData.UnkMat is not null)
-                            {
-                                overrideMat = entry.TagData.UnkMat;
-                                scene.Materials.Add(new ExportMaterial(overrideMat));
-                            }
-
-                            // Unsure if theres only ever 1 model here
-                            foreach (var model in container.TagData.Models.Enumerate(container.GetReader()).Where(x => x.Model is not null))
-                            {
-                                if (scene.Entities.Any(x => x.Mesh.Hash == model.Model.Hash))
-                                    continue;
-
-                                scene.AddModel(model.Model, overrideMat);
-                            }
+                            particles.Add(entry);
                         }
                     }
+                }
+
+                if (!particles.Any())
+                    return;
+
+                // I *think* the last entry is the one used in the inspection screen? All the others have slightly different pixel shaders
+                var last = particles.Where(x => x.TagData.ModelContainer is not null).Last();
+                var container = last.TagData.ModelContainer;
+
+                Material overrideMat = null;
+                if (last.TagData.UnkMat is not null)
+                {
+                    overrideMat = last.TagData.UnkMat;
+                    scene.Materials.Add(new ExportMaterial(overrideMat));
+                }
+
+                // Unsure if theres only ever 1 model here
+                foreach (var model in container.TagData.Models.Enumerate(container.GetReader()).Where(x => x.Model is not null))
+                {
+                    if (scene.Entities.Any(x => x.Mesh.Hash == model.Model.Hash))
+                        continue;
+
+                    scene.AddModel(model.Model, overrideMat);
                 }
             }
         }

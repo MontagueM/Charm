@@ -58,8 +58,8 @@ public partial class MainWindow
 
         System.Windows.Point position = Mouse.GetPosition(this);
         TranslateTransform gridTransform = (TranslateTransform)OverlayRoot.RenderTransform;
-        gridTransform.X = (int)Math.Round(position.X * x);
-        gridTransform.Y = (int)Math.Round(position.Y * y);
+        gridTransform.X = Math.Round(position.X * x);
+        gridTransform.Y = Math.Round(position.Y * y);
     }
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
