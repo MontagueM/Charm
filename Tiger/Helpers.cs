@@ -236,6 +236,14 @@ public static class Helpers
             return hash;
         }
     }
+
+    public static byte[] ConcatBytes(byte[] a, byte[] b)
+    {
+        byte[] result = new byte[a.Length + b.Length];
+        Buffer.BlockCopy(a, 0, result, 0, a.Length);
+        Buffer.BlockCopy(b, 0, result, a.Length, b.Length);
+        return result;
+    }
 }
 
 public static class NestedTypeHelpers

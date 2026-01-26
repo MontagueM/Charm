@@ -46,7 +46,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
             return TextureDimension.D2;
     }
 
-    public byte[] GetRawBytes()
+    public byte[] GetRawBytes(bool loadMips = true)
     {
         byte[] data;
         if (Strategy.IsD1())
@@ -56,33 +56,6 @@ public class Texture : TigerReferenceFile<STextureHeader>
             else
                 data = GetReferenceData();
 
-            if ((_tag.Flags1 & 0xC00) != 0x400 || IsCubemap())
-            {
-                GcnSurfaceFormatExtensions.GcnSurfaceFormat gcnformat = GcnSurfaceFormatExtensions.GetFormat(_tag.ROIFormat);
-                data = PS4SwizzleAlgorithm.UnSwizzle(data, _tag.Width, _tag.Height, _tag.ArraySize, gcnformat);
-            }
-        }
-        else
-        {
-            if (_tag.LargeTextureBuffer != null)
-                data = _tag.LargeTextureBuffer.GetData(false);
-            else
-                data = GetReferenceData();
-        }
-        return data;
-    }
-
-    public byte[] GetDDSBytes(DXGI_FORMAT format)
-    {
-        byte[] data;
-        if (Strategy.IsD1())
-        {
-            if (ReferenceHash.IsValid() && ReferenceHash.GetReferenceHash().IsValid())
-                data = PackageResourcer.Get().GetFileData(ReferenceHash.GetReferenceHash());
-            else
-                data = GetReferenceData();
-
-            //if ((_tag.Flags1 & 0xC00) != 0x400 || IsCubemap())
             if ((_tag.Flags1 & 0xF00) != 0x500 || IsCubemap() || IsVolume())
             {
                 GcnSurfaceFormatExtensions.GcnSurfaceFormat gcnformat = GcnSurfaceFormatExtensions.GetFormat(_tag.ROIFormat);
@@ -92,10 +65,21 @@ public class Texture : TigerReferenceFile<STextureHeader>
         else
         {
             if (_tag.LargeTextureBuffer != null)
-                data = _tag.LargeTextureBuffer.GetData(false);
+            {
+                if (loadMips)
+                    data = Helpers.ConcatBytes(_tag.LargeTextureBuffer.GetData(false), GetReferenceData());
+                else
+                    data = _tag.LargeTextureBuffer.GetData(false);
+            }
             else
                 data = GetReferenceData();
         }
+        return data;
+    }
+
+    public byte[] GetDDSBytes(DXGI_FORMAT format)
+    {
+        byte[] data = GetRawBytes(false);
 
         DirectXTexUtility.TexMetadata metadata = DirectXTexUtility.GenerateMetaData(_tag.Width, _tag.Height, _tag.Depth, 1, (DirectXTexUtility.DXGIFormat)format, _tag.ArraySize == 6);
         DirectXTexUtility.DDSHeader ddsHeader;
