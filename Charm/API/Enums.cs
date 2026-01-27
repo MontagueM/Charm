@@ -18,27 +18,27 @@ public static class DestinyDamageType
                 return DestinyDamageTypeEnum.None;
 
             case 1492: // TFS
-            case 1935:
+            case 1959:
                 return DestinyDamageTypeEnum.Kinetic;
 
             case 1493: // TFS
-            case 1936:
+            case 1960:
                 return DestinyDamageTypeEnum.Arc;
 
             case 1494: // TFS
-            case 1937:
+            case 1961:
                 return DestinyDamageTypeEnum.Solar;
 
             case 1495: // TFS
-            case 1938:
+            case 1962:
                 return DestinyDamageTypeEnum.Void;
 
             case 1496: // TFS
-            case 1939:
+            case 1963:
                 return DestinyDamageTypeEnum.Stasis;
 
             case 1497: // TFS
-            case 1940:
+            case 1964:
                 return DestinyDamageTypeEnum.Strand;
 
             default:
