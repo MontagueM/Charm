@@ -52,6 +52,7 @@ public partial class EntityListView : UserControl
         {
             Type renderer = App.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
             Renderer = Activator.CreateInstance(renderer) as IRenderer;
+            IRenderer.RegisterRenderer(Renderer, nameof(EntityListView));
 
             RendererGrid.Children.Add(Renderer as UserControl);
         }
@@ -778,8 +779,10 @@ public partial class EntityListView : UserControl
 
     public void Dispose()
     {
-        //if (Renderer is not null)
-        //    Renderer.OnClose();
+        if (Renderer is not null)
+        {
+            IRenderer.UnregisterRenderer(Renderer);
+        }
 
         if (RendererBasic is null)
             return;

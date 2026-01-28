@@ -650,11 +650,20 @@
         <!--  Input items  -->
         <DataTemplate DataType="{x:Type local:InputBlock}">
             <Grid
-                Margin="0,5,0,5"
+                Margin="0,5,15,5"
                 HorizontalAlignment="Right"
                 Background="Transparent">
                 <StackPanel FlowDirection="LeftToRight" Orientation="Horizontal">
-                    <Grid Margin="15,0,0,0" Background="Transparent">
+                    <TextBlock
+                        Margin="0"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="20"
+                        Foreground="{StaticResource ForegroundColour80}"
+                        Text="{Binding KeyAdditional}"
+                        TextWrapping="WrapWithOverflow" />
+
+                    <Grid Margin="0,0,0,0" Background="Transparent">
                         <TextBlock
                             VerticalAlignment="Center"
                             FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
@@ -682,7 +691,6 @@
                         Text="{Binding Action}"
                         TextWrapping="WrapWithOverflow" />
                 </StackPanel>
-
             </Grid>
         </DataTemplate>
 

@@ -351,6 +351,19 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
                     Dispatcher.Invoke(() =>
                     {
+                        if (MainWindow.Current?.CurrentTab?.Content is DareView2 && App.CanUseRenderer())
+                            inputBlocks.Add(new InputBlock()
+                            {
+                                Order = 1,
+                                KeyAdditional = "+",
+                                Key = $"", // Key glyph
+                                KeyPress = $"", // 2nd key glyph (mouse left/right)
+                                Action = $"View in 3D"
+                            });
+                    });
+
+                    Dispatcher.Invoke(() =>
+                    {
                         if (MainWindow.Current.CurrentTab is not null
                         && MainWindow.Current.CurrentTab.Content is CategoryView
                         && DareView2.ShouldAddToList(item))
@@ -914,6 +927,7 @@ public class InputBlock : ToolTipBlock
 {
     public string Key { get; set; }
     public string KeyPress { get; set; }
+    public string KeyAdditional { get; set; }
     public string Action { get; set; }
 }
 

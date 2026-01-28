@@ -14,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Charm.Shared;
 using Tiger;
 using Tiger.Schema;
 using VersionChecker;
@@ -506,6 +507,7 @@ public partial class MainWindow
             TabItem tab = (TabItem)sender;
             MainTabControl.Items.Remove(tab);
             dynamic content = tab.Content;
+
             if (content is ActivityView av)
             {
                 av.Dispose();
@@ -517,6 +519,11 @@ public partial class MainWindow
             else if (content is StaticListView staticView)
             {
                 staticView.Dispose();
+            }
+            else if (content.GetType().FullName == "Charm.Renderer.RendererViewport")
+            {
+                var rendererViewport = content as IRenderer;
+                IRenderer.UnregisterRenderer(rendererViewport);
             }
             else if (content is AudioListView audioView)
             {

@@ -8,6 +8,7 @@ using Arithmic;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using Microsoft.Win32;
+using Tiger;
 using VersionChecker;
 
 namespace Charm;
@@ -88,6 +89,13 @@ public partial class App : Application
             return;
 
         Log.Info("Loaded Charm.Renderer");
+    }
+
+    public static bool CanUseRenderer()
+    {
+        return CharmRenderer is not null
+            && ConfigSubsystem.Get().GetCustomRenderer()
+            && Strategy.IsLatest();
     }
 
     bool IsVcRedistInstalled()

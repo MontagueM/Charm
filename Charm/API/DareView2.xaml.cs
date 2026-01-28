@@ -67,7 +67,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
     private DestinyTierType? RarityFilter = null;
     private List<DestinyTraitID>? ReleaseFilter = null;
 
-    private IRenderer Renderer = null;
+    //private IRenderer Renderer = null;
 
     public DareView2()
     {
@@ -85,6 +85,13 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         // These trigger if something in the collection changes (add/remove), which will call DisplayItems.
         SelectedItems.CollectionChanged += (s, e) => SelectedItemsList.DisplayItems();
         ItemCategories.CollectionChanged += (s, e) => Categories.DisplayItems();
+
+        //if (Renderer is null)
+        //{
+        //    Type renderer = App.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
+        //    Renderer = Activator.CreateInstance(renderer) as IRenderer;
+        //    IRenderer.RegisterRenderer(Renderer, nameof(DareView2));
+        //}
     }
 
     private void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
@@ -93,7 +100,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         Focusable = true;
         Focus();
 
-        if (CanUseRenderer())
+        if (App.CanUseRenderer())
             Multi3DButton.Visibility = Visibility.Visible;
     }
 
@@ -364,7 +371,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         e.Handled = true;
         APIPlugItem apiItem = (sender as FrameworkElement).DataContext as APIPlugItem;
 
-        if (Keyboard.IsKeyDown(Key.LeftCtrl) && CanUseRenderer())
+        if (Keyboard.IsKeyDown(Key.LeftCtrl) && App.CanUseRenderer())
         {
             var item = apiItem.Item;
             if ((apiItem.Item.Type is "Artifact" or "Seasonal Artifact"))// && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is SC5738080 gearSet)
@@ -385,16 +392,16 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                 return;
             }
 
-            if (Renderer is null)
+
+            if (!MainWindow.Current.SetCurrentTab($"{apiItem.Item.Name} - 3D"))
             {
-                Type renderer = App.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
-                Renderer = Activator.CreateInstance(renderer) as IRenderer;
+                var renderer = CreateRenderer();
+                MainWindow.Current.MakeNewTab($"{apiItem.Item.Name} - 3D", renderer as UserControl);
+                MainWindow.Current.SetNewestTabSelected();
+
+                renderer.LoadInvestmentItem(item);
             }
 
-            MainWindow.Current.MakeNewTab($"{apiItem.Item.Name} - 3D", Renderer as UserControl);
-            MainWindow.Current.SetNewestTabSelected();
-
-            Renderer.LoadInvestmentItem(item);
 
             return;
         }
@@ -406,7 +413,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     private void Multi3DItemView(object sender, RoutedEventArgs e)
     {
-        if (!CanUseRenderer())
+        if (!App.CanUseRenderer())
             return;
 
         if (SelectedItems.Count == 0)
@@ -422,12 +429,6 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             return;
         }
 
-        if (Renderer is null)
-        {
-            Type renderer = App.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
-            Renderer = Activator.CreateInstance(renderer) as IRenderer;
-        }
-
         List<InventoryItem> items = new();
         foreach (var item in SelectedItems.Select(x => x.Item))
         {
@@ -441,10 +442,22 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             items.Add(item);
         }
 
-        MainWindow.Current.MakeNewTab($"API 3D MultiView", Renderer as UserControl);
-        MainWindow.Current.SetNewestTabSelected();
+        if (!MainWindow.Current.SetCurrentTab($"API 3D MultiView"))
+        {
+            var renderer = CreateRenderer();
+            MainWindow.Current.MakeNewTab($"API 3D MultiView", renderer as UserControl);
+            MainWindow.Current.SetNewestTabSelected();
+            renderer.LoadInvestmentItems(items);
+        }
+    }
 
-        Renderer.LoadInvestmentItems(items);
+    private IRenderer CreateRenderer()
+    {
+        Type renderer = App.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
+        var irenderer = Activator.CreateInstance(renderer) as IRenderer;
+        IRenderer.RegisterRenderer(irenderer, nameof(DareView2));
+
+        return irenderer;
     }
 
     private void ExportButton_Click(object sender, RoutedEventArgs e)
@@ -632,32 +645,41 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         }
     }
 
+
+    private static ConcurrentDictionary<uint, bool> _added = new();
     public static bool ShouldAddToList(InventoryItem item)
     {
-        DestinyTraitID[] blacklist = new[]
+        if (_added.ContainsKey(item.ApiHash))
+            return true;
+
+        var blacklist = new HashSet<DestinyTraitID>
         {
-            //DestinyTraitID.item_ghost_hologram,
             DestinyTraitID.item_emote,
             DestinyTraitID.item_finisher,
         };
 
-        DestinyTraitID[] whitelist = new[]
+        // TODO: Add emote fx mesh exporting
+        var whitelist = new HashSet<DestinyTraitID>
         {
-            // TODO: Add emotes and ghost projections for fx mesh exporting
             DestinyTraitID.item_shader,
             DestinyTraitID.item_ghost_hologram
         };
 
-        if (item.GetItemTraits().Any(trait => blacklist.Contains(trait)))
+        if (item.GetItemTraits().Any(blacklist.Contains))
             return false;
 
         // Gearset was removed on Artifacts in EoF for some reason, so the next best hacky solution is to:
         // 1: Check if the items InventoryBucket is the Seasonal Artifacts bucket
         // 2: Get the item next to it in the inventory items list and check if it has a model
         // 3: Profit?
-        return (!Strategy.IsD1() && (item.TagData.BucketTypeIndex == 42 && Investment.Get().GetInventoryItem(item.GetItemIndex() + 1).GetArtArrangementIndex() != -1)) // && item.TagData.Unk28.GetValue(item.GetReader()) is SC5738080)
+        bool canAdd = (!Strategy.IsD1() && (item.TagData.BucketTypeIndex == 42 && Investment.Get().GetInventoryItem(item.GetItemIndex() + 1).GetArtArrangementIndex() != -1)) // && item.TagData.Unk28.GetValue(item.GetReader()) is SC5738080)
             || item.GetArtArrangementIndex() != -1
             || item.GetItemTraits().Any(trait => whitelist.Contains(trait));
+
+        if (canAdd)
+            _added.TryAdd(item.ApiHash, true);
+
+        return canAdd;
     }
 
     // For aggregated outputs
@@ -730,13 +752,6 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         if (Strategy.IsLatest())
             about.IconImage = ApiImageUtils.MakeBitmapImage(Texture.GetTextureFromHash(new(0x80C0D9B8)), 120, 120);
         about.Show();
-    }
-
-    private bool CanUseRenderer()
-    {
-        return App.CharmRenderer is not null
-            && ConfigSubsystem.Get().GetCustomRenderer()
-            && Strategy.IsLatest();
     }
 
     public class Dare_ItemCategory : CharmUIElement

@@ -46,6 +46,7 @@ public partial class StaticListView : UserControl
         {
             Type renderer = App.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
             StaticRenderer = Activator.CreateInstance(renderer) as IRenderer;
+            IRenderer.RegisterRenderer(StaticRenderer, nameof(StaticListView));
 
             RendererGrid.Children.Add(StaticRenderer as UserControl);
         }
@@ -336,11 +337,10 @@ public partial class StaticListView : UserControl
 
     public void Dispose()
     {
-        //if (StaticRenderer is not null)
-        //{
-        //    StaticRenderer.OnClose();
-        //    StaticRenderer = null;
-        //}
+        if (StaticRenderer is not null)
+        {
+            IRenderer.UnregisterRenderer(StaticRenderer);
+        }
 
         if (StaticRendererBasic is null)
             return;
