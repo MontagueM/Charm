@@ -48,7 +48,7 @@ public partial class EntityListView : UserControl
             await LoadEntityList(item);
         };
 
-        if (App.CharmRenderer is not null && Config.GetCustomRenderer() && Strategy.IsLatest())
+        if (App.CanUseRenderer())
         {
             Type renderer = App.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
             Renderer = Activator.CreateInstance(renderer) as IRenderer;

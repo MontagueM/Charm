@@ -42,7 +42,7 @@ public partial class StaticListView : UserControl
             await LoadStaticList(item);
         };
 
-        if (App.CharmRenderer is not null && Config.GetCustomRenderer() && Strategy.IsLatest())
+        if (App.CanUseRenderer())
         {
             Type renderer = App.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
             StaticRenderer = Activator.CreateInstance(renderer) as IRenderer;

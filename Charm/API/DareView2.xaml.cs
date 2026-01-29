@@ -392,22 +392,19 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                 return;
             }
 
-
-            if (!MainWindow.Current.SetCurrentTab($"{apiItem.Item.Name} - 3D"))
+            if (!MainWindow.Current.SetCurrentTab($"{apiItem.Item.Name} {apiItem.Item.GetItemIndex()} - 3D"))
             {
                 var renderer = CreateRenderer();
-                MainWindow.Current.MakeNewTab($"{apiItem.Item.Name} - 3D", renderer as UserControl);
+                MainWindow.Current.MakeNewTab($"{apiItem.Item.Name} {apiItem.Item.GetItemIndex()} - 3D", renderer as UserControl);
                 MainWindow.Current.SetNewestTabSelected();
 
                 renderer.LoadInvestmentItem(item);
             }
-
-
             return;
         }
 
         ItemView apiItemView = new(apiItem.Item);
-        MainWindow.Current.MakeNewTab(apiItem.Item.Name, apiItemView);
+        MainWindow.Current.MakeNewTab($"{apiItem.Item.Name} {apiItem.Item.GetItemIndex()}", apiItemView);
         MainWindow.Current.SetNewestTabSelected();
     }
 
