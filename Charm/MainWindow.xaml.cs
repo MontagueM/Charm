@@ -91,7 +91,7 @@ public partial class MainWindow
                     .Where(t => t.Tag is 1 && !t.Header.ToString().Contains("configuration", StringComparison.InvariantCultureIgnoreCase))
                     .ToList()
                     .ForEach(t => MainTabControl.Items.Remove(t));
-                CurrentStrategyText.Text = $"{App.CurrentVersion.Id}: {args.Strategy.GetEnumDescription().ToUpper()}";
+                CurrentStrategyText.Text = $"{CharmApp.CurrentVersion.Id}: {args.Strategy.GetEnumDescription().ToUpper()}";
                 CheckGameVersion();
             });
         };
@@ -174,7 +174,7 @@ public partial class MainWindow
         // It only works if Helix3D gets to create a viewport first for whatever reason, so as long as its alive
         // anything that uses helix will just work fine? Very weird.
 #if !DEBUG // Only for release mode since helix will just crash the program if renderdoc is attached :)
-        if (App.CharmRenderer is not null && config.GetCustomRenderer())
+        if (CharmApp.CharmRenderer is not null && config.GetCustomRenderer())
         {
             var a = new CubemapView();
             a.Visibility = Visibility.Hidden;
@@ -357,14 +357,14 @@ public partial class MainWindow
 
     private async void CheckVersion()
     {
-        Arithmic.Log.Info($"Charm Version: {App.CurrentVersion.Id}");
-        var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/raw/delta/EOF", App.CurrentVersion);
+        Arithmic.Log.Info($"Charm Version: {CharmApp.CurrentVersion.Id}");
+        var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/raw/delta/EOF", CharmApp.CurrentVersion);
         versionChecker.LatestVersionName = "version";
         try
         {
             ApplicationVersion latestVersion = await versionChecker.GetLatestVersion();
             int latestID = int.Parse(latestVersion.Id.Replace(".", ""));
-            int currentID = int.Parse(App.CurrentVersion.Id.Replace(".", ""));
+            int currentID = int.Parse(CharmApp.CurrentVersion.Id.Replace(".", ""));
 
             bool upToDate = currentID >= latestID;
             if (!upToDate)
@@ -378,7 +378,7 @@ public partial class MainWindow
                     Title = "UPDATE AVAILABLE",
                     Subtitle = "A new Charm update is available!",
                     Description =
-                    $"Current Version: v{App.CurrentVersion.Id}\n" +
+                    $"Current Version: v{CharmApp.CurrentVersion.Id}\n" +
                     $"Latest Version: v{latestVersion.Id}",
                     UserInput = "Update",
                     UserInputSecondary = "Dismiss"

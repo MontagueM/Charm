@@ -100,7 +100,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         Focusable = true;
         Focus();
 
-        if (App.CanUseRenderer())
+        if (CharmApp.CanUseRenderer())
             Multi3DButton.Visibility = Visibility.Visible;
     }
 
@@ -371,7 +371,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         e.Handled = true;
         APIPlugItem apiItem = (sender as FrameworkElement).DataContext as APIPlugItem;
 
-        if (Keyboard.IsKeyDown(Key.LeftCtrl) && App.CanUseRenderer())
+        if (Keyboard.IsKeyDown(Key.LeftCtrl) && CharmApp.CanUseRenderer())
         {
             var item = apiItem.Item;
             if ((apiItem.Item.Type is "Artifact" or "Seasonal Artifact"))// && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is SC5738080 gearSet)
@@ -410,7 +410,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     private void Multi3DItemView(object sender, RoutedEventArgs e)
     {
-        if (!App.CanUseRenderer())
+        if (!CharmApp.CanUseRenderer())
             return;
 
         if (SelectedItems.Count == 0)
@@ -450,7 +450,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     private IRenderer CreateRenderer()
     {
-        Type renderer = App.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
+        Type renderer = CharmApp.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
         var irenderer = Activator.CreateInstance(renderer) as IRenderer;
         IRenderer.RegisterRenderer(irenderer, nameof(DareView2));
 

@@ -112,7 +112,7 @@ public partial class GeneralConfigView : UserControl
         hlsl.ChangeButton.Click += SaveShaderHLSL_OnClick;
         MaterialsConfigPanel.Children.Add(hlsl);
 
-        if (App.CharmRenderer is not null)
+        if (CharmApp.CharmRenderer is not null)
         {
             ConfigSettingToggleControl cusRend = new();
             cusRend.SettingName = "Custom Renderer";

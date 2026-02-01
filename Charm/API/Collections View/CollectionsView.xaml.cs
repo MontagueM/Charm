@@ -33,9 +33,9 @@ public partial class CollectionsView : UserControl
     {
         LoadCollectibles();
 
-        if (App.CharmRedacted is not null)
+        if (CharmApp.CharmRedacted is not null)
         {
-            var loaderType = App.CharmRedacted.GetType("Charm.Redacted.RedactedAPI");
+            var loaderType = CharmApp.CharmRedacted.GetType("Charm.Redacted.RedactedAPI");
             if (loaderType != null)
             {
                 RedactedPanel.Visibility = Visibility.Visible;

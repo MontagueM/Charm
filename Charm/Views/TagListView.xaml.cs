@@ -645,7 +645,7 @@ public partial class TagListView : UserControl
                     if (name.Contains("secret") || name.Contains("raid") || name.Contains("dungeon"))
                         name = destinationGlobalTagBag.DestinationGlobalTagBag;
 #if DEBUG
-                    if (App.CharmRedacted is not null)
+                    if (CharmApp.CharmRedacted is not null)
                         name = destinationGlobalTagBag.DestinationGlobalTagBagName;
 #endif
                     _allTagItems.Add(new TagItem
@@ -702,7 +702,7 @@ public partial class TagListView : UserControl
                 name = val.Tag.Hash;
 
 #if DEBUG
-            if (App.CharmRedacted is not null)
+            if (CharmApp.CharmRedacted is not null)
                 name = val.TagPath ?? "";
 #endif
             _allTagItems.Add(new TagItem
@@ -1169,9 +1169,9 @@ public partial class TagListView : UserControl
 
         ConcurrentDictionary<string, FileHash> directiveItems = new();
 
-        if (App.CharmRedacted is not null)
+        if (CharmApp.CharmRedacted is not null)
         {
-            var loaderType = App.CharmRedacted.GetType("Charm.Redacted.RedactedActivity");
+            var loaderType = CharmApp.CharmRedacted.GetType("Charm.Redacted.RedactedActivity");
             if (loaderType != null)
             {
                 var method = loaderType.GetMethod("Load", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);

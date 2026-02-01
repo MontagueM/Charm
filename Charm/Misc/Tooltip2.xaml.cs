@@ -351,7 +351,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
                     Dispatcher.Invoke(() =>
                     {
-                        if (MainWindow.Current?.CurrentTab?.Content is DareView2 && App.CanUseRenderer())
+                        if (MainWindow.Current?.CurrentTab?.Content is DareView2 && CharmApp.CanUseRenderer())
                             inputBlocks.Add(new InputBlock()
                             {
                                 Order = 1,

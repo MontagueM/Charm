@@ -16,7 +16,7 @@ namespace Charm;
 /// <summary>
 /// Interaction logic for App.xaml
 /// </summary>
-public partial class App : Application
+public partial class CharmApp : Application
 {
     public static ApplicationVersion CurrentVersion = new("3.2.0");
     public static Assembly? CharmRedacted = null;

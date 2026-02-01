@@ -215,7 +215,7 @@ public partial class MainMenuView : UserControl
         {
             DarkenBackground = true,
             //Icon = "",
-            Title = $"CHARM {App.CurrentVersion.Id}",
+            Title = $"CHARM {CharmApp.CurrentVersion.Id}",
             Subtitle = "The Destiny tool that does (almost) everything.",
             Description =
             "Charm was developed for 3D artists, nerds, to preserve vaulted content as much as possible, and for learning how the Tiger engine works in general!\n\n" +

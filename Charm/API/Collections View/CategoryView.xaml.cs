@@ -151,9 +151,9 @@ public partial class CategoryView : UserControl
             Debug.Assert((recordCount > 0) != (collectibleCount > 0) != (presCount > 0));
         }
 
-        if (App.CharmRedacted is not null)
+        if (CharmApp.CharmRedacted is not null)
         {
-            var loaderType = App.CharmRedacted.GetType("Charm.Redacted.RedactedAPI");
+            var loaderType = CharmApp.CharmRedacted.GetType("Charm.Redacted.RedactedAPI");
             if (loaderType != null)
             {
                 dynamic loader = Activator.CreateInstance(loaderType);

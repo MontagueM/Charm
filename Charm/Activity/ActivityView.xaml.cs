@@ -55,7 +55,7 @@ public partial class ActivityView : UserControl
             {
                 DirectiveControl.LoadUI(_activity.FileHash);
 
-                if (App.CharmRedacted is null)
+                if (CharmApp.CharmRedacted is null)
                     DirectiveTab.Visibility = Visibility.Collapsed;
             });
             MainWindow.Progress.CompleteStage();
