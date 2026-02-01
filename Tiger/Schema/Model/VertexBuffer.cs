@@ -27,10 +27,10 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
         using TigerReader handle = GetReferenceReader();
         foreach (uint vertexIndex in uniqueVertexIndices)
         {
-            //if (_strategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
-            //    ReadD1VertexData(handle, part, vertexIndex, bufferIndex, otherStride, isTerrain);
-            //else
-            ReadVertexData(handle, part, vertexIndex, bufferIndex, otherStride, isTerrain);
+            if (_strategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+                ReadD1VertexData(handle, part, vertexIndex, bufferIndex, otherStride, isTerrain);
+            else
+                ReadVertexData(handle, part, vertexIndex, bufferIndex, otherStride, isTerrain);
         }
     }
 
@@ -775,6 +775,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
         }
     }
 
+    // Can probably remove everything from here except buffer index 2, which is used for OldWeights buffer. Gonna keep *just in case* though
     private void ReadD1VertexData(TigerReader handle, MeshPart part, uint vertexIndex, int bufferIndex = -1, int otherStride = -1, bool isTerrain = false)
     {
         handle.BaseStream.Seek(vertexIndex * _tag.Stride, SeekOrigin.Begin);
@@ -1065,8 +1066,8 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                 break;
         }
 
-        if (part is DynamicMeshPart)
-            DynamicMeshPart.AddVertexColourSlotInfo(part as DynamicMeshPart, (part as DynamicMeshPart).GearDyeChangeColorIndex);
+        //if (part is DynamicMeshPart)
+        //    DynamicMeshPart.AddVertexColourSlotInfo(part as DynamicMeshPart, (part as DynamicMeshPart).GearDyeChangeColorIndex);
 
         status = true;
         if (!status)
