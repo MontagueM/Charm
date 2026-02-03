@@ -241,7 +241,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
             if (!Strategy.IsD1())
             {
                 // Emblem preview
-                if (item.GetItemTraits().Contains(DestinyTraitID.item_emblem))
+                if (item.ItemTraits.Contains(DestinyTraitID.item_emblem))
                 {
                     blocks.Add(new EmblemBlock()
                     {
@@ -530,7 +530,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                             ItemName = reward.ItemName,
                             Icon = reward.ItemIcon,
                             LargeIcon = reward.ItemIcon2,
-                            IsEmblem = reward.Collectible.Item.GetItemTraits().Contains(DestinyTraitID.item_emblem)
+                            IsEmblem = reward.Collectible.Item.ItemTraits.Contains(DestinyTraitID.item_emblem)
                         });
                     }
                     blocks.Add(rewards);
@@ -556,7 +556,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                             ItemName = reward.ItemName,
                             Icon = reward.ItemIcon,
                             LargeIcon = reward.ItemIcon2,
-                            IsEmblem = reward.Collectible.Item.GetItemTraits().Contains(DestinyTraitID.item_emblem)
+                            IsEmblem = reward.Collectible.Item.ItemTraits.Contains(DestinyTraitID.item_emblem)
                         });
                     }
                     blocks.Add(rewards);

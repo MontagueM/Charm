@@ -127,7 +127,7 @@ public partial class EntityView : UserControl
         ExporterScene scene = Tiger.Exporters.Exporter.Get().CreateScene(name, Strategy.IsD1() ? ExportType.D1API : ExportType.API);
 
         // Dont export gear shader for ghost projections since they dont use it
-        if (!item.GetItemTraits().Any(x => x == DestinyTraitID.item_ghost_hologram))
+        if (!item.ItemTraits.Any(x => x == DestinyTraitID.item_ghost_hologram))
             ExportGearShader(item, name, savePath);
 
         // Export the model
@@ -168,7 +168,7 @@ public partial class EntityView : UserControl
             Log.Debug($"Entity {entity?.Hash}: HasGeometry {entity?.HasGeometry()}");
 
             // ghost projections have just a rectangle mesh, we want just the actual projection mesh 
-            if (item.GetItemTraits().Any(x => x == DestinyTraitID.item_ghost_hologram))
+            if (item.ItemTraits.Any(x => x == DestinyTraitID.item_ghost_hologram))
             {
                 ExportGhostProjection(entity, scene);
                 continue;

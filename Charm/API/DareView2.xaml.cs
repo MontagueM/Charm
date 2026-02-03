@@ -224,7 +224,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
             if (ShouldAddToList(item) && item.Name != string.Empty)
             {
-                if (!item.GetItemTraits().Any() || item.GetItemTraits().Contains(DestinyTraitID.item_other))
+                if (!item.ItemTraits.Any() || item.ItemTraits.Contains(DestinyTraitID.item_other))
                 {
                     if (!SortedItems.ContainsKey(DestinyTraitID.item_other))
                         SortedItems[DestinyTraitID.item_other] = new List<InventoryItem>();
@@ -232,7 +232,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                     SortedItems[DestinyTraitID.item_other].Add(item);
                 }
 
-                foreach (var trait in item.GetItemTraits())
+                foreach (var trait in item.ItemTraits)
                 {
                     if (trait is DestinyTraitID.item_engram)
                         continue;
@@ -306,7 +306,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                 newItem.Items = new ObservableCollection<APIPlugItem>(newItem.Items.Where(x => x.Item.GetItemRarity() == RarityFilter));
 
             if (ReleaseFilter is not null)
-                newItem.Items = new ObservableCollection<APIPlugItem>(newItem.Items.Where(x => x.Item.GetItemTraits().Any(trait => ReleaseFilter.Contains(trait))));
+                newItem.Items = new ObservableCollection<APIPlugItem>(newItem.Items.Where(x => x.Item.ItemTraits.Any(trait => ReleaseFilter.Contains(trait))));
 
             if (newItem.Items.Count != 0)
                 itemCategories.Add(newItem);
@@ -662,7 +662,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             DestinyTraitID.item_ghost_hologram
         };
 
-        if (item.GetItemTraits().Any(blacklist.Contains))
+        if (item.ItemTraits.Any(blacklist.Contains))
             return false;
 
         // Gearset was removed on Artifacts in EoF for some reason, so the next best hacky solution is to:
@@ -671,7 +671,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         // 3: Profit?
         bool canAdd = (!Strategy.IsD1() && (item.TagData.BucketTypeIndex == 42 && Investment.Get().GetInventoryItem(item.GetItemIndex() + 1).GetArtArrangementIndex() != -1)) // && item.TagData.Unk28.GetValue(item.GetReader()) is SC5738080)
             || item.GetArtArrangementIndex() != -1
-            || item.GetItemTraits().Any(trait => whitelist.Contains(trait));
+            || item.ItemTraits.Any(trait => whitelist.Contains(trait));
 
         if (canAdd)
             _added.TryAdd(item.ApiHash, true);

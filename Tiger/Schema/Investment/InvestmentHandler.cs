@@ -1169,7 +1169,7 @@ public class InventoryItem : Tag<S9D798080>
     public uint ApiHash => _tag.InventoryItemHash.Hash32;
 
     private IReadOnlyCollection<DestinyTraitID> _traits;
-    private IReadOnlyCollection<DestinyTraitID> ItemTraits => _traits ??= GetItemTraits(); // cache traits on first use
+    public IReadOnlyCollection<DestinyTraitID> ItemTraits => _traits ??= GetItemTraits(); // cache traits on first use
 
     public bool IsWeapon => ItemTraits.Any(x => x.ToString().Contains("item_weapon"));
     public bool IsArmor => ItemTraits.Any(x => x.ToString().Contains("item_armor"));
