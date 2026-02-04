@@ -166,15 +166,28 @@
                 </Grid.Triggers>
 
                 <StackPanel Orientation="Vertical">
-                    <TextBlock
+                    <StackPanel
                         Margin="0,0,0,5"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Top"
                         Panel.ZIndex="1"
-                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                        FontSize="22"
-                        Foreground="White"
-                        Text="{Binding CategoryName}" />
+                        Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,5,0"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                            FontSize="22"
+                            Foreground="White"
+                            Text="{Binding CategoryName}" />
+
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                            FontSize="18"
+                            Foreground="White"
+                            Text="{Binding CategoryAmount}"
+                            Visibility="Collapsed" />
+                    </StackPanel>
+
                     <Border
                         Margin="0,0,0,0"
                         BorderBrush="White"
@@ -302,22 +315,21 @@
                                         FontSize="20"
                                         Foreground="White"
                                         Text="{Binding Item.Name}" />
-
                                 </Viewbox>
 
                                 <TextBlock
-                                    Margin="0,5,0,0"
+                                    Margin="0,5,0,5"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
                                     Panel.ZIndex="1"
                                     FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                                     FontSize="16"
                                     Foreground="White"
-                                    Opacity="0.5"
+                                    Opacity="0.75"
                                     Text="{Binding Item.Type}" />
 
                                 <TextBlock
-                                    Margin="0,5,0,0"
+                                    Margin="0,0,0,0"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
                                     Panel.ZIndex="1"
@@ -533,19 +545,48 @@
                     Opacity="1" />
 
                 <Grid
-                    Grid.Row="1"
+                    Grid.Row="0"
+                    Grid.RowSpan="2"
                     Grid.Column="1"
                     Background="Transparent">
 
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="10*" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="5*" />
+                        <RowDefinition Height="5*" />
                         <RowDefinition Height="90*" />
                     </Grid.RowDefinitions>
 
+                    <StackPanel
+                        x:Name="DareViewDevPanel"
+                        Grid.Row="0"
+                        Margin="15,5,15,0"
+                        HorizontalAlignment="Left"
+                        Background="Transparent"
+                        Orientation="Horizontal"
+                        Visibility="Hidden">
+                        <Button Click="ExportAllShaders" Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip
+                                    Name="Export All Shaders"
+                                    Description="Export every shader to 'Output'/AllShaders, will take some time."
+                                    Style="Category" />
+                            </local:GenericTooltipProperties.TooltipData>
+                            <TextBlock
+                                Margin="5,0,5,0"
+                                d:FontFamily="Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="16"
+                                Text="Export All Shaders" />
+                        </Button>
+                    </StackPanel>
+
                     <Grid
-                        Margin="15,-15,15,0"
+                        Grid.Row="1"
+                        Margin="15,0,15,0"
                         HorizontalAlignment="Stretch"
-                        VerticalAlignment="Top">
+                        VerticalAlignment="Center"
+                        Background="Transparent">
                         <ToggleButton
                             x:Name="AggregateOutputButton"
                             HorizontalAlignment="Left"
@@ -563,8 +604,6 @@
 
                         <Button
                             x:Name="Multi3DButton"
-                            Grid.Column="0"
-                            Margin="0,0,0,0"
                             HorizontalAlignment="Right"
                             Click="Multi3DItemView"
                             Style="{DynamicResource D2StyleButton}"
@@ -584,8 +623,10 @@
                         </Button>
                     </Grid>
 
-
-                    <Grid Margin="0,15,0,15">
+                    <Grid
+                        Grid.Row="2"
+                        Margin="0,0,0,0"
+                        Background="Transparent">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="30*" />
                             <ColumnDefinition Width="30*" />
@@ -595,7 +636,7 @@
                         <Button
                             x:Name="ExportButton"
                             Grid.Column="0"
-                            Margin="15,10,15,10"
+                            Margin="15,0,15,0"
                             Click="ExportButton_Click"
                             Style="{DynamicResource D2StyleButton}">
                             <local:GenericTooltipProperties.TooltipData>
@@ -614,7 +655,7 @@
                         <Button
                             x:Name="OpenOutputButton"
                             Grid.Column="1"
-                            Margin="0,10,0,10"
+                            Margin="0,0,0,0"
                             Click="OpenOutputFolder_Click"
                             Style="{DynamicResource D2StyleButton}">
                             <local:GenericTooltipProperties.TooltipData>
@@ -633,7 +674,7 @@
                         <Button
                             x:Name="ClearAllButton"
                             Grid.Column="2"
-                            Margin="15,10,15,10"
+                            Margin="15,0,15,0"
                             Click="ClearAllButton_Click"
                             Style="{DynamicResource D2StyleButton}">
                             <local:GenericTooltipProperties.TooltipData>
@@ -652,8 +693,8 @@
 
                     <local:ItemPage
                         x:Name="SelectedItemsList"
-                        Grid.Row="1"
-                        Margin="15,0,15,0"
+                        Grid.Row="3"
+                        Margin="15,15,15,0"
                         CollapsePageButtons="False"
                         Columns="1"
                         IsVertical="True"

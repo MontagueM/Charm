@@ -1034,6 +1034,8 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     public void ExportShader(InventoryItem item, string savePath, string name, TextureExportFormat outputTextureFormat)
     {
+        Directory.CreateDirectory(savePath);
+        Directory.CreateDirectory(Path.Combine(savePath, "Textures"));
         if (Strategy.IsD1())
         {
             Dictionary<string, DyeD1> dyes = new();
@@ -1066,7 +1068,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                 }
             }
             // armor
-            AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["ArmorPlate"], dyes["ArmorSuit"], dyes["ArmorCloth"] }, "_armour");
+            AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["ArmorPlate"], dyes["ArmorSuit"], dyes["ArmorCloth"] }, "_armor");
             // ghost
             AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["GhostMain"], dyes["GhostHighlights"], dyes["GhostDecals"] }, "_ghost");
             // ship

@@ -277,7 +277,8 @@ public partial class Spinner2 : UserControl, IDisposable
                 _renderedImage.Lock();
                 _renderedImage.AddDirtyRect(new Int32Rect(0, 0, _width, _height));
                 _renderedImage.Unlock();
-                D3DImageHost.Source = _renderedImage;
+                if (D3DImageHost.Source is null)
+                    D3DImageHost.Source = _renderedImage;
             });
         }
         catch (Exception e)

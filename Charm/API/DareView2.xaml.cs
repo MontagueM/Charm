@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -67,8 +68,6 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
     private DestinyTierType? RarityFilter = null;
     private List<DestinyTraitID>? ReleaseFilter = null;
 
-    //private IRenderer Renderer = null;
-
     public DareView2()
     {
         //#if DEBUG
@@ -85,13 +84,6 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         // These trigger if something in the collection changes (add/remove), which will call DisplayItems.
         SelectedItems.CollectionChanged += (s, e) => SelectedItemsList.DisplayItems();
         ItemCategories.CollectionChanged += (s, e) => Categories.DisplayItems();
-
-        //if (Renderer is null)
-        //{
-        //    Type renderer = App.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
-        //    Renderer = Activator.CreateInstance(renderer) as IRenderer;
-        //    IRenderer.RegisterRenderer(Renderer, nameof(DareView2));
-        //}
     }
 
     private void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
@@ -102,6 +94,10 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
         if (CharmApp.CanUseRenderer())
             Multi3DButton.Visibility = Visibility.Visible;
+
+#if DEBUG
+        DareViewDevPanel.Visibility = Visibility.Visible;
+#endif
     }
 
     public async void LoadContent()
@@ -252,17 +248,19 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
         foreach ((var trait, var items) in SortedItems.OrderBy(x => x.Key.GetEnumDescription()).Where(x => x.Value.Count != 0))
         {
+            var orderedItems = new ObservableCollection<APIPlugItem>(
+                    items.DistinctBy(x => x.ApiHash)
+                    .Select(x => new APIPlugItem(x))
+                    .OrderByDescending(x => x.Item.GetItemIndex())
+                    .OrderByDescending(x => x.Item.GetItemRarity()));
+
             ItemCategories.Add(new Dare_ItemCategory
             {
                 CategoryName = trait.GetEnumDescription(),
                 CategoryType = trait,
                 ItemsPerPage = 24,
-                Items = new ObservableCollection<APIPlugItem>(
-                    items.DistinctBy(x => x.ApiHash)
-                    .Select(x => new APIPlugItem(x))
-                    .OrderByDescending(x => x.Item.GetItemIndex())
-                    .OrderByDescending(x => x.Item.GetItemRarity()))
-
+                Items = orderedItems,
+                CategoryAmount = orderedItems.Count
             });
         }
         Categories.Items = ItemCategories.Where(x => x.CategoryType.ToString().StartsWith("item_"));
@@ -642,6 +640,50 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         }
     }
 
+    private async void ExportAllShaders(object sender, RoutedEventArgs e)
+    {
+        ConfigSubsystem config = TigerInstance.GetSubsystem<ConfigSubsystem>();
+        string basePath = $"{config.GetExportSavePath()}/AllShaders/";
+
+        var allShaders = Investment.Get()
+            .GetInventoryItemsUnloaded()
+            .Where(x => x.IsShader)
+            .DistinctBy(x => x.Name)
+            .ToList();
+
+        List<string> stages = allShaders
+            .Select((s, i) => $"Exporting {s.Name} ({i + 1}/{allShaders.Count})")
+            .ToList();
+
+        MainWindow.Progress.SetProgressStages(stages);
+
+        var semaphore = new SemaphoreSlim(Environment.ProcessorCount);
+        var tasks = allShaders.Select(async item =>
+        {
+            await semaphore.WaitAsync();
+            try
+            {
+                string itemName = Helpers.SanitizeString(item.Name);
+                string savePath = Path.Combine(basePath, itemName);
+
+                await Task.Run(() =>
+                {
+                    Investment.Get().ExportShader(item, savePath, itemName, config.GetOutputTextureFormat());
+                });
+
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    MainWindow.Progress.CompleteStage();
+                });
+            }
+            finally
+            {
+                semaphore.Release();
+            }
+        });
+
+        await Task.WhenAll(tasks);
+    }
 
     private static ConcurrentDictionary<uint, bool> _added = new();
     public static bool ShouldAddToList(InventoryItem item)
@@ -763,6 +805,20 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                 {
                     _categoryName = value;
                     OnPropertyChanged(nameof(CategoryName));
+                }
+            }
+        }
+
+        private int _categoryAmount;
+        public int CategoryAmount
+        {
+            get => _categoryAmount;
+            set
+            {
+                if (_categoryAmount != value)
+                {
+                    _categoryAmount = value;
+                    OnPropertyChanged(nameof(CategoryAmount));
                 }
             }
         }
