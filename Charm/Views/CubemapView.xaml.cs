@@ -80,11 +80,5 @@ public partial class CubemapView : UserControl
         Directory.CreateDirectory($"{savePath}/");
 
         _currentTexture.SavetoFile($"{savePath}/{_currentTexture.Hash}");
-
-        if (config.GetExportEquirectCubemaps())
-        {
-            var equirect = Texture.CubemapCrossToEquirectangular(Texture.FlattenCubemap(_currentTexture.GetScratchImage()));
-            TextureExtractor.SaveTextureToFile($"{savePath}/{_currentTexture.Hash}_Projected", equirect);
-        }
     }
 }
