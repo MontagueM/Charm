@@ -505,6 +505,168 @@ public class Texture : TigerReferenceFile<STextureHeader>
             _ => (long)0,
         };
     }
+
+    public static unsafe ScratchImage CubemapCrossToEquirectangular(ScratchImage crossImage)
+    {
+        var meta = crossImage.GetMetadata();
+        int faceSize = meta.Height / 3;
+        int outWidth = faceSize * 4;
+        int outHeight = faceSize * 2;
+
+        ScratchImage output = TexHelper.Instance.Initialize2D(
+            meta.Format,
+            outWidth,
+            outHeight,
+            1,
+            0,
+            0
+        );
+
+        var outImg = output.GetImage(0);
+        var srcImg = crossImage.GetImage(0);
+
+        (int tx, int ty)[] faceTiles =
+        {
+            (2, 1), // +X
+            (0, 1), // -X
+            (1, 0), // +Y
+            (1, 2), // -Y
+            (1, 1), // +Z
+            (3, 1), // -Z
+        };
+
+        int bytesPerPixel = (int)BitsPerPixel(meta.Format) / 8;
+
+        byte* outPtr = (byte*)outImg.Pixels;
+        long outRowPitch = outImg.RowPitch;
+        byte* srcPtr = (byte*)srcImg.Pixels;
+        long srcRowPitch = srcImg.RowPitch;
+
+        for (int y = 0; y < outHeight; y++)
+        {
+            for (int x = 0; x < outWidth; x++)
+            {
+                float u = (x + 0.5f) / outWidth;
+                float v = (y + 0.5f) / outHeight;
+
+                float theta = u * 2.0f * MathF.PI;
+                float phi = v * MathF.PI;
+
+                Vector3 dir;
+                dir.X = MathF.Sin(phi) * MathF.Cos(theta);
+                dir.Y = MathF.Cos(phi);
+                dir.Z = MathF.Sin(phi) * MathF.Sin(theta);
+
+                DirectionToCubeUV(dir, out int face, out float uFace, out float vFace);
+                float[] c = SampleFaceBilinear(face, uFace, vFace);
+                byte* dstPixel = outPtr + y * outRowPitch + x * bytesPerPixel;
+
+                if (bytesPerPixel == 4)
+                {
+                    dstPixel[0] = (byte)(MathF.Min(1f, MathF.Max(0f, c[0])) * 255f);
+                    dstPixel[1] = (byte)(MathF.Min(1f, MathF.Max(0f, c[1])) * 255f);
+                    dstPixel[2] = (byte)(MathF.Min(1f, MathF.Max(0f, c[2])) * 255f);
+                    dstPixel[3] = (byte)(MathF.Min(1f, MathF.Max(0f, c[3])) * 255f);
+                }
+                else if (bytesPerPixel == 8)
+                {
+                    ushort* up = (ushort*)dstPixel;
+                    up[0] = (ushort)(MathF.Min(1f, MathF.Max(0f, c[0])) * 65535f);
+                    up[1] = (ushort)(MathF.Min(1f, MathF.Max(0f, c[1])) * 65535f);
+                    up[2] = (ushort)(MathF.Min(1f, MathF.Max(0f, c[2])) * 65535f);
+                    up[3] = (ushort)(MathF.Min(1f, MathF.Max(0f, c[3])) * 65535f);
+                }
+            }
+        }
+
+        float[] ReadPixel(int face, int x, int y)
+        {
+            var (tx, ty) = faceTiles[face];
+            int sx = tx * faceSize + x;
+            int sy = ty * faceSize + y;
+
+            byte* p = srcPtr + sy * srcRowPitch + sx * bytesPerPixel;
+
+            float[] c = new float[4];
+
+            if (bytesPerPixel == 4)
+            {
+                c[0] = p[0] / 255f;
+                c[1] = p[1] / 255f;
+                c[2] = p[2] / 255f;
+                c[3] = p[3] / 255f;
+            }
+            else if (bytesPerPixel == 8)
+            {
+                ushort* up = (ushort*)p;
+                c[0] = up[0] / 65535f;
+                c[1] = up[1] / 65535f;
+                c[2] = up[2] / 65535f;
+                c[3] = up[3] / 65535f;
+            }
+
+            return c;
+        }
+
+        float Lerp(float a, float b, float t) => a + (b - a) * t;
+        float[] SampleFaceBilinear(int face, float uFace, float vFace)
+        {
+            float fx = uFace * (faceSize - 1);
+            float fy = vFace * (faceSize - 1);
+
+            int x0 = (int)MathF.Floor(fx);
+            int x1 = Math.Min(x0 + 1, faceSize - 1);
+            int y0 = (int)MathF.Floor(fy);
+            int y1 = Math.Min(y0 + 1, faceSize - 1);
+
+            float wx = fx - x0;
+            float wy = fy - y0;
+
+            float[] c00 = ReadPixel(face, x0, y0);
+            float[] c10 = ReadPixel(face, x1, y0);
+            float[] c01 = ReadPixel(face, x0, y1);
+            float[] c11 = ReadPixel(face, x1, y1);
+
+            float[] c = new float[4];
+            for (int i = 0; i < 4; i++)
+            {
+                float c0 = Lerp(c00[i], c10[i], wx);
+                float c1 = Lerp(c01[i], c11[i], wx);
+                c[i] = Lerp(c0, c1, wy);
+            }
+
+            return c;
+        }
+
+        return output;
+    }
+
+    private static void DirectionToCubeUV(Vector3 dir, out int face, out float u, out float v)
+    {
+        float ax = MathF.Abs(dir.X);
+        float ay = MathF.Abs(dir.Y);
+        float az = MathF.Abs(dir.Z);
+
+        if (ax >= ay && ax >= az)
+        {
+            if (dir.X > 0) { face = 0; u = -dir.Z / ax; v = -dir.Y / ax; } // +X
+            else { face = 1; u = dir.Z / ax; v = -dir.Y / ax; } // -X
+        }
+        else if (ay >= ax && ay >= az)
+        {
+            if (dir.Y > 0) { face = 2; u = dir.X / ay; v = dir.Z / ay; } // +Y
+            else { face = 3; u = dir.X / ay; v = -dir.Z / ay; } // -Y
+        }
+        else
+        {
+            if (dir.Z > 0) { face = 4; u = dir.X / az; v = -dir.Y / az; } // +Z
+            else { face = 5; u = -dir.X / az; v = -dir.Y / az; } // -Z
+        }
+
+        // Remap from [-1,1] to [0,1]
+        u = u * 0.5f + 0.5f;
+        v = v * 0.5f + 0.5f;
+    }
 }
 
 // todo move this

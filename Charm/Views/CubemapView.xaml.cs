@@ -25,7 +25,7 @@ public partial class CubemapView : UserControl
             Texture = TextureModel.Create(GetDisplayTexture(textureHeader)),
         });
 
-        // Can't use binding since DataContext is already taken up by something else
+        // Can't use binding since DataContext is already taken up by Helix3D
         Hash.Text = $"{textureHeader.Hash}";
         Dimensions.Text = $"{textureHeader.GetDimension()}: {textureHeader.TagData.Width}x{textureHeader.TagData.Height}x{textureHeader.TagData.ArraySize}";
         Format.Text = $"{textureHeader.TagData.GetFormat().ToString()} ({(textureHeader.IsSrgb() ? "Srgb" : "Linear")})";
@@ -80,5 +80,11 @@ public partial class CubemapView : UserControl
         Directory.CreateDirectory($"{savePath}/");
 
         _currentTexture.SavetoFile($"{savePath}/{_currentTexture.Hash}");
+
+        if (config.GetExportEquirectCubemaps())
+        {
+            var equirect = Texture.CubemapCrossToEquirectangular(Texture.FlattenCubemap(_currentTexture.GetScratchImage()));
+            TextureExtractor.SaveTextureToFile($"{savePath}/{_currentTexture.Hash}_Projected", equirect);
+        }
     }
 }

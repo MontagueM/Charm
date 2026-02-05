@@ -112,6 +112,15 @@ public partial class GeneralConfigView : UserControl
         hlsl.ChangeButton.Click += SaveShaderHLSL_OnClick;
         MaterialsConfigPanel.Children.Add(hlsl);
 
+        // Whether to export cubemaps as equirectangular projected
+        ConfigSettingToggleControl equirectCubemaps = new();
+        equirectCubemaps.SettingName = "Export Equirectangular Cubemaps";
+        equirectCubemaps.SettingLabel = "Export cubemaps as spherical (equirectangular), alongside the default cross layout.";
+        bVal = _config.GetExportEquirectCubemaps();
+        equirectCubemaps.SettingValue = bVal.ToString();
+        equirectCubemaps.ChangeButton.Click += ExportEquirectCubemaps_OnClick;
+        MaterialsConfigPanel.Children.Add(equirectCubemaps);
+
         if (CharmApp.CharmRenderer is not null)
         {
             ConfigSettingToggleControl cusRend = new();
@@ -387,6 +396,12 @@ public partial class GeneralConfigView : UserControl
     private void SaveShaderHLSL_OnClick(object sender, RoutedEventArgs e)
     {
         _config.SetSaveShaderHLSL(!_config.GetSaveShaderHLSL());
+        PopulateConfigPanel();
+    }
+
+    private void ExportEquirectCubemaps_OnClick(object sender, RoutedEventArgs e)
+    {
+        _config.SetExportEquirectCubemaps(!_config.GetExportEquirectCubemaps());
         PopulateConfigPanel();
     }
 }

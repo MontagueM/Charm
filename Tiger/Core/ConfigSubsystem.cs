@@ -25,6 +25,7 @@ public class CommonSettings
     public bool HolofoilShader { get; set; } = true;
     public bool CustomRenderer { get; set; } = false;
     public bool SaveShaderHLSL { get; set; } = false;
+    public bool SaveEquirectCubemaps { get; set; } = false;
 
     public bool AcceptedAgreementV320 { get; set; } = false;
 }
@@ -366,6 +367,17 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
     public bool GetSaveShaderHLSL()
     {
         return _settings.Common.SaveShaderHLSL;
+    }
+
+    public void SetExportEquirectCubemaps(bool val)
+    {
+        _settings.Common.SaveEquirectCubemaps = val;
+        Save();
+    }
+
+    public bool GetExportEquirectCubemaps()
+    {
+        return _settings.Common.SaveEquirectCubemaps;
     }
 
     private string _configFilePath = "./config.json";
