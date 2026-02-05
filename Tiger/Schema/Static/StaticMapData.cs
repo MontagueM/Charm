@@ -505,7 +505,7 @@ public struct SMapDataEntry
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "EA1A8080", 0x14)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "B3718080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "C96C8080", 0x18)]
-public struct SMapDataResource
+public struct SStaticMapDataResource
 {
     [SchemaField(0x8, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public TigerHash Unk08;

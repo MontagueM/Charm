@@ -19,6 +19,7 @@ namespace Charm;
 public partial class EntityView : UserControl
 {
     public FileHash Hash;
+    private bool _isEntityModel = false;
     private MainViewModel MVM;
 
     public EntityView()
@@ -28,6 +29,9 @@ public partial class EntityView : UserControl
 
     public bool LoadEntity(FileHash entityHash)
     {
+        if (_isEntityModel)
+            LoadEntityModel(entityHash);
+
         Log.Info($"Loading Entity {entityHash}");
 
         Hash = entityHash;
@@ -52,6 +56,7 @@ public partial class EntityView : UserControl
     public bool LoadEntityModel(FileHash entityModelHash)
     {
         Hash = entityModelHash;
+        _isEntityModel = true;
         SetupCheckboxHandlers();
 
         EntityModel entityModel = FileResourcer.Get().GetFile<EntityModel>(entityModelHash);

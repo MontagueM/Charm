@@ -1,5 +1,32 @@
 [
     {
+        "version": "3.2.3",
+        "date": "02-05-2026",
+        "changes": [
+            {
+                "title": "Do people read this?",
+                "notes": [
+                    "I forgot to add an entry for 3.2.0"
+                ]
+            },
+            {
+                "title": "Additions",
+                "notes": [
+                    "API: Ghost projections can now be exported.",
+                    "Export: SpeedTrees are now exportable.",
+                    "Config: Added a config option to allow exporting cubemaps in equirectangular format."
+                ]
+            },
+            {
+                "title": "Misc",
+                "notes": [
+                    "Fixed D1 physics mesh not having weights.",
+                    "Under the hood cleanup/fixes."
+                ]
+            }
+        ]
+    },
+    {
         "version": "3.1.9",
         "date": "12-02-2025",
         "changes": [

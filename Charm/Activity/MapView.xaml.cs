@@ -55,7 +55,7 @@ public partial class MapView : UserControl
         {
             foreach (SMapDataEntry entry in tables.MapDataTable.TagData.DataEntries)
             {
-                if (entry.DataResource.GetValue(tables.MapDataTable.GetReader()) is SMapDataResource resource)
+                if (entry.DataResource.GetValue(tables.MapDataTable.GetReader()) is SStaticMapDataResource resource)
                 {
                     resource.StaticMapParent?.Load();
                     if (resource.StaticMapParent is null || resource.StaticMapParent.TagData.StaticMap is null)
@@ -171,7 +171,7 @@ public partial class MapView : UserControl
         {
             if (Strategy.IsD1())
             {
-                if (data.MapDataTable.TagData.DataEntries[0].DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)
+                if (data.MapDataTable.TagData.DataEntries[0].DataResource.GetValue(data.MapDataTable.GetReader()) is SStaticMapDataResource staticMapResource)
                 {
                     staticMapResource.StaticMapParent?.Load();
                     if (staticMapResource.StaticMapParent is null)
@@ -185,7 +185,7 @@ public partial class MapView : UserControl
             {
                 switch (entry.DataResource.GetValue(data.MapDataTable.GetReader()))
                 {
-                    case SMapDataResource staticMapResource:
+                    case SStaticMapDataResource staticMapResource:
                         staticMapResource.StaticMapParent?.Load();
                         if (staticMapResource.StaticMapParent is null)
                             return;

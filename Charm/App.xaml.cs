@@ -18,7 +18,7 @@ namespace Charm;
 /// </summary>
 public partial class CharmApp : Application
 {
-    public static ApplicationVersion CurrentVersion = new("3.2.0");
+    public static ApplicationVersion CurrentVersion = new("3.2.3");
     public static Assembly? CharmRedacted = null;
     public static Assembly? CharmRenderer = null;
 

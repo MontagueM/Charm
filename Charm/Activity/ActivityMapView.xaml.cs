@@ -97,7 +97,7 @@ public partial class ActivityMapView : UserControl
             {
                 foreach (SMapDataEntry entry in dataTable.MapDataTable.TagData.DataEntries)
                 {
-                    if (entry.DataResource.GetValue(dataTable.MapDataTable.GetReader()) is SMapDataResource resource)
+                    if (entry.DataResource.GetValue(dataTable.MapDataTable.GetReader()) is SStaticMapDataResource resource)
                     {
                         resource.StaticMapParent?.Load();
                         if (resource.StaticMapParent is null || resource.StaticMapParent.TagData.StaticMap is null)
