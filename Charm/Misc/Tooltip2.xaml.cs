@@ -167,8 +167,8 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
             IsD1 = Strategy.IsD1(),
             Hash = item.ApiHash,
             Icon = ApiImageUtils.GetPlugWatermark(item),
-            Name = item.GetItemName(),
-            Type = item.GetItemType(),
+            Name = item.Name,
+            Type = item.Type,
             DamageType = DestinyDamageType.GetDamageType(item.GetItemDamageTypeIndex()),
 
             Label = rarity != DestinyTierType.Common ? rarity.ToString() : "",
@@ -227,7 +227,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
             blocks.Add(new TextsBlock()
             {
                 Order = 0,
-                Text = item.GetItemDescription()
+                Text = item.Description
             });
 
             // Flavor Text
@@ -235,7 +235,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
             {
                 Order = 1,
                 Italic = true,
-                Text = item.GetItemFlavorText()
+                Text = item.FlavorText
             });
 
             if (!Strategy.IsD1())

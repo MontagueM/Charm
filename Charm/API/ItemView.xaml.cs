@@ -102,10 +102,10 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
         Item = new()
         {
             Item = _invItem,
-            ItemName = _invItem.GetItemName().ToUpper(),
-            ItemType = _invItem.GetItemType().ToUpper(),
-            ItemFlavorText = _invItem.GetItemFlavorText(),
-            ItemLore = _invItem.GetItemLore(),
+            ItemName = _invItem.Name.ToUpper(),
+            ItemType = _invItem.Type.ToUpper(),
+            ItemFlavorText = _invItem.FlavorText,
+            ItemLore = _invItem.Lore,
             ItemHash = _invItem.ApiHash,
             ItemSource = collectible != null ? collectible.Value.SourceString?.Value : "",
             ItemRarity = _invItem.GetItemRarity(),

@@ -69,6 +69,7 @@ public partial class ProgressView : UserControl
             string removed = _progressStages.Dequeue();
             if (bLogProgress)
                 Log.Verbose($"Completed loading stage: {removed}");
+
             UpdateProgress();
             if (_progressStages.Count == 0)
             {

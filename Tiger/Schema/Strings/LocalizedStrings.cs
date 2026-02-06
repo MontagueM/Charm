@@ -52,7 +52,9 @@ public class LocalizedStrings : Tag<SLocalizedStrings>
         int index = FindIndexOfStringHash(hash);
         if (index == -1)
         {
-            // Log.Error($"Could not find string with hash {hash}");
+            if (Hash.CheckRedacted())
+                return new TigerString($"Redacted-{hash}");
+
             return new TigerString($"NotFound-{hash}");
         }
         return new TigerString(hash, _tag.EnglishStringsData.GetStringFromIndex(index));

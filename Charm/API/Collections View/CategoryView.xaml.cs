@@ -177,8 +177,8 @@ public partial class CategoryView : UserControl
                 //ItemIcon = strings.IconIndex != -1 ? ApiImageUtils.MakeFullItemIcon(invItem) : null,
                 //ItemIcon2 = ApiImageUtils.GetPlugWatermark(invItem),
                 ItemName = strings.CollectibleName.Value?.ToString() ?? "",
-                ItemType = invItem.GetItemType() ?? "",
-                ItemDescription = invItem.GetItemFlavorText() ?? "",
+                ItemType = invItem.Type ?? "",
+                ItemDescription = invItem.FlavorText ?? "",
                 EntryType = CategoryEntryType.Collectible
             };
 
@@ -227,8 +227,8 @@ public partial class CategoryView : UserControl
                     //ItemIcon = strings.IconIndex != -1 ? ApiImageUtils.MakeFullItemIcon(invItem) : null,
                     //ItemIcon2 = ApiImageUtils.GetPlugWatermark(invItem),
                     ItemName = strings.CollectibleName.Value?.ToString() ?? "",
-                    ItemType = invItem.GetItemType() ?? "",
-                    ItemDescription = invItem.GetItemFlavorText() ?? "",
+                    ItemType = invItem.Type ?? "",
+                    ItemDescription = invItem.FlavorText ?? "",
                     EntryType = CategoryEntryType.Collectible
                 };
 

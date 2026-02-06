@@ -76,8 +76,8 @@ public partial class WeaponAudioListView : UserControl
         {
             if (item.GetWeaponPatternIndex() == -1)
                 return;
-            string name = item.GetItemName();
-            string type = item.GetItemType();
+            string name = item.Name;
+            string type = item.Type;
             if (type == null)
             {
                 type = "";

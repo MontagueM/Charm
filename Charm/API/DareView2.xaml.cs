@@ -214,8 +214,8 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
         await Parallel.ForEachAsync(inventoryItems, async (item, ct) =>
         {
-            string name = item.GetItemName();
-            string? type_string = item.GetItemType();
+            string name = item.Name;
+            string? type_string = item.Type;
             type_string ??= "";
 
             if (ShouldAddToList(item) && item.Name != string.Empty)
@@ -234,7 +234,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                         continue;
 
                     var _trait = trait;
-                    if (item.GetItemType() == "Trace Rifle" && _trait == DestinyTraitID.item_weapon_auto_rifle) // bungo pls fix
+                    if (item.Type == "Trace Rifle" && _trait == DestinyTraitID.item_weapon_auto_rifle) // bungo pls fix
                         _trait = DestinyTraitID.item_weapon_trace_rifle;
 
                     if (!SortedItems.ContainsKey(_trait))
@@ -292,9 +292,9 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             if (searchStr is not null && searchStr != string.Empty)
             {
                 newItem.Items = new ObservableCollection<APIPlugItem>(item.Items
-                .Where(x => x.Item.GetItemName().Contains(searchStr, StringComparison.InvariantCultureIgnoreCase)
-                            || x.Item.GetItemType().Contains(searchStr, StringComparison.InvariantCultureIgnoreCase)
-                            || x.Item.Parent?.GetItemName().Contains(searchStr, StringComparison.InvariantCultureIgnoreCase) == true
+                .Where(x => x.Item.Name.Contains(searchStr, StringComparison.InvariantCultureIgnoreCase)
+                            || x.Item.Type.Contains(searchStr, StringComparison.InvariantCultureIgnoreCase)
+                            || x.Item.Parent?.Name.Contains(searchStr, StringComparison.InvariantCultureIgnoreCase) == true
                             || $"{x.Hash}" == searchStr));
             }
             else
@@ -655,7 +655,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             .Select((s, i) => $"Exporting {s.Name} ({i + 1}/{allShaders.Count})")
             .ToList();
 
-        MainWindow.Progress.SetProgressStages(stages);
+        MainWindow.Progress.SetProgressStages(stages, false);
 
         var semaphore = new SemaphoreSlim(Environment.ProcessorCount);
         var tasks = allShaders.Select(async item =>
@@ -666,10 +666,14 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                 string itemName = Helpers.SanitizeString(item.Name);
                 string savePath = Path.Combine(basePath, itemName);
 
-                await Task.Run(() =>
+                // gonna skip already existing so new shaders can be exported quicker
+                if (!Directory.Exists(savePath))
                 {
-                    Investment.Get().ExportShader(item, savePath, itemName, config.GetOutputTextureFormat());
-                });
+                    await Task.Run(() =>
+                    {
+                        Investment.Get().ExportShader(item, savePath, itemName, config.GetOutputTextureFormat());
+                    });
+                }
 
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
