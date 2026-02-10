@@ -20,7 +20,7 @@
                 Style="{DynamicResource D2StyleRadioButton}">
                 <Border Background="#55515151">
                     <TextBlock
-                        Margin="75,25,75,25"
+                        Margin="75,20,75,20"
                         d:FontFamily="Haas Grot Text 55 Roman"
                         FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                         FontSize="32"
@@ -46,13 +46,13 @@
         </Grid.Triggers>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="15*" />
-            <ColumnDefinition Width="50*" />
+            <ColumnDefinition Width="55*" />
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0" Background="#30000000">
             <StackPanel
-                Margin="0,0,25,0"
-                HorizontalAlignment="Right"
+                Margin="0,0,0,0"
+                HorizontalAlignment="Center"
                 VerticalAlignment="Center">
                 <ItemsControl x:Name="Settings" ItemTemplate="{StaticResource SettingsButtonTemplate}">
                     <ItemsControl.ItemsPanel>

@@ -701,62 +701,62 @@ public partial class MainWindow
 
     private void OnAnyButtonMouseEnter(object sender, MouseEventArgs e)
     {
-        FrameworkElement element = sender as FrameworkElement;
-        if (element != null)
+        if (sender is not FrameworkElement element)
+            return;
+
+        ToolTip.ActiveItem = element;
+        if (element.DataContext != null && !GenericTooltipProperties.HasTooltipData(element))
         {
-            ToolTip.ActiveItem = element;
-            if (element.DataContext != null && !GenericTooltipProperties.HasTooltipData(element))
+            switch (element.DataContext)
             {
-                switch (element.DataContext)
-                {
-                    case APIPlugItem item:
-                        ToolTip.MakeTooltip(item.Item, item.ParentSocketStyle);
-                        break;
-                    case Category item:
-                        ToolTip.MakeTooltip(item);
-                        break;
+                case APIPlugItem item:
+                    ToolTip.MakeTooltip(item.Item, item.ParentSocketStyle);
+                    break;
+                case Category item:
+                    ToolTip.MakeTooltip(item);
+                    break;
 
-                    case CategoryEntry item:
-                        if (item.EntryType == CategoryEntryType.Record)
-                        {
-                            ToolTip.MakeTooltip(item);
-                        }
-                        else if (item.EntryType == CategoryEntryType.Collectible)
-                        {
-                            ToolTip.MakeTooltip(item.Collectible.Item);
-                        }
-                        break;
-                }
-            }
-            else
-            {
-                var tooltipData = GenericTooltipProperties.GetTooltipData(element);
-                if (tooltipData == null)
-                {
-                    // If not set directly, look up the visual tree to check the parent
-                    DependencyObject current = element;
-
-                    while (current != null)
+                case CategoryEntry item:
+                    if (item.EntryType == CategoryEntryType.Record)
                     {
-                        if (current is not ContainerVisual)
-                        {
-                            tooltipData = GenericTooltipProperties.GetTooltipData((UIElement)current);
-                            if (tooltipData != null)
-                                break;
-                        }
-                        else
-                            return;
-
-                        current = VisualTreeHelper.GetParent(current);
+                        ToolTip.MakeTooltip(item);
                     }
-                }
-
-                if (tooltipData != null)
-                {
-                    ToolTip.MakeTooltip(tooltipData);
-                }
+                    else if (item.EntryType == CategoryEntryType.Collectible)
+                    {
+                        ToolTip.MakeTooltip(item.Collectible.Item);
+                    }
+                    break;
             }
         }
+        else
+        {
+            var tooltipData = GenericTooltipProperties.GetTooltipData(element);
+            if (tooltipData == null)
+            {
+                // If not set directly, look up the visual tree to check the parent
+                DependencyObject current = element;
+
+                while (current != null)
+                {
+                    if (current is not ContainerVisual)
+                    {
+                        tooltipData = GenericTooltipProperties.GetTooltipData((UIElement)current);
+                        if (tooltipData != null)
+                            break;
+                    }
+                    else
+                        return;
+
+                    current = VisualTreeHelper.GetParent(current);
+                }
+            }
+
+            if (tooltipData != null)
+            {
+                ToolTip.MakeTooltip(tooltipData);
+            }
+        }
+
     }
 
     private void OnAnyButtonMouseLeave(object sender, MouseEventArgs e)

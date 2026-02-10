@@ -338,8 +338,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
 
                         plugItem._iconLoader = new AsyncImageLoader(
                         () => ApiImageUtils.MakeIcon(sandboxPerk.IconIndex),
-                        OnPropertyChanged,
-                        nameof(APIPlugItem.Icon), true);
+                        () => OnPropertyChanged(nameof(APIPlugItem.Icon)), true);
 
                         plugs.Add(plugItem);
                     }
@@ -843,28 +842,23 @@ public class APIPlugItem : CharmUIElement
     {
         _iconBgLoader = new AsyncImageLoader(
             () => ApiImageUtils.MakeItemIconBackground(item),
-            OnPropertyChanged,
-            nameof(IconBackground));
+            () => OnPropertyChanged(nameof(IconBackground)));
 
         _iconLoader = new AsyncImageLoader(
             () => ApiImageUtils.MakeItemIconForeground(item),
-            OnPropertyChanged,
-            nameof(Icon));
+            () => OnPropertyChanged(nameof(Icon)));
 
         _iconOverlayLoader = new AsyncImageLoader(
             () => ApiImageUtils.MakeItemIconOverlay(item),
-            OnPropertyChanged,
-            nameof(IconOverlay));
+            () => OnPropertyChanged(nameof(IconOverlay)));
 
         _watermarkLoader = new AsyncImageLoader(
             () => ApiImageUtils.GetPlugWatermark(item),
-            OnPropertyChanged,
-            nameof(ItemWatermark));
+            () => OnPropertyChanged(nameof(ItemWatermark)));
 
         Item = item;
         Hash = item.ApiHash;
     }
-
 
     public string OverrideName { get; set; } // Used for raw sandbox perks, since they arent InventoryItems
     public string OverrideDescription { get; set; }

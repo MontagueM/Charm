@@ -16,8 +16,11 @@ public class InventoryItem : Tag<S9D798080>
     private IReadOnlyCollection<DestinyTraitID> _traits;
     public IReadOnlyCollection<DestinyTraitID> ItemTraits => _traits ??= GetItemTraits(); // cache traits on first use
 
-    public bool IsWeapon => ItemTraits.Any(x => x.ToString().Contains("item_weapon"));
-    public bool IsArmor => ItemTraits.Any(x => x.ToString().Contains("item_armor"));
+    private bool? _isWeapon;
+    public bool IsWeapon => _isWeapon ??= ItemTraits.Any(x => x.ToString().StartsWith("item_weapon_", StringComparison.Ordinal));
+
+    private bool? _isArmor;
+    public bool IsArmor => _isArmor ??= ItemTraits.Any(x => x.ToString().StartsWith("item_armor", StringComparison.Ordinal));
 
     public bool IsGhost => ItemTraits.Contains(DestinyTraitID.item_ghost);
     public bool IsShip => ItemTraits.Contains(DestinyTraitID.item_ship);

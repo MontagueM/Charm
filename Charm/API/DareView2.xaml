@@ -22,13 +22,14 @@
             RenderOptions.CachingHint="Cache" />
 
         <DataTemplate x:Key="ItemIconTemplate">
-            <Grid>
+            <Grid ClipToBounds="True">
                 <Image
                     Width="86"
                     Height="86"
                     Margin="0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
+                    RenderOptions.BitmapScalingMode="LowQuality"
                     Source="{Binding IconBackground}" />
 
                 <Grid
@@ -63,12 +64,55 @@
                         Opacity="0.15" />
                 </Grid>
 
+                <Grid
+                    Width="86"
+                    Height="86"
+                    IsHitTestVisible="False">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Item.IsHolofoil, Converter={StaticResource HolofoilEnabledConverter}}" Value="False" />
+                                        <Condition Binding="{Binding Item.IsHolofoil}" Value="True" />
+                                    </MultiDataTrigger.Conditions>
+                                    <MultiDataTrigger.Setters>
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </MultiDataTrigger.Setters>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+
+                    <!--  Could be better but it works so good enough for me  -->
+                    <Path
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Fill="#a2816f"
+                        RenderTransformOrigin="1,0">
+                        <Path.RenderTransform>
+                            <RotateTransform Angle="-45" />
+                        </Path.RenderTransform>
+                        <Path.Data>
+                            <GeometryGroup>
+                                <RectangleGeometry Rect="15,0 86,3" />
+                                <RectangleGeometry Rect="0,9 86,3" />
+                                <RectangleGeometry Rect="0,18 86,3" />
+                                <RectangleGeometry Rect="0,28 86,3" />
+                            </GeometryGroup>
+                        </Path.Data>
+                    </Path>
+                </Grid>
+
+
                 <Image
                     Width="86"
                     Height="86"
                     Margin="0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
+                    RenderOptions.BitmapScalingMode="LowQuality"
                     Source="{Binding Icon}" />
 
                 <Image
@@ -77,6 +121,7 @@
                     Margin="0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
+                    RenderOptions.BitmapScalingMode="LowQuality"
                     Source="{Binding IconOverlay}" />
             </Grid>
         </DataTemplate>
@@ -386,6 +431,13 @@
                 </Grid>
 
                 <Grid Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                        FontSize="64"
+                        Text="?" />
 
                     <ContentControl
                         x:Name="IconHost"
@@ -518,463 +570,465 @@
             </Rectangle>
         </Grid>
 
-        <Viewbox Grid.RowSpan="3" Panel.ZIndex="1">
+
+        <Grid
+            Grid.RowSpan="3"
+            Width="1920"
+            Height="990"
+            Panel.ZIndex="1"
+            Background="Transparent"
+            ClipToBounds="True"
+            RenderTransformOrigin="0.5,0.5"
+            SnapsToDevicePixels="True">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="75*" />
+                <ColumnDefinition Width="25*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="5*" />
+                <RowDefinition Height="90*" />
+                <RowDefinition Height="5*" />
+            </Grid.RowDefinitions>
+
+            <Border
+                Grid.RowSpan="3"
+                Grid.Column="1"
+                Background="#CC1B1C20"
+                BorderBrush="#62FFFFFF"
+                BorderThickness="2,0,0,0"
+                Opacity="1" />
+
             <Grid
-                Width="1920"
-                Height="990"
-                Background="Transparent"
-                ClipToBounds="True"
-                RenderTransformOrigin="0.5,0.5"
-                SnapsToDevicePixels="True">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="75*" />
-                    <ColumnDefinition Width="25*" />
-                </Grid.ColumnDefinitions>
+                Grid.Row="0"
+                Grid.RowSpan="2"
+                Grid.Column="1"
+                Background="Transparent">
+
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="5*" />
                     <RowDefinition Height="5*" />
                     <RowDefinition Height="90*" />
-                    <RowDefinition Height="5*" />
                 </Grid.RowDefinitions>
 
-                <Border
-                    Grid.RowSpan="3"
-                    Grid.Column="1"
-                    Background="#CC1B1C20"
-                    BorderBrush="#62FFFFFF"
-                    BorderThickness="2,0,0,0"
-                    Opacity="1" />
+                <StackPanel
+                    x:Name="DareViewDevPanel"
+                    Grid.Row="0"
+                    Margin="15,5,15,0"
+                    HorizontalAlignment="Left"
+                    d:Visibility="Visible"
+                    Background="Transparent"
+                    Orientation="Horizontal"
+                    Visibility="Hidden">
+                    <Button Click="ExportAllShaders" Style="{DynamicResource D2StyleButton}">
+                        <local:GenericTooltipProperties.TooltipData>
+                            <local:GenericTooltip
+                                Name="Export All Shaders"
+                                Description="Export every shader to 'Output'/AllShaders, will take some time."
+                                Style="Category" />
+                        </local:GenericTooltipProperties.TooltipData>
+                        <TextBlock
+                            Margin="5,0,5,0"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="16"
+                            Text="Export All Shaders" />
+                    </Button>
+
+                    <ToggleButton
+                        Margin="10,0,0,0"
+                        Click="LoadAllItems"
+                        IsChecked="False"
+                        Style="{DynamicResource D2StyleTagListButton}">
+                        <local:GenericTooltipProperties.TooltipData>
+                            <local:GenericTooltip
+                                Name="Load All Items"
+                                Description="Loads every InventoryItem definition."
+                                Style="Category" />
+                        </local:GenericTooltipProperties.TooltipData>
+                        <TextBlock
+                            Margin="5,0,5,0"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="16"
+                            Text="Load All Items" />
+                    </ToggleButton>
+                </StackPanel>
 
                 <Grid
-                    Grid.Row="0"
-                    Grid.RowSpan="2"
-                    Grid.Column="1"
+                    Grid.Row="1"
+                    Margin="15,0,15,0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center"
                     Background="Transparent">
-
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="5*" />
-                        <RowDefinition Height="5*" />
-                        <RowDefinition Height="90*" />
-                    </Grid.RowDefinitions>
-
-                    <StackPanel
-                        x:Name="DareViewDevPanel"
-                        Grid.Row="0"
-                        Margin="15,5,15,0"
+                    <ToggleButton
+                        x:Name="AggregateOutputButton"
                         HorizontalAlignment="Left"
-                        d:Visibility="Visible"
-                        Background="Transparent"
-                        Orientation="Horizontal"
-                        Visibility="Hidden">
-                        <Button Click="ExportAllShaders" Style="{DynamicResource D2StyleButton}">
-                            <local:GenericTooltipProperties.TooltipData>
-                                <local:GenericTooltip
-                                    Name="Export All Shaders"
-                                    Description="Export every shader to 'Output'/AllShaders, will take some time."
-                                    Style="Category" />
-                            </local:GenericTooltipProperties.TooltipData>
-                            <TextBlock
-                                Margin="5,0,5,0"
-                                d:FontFamily="Haas Grot Text 55 Roman"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                FontSize="16"
-                                Text="Export All Shaders" />
-                        </Button>
+                        Content="AGGREGATE OUTPUT"
+                        FontSize="18"
+                        Style="{DynamicResource D2StyleToggleBoxButton}">
+                        <local:GenericTooltipProperties.TooltipData>
+                            <local:GenericTooltip
+                                Name="AGGREGATE OUTPUT"
+                                Description="Exports selected items to a singular folder in your Charm output path.&#x0a;&#x0a;The folder will be named 'ApiOutput#', where the hashtag represents the current ApiOutput folder count"
+                                Style="Category"
+                                Type="Export Option" />
+                        </local:GenericTooltipProperties.TooltipData>
+                    </ToggleButton>
 
-                        <ToggleButton
-                            Margin="10,0,0,0"
-                            Click="LoadAllItems"
-                            IsChecked="False"
-                            Style="{DynamicResource D2StyleTagListButton}">
-                            <local:GenericTooltipProperties.TooltipData>
-                                <local:GenericTooltip
-                                    Name="Load All Items"
-                                    Description="Loads every InventoryItem definition."
-                                    Style="Category" />
-                            </local:GenericTooltipProperties.TooltipData>
-                            <TextBlock
-                                Margin="5,0,5,0"
-                                d:FontFamily="Haas Grot Text 55 Roman"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                FontSize="16"
-                                Text="Load All Items" />
-                        </ToggleButton>
+                    <Button
+                        x:Name="Multi3DButton"
+                        HorizontalAlignment="Right"
+                        Click="Multi3DItemView"
+                        Style="{DynamicResource D2StyleButton}"
+                        Visibility="Collapsed">
+                        <local:GenericTooltipProperties.TooltipData>
+                            <local:GenericTooltip
+                                Name="3D View"
+                                Description="View everything in the export list in 3D."
+                                Style="Category" />
+                        </local:GenericTooltipProperties.TooltipData>
+                        <TextBlock
+                            Margin="5,0,5,0"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="16"
+                            Text="View All In 3D" />
+                    </Button>
+                </Grid>
+
+                <Grid
+                    Grid.Row="2"
+                    Margin="0,0,0,0"
+                    Background="Transparent">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="30*" />
+                        <ColumnDefinition Width="30*" />
+                        <ColumnDefinition Width="30*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button
+                        x:Name="ExportButton"
+                        Grid.Column="0"
+                        Margin="15,0,15,0"
+                        Click="ExportButton_Click"
+                        Style="{DynamicResource D2StyleButton}">
+                        <local:GenericTooltipProperties.TooltipData>
+                            <local:GenericTooltip
+                                Name="EXPORT"
+                                Description="Exports everything in the export list"
+                                Style="Category" />
+                        </local:GenericTooltipProperties.TooltipData>
+                        <TextBlock
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="18"
+                            Text="EXPORT" />
+                    </Button>
+
+                    <Button
+                        x:Name="OpenOutputButton"
+                        Grid.Column="1"
+                        Margin="0,0,0,0"
+                        Click="OpenOutputFolder_Click"
+                        Style="{DynamicResource D2StyleButton}">
+                        <local:GenericTooltipProperties.TooltipData>
+                            <local:GenericTooltip
+                                Name="OPEN OUTPUT"
+                                Description="Opens the output folder for your rips"
+                                Style="Category" />
+                        </local:GenericTooltipProperties.TooltipData>
+                        <TextBlock
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="18"
+                            Text="OPEN OUTPUT" />
+                    </Button>
+
+                    <Button
+                        x:Name="ClearAllButton"
+                        Grid.Column="2"
+                        Margin="15,0,15,0"
+                        Click="ClearAllButton_Click"
+                        Style="{DynamicResource D2StyleButton}">
+                        <local:GenericTooltipProperties.TooltipData>
+                            <local:GenericTooltip
+                                Name="CLEAR"
+                                Description="Clears everything from the export list"
+                                Style="Category" />
+                        </local:GenericTooltipProperties.TooltipData>
+                        <TextBlock
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="18"
+                            Text="CLEAR" />
+                    </Button>
+                </Grid>
+
+                <local:ItemPage
+                    x:Name="SelectedItemsList"
+                    Grid.Row="3"
+                    Margin="15,15,15,0"
+                    CollapsePageButtons="False"
+                    Columns="1"
+                    IsVertical="True"
+                    ItemMargin="3,0,3,0"
+                    ItemTemplate="{StaticResource DareSelectedEntry}"
+                    Items="{Binding SelectedItems}"
+                    ItemsPerPage="7"
+                    PageIndicatorMargin="0,0,0,-10"
+                    ShowVerticalPageIndicator="True"
+                    UsePlaceholders="True"
+                    UseStackPanel="False" />
+            </Grid>
+
+            <Grid
+                x:Name="MainGrid"
+                Grid.Row="1"
+                Grid.RowSpan="2"
+                Grid.Column="0"
+                Margin="25,0,0,0"
+                ClipToBounds="False">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5*" />
+                    <ColumnDefinition Width="90*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="10*" />
+                    <RowDefinition Height="95*" />
+                </Grid.RowDefinitions>
+
+                <Button
+                    x:Name="HelpButton"
+                    Grid.Column="0"
+                    Width="50"
+                    Height="50"
+                    HorizontalAlignment="Right"
+                    local:StyleHelper.CornerRadius="100"
+                    Click="HelpButton_Click"
+                    Style="{DynamicResource D2StyleButton}">
+                    <TextBlock
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                        FontSize="32"
+                        Text="?" />
+                </Button>
+
+                <Grid
+                    Name="HolofoilShaderPreload"
+                    Width="1"
+                    Height="1"
+                    Opacity="0">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding {x:Null}, Converter={StaticResource HolofoilEnabledConverter}}" Value="True">
+                                    <Setter Property="Visibility" Value="Hidden" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <Grid CacheMode="BitmapCache">
+                        <Grid.Effect>
+                            <StaticResource ResourceKey="HolofoilShader" />
+                        </Grid.Effect>
+                    </Grid>
+
+                    <Border
+                        BorderBrush="White"
+                        BorderThickness="8"
+                        Opacity="0.15" />
+                </Grid>
+
+                <Grid Grid.Row="0" Grid.Column="1">
+                    <StackPanel
+                        x:Name="FilterOptions"
+                        Grid.Row="0"
+                        Margin="0,0,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                        <TextBox
+                            x:Name="SearchBox"
+                            Grid.Row="0"
+                            Width="350"
+                            Margin="10,0,10,0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            FontSize="30"
+                            TextChanged="SearchBox_TextChanged"
+                            TextWrapping="Wrap" />
                     </StackPanel>
 
                     <Grid
-                        Grid.Row="1"
-                        Margin="15,0,15,0"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Center"
-                        Background="Transparent">
-                        <ToggleButton
-                            x:Name="AggregateOutputButton"
-                            HorizontalAlignment="Left"
-                            Content="AGGREGATE OUTPUT"
-                            FontSize="18"
-                            Style="{DynamicResource D2StyleToggleBoxButton}">
-                            <local:GenericTooltipProperties.TooltipData>
-                                <local:GenericTooltip
-                                    Name="AGGREGATE OUTPUT"
-                                    Description="Exports selected items to a singular folder in your Charm output path.&#x0a;&#x0a;The folder will be named 'ApiOutput#', where the hashtag represents the current ApiOutput folder count"
-                                    Style="Category"
-                                    Type="Export Option" />
-                            </local:GenericTooltipProperties.TooltipData>
-                        </ToggleButton>
-
+                        x:Name="RenegadesDisclaimer"
+                        Margin="0,-20,50,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Background="#755C0000"
+                        Visibility="Collapsed">
                         <Button
-                            x:Name="Multi3DButton"
-                            HorizontalAlignment="Right"
-                            Click="Multi3DItemView"
-                            Style="{DynamicResource D2StyleButton}"
-                            Visibility="Collapsed">
-                            <local:GenericTooltipProperties.TooltipData>
-                                <local:GenericTooltip
-                                    Name="3D View"
-                                    Description="View everything in the export list in 3D."
-                                    Style="Category" />
-                            </local:GenericTooltipProperties.TooltipData>
-                            <TextBlock
-                                Margin="5,0,5,0"
-                                d:FontFamily="Haas Grot Text 55 Roman"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                FontSize="16"
-                                Text="View All In 3D" />
-                        </Button>
-                    </Grid>
-
-                    <Grid
-                        Grid.Row="2"
-                        Margin="0,0,0,0"
-                        Background="Transparent">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="30*" />
-                            <ColumnDefinition Width="30*" />
-                            <ColumnDefinition Width="30*" />
-                        </Grid.ColumnDefinitions>
-
-                        <Button
-                            x:Name="ExportButton"
                             Grid.Column="0"
-                            Margin="15,0,15,0"
-                            Click="ExportButton_Click"
+                            Panel.ZIndex="100"
                             Style="{DynamicResource D2StyleButton}">
                             <local:GenericTooltipProperties.TooltipData>
                                 <local:GenericTooltip
-                                    Name="EXPORT"
-                                    Description="Exports everything in the export list"
+                                    Name="DISCLAIMER"
+                                    BodyColor="#100000"
+                                    Description=" Any Star Wars themed gear CAN NOT be uploaded to the Destiny Model Rips Discord or Google Drive due to potential copyright claims by Disney...&#x0a;&#x0a; Many item strings may appear as 'Redacted-###' if you do not have the correct decryption key, due to those strings being in redacted pkg files."
+                                    HeaderColor="#5C0000"
                                     Style="Category" />
                             </local:GenericTooltipProperties.TooltipData>
                             <TextBlock
                                 d:FontFamily="Haas Grot Text 55 Roman"
                                 FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                FontSize="18"
-                                Text="EXPORT" />
-                        </Button>
-
-                        <Button
-                            x:Name="OpenOutputButton"
-                            Grid.Column="1"
-                            Margin="0,0,0,0"
-                            Click="OpenOutputFolder_Click"
-                            Style="{DynamicResource D2StyleButton}">
-                            <local:GenericTooltipProperties.TooltipData>
-                                <local:GenericTooltip
-                                    Name="OPEN OUTPUT"
-                                    Description="Opens the output folder for your rips"
-                                    Style="Category" />
-                            </local:GenericTooltipProperties.TooltipData>
-                            <TextBlock
-                                d:FontFamily="Haas Grot Text 55 Roman"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                FontSize="18"
-                                Text="OPEN OUTPUT" />
-                        </Button>
-
-                        <Button
-                            x:Name="ClearAllButton"
-                            Grid.Column="2"
-                            Margin="15,0,15,0"
-                            Click="ClearAllButton_Click"
-                            Style="{DynamicResource D2StyleButton}">
-                            <local:GenericTooltipProperties.TooltipData>
-                                <local:GenericTooltip
-                                    Name="CLEAR"
-                                    Description="Clears everything from the export list"
-                                    Style="Category" />
-                            </local:GenericTooltipProperties.TooltipData>
-                            <TextBlock
-                                d:FontFamily="Haas Grot Text 55 Roman"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                FontSize="18"
-                                Text="CLEAR" />
+                                FontSize="14"
+                                Text="RENEGADES DISCLAIMER" />
                         </Button>
                     </Grid>
-
-                    <local:ItemPage
-                        x:Name="SelectedItemsList"
-                        Grid.Row="3"
-                        Margin="15,15,15,0"
-                        CollapsePageButtons="False"
-                        Columns="1"
-                        IsVertical="True"
-                        ItemMargin="3,0,3,0"
-                        ItemTemplate="{StaticResource DareSelectedEntry}"
-                        Items="{Binding SelectedItems}"
-                        ItemsPerPage="7"
-                        PageIndicatorMargin="0,0,0,-10"
-                        ShowVerticalPageIndicator="True"
-                        UsePlaceholders="True"
-                        UseStackPanel="False" />
                 </Grid>
 
-                <Grid
-                    x:Name="MainGrid"
+                <local:ItemPage
+                    x:Name="Categories"
                     Grid.Row="1"
-                    Grid.RowSpan="2"
-                    Grid.Column="0"
-                    Margin="25,0,0,0"
-                    ClipToBounds="False">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="5*" />
-                        <ColumnDefinition Width="90*" />
-                    </Grid.ColumnDefinitions>
+                    Grid.Column="1"
+                    VerticalAlignment="Stretch"
+                    Columns="1"
+                    HidePageButtons="True"
+                    IsVertical="True"
+                    ItemMargin="0,0,0,25"
+                    ItemTemplate="{StaticResource ItemCategory}"
+                    Items="{Binding ItemCategories}"
+                    ItemsPerPage="3"
+                    PageIndicatorMargin="0,0,0,25"
+                    SelectOnPageChange="False"
+                    ShowVerticalPageIndicator="True"
+                    SlideDistance="5"
+                    TransitionSpeed="0.075"
+                    UsePlaceholders="False"
+                    UseStackPanel="False" />
 
+                <Grid
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="0,50,0,50"
+                    HorizontalAlignment="Right">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="10*" />
-                        <RowDefinition Height="95*" />
+                        <RowDefinition Height="50*" />
+                        <RowDefinition Height="50*" />
                     </Grid.RowDefinitions>
 
                     <Button
-                        x:Name="HelpButton"
-                        Grid.Column="0"
+                        x:Name="PreviousPage"
                         Width="50"
-                        Height="50"
-                        HorizontalAlignment="Right"
-                        local:StyleHelper.CornerRadius="100"
-                        Click="HelpButton_Click"
-                        Style="{DynamicResource D2StyleButton}">
-                        <TextBlock
-                            d:FontFamily="Haas Grot Text 55 Roman"
-                            FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
-                            FontSize="32"
-                            Text="?" />
-                    </Button>
-
-                    <Grid
-                        Name="HolofoilShaderPreload"
-                        Width="1"
-                        Height="1"
-                        Opacity="0">
-                        <Grid.Style>
-                            <Style TargetType="Grid">
-                                <Setter Property="Visibility" Value="Collapsed" />
+                        Height="Auto"
+                        Margin="2,0,0,0"
+                        local:StyleHelper.BorderThickness="1"
+                        Focusable="False"
+                        Visibility="Visible">
+                        <Button.Style>
+                            <Style BasedOn="{StaticResource D2StyleButtonNoOverlay}" TargetType="Button">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding {x:Null}, Converter={StaticResource HolofoilEnabledConverter}}" Value="True">
-                                        <Setter Property="Visibility" Value="Hidden" />
+                                    <DataTrigger Binding="{Binding IsVertical}" Value="False">
+                                        <Setter Property="Width" Value="Auto" />
+                                        <Setter Property="Height" Value="35" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </Grid.Style>
-                        <Grid CacheMode="BitmapCache">
-                            <Grid.Effect>
-                                <StaticResource ResourceKey="HolofoilShader" />
-                            </Grid.Effect>
-                        </Grid>
-
-                        <Border
-                            BorderBrush="White"
-                            BorderThickness="8"
-                            Opacity="0.15" />
-                    </Grid>
-
-                    <Grid Grid.Row="0" Grid.Column="1">
-                        <StackPanel
-                            x:Name="FilterOptions"
-                            Grid.Row="0"
-                            Margin="0,0,0,0"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Orientation="Horizontal">
-                            <TextBox
-                                x:Name="SearchBox"
-                                Grid.Row="0"
-                                Width="350"
-                                Margin="10,0,10,0"
-                                HorizontalAlignment="Stretch"
+                        </Button.Style>
+                        <Border Background="#33FFFFFF" Focusable="False">
+                            <Polygon
+                                HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                FontSize="30"
-                                TextChanged="SearchBox_TextChanged"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
+                                Fill="#CCFFFFFF"
+                                Points="0, 0 60, 50, 0, 100">
+                                <Polygon.Style>
+                                    <Style TargetType="Polygon">
+                                        <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+                                        <Setter Property="LayoutTransform">
+                                            <Setter.Value>
+                                                <TransformGroup>
+                                                    <ScaleTransform ScaleX="0.15" ScaleY="0.15" />
+                                                    <RotateTransform Angle="-90" />
+                                                </TransformGroup>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsVertical}" Value="True">
+                                                <Setter Property="LayoutTransform">
+                                                    <Setter.Value>
+                                                        <TransformGroup>
+                                                            <ScaleTransform ScaleX="0.15" ScaleY="0.15" />
+                                                            <RotateTransform Angle="00" />
+                                                        </TransformGroup>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Polygon.Style>
+                            </Polygon>
+                        </Border>
+                    </Button>
 
-                        <Grid
-                            x:Name="RenegadesDisclaimer"
-                            Margin="0,-20,50,0"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Top"
-                            Background="#755C0000"
-                            Visibility="Collapsed">
-                            <Button
-                                Grid.Column="0"
-                                Panel.ZIndex="100"
-                                Style="{DynamicResource D2StyleButton}">
-                                <local:GenericTooltipProperties.TooltipData>
-                                    <local:GenericTooltip
-                                        Name="DISCLAIMER"
-                                        BodyColor="#100000"
-                                        Description=" Any Star Wars themed gear CAN NOT be uploaded to the Destiny Model Rips Discord or Google Drive due to potential copyright claims by Disney...&#x0a;&#x0a; Many item strings may appear as 'NotFound' if you do not have the correct decryption key, due to those strings being in redacted pkg files."
-                                        HeaderColor="#5C0000"
-                                        Style="Category" />
-                                </local:GenericTooltipProperties.TooltipData>
-                                <TextBlock
-                                    d:FontFamily="Haas Grot Text 55 Roman"
-                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                    FontSize="14"
-                                    Text="RENEGADES DISCLAIMER" />
-                            </Button>
-                        </Grid>
-                    </Grid>
-
-                    <local:ItemPage
-                        x:Name="Categories"
+                    <Button
+                        x:Name="NextPage"
                         Grid.Row="1"
-                        Grid.Column="1"
-                        VerticalAlignment="Stretch"
-                        Columns="1"
-                        HidePageButtons="True"
-                        IsVertical="True"
-                        ItemMargin="0,0,0,25"
-                        ItemTemplate="{StaticResource ItemCategory}"
-                        Items="{Binding ItemCategories}"
-                        ItemsPerPage="3"
-                        PageIndicatorMargin="0,0,0,25"
-                        SelectOnPageChange="False"
-                        ShowVerticalPageIndicator="True"
-                        SlideDistance="5"
-                        TransitionSpeed="0.075"
-                        UsePlaceholders="False"
-                        UseStackPanel="False" />
-
-                    <Grid
-                        Grid.Row="1"
-                        Grid.Column="0"
-                        Margin="0,50,0,50"
-                        HorizontalAlignment="Right">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="50*" />
-                            <RowDefinition Height="50*" />
-                        </Grid.RowDefinitions>
-
-                        <Button
-                            x:Name="PreviousPage"
-                            Width="50"
-                            Height="Auto"
-                            Margin="2,0,0,0"
-                            local:StyleHelper.BorderThickness="1"
-                            Focusable="False"
-                            Visibility="Visible">
-                            <Button.Style>
-                                <Style BasedOn="{StaticResource D2StyleButtonNoOverlay}" TargetType="Button">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsVertical}" Value="False">
-                                            <Setter Property="Width" Value="Auto" />
-                                            <Setter Property="Height" Value="35" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                            <Border Background="#33FFFFFF" Focusable="False">
-                                <Polygon
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Fill="#CCFFFFFF"
-                                    Points="0, 0 60, 50, 0, 100">
-                                    <Polygon.Style>
-                                        <Style TargetType="Polygon">
-                                            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
-                                            <Setter Property="LayoutTransform">
-                                                <Setter.Value>
-                                                    <TransformGroup>
-                                                        <ScaleTransform ScaleX="0.15" ScaleY="0.15" />
-                                                        <RotateTransform Angle="-90" />
-                                                    </TransformGroup>
-                                                </Setter.Value>
-                                            </Setter>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsVertical}" Value="True">
-                                                    <Setter Property="LayoutTransform">
-                                                        <Setter.Value>
-                                                            <TransformGroup>
-                                                                <ScaleTransform ScaleX="0.15" ScaleY="0.15" />
-                                                                <RotateTransform Angle="00" />
-                                                            </TransformGroup>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Polygon.Style>
-                                </Polygon>
-                            </Border>
-                        </Button>
-
-                        <Button
-                            x:Name="NextPage"
-                            Grid.Row="1"
-                            Width="50"
-                            Height="Auto"
-                            Margin="2,0,0,0"
-                            local:StyleHelper.BorderThickness="1"
-                            Focusable="False"
-                            Visibility="Visible">
-                            <Button.Style>
-                                <Style BasedOn="{StaticResource D2StyleButtonNoOverlay}" TargetType="Button">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsVertical}" Value="False">
-                                            <Setter Property="Width" Value="Auto" />
-                                            <Setter Property="Height" Value="35" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                            <Border Background="#33FFFFFF" Focusable="False">
-                                <Polygon
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Fill="#CCFFFFFF"
-                                    Points="0, 0 60, 50, 0, 100">
-                                    <Polygon.Style>
-                                        <Style TargetType="Polygon">
-                                            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
-                                            <Setter Property="LayoutTransform">
-                                                <Setter.Value>
-                                                    <TransformGroup>
-                                                        <ScaleTransform ScaleX="0.15" ScaleY="0.15" />
-                                                        <RotateTransform Angle="90" />
-                                                    </TransformGroup>
-                                                </Setter.Value>
-                                            </Setter>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsVertical}" Value="True">
-                                                    <Setter Property="LayoutTransform">
-                                                        <Setter.Value>
-                                                            <TransformGroup>
-                                                                <ScaleTransform ScaleX="0.15" ScaleY="0.15" />
-                                                                <RotateTransform Angle="00" />
-                                                            </TransformGroup>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Polygon.Style>
-                                </Polygon>
-                            </Border>
-                        </Button>
-                    </Grid>
+                        Width="50"
+                        Height="Auto"
+                        Margin="2,0,0,0"
+                        local:StyleHelper.BorderThickness="1"
+                        Focusable="False"
+                        Visibility="Visible">
+                        <Button.Style>
+                            <Style BasedOn="{StaticResource D2StyleButtonNoOverlay}" TargetType="Button">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsVertical}" Value="False">
+                                        <Setter Property="Width" Value="Auto" />
+                                        <Setter Property="Height" Value="35" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Border Background="#33FFFFFF" Focusable="False">
+                            <Polygon
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Fill="#CCFFFFFF"
+                                Points="0, 0 60, 50, 0, 100">
+                                <Polygon.Style>
+                                    <Style TargetType="Polygon">
+                                        <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+                                        <Setter Property="LayoutTransform">
+                                            <Setter.Value>
+                                                <TransformGroup>
+                                                    <ScaleTransform ScaleX="0.15" ScaleY="0.15" />
+                                                    <RotateTransform Angle="90" />
+                                                </TransformGroup>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsVertical}" Value="True">
+                                                <Setter Property="LayoutTransform">
+                                                    <Setter.Value>
+                                                        <TransformGroup>
+                                                            <ScaleTransform ScaleX="0.15" ScaleY="0.15" />
+                                                            <RotateTransform Angle="00" />
+                                                        </TransformGroup>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Polygon.Style>
+                            </Polygon>
+                        </Border>
+                    </Button>
                 </Grid>
             </Grid>
-        </Viewbox>
+        </Grid>
+
     </Grid>
 </UserControl>

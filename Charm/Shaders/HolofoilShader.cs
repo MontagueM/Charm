@@ -48,8 +48,22 @@ public class HolofoilShader : ShaderEffect
         return new System.Uri(uriString);
     }
 
+    private static readonly Stopwatch _stopwatch = Stopwatch.StartNew();
+    private float _lastTime;
+    private double _lastFrameTime;
     private void UpdateTime(object sender, EventArgs e)
     {
-        Time = (float)(DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalSeconds;
+        double now = _stopwatch.Elapsed.TotalSeconds;
+        if (now - _lastFrameTime < 1.0 / 60.0)
+            return;
+
+        _lastFrameTime = now;
+        float t = (float)now;
+
+        if (Math.Abs(t - _lastTime) < 0.0001f)
+            return;
+
+        _lastTime = t;
+        Time = t;
     }
 }

@@ -579,78 +579,50 @@ public static class ApiImageUtils
 public sealed class AsyncImageLoader
 {
     private readonly Func<ImageSource> _loader;
-    private readonly Action<string> _notifyPropertyChanged;
-    private readonly string _propertyName;
+    private readonly Action _notifyPropertyChanged;
 
-    private bool _isLoading;
     private ImageSource _image;
+    private Task<ImageSource> _loadTask;
 
     public AsyncImageLoader(
         Func<ImageSource> loader,
-        Action<string> notifyPropertyChanged,
-        string propertyName, bool runNow = false)
+        Action notifyPropertyChanged,
+        bool runNow = false)
     {
-        _loader = loader;
-        _notifyPropertyChanged = notifyPropertyChanged;
-        _propertyName = propertyName;
+        _loader = loader ?? throw new ArgumentNullException(nameof(loader));
+        _notifyPropertyChanged = notifyPropertyChanged ?? throw new ArgumentNullException(nameof(notifyPropertyChanged));
+
         if (runNow)
-            GetImage();
+            _ = GetImage();
     }
 
     public ImageSource GetImage()
     {
-        if (_image != null || _isLoading)
+        if (_image != null)
             return _image;
 
-        StartLoading();
+        if (_loadTask == null)
+        {
+            _loadTask = Task.Run(_loader).ContinueWith(t =>
+            {
+                var img = t.Result;
+
+                if (img is BitmapSource bmp && bmp.CanFreeze)
+                    bmp.Freeze();
+
+                _image = img;
+                _notifyPropertyChanged();
+
+                return img;
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
         return null;
     }
 
     public void SetImage(ImageSource value)
     {
         _image = value;
-        _notifyPropertyChanged(_propertyName);
-    }
-
-    private async void StartLoading()
-    {
-        _isLoading = true;
-        try
-        {
-            var img = await AsyncImageWorker.LoadAsync(_loader);
-            if (img != null)
-            {
-                _image = img;
-                _notifyPropertyChanged(_propertyName);
-            }
-        }
-        finally
-        {
-            _isLoading = false;
-        }
-    }
-}
-
-public static class AsyncImageWorker
-{
-    //private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(18, 36);
-
-    public static async Task<ImageSource> LoadAsync(Func<ImageSource> loader)
-    {
-        //await _semaphore.WaitAsync();
-        try
-        {
-            var img = await Task.Run(loader);
-
-            //if (img is BitmapSource bmp && bmp.CanFreeze)
-            //    bmp.Freeze();
-
-            return img;
-        }
-        finally
-        {
-            //_semaphore.Release();
-        }
+        _notifyPropertyChanged();
     }
 }
 
@@ -763,10 +735,10 @@ public static class UIHelper
         if (additive && obj.Opacity != (double)from)
             from = (float)obj.Opacity;
 
-        obj.Opacity = from;
-
-        Dispatcher.CurrentDispatcher.BeginInvoke(() =>
+        void Start()
         {
+            obj.Opacity = from;
+
             var animation = new DoubleAnimation
             {
                 From = from,
@@ -775,12 +747,17 @@ public static class UIHelper
                 EasingFunction = easing ?? new QuadraticEase { EasingMode = EasingMode.EaseOut },
                 AutoReverse = autoReverse,
             };
+
             if (completed is not null)
                 animation.Completed += completed;
 
             obj.BeginAnimation(UIElement.OpacityProperty, animation);
+        }
 
-        }, DispatcherPriority.Render);
+        if (obj.Dispatcher.CheckAccess())
+            Start();
+        else
+            obj.Dispatcher.BeginInvoke(Start, DispatcherPriority.Loaded);
     }
 
     public static void AnimateSlide(UIElement obj, float seconds, Point to, Point from,
@@ -792,8 +769,7 @@ public static class UIHelper
         // Set initial position before animation to avoid a flash
         translate.X = from.X;
         translate.Y = from.Y;
-
-        Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() =>
+        void Start()
         {
             // Animate X
             var animX = new DoubleAnimation
@@ -819,8 +795,12 @@ public static class UIHelper
 
             translate.BeginAnimation(TranslateTransform.XProperty, animX);
             translate.BeginAnimation(TranslateTransform.YProperty, animY);
+        }
 
-        }), DispatcherPriority.Render);
+        if (obj.Dispatcher.CheckAccess())
+            Start();
+        else
+            obj.Dispatcher.BeginInvoke(Start, DispatcherPriority.Loaded);
     }
 
     public static void AnimateScale(UIElement obj, float seconds, Point to, Point from, bool autoReverse = false, EventHandler? completed = null)
@@ -832,7 +812,7 @@ public static class UIHelper
         scale.ScaleX = from.X;
         scale.ScaleY = from.Y;
 
-        Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() =>
+        void Start()
         {
             // Animate X
             var animX = new DoubleAnimation
@@ -858,8 +838,12 @@ public static class UIHelper
 
             scale.BeginAnimation(ScaleTransform.ScaleXProperty, animX);
             scale.BeginAnimation(ScaleTransform.ScaleYProperty, animY);
+        }
 
-        }), DispatcherPriority.Render);
+        if (obj.Dispatcher.CheckAccess())
+            Start();
+        else
+            obj.Dispatcher.BeginInvoke(Start, DispatcherPriority.Loaded);
     }
 
     public static TransformGroup EnsureTransformGroup(UIElement obj)
@@ -1015,7 +999,7 @@ public static class UIHelper
 
     public static void SelectRadioButton(ItemsControl itemsControl, int index)
     {
-        Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+        itemsControl.Dispatcher.BeginInvoke(new Action(() =>
         {
             if (index < 0 || index >= itemsControl.Items.Count)
                 return;
@@ -1034,7 +1018,7 @@ public static class UIHelper
 
     public static void UnselectAllRadioButtons(ItemsControl itemsControl)
     {
-        Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+        itemsControl.Dispatcher.BeginInvoke(new Action(() =>
         {
             foreach (object? item in itemsControl.Items)
             {

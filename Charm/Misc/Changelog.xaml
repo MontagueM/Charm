@@ -12,17 +12,15 @@
     <UserControl.Resources>
         <DataTemplate x:Key="ChangelogEntry">
             <RadioButton
-                Margin="0,5,5,5"
+                Margin="0,5,0,5"
                 Click="ChangelogEntry_Click"
                 GroupName="VersionButtons"
                 MouseEnter="ChangelogEntry_MouseEnter"
                 Style="{DynamicResource D2StyleRadioButton}"
                 Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                <StackPanel
-                    Margin="15,0,0,0"
-                    HorizontalAlignment="Left"
-                    Orientation="Horizontal">
+                <Grid Margin="15,0,0,0" HorizontalAlignment="Stretch">
                     <TextBlock
+                        HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
                         FontSize="32"
@@ -36,7 +34,7 @@
                         FontSize="22"
                         Foreground="{StaticResource ForegroundColour50}"
                         Text="{Binding Date}" />
-                </StackPanel>
+                </Grid>
 
             </RadioButton>
         </DataTemplate>
@@ -157,6 +155,7 @@
                 <Grid
                     x:Name="ChangeLogPanel"
                     Grid.Column="2"
+                    Margin="0,0,100,0"
                     Visibility="Hidden">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
@@ -186,12 +185,17 @@
                     </StackPanel>
 
 
-                    <Grid Grid.Row="1" Margin="0,0,0,0">
+                    <Grid Grid.Row="1">
+                        <Border
+                            Margin="0,-20,0,0"
+                            VerticalAlignment="Top"
+                            BorderBrush="White"
+                            BorderThickness="0,1,0,1"
+                            Opacity=".5"
+                            Visibility="Visible" />
 
                         <ScrollViewer
-                            Grid.Row="1"
-                            Grid.ColumnSpan="1"
-                            Margin="0,0,100,0"
+                            Margin="0,0,0,0"
                             HorizontalAlignment="Stretch"
                             Background="Transparent"
                             HorizontalScrollBarVisibility="Disabled"

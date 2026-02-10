@@ -1363,699 +1363,701 @@
                 Source="{Binding Item.ItemFoundryBanner}" />
         </Grid>
 
-        <Viewbox Grid.RowSpan="3" Panel.ZIndex="5">
+
+        <Grid
+            Grid.RowSpan="3"
+            Width="1920"
+            Height="990"
+            Panel.ZIndex="5"
+            Background="Transparent"
+            ClipToBounds="True"
+            RenderTransformOrigin="0.5,0.5"
+            SnapsToDevicePixels="True">
+
+            <!--  Emblem  -->
             <Grid
-                Width="1920"
-                Height="990"
-                Background="Transparent"
-                ClipToBounds="True"
-                RenderTransformOrigin="0.5,0.5"
-                SnapsToDevicePixels="True">
-
-                <!--  Emblem  -->
+                x:Name="EmblemContainer"
+                Margin="0,0,0,0"
+                Background="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="75*" />
+                    <RowDefinition Height="50*" />
+                </Grid.RowDefinitions>
                 <Grid
-                    x:Name="EmblemContainer"
-                    Margin="0,0,0,0"
+                    Grid.Row="0"
+                    VerticalAlignment="Bottom"
                     Background="Transparent">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="75*" />
-                        <RowDefinition Height="50*" />
-                    </Grid.RowDefinitions>
-                    <Grid
-                        Grid.Row="0"
-                        VerticalAlignment="Bottom"
-                        Background="Transparent">
-                        <Image
-                            Width="1958"
-                            Height="146"
-                            HorizontalAlignment="Center"
-                            Source="{Binding Emblem.EmblemLarge}" />
-                        <Image
-                            Width="96"
-                            Height="96"
-                            Margin="75,90,0,0"
-                            HorizontalAlignment="Left"
-                            Source="{Binding Emblem.EmblemSmall}" />
+                    <Image
+                        Width="1958"
+                        Height="146"
+                        HorizontalAlignment="Center"
+                        Source="{Binding Emblem.EmblemLarge}" />
+                    <Image
+                        Width="96"
+                        Height="96"
+                        Margin="75,90,0,0"
+                        HorizontalAlignment="Left"
+                        Source="{Binding Emblem.EmblemSmall}" />
 
-                        <Image
-                            Width="948"
-                            Height="128"
-                            Margin="300,-350,0,0"
-                            Source="{Binding Emblem.EmblemMedium}" />
-                        <Image
-                            Width="128"
-                            Height="128"
-                            Margin="-600,-350,0,0"
-                            HorizontalAlignment="Center"
-                            Source="{Binding Emblem.EmblemSmall}" />
+                    <Image
+                        Width="948"
+                        Height="128"
+                        Margin="300,-350,0,0"
+                        Source="{Binding Emblem.EmblemMedium}" />
+                    <Image
+                        Width="128"
+                        Height="128"
+                        Margin="-600,-350,0,0"
+                        HorizontalAlignment="Center"
+                        Source="{Binding Emblem.EmblemSmall}" />
 
-                    </Grid>
-
-
-                    <Rectangle
-                        Grid.Row="1"
-                        VerticalAlignment="Stretch"
-                        Stretch="Fill">
-                        <Rectangle.Fill>
-                            <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
-                                <GradientStop Offset="1" Color="#00000000" />
-                                <GradientStop Offset="0" Color="{Binding Emblem.EmblemColor}" />
-                            </LinearGradientBrush>
-                        </Rectangle.Fill>
-                    </Rectangle>
                 </Grid>
 
-                <!--  Main Item Container  -->
-                <Grid x:Name="MainContainer" Visibility="Visible">
+
+                <Rectangle
+                    Grid.Row="1"
+                    VerticalAlignment="Stretch"
+                    Stretch="Fill">
+                    <Rectangle.Fill>
+                        <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                            <GradientStop Offset="1" Color="#00000000" />
+                            <GradientStop Offset="0" Color="{Binding Emblem.EmblemColor}" />
+                        </LinearGradientBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
+            </Grid>
+
+            <!--  Main Item Container  -->
+            <Grid x:Name="MainContainer" Visibility="Visible">
+                <Grid.RenderTransform>
+                    <TranslateTransform />
+                </Grid.RenderTransform>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="10*" />
+                    <RowDefinition Height="105*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="10*" />
+                    <ColumnDefinition Width="120*" />
+                    <ColumnDefinition Width="10*" />
+                </Grid.ColumnDefinitions>
+
+
+                <Grid
+                    x:Name="MainInfoGrid"
+                    Grid.Row="1"
+                    Grid.Column="1">
                     <Grid.RenderTransform>
                         <TranslateTransform />
                     </Grid.RenderTransform>
-
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="10*" />
-                        <RowDefinition Height="105*" />
+                        <RowDefinition Height="96" />
+                        <RowDefinition Height="auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="10*" />
-                        <ColumnDefinition Width="120*" />
-                        <ColumnDefinition Width="10*" />
-                    </Grid.ColumnDefinitions>
-
-
-                    <Grid
-                        x:Name="MainInfoGrid"
-                        Grid.Row="1"
-                        Grid.Column="1">
-                        <Grid.RenderTransform>
-                            <TranslateTransform />
-                        </Grid.RenderTransform>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="96" />
-                            <RowDefinition Height="auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-
-                        <!--  Item Icon + Name + Type  -->
-                        <Grid Grid.Row="0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="96" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-
-
-                            <!--  Icon Watermark  -->
-                            <Grid
-                                Width="28"
-                                Height="48"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Top"
-                                Panel.ZIndex="10"
-                                Visibility="{Binding Item.ItemWatermark, Converter={StaticResource NullToVisibilityConverter}}">
-                                <Rectangle
-                                    Grid.Row="1"
-                                    Width="22"
-                                    Height="48"
-                                    Margin="0,3,0,0"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Top"
-                                    Opacity="0.6"
-                                    RenderOptions.EdgeMode="Aliased"
-                                    Stretch="Fill">
-                                    <Rectangle.Fill>
-                                        <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
-                                            <GradientStop Offset="0" Color="#00000000" />
-                                            <GradientStop Offset="1" Color="Black" />
-                                        </LinearGradientBrush>
-                                    </Rectangle.Fill>
-                                </Rectangle>
-
-                                <!--  Featured item banner  -->
-                                <Polygon
-                                    Width="28"
-                                    Height="32"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Top"
-                                    Fill="#109191"
-                                    Points="0,0 0,32 14,28 28,32 28,0">
-                                    <Polygon.Style>
-                                        <Style TargetType="Polygon">
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Item.ItemHash, Converter={StaticResource Investment_IsFeaturedItem}}" Value="True">
-                                                    <Setter Property="Visibility" Value="Visible" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Polygon.Style>
-                                </Polygon>
-
-                                <Image
-                                    Width="20"
-                                    Height="20"
-                                    Margin="0,3,0,0"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Top"
-                                    RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                    Source="{Binding Item.ItemWatermark}" />
-                            </Grid>
-
-                            <Border
-                                Width="96"
-                                Height="96"
-                                Panel.ZIndex="1"
-                                BorderBrush="White"
-                                BorderThickness="3" />
-
-                            <Image
-                                Width="96"
-                                Height="96"
-                                d:Source="https://www.bungie.net/common/destiny2_content/icons/7a793b17f8c18aaed66c6b87de9ff5f8.jpg"
-                                RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                Source="{Binding Item.ItemIconBackground}" />
-
-                            <Grid Width="96" Height="96">
-                                <Grid.Style>
-                                    <Style TargetType="Grid">
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                        <Style.Triggers>
-                                            <MultiDataTrigger>
-                                                <MultiDataTrigger.Conditions>
-                                                    <Condition Binding="{Binding Item.Item.IsHolofoil, Converter={StaticResource HolofoilEnabledConverter}}" Value="True" />
-                                                    <Condition Binding="{Binding Item.Item.IsHolofoil}" Value="True" />
-                                                </MultiDataTrigger.Conditions>
-                                                <MultiDataTrigger.Setters>
-                                                    <Setter Property="Visibility" Value="Visible" />
-                                                </MultiDataTrigger.Setters>
-                                            </MultiDataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Grid.Style>
-                                <Grid>
-                                    <Grid.Effect>
-                                        <local:HolofoilShader />
-                                    </Grid.Effect>
-                                </Grid>
-
-                                <Border
-                                    BorderBrush="White"
-                                    BorderThickness="8"
-                                    Opacity="0.15" />
-                            </Grid>
-
-                            <Image
-                                Width="96"
-                                Height="96"
-                                d:Source="https://www.bungie.net/common/destiny2_content/icons/7a793b17f8c18aaed66c6b87de9ff5f8.jpg"
-                                RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                Source="{Binding Item.ItemIcon}"
-                                Visibility="Visible" />
-
-                            <Image
-                                Width="96"
-                                Height="96"
-                                d:Source="https://www.bungie.net/common/destiny2_content/icons/7a793b17f8c18aaed66c6b87de9ff5f8.jpg"
-                                RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                Source="{Binding Item.ItemIconOverlay}" />
-
-                            <Image
-                                Width="96"
-                                Height="96"
-                                Panel.ZIndex="1"
-                                d:Source="https://www.bungie.net/common/destiny2_content/icons/7a793b17f8c18aaed66c6b87de9ff5f8.jpg"
-                                Source="{Binding Item.ItemIcon, Converter={StaticResource TextureFromHashConverter}, ConverterParameter=3C45C280}" />
-
-                            <StackPanel
-                                Grid.Column="1"
-                                Margin="25,0,0,0"
-                                Orientation="Vertical">
-                                <TextBlock
-                                    Margin="0,-16,0,0"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Top"
-                                    Panel.ZIndex="1"
-                                    d:FontFamily="Haas Grot Text 65 Medium"
-                                    d:Text="IZANAGI'S BURDEN"
-                                    FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
-                                    FontSize="72"
-                                    Foreground="{StaticResource ForegroundColour100}"
-                                    Text="{Binding Item.ItemName}" />
-
-                                <TextBlock
-                                    Margin="0,-9,0,0"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Top"
-                                    Panel.ZIndex="1"
-                                    d:FontFamily="Haas Grot Text 55 Roman"
-                                    d:Text="SNIPER RIFLE"
-                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                                    FontSize="32"
-                                    Foreground="{StaticResource ForegroundColour100}"
-                                    Opacity="0.7"
-                                    Text="{Binding Item.ItemType}" />
-                            </StackPanel>
-                        </Grid>
-
-                        <!--  Item Flavor Text  -->
-                        <Grid Grid.Row="1">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="40*" />
-                                <ColumnDefinition Width="50*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock
-                                Grid.Row="1"
-                                Margin="0,40,0,40"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                Panel.ZIndex="1"
-                                d:FontFamily="Haas Grot Text 56 Italic"
-                                d:Text="&quot;Shame. Guilt. Fear. We all bear them. Gather your regrets, purge them as best you can. Let your enemies feel the weight of your burdens.&quot; —Ada-1"
-                                FontFamily="{DynamicResource Haas Grot Text 56 Italic}"
-                                FontSize="22"
-                                Foreground="{StaticResource ForegroundColour100}"
-                                Opacity="0.75"
-                                Text="{Binding Item.ItemFlavorText}"
-                                TextWrapping="WrapWithOverflow" />
-                        </Grid>
-
-                        <!--  Socket + Stat Entries  -->
-                        <Grid Grid.Row="2">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="50*" />
-                                <ColumnDefinition Width="50*" />
-                            </Grid.ColumnDefinitions>
-
-                            <!--  Sockets  -->
-                            <local:ItemPage
-                                x:Name="SocketCategoriesPage"
-                                Columns="1"
-                                HidePageButtons="True"
-                                IsVertical="True"
-                                ItemMargin="0"
-                                ItemTemplate="{StaticResource SocketCategory}"
-                                Items="{Binding SocketCategories}"
-                                ItemsPerPage="3"
-                                SelectOnPageChange="False"
-                                SlideDistance="10"
-                                UsePlaceholders="False"
-                                UseStackPanel="True" />
-
-                            <!--  Stats  -->
-                            <Grid
-                                x:Name="StatsPanel"
-                                Grid.Column="1"
-                                Margin="0,0,-70,100"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Bottom"
-                                ClipToBounds="False"
-                                Visibility="{Binding StatEntries, Converter={StaticResource IsCollectionEmptyToVisConverter}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="auto" />
-                                    <ColumnDefinition Width="auto" />
-                                    <ColumnDefinition Width="auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <Rectangle
-                                    Grid.ColumnSpan="2"
-                                    Margin="-20"
-                                    VerticalAlignment="Stretch"
-                                    Opacity="0.4"
-                                    SnapsToDevicePixels="True"
-                                    Stretch="Fill">
-                                    <Rectangle.Fill>
-                                        <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
-                                            <GradientStop Offset="1" Color="#00000000" />
-                                            <GradientStop Offset="0.25" Color="Black" />
-                                        </LinearGradientBrush>
-                                    </Rectangle.Fill>
-                                </Rectangle>
-
-                                <Rectangle
-                                    Grid.Column="2"
-                                    Grid.ColumnSpan="2"
-                                    Margin="20,-20,-1000,-20"
-                                    VerticalAlignment="Stretch"
-                                    Fill="Black"
-                                    Opacity="0.4"
-                                    SnapsToDevicePixels="True"
-                                    Stretch="Fill" />
-
-                                <TextBlock
-                                    x:Name="ItemDamageType"
-                                    Grid.Row="0"
-                                    Grid.Column="0"
-                                    Margin="0,0,0,0"
-                                    HorizontalAlignment="Right"
-                                    Panel.ZIndex="1"
-                                    FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
-                                    FontSize="50">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Visible" />
-                                            <Setter Property="Foreground" Value="{StaticResource ForegroundColour100}" />
-                                            <Setter Property="Effect">
-                                                <Setter.Value>
-                                                    <DropShadowEffect
-                                                        BlurRadius="2"
-                                                        Direction="320"
-                                                        Opacity="0.7"
-                                                        ShadowDepth="2"
-                                                        Color="#1B1B1B" />
-                                                </Setter.Value>
-                                            </Setter>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="">
-                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="Kinetic">
-                                                    <Setter Property="Foreground" Value="White" />
-                                                    <Setter Property="Text" Value="Kinetic" />
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="Arc">
-                                                    <Setter Property="Foreground" Value="#85c5ec" />
-                                                    <Setter Property="Text" Value=" Arc" />
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="Solar">
-                                                    <Setter Property="Foreground" Value="#f2711b" />
-                                                    <Setter Property="Text" Value=" Solar" />
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="Void">
-                                                    <Setter Property="Foreground" Value="#b184c5" />
-                                                    <Setter Property="Text" Value=" Void" />
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="Stasis">
-                                                    <Setter Property="Foreground" Value="#4d88ff" />
-                                                    <Setter Property="Text" Value=" Stasis" />
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="Strand">
-                                                    <Setter Property="Foreground" Value="#35e366" />
-                                                    <Setter Property="Text" Value=" Strand" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-
-                                <Border
-                                    Grid.Column="1"
-                                    Margin="50,0,25,0"
-                                    BorderBrush="White"
-                                    BorderThickness="2,0,0,0"
-                                    Focusable="False"
-                                    Opacity="0.5"
-                                    Visibility="Visible" />
-
-                                <StackPanel Grid.Column="2">
-                                    <ItemsControl Margin="0,0,0,15" ItemsSource="{Binding StatEntries}" />
-
-                                    <ItemsControl
-                                        Margin="0,0,0,0"
-                                        ItemTemplate="{StaticResource NumericStatEntry}"
-                                        ItemsSource="{Binding NumericStatEntries}" />
-                                </StackPanel>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Grid>
-
-                <!--  Appearance Subscreen indicator  -->
-                <Grid
-                    x:Name="AppearanceSubscreen"
-                    Margin="0,0,0,10"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Bottom"
-                    Panel.ZIndex="3"
-                    IsHitTestVisible="False"
-                    Visibility="Collapsed">
-                    <StackPanel>
-                        <TextBlock
-                            x:Name="SubscreenText"
-                            Margin="0,0,0,5"
-                            HorizontalAlignment="Center"
-                            FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
-                            FontSize="20"
-                            Foreground="White"
-                            Opacity="0.8"
-                            Text="A P P E A R A N C E">
-                            <TextBlock.Effect>
-                                <DropShadowEffect
-                                    BlurRadius="1"
-                                    Opacity="0.43"
-                                    ShadowDepth="3"
-                                    Color="Black" />
-                            </TextBlock.Effect>
-                        </TextBlock>
-
-                        <Rectangle
-                            Width="500"
-                            Height="8"
-                            Margin="0,0,0,5"
-                            HorizontalAlignment="Stretch"
-                            Opacity="0.5">
-                            <Rectangle.Fill>
-                                <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
-                                    <GradientStop x:Name="LeftStop" Offset="0" Color="Transparent" />
-                                    <GradientStop x:Name="MiddleStop" Offset="0.5" Color="White" />
-                                    <GradientStop x:Name="RightStop" Offset="1" Color="Transparent" />
-                                </LinearGradientBrush>
-                            </Rectangle.Fill>
-
-                            <Rectangle.Triggers>
-                                <EventTrigger RoutedEvent="Rectangle.Loaded">
-                                    <BeginStoryboard>
-                                        <Storyboard AutoReverse="True" RepeatBehavior="Forever">
-                                            <DoubleAnimation
-                                                Storyboard.TargetName="LeftStop"
-                                                Storyboard.TargetProperty="Offset"
-                                                From="0"
-                                                To="0.20"
-                                                Duration="0:0:3">
-                                                <DoubleAnimation.EasingFunction>
-                                                    <SineEase EasingMode="EaseInOut" />
-                                                </DoubleAnimation.EasingFunction>
-                                            </DoubleAnimation>
-
-                                            <DoubleAnimation
-                                                Storyboard.TargetName="RightStop"
-                                                Storyboard.TargetProperty="Offset"
-                                                From="1"
-                                                To="0.80"
-                                                Duration="0:0:3">
-                                                <DoubleAnimation.EasingFunction>
-                                                    <SineEase EasingMode="EaseInOut" />
-                                                </DoubleAnimation.EasingFunction>
-                                            </DoubleAnimation>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </EventTrigger>
-                            </Rectangle.Triggers>
-                        </Rectangle>
-
-                        <Polygon
-                            x:Name="SubscreenArrowUp"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Bottom"
-                            Fill="White"
-                            Opacity="0.5"
-                            Points="0, 0 50, 50, 0, 100"
-                            Visibility="Hidden">
-                            <Polygon.Style>
-                                <Style TargetType="Polygon">
-                                    <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
-                                    <Setter Property="LayoutTransform">
-                                        <Setter.Value>
-                                            <TransformGroup>
-                                                <ScaleTransform ScaleX="0.15" ScaleY="0.2" />
-                                                <RotateTransform Angle="-90" />
-                                            </TransformGroup>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </Polygon.Style>
-                        </Polygon>
-
-                        <Grid Margin="0,2,0,2">
-                            <TextBlock
-                                Margin="0,0,25,0"
-                                HorizontalAlignment="Center"
-                                FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
-                                FontSize="22"
-                                Foreground="#2f2f2f"
-                                Opacity="1"
-                                Text="" />
-
-                            <TextBlock
-                                x:Name="SubscreenKey"
-                                Margin="0,0,0,0"
-                                HorizontalAlignment="Center"
-                                FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
-                                FontSize="22"
-                                Foreground="White"
-                                Opacity="0.8"
-                                Text="" />
-                        </Grid>
-
-
-                        <Polygon
-                            x:Name="SubscreenArrowDown"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Bottom"
-                            Fill="White"
-                            Opacity="0.5"
-                            Points="0, 0 50, 50, 0, 100">
-                            <Polygon.Style>
-                                <Style TargetType="Polygon">
-                                    <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
-                                    <Setter Property="LayoutTransform">
-                                        <Setter.Value>
-                                            <TransformGroup>
-                                                <ScaleTransform ScaleX="0.15" ScaleY="0.2" />
-                                                <RotateTransform Angle="90" />
-                                            </TransformGroup>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </Polygon.Style>
-                        </Polygon>
-                    </StackPanel>
-
-                </Grid>
-
-                <!--  Item Lore  -->
-                <Grid
-                    x:Name="LoreEntry"
-                    Width="880"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Stretch"
-                    Panel.ZIndex="5"
-                    Background="#CC1B1C20"
-                    Visibility="Collapsed">
-                    <Border
-                        BorderBrush="White"
-                        BorderThickness="0,0,2,0"
-                        Opacity="0.3" />
-
-                    <Grid>
+                    <!--  Item Icon + Name + Type  -->
+                    <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="740" />
+                            <ColumnDefinition Width="96" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="105" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="80" />
-                        </Grid.RowDefinitions>
 
-                        <!--  Item Name + upper border  -->
-                        <StackPanel Grid.Column="1" VerticalAlignment="Bottom">
-                            <TextBlock
-                                Margin="0,0,0,30"
+                        <!--  Icon Watermark  -->
+                        <Grid
+                            Width="28"
+                            Height="48"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Panel.ZIndex="10"
+                            Visibility="{Binding Item.ItemWatermark, Converter={StaticResource NullToVisibilityConverter}}">
+                            <Rectangle
+                                Grid.Row="1"
+                                Width="22"
+                                Height="48"
+                                Margin="0,3,0,0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Top"
+                                Opacity="0.6"
+                                RenderOptions.EdgeMode="Aliased"
+                                Stretch="Fill">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                                        <GradientStop Offset="0" Color="#00000000" />
+                                        <GradientStop Offset="1" Color="Black" />
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+
+                            <!--  Featured item banner  -->
+                            <Polygon
+                                Width="28"
+                                Height="32"
                                 HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
+                                VerticalAlignment="Top"
+                                Fill="#109191"
+                                Points="0,0 0,32 14,28 28,32 28,0">
+                                <Polygon.Style>
+                                    <Style TargetType="Polygon">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Item.ItemHash, Converter={StaticResource Investment_IsFeaturedItem}}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Polygon.Style>
+                            </Polygon>
+
+                            <Image
+                                Width="20"
+                                Height="20"
+                                Margin="0,3,0,0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Top"
+                                RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                Source="{Binding Item.ItemWatermark}" />
+                        </Grid>
+
+                        <Border
+                            Width="96"
+                            Height="96"
+                            Panel.ZIndex="1"
+                            BorderBrush="White"
+                            BorderThickness="3" />
+
+                        <Image
+                            Width="96"
+                            Height="96"
+                            d:Source="https://www.bungie.net/common/destiny2_content/icons/7a793b17f8c18aaed66c6b87de9ff5f8.jpg"
+                            RenderOptions.BitmapScalingMode="NearestNeighbor"
+                            Source="{Binding Item.ItemIconBackground}" />
+
+                        <Grid Width="96" Height="96">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Item.Item.IsHolofoil, Converter={StaticResource HolofoilEnabledConverter}}" Value="True" />
+                                                <Condition Binding="{Binding Item.Item.IsHolofoil}" Value="True" />
+                                            </MultiDataTrigger.Conditions>
+                                            <MultiDataTrigger.Setters>
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </MultiDataTrigger.Setters>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <Grid>
+                                <Grid.Effect>
+                                    <local:HolofoilShader />
+                                </Grid.Effect>
+                            </Grid>
+
+                            <Border
+                                BorderBrush="White"
+                                BorderThickness="8"
+                                Opacity="0.15" />
+                        </Grid>
+
+                        <Image
+                            Width="96"
+                            Height="96"
+                            d:Source="https://www.bungie.net/common/destiny2_content/icons/7a793b17f8c18aaed66c6b87de9ff5f8.jpg"
+                            RenderOptions.BitmapScalingMode="NearestNeighbor"
+                            Source="{Binding Item.ItemIcon}"
+                            Visibility="Visible" />
+
+                        <Image
+                            Width="96"
+                            Height="96"
+                            d:Source="https://www.bungie.net/common/destiny2_content/icons/7a793b17f8c18aaed66c6b87de9ff5f8.jpg"
+                            RenderOptions.BitmapScalingMode="NearestNeighbor"
+                            Source="{Binding Item.ItemIconOverlay}" />
+
+                        <Image
+                            Width="96"
+                            Height="96"
+                            Panel.ZIndex="1"
+                            d:Source="https://www.bungie.net/common/destiny2_content/icons/7a793b17f8c18aaed66c6b87de9ff5f8.jpg"
+                            Source="{Binding Item.ItemIcon, Converter={StaticResource TextureFromHashConverter}, ConverterParameter=3C45C280}" />
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Margin="25,0,0,0"
+                            Orientation="Vertical">
+                            <TextBlock
+                                Margin="0,-16,0,0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
                                 Panel.ZIndex="1"
                                 d:FontFamily="Haas Grot Text 65 Medium"
                                 d:Text="IZANAGI'S BURDEN"
                                 FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
-                                FontSize="30"
-                                FontWeight="Bold"
+                                FontSize="72"
                                 Foreground="{StaticResource ForegroundColour100}"
-                                Opacity="0.9"
-                                Text="{Binding Item.ItemName}"
-                                Typography.CapitalSpacing="True" />
+                                Text="{Binding Item.ItemName}" />
 
-                            <Rectangle
-                                Width="34"
-                                Height="3"
-                                HorizontalAlignment="Center"
-                                Fill="White"
-                                Opacity="0.3" />
-                            <Rectangle
-                                Width="740"
-                                Height="1"
-                                HorizontalAlignment="Center"
-                                Fill="White"
-                                Opacity="0.3" />
-                        </StackPanel>
-
-                        <!--  Item Flavor Text  -->
-                        <Grid
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            Grid.ColumnSpan="2"
-                            Margin="0,45,0,0">
-
-                            <ScrollViewer
-                                Grid.Row="1"
-                                Grid.ColumnSpan="1"
-                                Margin="0,0,30,0"
-                                HorizontalAlignment="Stretch"
-                                Background="Transparent"
-                                HorizontalScrollBarVisibility="Disabled"
-                                VerticalScrollBarVisibility="Auto">
-                                <ScrollViewer.Resources>
-                                    <Style BasedOn="{StaticResource BorderedScrollBar}" TargetType="ScrollBar">
-                                        <Setter Property="Width" Value="7" />
-                                    </Style>
-                                </ScrollViewer.Resources>
-                                <StackPanel>
-                                    <TextBlock
-                                        HorizontalAlignment="Left"
-                                        VerticalAlignment="Top"
-                                        Panel.ZIndex="1"
-                                        FontFamily="{DynamicResource Haas Grot Disp 75 Bold}"
-                                        FontSize="22"
-                                        Foreground="{StaticResource ForegroundColour90}"
-                                        Opacity="0.9"
-                                        Text="{Binding Item.ItemFlavorText, Converter={StaticResource StringToUpperConverter}}"
-                                        TextWrapping="WrapWithOverflow"
-                                        Typography.CapitalSpacing="True" />
-                                    <TextBlock
-                                        Margin="0,35,20,0"
-                                        HorizontalAlignment="Left"
-                                        d:Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                                        FontSize="23"
-                                        LineHeight="32px"
-                                        Text="{Binding Item.ItemLore}"
-                                        TextWrapping="WrapWithOverflow"
-                                        Typography.CapitalSpacing="True" />
-                                </StackPanel>
-
-
-
-                            </ScrollViewer>
-                        </Grid>
-
-                        <!--  Lower border  -->
-                        <StackPanel
-                            Grid.Row="2"
-                            Grid.Column="1"
-                            Margin="0,25,0,0"
-                            VerticalAlignment="Center">
-
-                            <Rectangle
-                                Width="740"
-                                Height="1"
-                                HorizontalAlignment="Center"
-                                Fill="White"
-                                Opacity="0.3" />
-                            <Rectangle
-                                Width="34"
-                                Height="3"
-                                HorizontalAlignment="Center"
-                                Fill="White"
-                                Opacity="0.3" />
-
+                            <TextBlock
+                                Margin="0,-9,0,0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Panel.ZIndex="1"
+                                d:FontFamily="Haas Grot Text 55 Roman"
+                                d:Text="SNIPER RIFLE"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                FontSize="32"
+                                Foreground="{StaticResource ForegroundColour100}"
+                                Opacity="0.7"
+                                Text="{Binding Item.ItemType}" />
                         </StackPanel>
                     </Grid>
 
+                    <!--  Item Flavor Text  -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="40*" />
+                            <ColumnDefinition Width="50*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Grid.Row="1"
+                            Margin="0,40,0,40"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Panel.ZIndex="1"
+                            d:FontFamily="Haas Grot Text 56 Italic"
+                            d:Text="&quot;Shame. Guilt. Fear. We all bear them. Gather your regrets, purge them as best you can. Let your enemies feel the weight of your burdens.&quot; —Ada-1"
+                            FontFamily="{DynamicResource Haas Grot Text 56 Italic}"
+                            FontSize="22"
+                            Foreground="{StaticResource ForegroundColour100}"
+                            Opacity="0.75"
+                            Text="{Binding Item.ItemFlavorText}"
+                            TextWrapping="WrapWithOverflow" />
+                    </Grid>
+
+                    <!--  Socket + Stat Entries  -->
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50*" />
+                            <ColumnDefinition Width="50*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!--  Sockets  -->
+                        <local:ItemPage
+                            x:Name="SocketCategoriesPage"
+                            Columns="1"
+                            HidePageButtons="True"
+                            IsVertical="True"
+                            ItemMargin="0"
+                            ItemTemplate="{StaticResource SocketCategory}"
+                            Items="{Binding SocketCategories}"
+                            ItemsPerPage="3"
+                            SelectOnPageChange="False"
+                            SlideDistance="10"
+                            UsePlaceholders="False"
+                            UseStackPanel="True" />
+
+                        <!--  Stats  -->
+                        <Grid
+                            x:Name="StatsPanel"
+                            Grid.Column="1"
+                            Margin="0,0,-70,100"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            ClipToBounds="False"
+                            Visibility="{Binding StatEntries, Converter={StaticResource IsCollectionEmptyToVisConverter}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Rectangle
+                                Grid.ColumnSpan="2"
+                                Margin="-20"
+                                VerticalAlignment="Stretch"
+                                Opacity="0.4"
+                                SnapsToDevicePixels="True"
+                                Stretch="Fill">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
+                                        <GradientStop Offset="1" Color="#00000000" />
+                                        <GradientStop Offset="0.25" Color="Black" />
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+
+                            <Rectangle
+                                Grid.Column="2"
+                                Grid.ColumnSpan="2"
+                                Margin="20,-20,-1000,-20"
+                                VerticalAlignment="Stretch"
+                                Fill="Black"
+                                Opacity="0.4"
+                                SnapsToDevicePixels="True"
+                                Stretch="Fill" />
+
+                            <TextBlock
+                                x:Name="ItemDamageType"
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Margin="0,0,0,0"
+                                HorizontalAlignment="Right"
+                                Panel.ZIndex="1"
+                                FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                                FontSize="50">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Setter Property="Foreground" Value="{StaticResource ForegroundColour100}" />
+                                        <Setter Property="Effect">
+                                            <Setter.Value>
+                                                <DropShadowEffect
+                                                    BlurRadius="2"
+                                                    Direction="320"
+                                                    Opacity="0.7"
+                                                    ShadowDepth="2"
+                                                    Color="#1B1B1B" />
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="Kinetic">
+                                                <Setter Property="Foreground" Value="White" />
+                                                <Setter Property="Text" Value="Kinetic" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="Arc">
+                                                <Setter Property="Foreground" Value="#85c5ec" />
+                                                <Setter Property="Text" Value=" Arc" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="Solar">
+                                                <Setter Property="Foreground" Value="#f2711b" />
+                                                <Setter Property="Text" Value=" Solar" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="Void">
+                                                <Setter Property="Foreground" Value="#b184c5" />
+                                                <Setter Property="Text" Value=" Void" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="Stasis">
+                                                <Setter Property="Foreground" Value="#4d88ff" />
+                                                <Setter Property="Text" Value=" Stasis" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="Strand">
+                                                <Setter Property="Foreground" Value="#35e366" />
+                                                <Setter Property="Text" Value=" Strand" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <Border
+                                Grid.Column="1"
+                                Margin="50,0,25,0"
+                                BorderBrush="White"
+                                BorderThickness="2,0,0,0"
+                                Focusable="False"
+                                Opacity="0.5"
+                                Visibility="Visible" />
+
+                            <StackPanel Grid.Column="2">
+                                <ItemsControl Margin="0,0,0,15" ItemsSource="{Binding StatEntries}" />
+
+                                <ItemsControl
+                                    Margin="0,0,0,0"
+                                    ItemTemplate="{StaticResource NumericStatEntry}"
+                                    ItemsSource="{Binding NumericStatEntries}" />
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
                 </Grid>
             </Grid>
 
-        </Viewbox>
+            <!--  Appearance Subscreen indicator  -->
+            <Grid
+                x:Name="AppearanceSubscreen"
+                Margin="0,0,0,10"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Panel.ZIndex="3"
+                IsHitTestVisible="False"
+                Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock
+                        x:Name="SubscreenText"
+                        Margin="0,0,0,5"
+                        HorizontalAlignment="Center"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
+                        FontSize="20"
+                        Foreground="White"
+                        Opacity="0.8"
+                        Text="A P P E A R A N C E">
+                        <TextBlock.Effect>
+                            <DropShadowEffect
+                                BlurRadius="1"
+                                Opacity="0.43"
+                                ShadowDepth="3"
+                                Color="Black" />
+                        </TextBlock.Effect>
+                    </TextBlock>
+
+                    <Rectangle
+                        Width="500"
+                        Height="8"
+                        Margin="0,0,0,5"
+                        HorizontalAlignment="Stretch"
+                        Opacity="0.5">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
+                                <GradientStop x:Name="LeftStop" Offset="0" Color="Transparent" />
+                                <GradientStop x:Name="MiddleStop" Offset="0.5" Color="White" />
+                                <GradientStop x:Name="RightStop" Offset="1" Color="Transparent" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+
+                        <Rectangle.Triggers>
+                            <EventTrigger RoutedEvent="Rectangle.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard AutoReverse="True" RepeatBehavior="Forever">
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="LeftStop"
+                                            Storyboard.TargetProperty="Offset"
+                                            From="0"
+                                            To="0.20"
+                                            Duration="0:0:3">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="RightStop"
+                                            Storyboard.TargetProperty="Offset"
+                                            From="1"
+                                            To="0.80"
+                                            Duration="0:0:3">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Rectangle.Triggers>
+                    </Rectangle>
+
+                    <Polygon
+                        x:Name="SubscreenArrowUp"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Fill="White"
+                        Opacity="0.5"
+                        Points="0, 0 50, 50, 0, 100"
+                        Visibility="Hidden">
+                        <Polygon.Style>
+                            <Style TargetType="Polygon">
+                                <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+                                <Setter Property="LayoutTransform">
+                                    <Setter.Value>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="0.15" ScaleY="0.2" />
+                                            <RotateTransform Angle="-90" />
+                                        </TransformGroup>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Polygon.Style>
+                    </Polygon>
+
+                    <Grid Margin="0,2,0,2">
+                        <TextBlock
+                            Margin="0,0,25,0"
+                            HorizontalAlignment="Center"
+                            FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                            FontSize="22"
+                            Foreground="#2f2f2f"
+                            Opacity="1"
+                            Text="" />
+
+                        <TextBlock
+                            x:Name="SubscreenKey"
+                            Margin="0,0,0,0"
+                            HorizontalAlignment="Center"
+                            FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                            FontSize="22"
+                            Foreground="White"
+                            Opacity="0.8"
+                            Text="" />
+                    </Grid>
+
+
+                    <Polygon
+                        x:Name="SubscreenArrowDown"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Fill="White"
+                        Opacity="0.5"
+                        Points="0, 0 50, 50, 0, 100">
+                        <Polygon.Style>
+                            <Style TargetType="Polygon">
+                                <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+                                <Setter Property="LayoutTransform">
+                                    <Setter.Value>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="0.15" ScaleY="0.2" />
+                                            <RotateTransform Angle="90" />
+                                        </TransformGroup>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Polygon.Style>
+                    </Polygon>
+                </StackPanel>
+
+            </Grid>
+
+            <!--  Item Lore  -->
+            <Grid
+                x:Name="LoreEntry"
+                Width="880"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Stretch"
+                Panel.ZIndex="5"
+                Background="#CC1B1C20"
+                Visibility="Collapsed">
+                <Border
+                    BorderBrush="White"
+                    BorderThickness="0,0,2,0"
+                    Opacity="0.3" />
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="740" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="105" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="80" />
+                    </Grid.RowDefinitions>
+
+                    <!--  Item Name + upper border  -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Bottom">
+                        <TextBlock
+                            Margin="0,0,0,30"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Panel.ZIndex="1"
+                            d:FontFamily="Haas Grot Text 65 Medium"
+                            d:Text="IZANAGI'S BURDEN"
+                            FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                            FontSize="30"
+                            FontWeight="Bold"
+                            Foreground="{StaticResource ForegroundColour100}"
+                            Opacity="0.9"
+                            Text="{Binding Item.ItemName}"
+                            Typography.CapitalSpacing="True" />
+
+                        <Rectangle
+                            Width="34"
+                            Height="3"
+                            HorizontalAlignment="Center"
+                            Fill="White"
+                            Opacity="0.3" />
+                        <Rectangle
+                            Width="740"
+                            Height="1"
+                            HorizontalAlignment="Center"
+                            Fill="White"
+                            Opacity="0.3" />
+                    </StackPanel>
+
+                    <!--  Item Flavor Text  -->
+                    <Grid
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        Margin="0,45,0,0">
+
+                        <ScrollViewer
+                            Grid.Row="1"
+                            Grid.ColumnSpan="1"
+                            Margin="0,0,30,0"
+                            HorizontalAlignment="Stretch"
+                            Background="Transparent"
+                            HorizontalScrollBarVisibility="Disabled"
+                            VerticalScrollBarVisibility="Auto">
+                            <ScrollViewer.Resources>
+                                <Style BasedOn="{StaticResource BorderedScrollBar}" TargetType="ScrollBar">
+                                    <Setter Property="Width" Value="7" />
+                                </Style>
+                            </ScrollViewer.Resources>
+                            <StackPanel>
+                                <TextBlock
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Disp 75 Bold}"
+                                    FontSize="22"
+                                    Foreground="{StaticResource ForegroundColour90}"
+                                    Opacity="0.9"
+                                    Text="{Binding Item.ItemFlavorText, Converter={StaticResource StringToUpperConverter}}"
+                                    TextWrapping="WrapWithOverflow"
+                                    Typography.CapitalSpacing="True" />
+                                <TextBlock
+                                    Margin="0,35,20,0"
+                                    HorizontalAlignment="Left"
+                                    d:Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="23"
+                                    LineHeight="32px"
+                                    Text="{Binding Item.ItemLore}"
+                                    TextWrapping="WrapWithOverflow"
+                                    Typography.CapitalSpacing="True" />
+                            </StackPanel>
+
+
+
+                        </ScrollViewer>
+                    </Grid>
+
+                    <!--  Lower border  -->
+                    <StackPanel
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Margin="0,25,0,0"
+                        VerticalAlignment="Center">
+
+                        <Rectangle
+                            Width="740"
+                            Height="1"
+                            HorizontalAlignment="Center"
+                            Fill="White"
+                            Opacity="0.3" />
+                        <Rectangle
+                            Width="34"
+                            Height="3"
+                            HorizontalAlignment="Center"
+                            Fill="White"
+                            Opacity="0.3" />
+
+                    </StackPanel>
+                </Grid>
+
+            </Grid>
+        </Grid>
+
+
 
         <Grid
             Grid.Row="2"

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Arithmic;
@@ -105,21 +106,17 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     protected override void Initialise()
     {
-        if (_strategy is >= TigerStrategy.DESTINY2_WITCHQUEEN_6307 or TigerStrategy.DESTINY1_RISE_OF_IRON)
-        {
+        if (Strategy.IsLatest() || Strategy.IsD1())
             GetAllInvestmentTags();
-        }
         else
-        {
-            Log.Info("API is not supported for versions below DESTINY2_WITCHQUEEN_6307");
-        }
+            Log.Info("API is only supported on the latest verison of D2 or D1.");
     }
 
     private void GetAllInvestmentTags()
     {
         ConcurrentHashSet<FileHash> allHashes = new();
         // Iterate over all investment pkgs until we find all the tags we need
-        if (_strategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        if (Strategy.IsLatest())
         {
             bool PackageFilterFunc(string packagePath) => packagePath.Contains("investment") || packagePath.Contains("client_startup");
             allHashes = PackageResourcer.Get().GetAllHashes(PackageFilterFunc);
@@ -251,7 +248,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                 }
             });
         }
-        else if (_strategy == TigerStrategy.DESTINY1_RISE_OF_IRON) // No need to loop hashes when D1 will never change
+        else // No need to loop hashes when D1 will never change
         {
             _localizedStringsIndexTag = FileResourcer.Get().GetSchemaTag<S095A8080>(new FileHash("1AE2A580"));
             GetLocalizedStringsIndexDict();
@@ -280,12 +277,12 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             Task.Run(GetInventoryItemStringThings),
             Task.Run(GetItemIconMap),
             Task.Run(GetSocketCategoryStrings),
-            Task.Run(GetInventoryItemLoreStrings),
+            Task.Run(GetInventoryItemLoreStrings), // Biggest load time offender at ~550ms
             Task.Run(GetSandboxPerkStrings),
             Task.Run(GetStatStrings),
             Task.Run(GetCollectableIndexDict),
             Task.Run(GetCollectables),
-            Task.Run(GetCollectableStrings),
+            Task.Run(GetCollectableStrings), // ~275ms
             Task.Run(GetObjectives),
             Task.Run(GetObjectiveStrings),
             Task.Run(GetSandboxPerkMap2),
@@ -1137,9 +1134,11 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     {
         try
         {
+            Stopwatch sw = Stopwatch.StartNew();
             Log.Debug($"Starting {methodName}");
             method();
-            Log.Debug($"Completed {methodName}");
+            sw.Stop();
+            Log.Debug($"Completed {methodName} in {sw.Elapsed.Milliseconds}ms");
         }
         catch (Exception ex)
         {

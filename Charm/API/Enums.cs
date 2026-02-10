@@ -42,7 +42,7 @@ public static class DestinyDamageType
                 return DestinyDamageTypeEnum.Strand;
 
             default:
-                Log.Warning($"Unknown DestinyDamageTypeEnum {index}");
+                Log.Debug($"Unknown DestinyDamageTypeEnum {index}");
                 return DestinyDamageTypeEnum.None;
         }
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -150,11 +151,12 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
         ShowTooltip();
     }
 
-    public async void MakeTooltip(InventoryItem item, DestinySocketCategoryStyle overrideStyle = DestinySocketCategoryStyle.Unknown)
+    public async Task MakeTooltip(InventoryItem item, DestinySocketCategoryStyle overrideStyle = DestinySocketCategoryStyle.Unknown)
     {
         ClearTooltip();
-        var blocks = new List<ToolTipBlock>();
-        var inputBlocks = new List<ToolTipBlock>();
+
+        var blocks = new List<ToolTipBlock>(32);
+        var inputBlocks = new List<ToolTipBlock>(4);
 
         var rarity = item.GetItemRarity();
         var strings = item.GetItemStrings();
@@ -162,6 +164,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
         TooltipStyle = strings.TagData.TooltipStyle;
         HeaderColor = rarity.GetColor();
         BodyColor = rarity.GetBodyColor();
+
         Header = new()
         {
             IsD1 = Strategy.IsD1(),
@@ -170,7 +173,6 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
             Name = item.Name,
             Type = item.Type,
             DamageType = DestinyDamageType.GetDamageType(item.GetItemDamageTypeIndex()),
-
             Label = rarity != DestinyTierType.Common ? rarity.ToString() : "",
             TextColor = rarity != DestinyTierType.Common ? Color.FromScRgb(1, 1, 1, 1) : Color.FromScRgb(1, 0, 0, 0),
             LabelColor = rarity.GetLabelColor()
@@ -186,7 +188,6 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
         {
             HeaderColor = DestinyTierType.Unknown.GetColor();
             BodyColor = DestinyTierType.Unknown.GetBodyColor();
-
             Header.Label = null;
             Header.TextColor = Color.FromScRgb(1, 1, 1, 1);
             Header.LabelColor = DestinyTierType.Unknown.GetLabelColor();
@@ -197,12 +198,12 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
             case DestinySocketCategoryStyle.Reusable:
                 HeaderColor = Color.FromArgb(255, 0, 0, 0);
                 BodyColor = Color.FromArgb(255, 0x1C, 0x1C, 0x1C);
-
-                Header.Label = ""; // TODO
+                Header.Label = "";
                 Header.TextColor = Color.FromScRgb(1, 1, 1, 1);
                 Header.LabelColor = DestinyTierType.Unknown.GetLabelColor();
                 Header.HideTopBar = false;
                 break;
+
             case DestinySocketCategoryStyle.Consumable:
                 Header.CollapseEmpty = true;
                 Header.TextColor = Color.FromScRgb(1, 1, 1, 1);
@@ -215,83 +216,58 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                 break;
         }
 
+        bool canView3D = MainWindow.Current?.CurrentTab?.Content is DareView2 && CharmApp.CanUseRenderer();
+        bool canExport = MainWindow.Current?.CurrentTab?.Content is CategoryView && DareView2.ShouldAddToList(item);
+
         await Task.Run(() =>
         {
-            // Spacer Block
-            blocks.Add(new SpacerBlock()
-            {
-                Order = -1,
-            });
+            // Spacer
+            blocks.Add(new SpacerBlock { Order = -1 });
 
             // Description
-            blocks.Add(new TextsBlock()
-            {
-                Order = 0,
-                Text = item.Description
-            });
+            blocks.Add(new TextsBlock { Order = 0, Text = item.Description });
 
-            // Flavor Text
-            blocks.Add(new TextsBlock()
-            {
-                Order = 1,
-                Italic = true,
-                Text = item.FlavorText
-            });
+            // Flavor
+            blocks.Add(new TextsBlock { Order = 1, Italic = true, Text = item.FlavorText });
 
             if (!Strategy.IsD1())
             {
-                // Emblem preview
                 if (item.ItemTraits.Contains(DestinyTraitID.item_emblem))
                 {
-                    blocks.Add(new EmblemBlock()
+                    blocks.Add(new EmblemBlock
                     {
                         Emblem = ApiImageUtils.MakeIcon(strings.TagData.EmblemContainerIndex)
                     });
                 }
 
-                // Energy Mod Cost
                 if (strings.TagData.DisplayStyle == DestinyUIDisplayStyle.EnergyMod)
                 {
-                    foreach (S86738080 stat in ((S81738080)item.TagData.Unk78.GetValue(item.GetReader())).InvestmentStats)
+                    if (item.TagData.Unk78.GetValue(item.GetReader()) is S81738080 stats2)
                     {
-                        S6F588080 statItem = Investment.Get().StatStrings[stat.StatTypeIndex];
-                        if (statItem.StatHash.Hash32 is 3578062600 or 514071887)
+                        foreach (S86738080 stat in stats2.InvestmentStats)
                         {
-                            blocks.Add(new EnergyModBlock()
+                            S6F588080 statItem = Investment.Get().StatStrings[stat.StatTypeIndex];
+                            if (statItem.StatHash.Hash32 is 3578062600 or 514071887)
                             {
-                                Order = 2,
-                                Icon = ApiImageUtils.MakeIcon(statItem.StatIconIndex, iconIndex: 3),
-                                Cost = stat.Value
-                            });
+                                blocks.Add(new EnergyModBlock
+                                {
+                                    Order = 2,
+                                    Icon = ApiImageUtils.MakeIcon(statItem.StatIconIndex, iconIndex: 3),
+                                    Cost = stat.Value
+                                });
+                            }
                         }
                     }
                 }
 
-
-                if (overrideStyle == DestinySocketCategoryStyle.Unknown)
+                if (overrideStyle == DestinySocketCategoryStyle.Unknown && !string.IsNullOrEmpty(item.Source))
                 {
-                    // Source
-                    if (item.Source != null && item.Source != "")
-                    {
-                        blocks.Add(new SpacerBlock()
-                        {
-                            Order = 5,
-                            Height = 15,
-                            ShowBar = true
-                        });
-
-                        blocks.Add(new TextsBlock()
-                        {
-                            Order = 6,
-                            Text = item.Source
-                        });
-                    }
+                    blocks.Add(new SpacerBlock { Order = 5, Height = 15, ShowBar = true });
+                    blocks.Add(new TextsBlock { Order = 6, Text = item.Source });
                 }
-
 
                 if (overrideStyle != DestinySocketCategoryStyle.Reusable)
                 {
-                    // Perks
                     if (item.TagData.Unk78.GetValue(item.GetReader()) is S81738080 stats)
                     {
                         foreach (S87738080 perk in stats.Perks)
@@ -300,7 +276,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                             if (perkStrings.IconIndex == -1)
                                 continue;
 
-                            blocks.Add(new PerkBlock()
+                            blocks.Add(new PerkBlock
                             {
                                 Order = 7,
                                 Description = perkStrings.SandboxPerkDescription,
@@ -312,23 +288,15 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                     // Tooltip Notifications
                     if (strings.TagData.TooltipNotifications.Any())
                     {
-                        blocks.Add(new SpacerBlock()
-                        {
-                            Order = 8,
-                            ShowBar = true,
-                            BarOpacity = 0.1f
-                        });
+                        blocks.Add(new SpacerBlock { Order = 8, ShowBar = true, BarOpacity = 0.1f });
 
                         foreach (SB2548080 notif in strings.TagData.TooltipNotifications)
                         {
                             string? message = notif.DisplayString.Value;
-                            if (string.IsNullOrWhiteSpace(message))
-                                continue;
+                            if (string.IsNullOrWhiteSpace(message)) continue;
+                            if (BlacklistedNotifications.Contains(message)) continue;
 
-                            if (BlacklistedNotifications.Contains(message))
-                                continue;
-
-                            blocks.Add(new NotificationBlock()
+                            blocks.Add(new NotificationBlock
                             {
                                 Order = 9,
                                 Text = message,
@@ -338,46 +306,40 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                     }
                 }
 
-                // Input blocks
                 if (strings.TagData.Unk40.GetValue(strings.GetReader()) is SD7548080 preview)
                 {
-                    inputBlocks.Add(new InputBlock()
+                    inputBlocks.Add(new InputBlock
                     {
                         Order = 0,
-                        Key = $"", // Key glyph
-                        KeyPress = $"", // 2nd key glyph (mouse left/right)
-                        Action = $"{(preview.PreviewActionString.Value ?? "Details")}"
+                        Key = "", // Key glyph
+                        KeyPress = "", // 2nd key glyph (mouse left/right)
+                        Action = preview.PreviewActionString.Value ?? "Details"
                     });
 
-                    Dispatcher.Invoke(() =>
+                    if (canView3D && !item.IsShader)
                     {
-                        if (MainWindow.Current?.CurrentTab?.Content is DareView2 && CharmApp.CanUseRenderer())
-                            inputBlocks.Add(new InputBlock()
-                            {
-                                Order = 1,
-                                KeyAdditional = "+",
-                                Key = $"", // Key glyph
-                                KeyPress = $"", // 2nd key glyph (mouse left/right)
-                                Action = $"View in 3D"
-                            });
-                    });
+                        inputBlocks.Add(new InputBlock
+                        {
+                            Order = 1,
+                            KeyAdditional = "+",
+                            Key = "",
+                            KeyPress = "",
+                            Action = "View in 3D"
+                        });
+                    }
 
-                    Dispatcher.Invoke(() =>
+                    if (canExport)
                     {
-                        if (MainWindow.Current.CurrentTab is not null
-                        && MainWindow.Current.CurrentTab.Content is CategoryView
-                        && DareView2.ShouldAddToList(item))
-                            inputBlocks.Add(new InputBlock()
-                            {
-                                Order = 1,
-                                Key = $"",
-                                Action = $"Export"
-                            });
-                    });
+                        inputBlocks.Add(new InputBlock
+                        {
+                            Order = 1,
+                            Key = "",
+                            Action = "Export"
+                        });
+                    }
                 }
             }
         });
-
 
         foreach (var block in blocks)
             BodyBlocks.Add(block);
@@ -423,7 +385,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
         ShowTooltip();
     }
 
-    public async void MakeTooltip(CategoryEntry item)
+    public async Task MakeTooltip(CategoryEntry item)
     {
         ClearTooltip();
         var blocks = new List<ToolTipBlock>();
@@ -562,32 +524,12 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                     blocks.Add(rewards);
                 }
             }
-
-
         });
 
         foreach (var block in blocks)
             BodyBlocks.Add(block);
 
         ShowTooltip();
-    }
-
-    public void ShowTooltip()
-    {
-        Dispatcher.Invoke(() =>
-        {
-            Visibility = Visibility.Visible;
-        });
-    }
-
-    public void ClearTooltip()
-    {
-        ExtraOffset = new(0, 0);
-        Visibility = Visibility.Collapsed;
-        Header = null;
-        BodyBlocks.Clear();
-        InputBlocks.Clear();
-        _firstShow = true;
     }
 
     public ObjectiveBlock AddObjective(int index)
@@ -614,9 +556,28 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
         return objBlock;
     }
 
+    public void ShowTooltip()
+    {
+        UIHelper.AnimateFade(this, 0.025f);
+        Visibility = Visibility.Visible;
+    }
+
+    public void ClearTooltip()
+    {
+        Visibility = Visibility.Hidden;
+        ExtraOffset = new(0, 0);
+        Header = null;
+        BodyBlocks.Clear();
+        InputBlocks.Clear();
+        _firstShow = true;
+    }
+
     private Point _tooltipPos = new Point(0, 0);
     private bool _firstShow = true;
-    private const double LerpSpeed = 0.75;
+    private Vector _tooltipVelocity = new Vector(0, 0);
+    private const double SmoothTime = 0.01;
+
+    private readonly Stopwatch _frameTimer = Stopwatch.StartNew();
     private void OnRender(object sender, EventArgs e) // TODO clamp to left/right sides, not really needed rn
     {
         if (ActiveItem == null && ToolTip.Visibility == Visibility.Visible)
@@ -655,20 +616,56 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
             targetY = -padding;
 
         // Lerp for perceived smoothness (still looks a little sluggish but idk)
-        if (_firstShow)
-        {
-            _firstShow = false;
-            _tooltipPos.X = targetX;
-            _tooltipPos.Y = targetY;
-        }
-        else
-        {
-            _tooltipPos.X += (targetX - _tooltipPos.X) * LerpSpeed;
-            _tooltipPos.Y += (targetY - _tooltipPos.Y) * LerpSpeed;
-        }
+        double deltaTime = _frameTimer.Elapsed.TotalSeconds;
+        _frameTimer.Restart();
+
+        // TODO: tooltip blocks sometimes arent fully ready before rendering, causing a split second jump on first show
+        //if (_firstShow)
+        //{
+        //    _firstShow = false;
+        //    _tooltipPos.X = targetX;
+        //    _tooltipPos.Y = targetY;
+        //    _tooltipVelocity = new Vector(0, 0);
+        //}
+        //else
+        //{
+        //    double vx = _tooltipVelocity.X;
+        //    double vy = _tooltipVelocity.Y;
+
+        //    _tooltipPos.X = SmoothDamp(_tooltipPos.X, targetX, ref vx, SmoothTime, deltaTime);
+        //    _tooltipPos.Y = SmoothDamp(_tooltipPos.Y, targetY, ref vy, SmoothTime, deltaTime);
+
+        //    _tooltipVelocity.X = vx;
+        //    _tooltipVelocity.Y = vy;
+        //}
+
+        _tooltipPos.X = targetX;
+        _tooltipPos.Y = targetY;
 
         TooltipTranslate.X = _tooltipPos.X;
         TooltipTranslate.Y = _tooltipPos.Y;
+    }
+
+    private static double SmoothDamp(
+    double current,
+    double target,
+    ref double currentVelocity,
+    double smoothTime,
+    double deltaTime)
+    {
+        // Based on Unity's SmoothDamp implementation
+        smoothTime = Math.Max(0.0001, smoothTime);
+        double omega = 2.0 / smoothTime;
+
+        double x = omega * deltaTime;
+        double exp = 1.0 / (1.0 + x + 0.48 * x * x + 0.235 * x * x * x);
+
+        double change = current - target;
+        double temp = (currentVelocity + omega * change) * deltaTime;
+        currentVelocity = (currentVelocity - omega * temp) * exp;
+
+        double result = target + (change + temp) * exp;
+        return result;
     }
 
     //private void UserControl_KeyDown(object sender, KeyEventArgs e)
