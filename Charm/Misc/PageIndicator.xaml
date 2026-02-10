@@ -14,77 +14,93 @@
             InactiveColor="#55FFFFFF" />
     </UserControl.Resources>
 
-    <StackPanel
-        HorizontalAlignment="Center"
-        VerticalAlignment="Bottom"
-        Background="Transparent"
-        Orientation="Horizontal">
-        <ItemsControl ItemsSource="{Binding Indicators, RelativeSource={RelativeSource AncestorType=UserControl}}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Rectangle
-                        Height="4"
-                        Fill="White"
-                        Opacity="0.36">
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Bottom">
+        <TextBlock
+            Margin="0,0,0,-15"
+            HorizontalAlignment="Center"
+            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+            FontSize="20"
+            Visibility="{Binding DisplayAsNumbers, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Run Text="{Binding CurrentPage, Converter={StaticResource AddOneConverter}}" />
+            <Run Text="/" />
+            <Run Text="{Binding TotalPages}" />
+        </TextBlock>
 
-                        <Rectangle.Style>
-                            <Style TargetType="Rectangle">
+        <StackPanel
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            Background="Transparent"
+            Orientation="Horizontal"
+            SizeChanged="StackPanel_SizeChanged"
+            Visibility="{Binding DisplayAsNumbers, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+            <ItemsControl ItemsSource="{Binding Indicators, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Rectangle
+                            Height="4"
+                            Fill="White"
+                            Opacity="0.36">
 
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ShrinkInactive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
-                                        <Setter Property="Width" Value="10" />
-                                        <Setter Property="Margin" Value="2,0,2,0" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding ShrinkInactive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False">
-                                        <Setter Property="Width" Value="30" />
-                                        <Setter Property="Margin" Value="3,0,3,0" />
-                                    </DataTrigger>
+                            <Rectangle.Style>
+                                <Style TargetType="Rectangle">
 
-                                    <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                                        <DataTrigger.EnterActions>
-                                            <BeginStoryboard>
-                                                <Storyboard>
-                                                    <DoubleAnimation
-                                                        Storyboard.TargetProperty="Opacity"
-                                                        From="0.36"
-                                                        To="1"
-                                                        Duration="0:0:0.2" />
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </DataTrigger.EnterActions>
-                                        <DataTrigger.ExitActions>
-                                            <BeginStoryboard>
-                                                <Storyboard>
-                                                    <DoubleAnimation
-                                                        Storyboard.TargetProperty="Opacity"
-                                                        From="1"
-                                                        To="0.36"
-                                                        Duration="0:0:0.2" />
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </DataTrigger.ExitActions>
-                                    </DataTrigger>
-
-                                    <MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding ShrinkInactive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True" />
-                                            <Condition Binding="{Binding IsCurrent}" Value="True" />
-                                        </MultiDataTrigger.Conditions>
-                                        <MultiDataTrigger.Setters>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ShrinkInactive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                            <Setter Property="Width" Value="10" />
+                                            <Setter Property="Margin" Value="2,0,2,0" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ShrinkInactive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False">
                                             <Setter Property="Width" Value="30" />
-                                        </MultiDataTrigger.Setters>
-                                    </MultiDataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Rectangle.Style>
-                    </Rectangle>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </StackPanel>
+                                            <Setter Property="Margin" Value="3,0,3,0" />
+                                        </DataTrigger>
+
+                                        <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation
+                                                            Storyboard.TargetProperty="Opacity"
+                                                            From="0.36"
+                                                            To="1"
+                                                            Duration="0:0:0.2" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                            <DataTrigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation
+                                                            Storyboard.TargetProperty="Opacity"
+                                                            From="1"
+                                                            To="0.36"
+                                                            Duration="0:0:0.2" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.ExitActions>
+                                        </DataTrigger>
+
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding ShrinkInactive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True" />
+                                                <Condition Binding="{Binding IsCurrent}" Value="True" />
+                                            </MultiDataTrigger.Conditions>
+                                            <MultiDataTrigger.Setters>
+                                                <Setter Property="Width" Value="30" />
+                                            </MultiDataTrigger.Setters>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Rectangle.Style>
+                        </Rectangle>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </Grid>
+
 </UserControl>

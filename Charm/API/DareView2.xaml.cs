@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -203,7 +204,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         FilterOptions.Children.Add(release_presets);
     }
 
-    private async Task LoadApiList()
+    private async Task LoadApiList(bool loadAll = false)
     {
         ItemCategories.Clear();
         IEnumerable<InventoryItem> inventoryItems = await Investment.Get().GetInventoryItems();
@@ -218,7 +219,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             string? type_string = item.Type;
             type_string ??= "";
 
-            if (ShouldAddToList(item) && item.Name != string.Empty)
+            if ((ShouldAddToList(item) && item.Name != string.Empty) || loadAll)
             {
                 if (!item.ItemTraits.Any() || item.ItemTraits.Contains(DestinyTraitID.item_other))
                 {
@@ -687,6 +688,12 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         });
 
         await Task.WhenAll(tasks);
+    }
+
+    private async void LoadAllItems(object sender, RoutedEventArgs e)
+    {
+        bool loadAll = (sender as ToggleButton)?.IsChecked ?? false;
+        await LoadApiList(loadAll);
     }
 
     private static ConcurrentDictionary<uint, bool> _added = new();

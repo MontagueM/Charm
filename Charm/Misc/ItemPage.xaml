@@ -88,10 +88,12 @@
                 x:Name="PageIndicatorItem"
                 Grid.Column="0"
                 Grid.ColumnSpan="3"
+                MaxWidth="{Binding ElementName=ItemList, Path=ActualWidth}"
                 Margin="{Binding PageIndicatorMargin}"
                 HorizontalAlignment="Center"
                 CurrentPage="{Binding CurrentPage, Mode=TwoWay}"
                 DataContext="{Binding RelativeSource={RelativeSource AncestorType=UserControl}}"
+                HostWidth="{Binding ElementName=ItemList, Path=ActualWidth}"
                 TotalPages="{Binding TotalPages, Mode=TwoWay}" />
 
             <!--  PreviousPage Button  -->

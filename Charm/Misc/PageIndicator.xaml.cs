@@ -9,7 +9,7 @@ using System.Windows.Media;
 
 namespace Charm;
 
-public partial class PageIndicator : UserControl
+public partial class PageIndicator : UserControl, INotifyPropertyChanged
 {
     private ObservableCollection<PageIndicatorDot> _indicators = new();
     public ObservableCollection<PageIndicatorDot> Indicators
@@ -31,7 +31,7 @@ public partial class PageIndicator : UserControl
             if (_shrinkInactive != value)
             {
                 _shrinkInactive = value;
-                OnPropertyChanged(nameof(_shrinkInactive));
+                OnPropertyChanged(nameof(ShrinkInactive));
             }
         }
     }
@@ -74,6 +74,29 @@ public partial class PageIndicator : UserControl
         control.UpdateIndicators();
     }
 
+    public double HostWidth
+    {
+        get => (double)GetValue(HostWidthProperty);
+        set => SetValue(HostWidthProperty, value);
+    }
+
+    public static readonly DependencyProperty HostWidthProperty =
+        DependencyProperty.Register(nameof(HostWidth), typeof(double), typeof(PageIndicator));
+
+    private bool _displayAsNumbers = false;
+    public bool DisplayAsNumbers
+    {
+        get => _displayAsNumbers;
+        set
+        {
+            if (_displayAsNumbers != value)
+            {
+                _displayAsNumbers = value;
+                OnPropertyChanged(nameof(DisplayAsNumbers));
+            }
+        }
+    }
+
     public PageIndicator()
     {
         InitializeComponent();
@@ -95,6 +118,11 @@ public partial class PageIndicator : UserControl
     private void OnPropertyChanged(string name)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+
+    private void StackPanel_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        DisplayAsNumbers = ActualWidth >= HostWidth;
     }
 }
 

@@ -124,6 +124,9 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
         {
             short index = _invItem.GetItemStrings().TagData.EmblemContainerIndex;
             var container = Investment.Get().GetItemIconContainer(index);
+            if (container is null)
+                return;
+
             var col = container.TagData.DyeColorR;
             Emblem = new()
             {

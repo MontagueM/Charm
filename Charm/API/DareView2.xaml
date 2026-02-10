@@ -562,6 +562,7 @@
                         Grid.Row="0"
                         Margin="15,5,15,0"
                         HorizontalAlignment="Left"
+                        d:Visibility="Visible"
                         Background="Transparent"
                         Orientation="Horizontal"
                         Visibility="Hidden">
@@ -579,6 +580,25 @@
                                 FontSize="16"
                                 Text="Export All Shaders" />
                         </Button>
+
+                        <ToggleButton
+                            Margin="10,0,0,0"
+                            Click="LoadAllItems"
+                            IsChecked="False"
+                            Style="{DynamicResource D2StyleTagListButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip
+                                    Name="Load All Items"
+                                    Description="Loads every InventoryItem definition."
+                                    Style="Category" />
+                            </local:GenericTooltipProperties.TooltipData>
+                            <TextBlock
+                                Margin="5,0,5,0"
+                                d:FontFamily="Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="16"
+                                Text="Load All Items" />
+                        </ToggleButton>
                     </StackPanel>
 
                     <Grid
