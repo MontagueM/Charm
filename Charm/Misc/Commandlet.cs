@@ -16,6 +16,7 @@ public abstract class Commandlet
     {
         if (TigerInstance.Args.GetArgValue("commandlet", out string commandletName))
         {
+            Log.Info($"Running commandlet '{commandletName}'...");
             Stopwatch stopwatch = new();
             stopwatch.Start();
 

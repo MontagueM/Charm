@@ -34,9 +34,9 @@ public class TigerArgs
     {
         for (int i = 0; i < _args.Length; i++)
         {
-            if (_args[i].StartsWith($"-{argName}", StringComparison.InvariantCultureIgnoreCase) && _args[i].Contains("="))
+            if (_args[i].StartsWith($"-{argName}", StringComparison.InvariantCultureIgnoreCase))
             {
-                return _args[i].Split("=")[1];
+                return _args[i + 1];
             }
         }
 

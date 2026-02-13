@@ -157,6 +157,10 @@ public partial class MainWindow
             });
         };
 
+        // Commandlet detection
+        if (TigerInstance.Args.GetArgValue("commandlet", out _))
+            Commandlet.RunCommandlet();
+
         // Global ToolTip detection
         EventManager.RegisterClassHandler(
             typeof(ButtonBase),

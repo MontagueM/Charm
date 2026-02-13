@@ -7,7 +7,7 @@ public class PerfTestCommandlet : ICommandlet
 {
     public void Run(TigerArgs args)
     {
-        TestPackageReads();
+        //TestPackageReads();
         TestAllPackagesAndFiles();
     }
 
@@ -45,9 +45,9 @@ public class PerfTestCommandlet : ICommandlet
             PackageMetadata pkgMetadata = pkg.GetPackageMetadata();
             ushort fileCount = (ushort)pkgMetadata.FileCount;
 
-            RunTest(RunGroupedTest, pkg, fileCount);
+            //RunTest(RunGroupedTest, pkg, fileCount);
             // RunTest(RunSerialTest, pkg, fileCount);
-            // RunTest(RunParallelTest, pkg, fileCount);
+            RunTest(RunParallelTest, pkg, fileCount);
         });
     }
 
@@ -73,7 +73,7 @@ public class PerfTestCommandlet : ICommandlet
         Stopwatch sw = Stopwatch.StartNew();
         testFunc(pkg, fileCount);
         sw.Stop();
-        Log.Info($"{testFunc.Method.Name}: Generated {fileCount} reads in {sw.ElapsedMilliseconds}ms");
+        Log.Info($"{testFunc.Method.Name}: Generated {fileCount} reads in {sw.ElapsedMilliseconds}ms : {pkg.GetPackageMetadata().Name}");
         return sw.ElapsedMilliseconds;
     }
 

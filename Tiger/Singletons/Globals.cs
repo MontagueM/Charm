@@ -10,6 +10,7 @@ namespace Tiger.Schema;
 public class Globals : Strategy.StrategistSingleton<Globals>
 {
     private List<TigerInputLayout> _inputLayouts = new();
+    public List<TigerInputLayout> InputLayouts => _inputLayouts;
     private ConcurrentDictionary<string, Material> _renderPipelines = new();
     private ConcurrentDictionary<TfxScope, SScope> _renderScopes = new();
 
