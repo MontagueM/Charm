@@ -109,7 +109,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
             ItemHash = _invItem.ApiHash,
             ItemSource = collectible != null ? collectible.Value.SourceString?.Value : "",
             ItemRarity = _invItem.GetItemRarity(),
-            ItemDamageType = DestinyDamageType.GetDamageType(_invItem.GetItemDamageTypeIndex()),
+            ItemDamageType = DestinyDamageType.GetDamageType(_invItem.DamageTypeIndex),
 
             ItemIconBackground = ApiImageUtils.MakeItemIconBackground(_invItem),
             ItemIcon = ApiImageUtils.MakeItemIconForeground(_invItem),

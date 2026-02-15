@@ -330,7 +330,7 @@ public partial class CategoryView : UserControl
                         item.Collectible.Item = Investment.GetInventoryItem(gearSet.ItemList.First().ItemIndex);
                 }
 
-                if (item.Collectible.Item.GetArtArrangementIndex() != -1)
+                if (item.Collectible.Item.ArtArrangementIndex != -1)
                 {
                     EntityView.ExportInventoryItem(item.Collectible.Item, ConfigSubsystem.Get().GetExportSavePath());
                 }

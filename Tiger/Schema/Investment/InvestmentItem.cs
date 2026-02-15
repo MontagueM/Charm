@@ -70,6 +70,12 @@ public class InventoryItem : Tag<S9D798080>
     // If this item is an ornament this will be its parent item
     public InventoryItem Parent = null;
 
+    private int? _artArrangementIndex = null;
+    public int ArtArrangementIndex => _artArrangementIndex ??= GetArtArrangementIndex();
+
+    private int? _damageTypeIndex = null;
+    public int DamageTypeIndex => _damageTypeIndex ??= GetItemDamageTypeIndex();
+
     public override void Load(bool force = false)
     {
         base.Load(force);
@@ -212,7 +218,7 @@ public class InventoryItem : Tag<S9D798080>
                     {
                         InventoryItem item = Investment.Get().GetInventoryItem(entry.SingleInitialItemIndex);
                         item.Load(true); // idk why the item sometimes isnt fully loaded
-                        index = item.GetItemDamageTypeIndex();
+                        index = item.DamageTypeIndex;
                         break;
                     }
                 }

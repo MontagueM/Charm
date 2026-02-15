@@ -378,7 +378,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                 item = Investment.Get().GetInventoryItem(apiItem.Item.GetItemIndex() + 1);
                 item.Name = apiItem.Item.Name;
             }
-            if (item.GetArtArrangementIndex() == -1)
+            if (item.ArtArrangementIndex == -1)
             {
                 NotificationBanner notify = new()
                 {
@@ -502,7 +502,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                 if (!dupNames.Add(curItem.Name))
                     curItem.Name += $" {curItem.ApiHash}";
 
-                if (curItem.GetArtArrangementIndex() != -1)
+                if (curItem.ArtArrangementIndex != -1)
                 {
                     // if has a model
                     EntityView.ExportInventoryItem(curItem, savePath, aggregateOutput);
@@ -722,8 +722,8 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         // 1: Check if the items InventoryBucket is the Seasonal Artifacts bucket
         // 2: Get the item next to it in the inventory items list and check if it has a model
         // 3: Profit?
-        bool canAdd = (!Strategy.IsD1() && (item.TagData.BucketTypeIndex == 42 && Investment.Get().GetInventoryItem(item.GetItemIndex() + 1).GetArtArrangementIndex() != -1)) // && item.TagData.Unk28.GetValue(item.GetReader()) is SC5738080)
-            || item.GetArtArrangementIndex() != -1
+        bool canAdd = (!Strategy.IsD1() && (item.TagData.BucketTypeIndex == 42 && Investment.Get().GetInventoryItem(item.GetItemIndex() + 1).ArtArrangementIndex != -1)) // && item.TagData.Unk28.GetValue(item.GetReader()) is SC5738080)
+            || item.ArtArrangementIndex != -1
             || item.ItemTraits.Any(trait => whitelist.Contains(trait));
 
         if (canAdd)

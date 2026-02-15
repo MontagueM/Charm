@@ -882,13 +882,13 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     public TigerHash GetArtArrangementHash(InventoryItem item)
     {
-        return _artArrangementMap.TagData.ArtArrangementHashes.ElementAt(_artArrangementMap.GetReader(), item.GetArtArrangementIndex()).ArtArrangementHash;
+        return _artArrangementMap.TagData.ArtArrangementHashes.ElementAt(_artArrangementMap.GetReader(), item.ArtArrangementIndex).ArtArrangementHash;
     }
 
     public List<Entity.Entity> GetEntitiesFromHash(InventoryItem item)
     {
         List<Entity.Entity> entities = new();
-        int index = item.GetArtArrangementIndex();
+        int index = item.ArtArrangementIndex;
         if (index == -1)
         {
             Log.Warning($"Item {item.Name} ({item.ApiHash}) has no art arrangement index.");
@@ -902,7 +902,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     public List<Entity.Entity> GetEntitiesFromHash(TigerHash hash)
     {
         InventoryItem item = GetInventoryItem(hash);
-        int index = item.GetArtArrangementIndex();
+        int index = item.ArtArrangementIndex;
         List<Entity.Entity> entities = GetEntitiesFromArrangementIndex(index);
         return entities;
     }

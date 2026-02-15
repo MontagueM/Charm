@@ -334,6 +334,7 @@
                     Height="60"
                     Margin="0"
                     IsHitTestVisible="False"
+                    RenderOptions.BitmapScalingMode="LowQuality"
                     Source="{Binding Icon}" />
             </Grid>
 

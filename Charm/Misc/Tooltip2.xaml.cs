@@ -172,7 +172,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
             Icon = ApiImageUtils.GetPlugWatermark(item),
             Name = item.Name,
             Type = item.Type,
-            DamageType = DestinyDamageType.GetDamageType(item.GetItemDamageTypeIndex()),
+            DamageType = DestinyDamageType.GetDamageType(item.DamageTypeIndex),
             Label = rarity != DestinyTierType.Common ? rarity.ToString() : "",
             TextColor = rarity != DestinyTierType.Common ? Color.FromScRgb(1, 1, 1, 1) : Color.FromScRgb(1, 0, 0, 0),
             LabelColor = rarity.GetLabelColor()
