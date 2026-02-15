@@ -114,10 +114,10 @@ public static class ApiImageUtils
         var group = new DrawingGroup();
 
         // streams
-        UnmanagedMemoryStream? bgStream = item.GetIconBackgroundStream();
-        UnmanagedMemoryStream? bgOverlayStream = item.GetIconBackgroundOverlayStream();
-        UnmanagedMemoryStream? primaryStream = item.GetIconPrimaryStream();
-        UnmanagedMemoryStream? overlayStream = item.GetIconOverlayStream();
+        using UnmanagedMemoryStream? bgStream = item.GetIconBackgroundStream();
+        using UnmanagedMemoryStream? bgOverlayStream = item.GetIconBackgroundOverlayStream();
+        using UnmanagedMemoryStream? primaryStream = item.GetIconPrimaryStream();
+        using UnmanagedMemoryStream? overlayStream = item.GetIconOverlayStream();
 
         // Main background (rarity color)
         BitmapImage? bg = bgStream != null ? MakeBitmapImage(bgStream, 96, 96) : null;
@@ -132,15 +132,18 @@ public static class ApiImageUtils
         // For D1 Age Of Triumph ornaments
         if (isD1Ornament)
         {
-            bgOverlay = MakeBitmapImage(Texture.GetTextureFromHash(new(0x80A63BAA)), 96, 96);
+            using UnmanagedMemoryStream aotOverlay = Texture.GetTextureFromHash(new(0x80A63BAA));
+            bgOverlay = MakeBitmapImage(aotOverlay, 96, 96);
             var bgOverlayNew = ChangeOpacity(bgOverlay, 0.5f);
             group.Children.Add(new ImageDrawing(bgOverlayNew, new Rect(0, 0, 96, 96)));
         }
 
         // The main icon
-        BitmapImage? primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
+        BitmapImage? primary;
         if (bgOverlayStream != null && Strategy.IsD1()) // D1 Icon dyes
             primary = MakeDyedIcon(item);
+        else
+            primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
 
         group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
 
@@ -162,7 +165,8 @@ public static class ApiImageUtils
         // Crafted overlay for patterns
         if (!Strategy.IsD1() && item.TagData.Unk10.GetValue(item.GetReader()) is S49298080)
         {
-            var craftedOverlay = MakeBitmapImage(Texture.GetTextureFromHash(new(Strategy.IsLatest() ? 0x80A9F577 : 0x80E55268)), 96, 96);
+            using UnmanagedMemoryStream overlay = Texture.GetTextureFromHash(new(Strategy.IsLatest() ? 0x80A9F577 : 0x80E55268));
+            var craftedOverlay = MakeBitmapImage(overlay, 96, 96);
             group.Children.Add(new ImageDrawing(craftedOverlay, new Rect(0, 0, 96, 96)));
         }
 
@@ -184,8 +188,8 @@ public static class ApiImageUtils
         var group = new DrawingGroup();
 
         // streams
-        UnmanagedMemoryStream? bgStream = item.GetIconBackgroundStream();
-        UnmanagedMemoryStream? bgOverlayStream = item.GetIconBackgroundOverlayStream();
+        using UnmanagedMemoryStream? bgStream = item.GetIconBackgroundStream();
+        using UnmanagedMemoryStream? bgOverlayStream = item.GetIconBackgroundOverlayStream();
 
         // Main background (rarity color)
         BitmapImage? bg = bgStream != null ? MakeBitmapImage(bgStream, 96, 96) : null;
@@ -202,7 +206,8 @@ public static class ApiImageUtils
         // For D1 Age Of Triumph ornaments
         if (isD1Ornament)
         {
-            BitmapImage? bgOverlay = MakeBitmapImage(Texture.GetTextureFromHash(new(0x80A63BAA)), 96, 96);
+            using UnmanagedMemoryStream aotOverlay = Texture.GetTextureFromHash(new(0x80A63BAA));
+            BitmapImage? bgOverlay = MakeBitmapImage(aotOverlay, 96, 96);
             var bgOverlayNew = ChangeOpacity(bgOverlay, 0.5f);
             group.Children.Add(new ImageDrawing(bgOverlayNew, new Rect(0, 0, 96, 96)));
         }
@@ -225,13 +230,13 @@ public static class ApiImageUtils
         var group = new DrawingGroup();
 
         // streams
-        UnmanagedMemoryStream? primaryStream = item.GetIconPrimaryStream();
+        using UnmanagedMemoryStream? primaryStream = item.GetIconPrimaryStream();
 
         // The main icon
         BitmapImage? primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
         if (Strategy.IsD1()) // D1 Icon dyes
         {
-            UnmanagedMemoryStream? bgOverlayStream = item.GetIconBackgroundOverlayStream();
+            using UnmanagedMemoryStream? bgOverlayStream = item.GetIconBackgroundOverlayStream();
             if (bgOverlayStream != null)
                 primary = MakeDyedIcon(item);
         }
@@ -256,7 +261,7 @@ public static class ApiImageUtils
         var group = new DrawingGroup();
 
         // streams
-        UnmanagedMemoryStream? overlayStream = item.GetIconOverlayStream();
+        using UnmanagedMemoryStream? overlayStream = item.GetIconOverlayStream();
 
         // Overlay (watermark, masterwork, etc.)
         int wh = item.GetIconOverlayTexture()?.Width ?? 96;
@@ -276,7 +281,8 @@ public static class ApiImageUtils
         // Crafted overlay for patterns
         if (!Strategy.IsD1() && item.TagData.Unk10.GetValue(item.GetReader()) is S49298080)
         {
-            var craftedOverlay = MakeBitmapImage(Texture.GetTextureFromHash(new(Strategy.IsLatest() ? 0x80A9F577 : 0x80E55268)), 96, 96);
+            using UnmanagedMemoryStream overlay = Texture.GetTextureFromHash(new(Strategy.IsLatest() ? 0x80A9F577 : 0x80E55268));
+            var craftedOverlay = MakeBitmapImage(overlay, 96, 96);
             group.Children.Add(new ImageDrawing(craftedOverlay, new Rect(0, 0, 96, 96)));
         }
 
@@ -290,7 +296,7 @@ public static class ApiImageUtils
 
     public static DrawingImage MakeFoundryBanner(InventoryItem item)
     {
-        UnmanagedMemoryStream? foundryStream = item.GetFoundryIconStream();
+        using UnmanagedMemoryStream? foundryStream = item.GetFoundryIconStream();
         BitmapImage? foundry = foundryStream != null ? MakeBitmapImage(foundryStream, 596, 596) : null;
 
         var group = new DrawingGroup();
@@ -304,7 +310,7 @@ public static class ApiImageUtils
 
     public static ImageSource GetPlugWatermark(InventoryItem item)
     {
-        UnmanagedMemoryStream? overlayStream = item.GetIconOverlayStream(1);
+        using UnmanagedMemoryStream? overlayStream = item.GetIconOverlayStream(1);
         BitmapImage? overlay = overlayStream != null ? MakeBitmapImage(overlayStream, 96, 96) : null;
         var dw = new ImageBrush(overlay);
         dw.Freeze();
@@ -318,7 +324,8 @@ public static class ApiImageUtils
         if (texture == null)
             return null;
 
-        BitmapImage? primary = MakeBitmapImage(texture.GetTexture(), texture.TagData.Width, texture.TagData.Height);
+        using UnmanagedMemoryStream? primaryStream = texture.GetTexture();
+        BitmapImage? primary = MakeBitmapImage(primaryStream, texture.TagData.Width, texture.TagData.Height);
 
         var dw = new ImageBrush(primary);
         dw.Freeze();
@@ -360,7 +367,7 @@ public static class ApiImageUtils
             return null;
 
         Texture? texture = GetTexture(containers[containerIndex], iconIndex, listIndex);
-        UnmanagedMemoryStream? primaryStream = texture?.GetTexture();
+        using UnmanagedMemoryStream? primaryStream = texture?.GetTexture();
         BitmapImage? primary = primaryStream != null ? MakeBitmapImage(primaryStream, texture.TagData.Width, texture.TagData.Height) : null;
 
         var dw = new ImageBrush(primary);
@@ -409,8 +416,10 @@ public static class ApiImageUtils
         if (maskCont is not null)
             mask = GetTexture(maskCont);
 
-        Bitmap mainImage = primary != null ? MakeBitmap(primary.GetTexture()) : null;
-        Bitmap colorMaskImage = mask != null ? MakeBitmap(mask.GetTexture()) : null;
+        using UnmanagedMemoryStream? primaryStream = primary?.GetTexture();
+        using UnmanagedMemoryStream? maskStream = mask?.GetTexture();
+        Bitmap mainImage = primary != null ? MakeBitmap(primaryStream) : null;
+        Bitmap colorMaskImage = mask != null ? MakeBitmap(maskStream) : null;
         if (mainImage is null || colorMaskImage is null)
             return Bitmap2BitmapImage(mainImage);
 
@@ -418,9 +427,9 @@ public static class ApiImageUtils
         if (maskCont is not null && (mask.Height * mask.Width != primary.Height * primary.Width))
         {
             if (primary.Width * primary.Height > mask.Width * mask.Height)
-                colorMaskImage = MakeBitmap(mask.GetTexture(), new System.Numerics.Vector2(primary.Width, primary.Height));
+                colorMaskImage = MakeBitmap(maskStream, new System.Numerics.Vector2(primary.Width, primary.Height));
             else
-                mainImage = MakeBitmap(primary.GetTexture(), new System.Numerics.Vector2(mask.Width, mask.Height));
+                mainImage = MakeBitmap(primaryStream, new System.Numerics.Vector2(mask.Width, mask.Height));
         }
 
         // Define RGB colors
@@ -1377,7 +1386,8 @@ public class TextureFromHashConverter : IValueConverter
         if (texture == null)
             return null;
 
-        BitmapImage? primary = ApiImageUtils.MakeBitmapImage(texture.GetTexture(), texture.TagData.Width, texture.TagData.Height);
+        using UnmanagedMemoryStream ms = texture.GetTexture();
+        BitmapImage? primary = ApiImageUtils.MakeBitmapImage(ms, texture.TagData.Width, texture.TagData.Height);
 
         var dw = new ImageBrush(primary);
         dw.Freeze();
@@ -1422,7 +1432,8 @@ public class TextureFromIconContainerConverter : IValueConverter
             if (tex is null)
                 return null;
 
-            BitmapImage? primary = ApiImageUtils.MakeBitmapImage(tex.GetTexture(), tex.Width, tex.Height);
+            using UnmanagedMemoryStream ms = tex.GetTexture();
+            BitmapImage? primary = ApiImageUtils.MakeBitmapImage(ms, tex.Width, tex.Height);
 
             var dw = new ImageBrush(primary);
             dw.Freeze();
@@ -1435,7 +1446,8 @@ public class TextureFromIconContainerConverter : IValueConverter
             if (tex is null)
                 return null;
 
-            BitmapImage? primary = ApiImageUtils.MakeBitmapImage(tex.GetTexture(), tex.Width, tex.Height);
+            using UnmanagedMemoryStream ms = tex.GetTexture();
+            BitmapImage? primary = ApiImageUtils.MakeBitmapImage(ms, tex.Width, tex.Height);
 
             var dw = new ImageBrush(primary);
             dw.Freeze();

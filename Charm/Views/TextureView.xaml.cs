@@ -26,9 +26,10 @@ public partial class TextureView : UserControl
         if (!textureHeader.IsVolume())
             CurrentSlice = 0;
 
+        using UnmanagedMemoryStream textureStream = textureHeader.IsVolume() ? textureHeader.GetVolumeSlice(CurrentSlice) : textureHeader.GetTexture();
         BitmapImage bitmapImage = new();
         bitmapImage.BeginInit();
-        bitmapImage.StreamSource = textureHeader.IsVolume() ? textureHeader.GetVolumeSlice(CurrentSlice) : textureHeader.GetTexture();
+        bitmapImage.StreamSource = textureStream;
         bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
         float widthDivisionRatio = (float)textureHeader.TagData.Width / 800;
         float heightDivisionRatio = (float)textureHeader.TagData.Height / 800;
@@ -137,7 +138,6 @@ public static class TextureLoader
         try
         {
             BitmapImage image = CreateImage(texture, maxWidth, maxHeight);
-            image.Freeze();
             return image;
         }
         catch (Exception) // Rare case where a "not a cubemap cubemap" doesnt want to load in time
@@ -165,6 +165,7 @@ public static class TextureLoader
         bitmap.DecodePixelWidth = imgWidth;
         bitmap.DecodePixelHeight = imgHeight;
         bitmap.EndInit();
+        bitmap.Freeze();
 
         return bitmap;
     }
