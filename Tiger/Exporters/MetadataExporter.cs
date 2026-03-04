@@ -4,6 +4,12 @@ using Tiger.Schema;
 
 namespace Tiger.Exporters;
 
+public enum MetadataGame
+{
+    DESTINY = 0,
+    MARATHON = 1
+}
+
 // TODO: Clean this up
 public class MetadataExporter : AbstractExporter
 {
@@ -43,6 +49,7 @@ class MetadataScene
         SetType(_exportType, _dataExportType);
         SetMeshName(scene.Name);
 
+        _config.TryAdd("Game", MetadataGame.DESTINY);
         _config["UnifiedAssets"] = _charmConfig.GetSingleFolderMapAssetsEnabled();
         if (_charmConfig.GetSingleFolderMapAssetsEnabled() && scene.DataType == DataExportType.Map)
         {
