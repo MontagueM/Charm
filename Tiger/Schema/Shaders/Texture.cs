@@ -114,7 +114,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
             {
                 scratchImage = DecompressScratchImage(scratchImage,
                     format == DXGI_FORMAT.BC6H_UF16 ? DXGI_FORMAT.R16G16B16A16_UNORM : DXGI_FORMAT.R8G8B8A8_UNORM); //IsSrgb() ? DXGI_FORMAT.R8G8B8A8_UNORM_SRGB : DXGI_FORMAT.R8G8B8A8_UNORM);
-                scratchImage = scratchImage.PremultiplyAlpha(TEX_PMALPHA_FLAGS.SRGB_OUT);
+                scratchImage = PremultiplyAlpha(scratchImage, TEX_PMALPHA_FLAGS.SRGB_OUT);
             }
         }
         else
@@ -159,6 +159,22 @@ public class Texture : TigerReferenceFile<STextureHeader>
             try
             {
                 scratchImage = scratchImage.Decompress(format);
+                return scratchImage;
+            }
+            catch (AccessViolationException)
+            {
+            }
+        }
+    }
+
+    // Not a fix at all but this (and the method above) stops(?) the random release build only crash that can happen here, idfk whats going on im not smart enough for this shit man.
+    private ScratchImage PremultiplyAlpha(ScratchImage scratchImage, TEX_PMALPHA_FLAGS flags)
+    {
+        while (true)
+        {
+            try
+            {
+                scratchImage = scratchImage.PremultiplyAlpha(flags);
                 return scratchImage;
             }
             catch (AccessViolationException)
