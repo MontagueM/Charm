@@ -103,7 +103,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     public async void LoadContent()
     {
-        List<string> loading = new() { "Loading API Items" };
+        List<string> loading = new() { "Loading Investment Items" };
         MainWindow.Progress.SetProgressStages(loading, false, true);
 
         await LoadApiList();
@@ -438,10 +438,10 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             items.Add(item);
         }
 
-        if (!MainWindow.Current.SetCurrentTab($"API 3D MultiView"))
+        if (!MainWindow.Current.SetCurrentTab($"Gear 3D MultiView"))
         {
             var renderer = CreateRenderer();
-            MainWindow.Current.MakeNewTab($"API 3D MultiView", renderer as UserControl);
+            MainWindow.Current.MakeNewTab($"Gear 3D MultiView", renderer as UserControl);
             MainWindow.Current.SetNewestTabSelected();
             renderer.LoadInvestmentItems(items);
         }
@@ -735,19 +735,15 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
     // For aggregated outputs
     public static string CreateNextOutputFolder(string baseDirectory)
     {
-        // Get all subdirectories that match the "Output#" pattern
-        string[] existingFolders = Directory.GetDirectories(baseDirectory, "ApiOutput*");
+        string[] existingFolders = Directory.GetDirectories(baseDirectory, "GearOutput*");
         int maxNumber = 0;
 
-        // Regex to capture the numeric part of "Output#"
-        Regex regex = new(@"ApiOutput(\d+)$");
-
+        Regex regex = new(@"GearOutput(\d+)$");
         foreach (string folder in existingFolders)
         {
             Match match = regex.Match(Path.GetFileName(folder));
             if (match.Success)
             {
-                // Parse the number from the folder name
                 int folderNumber = int.Parse(match.Groups[1].Value);
                 if (folderNumber > maxNumber)
                 {
@@ -756,12 +752,9 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             }
         }
 
-        // Increment the max number to get the next available folder
         int nextNumber = maxNumber + 1;
-        string newFolderName = $"ApiOutput{nextNumber}";
+        string newFolderName = $"GearOutput{nextNumber}";
         string newFolderPath = Path.Combine(baseDirectory, newFolderName);
-
-        // Create the new directory
         Directory.CreateDirectory(newFolderPath);
 
         return newFolderPath;
@@ -789,8 +782,8 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         {
             DarkenBackground = true,
             //Icon = "❓",
-            Title = $"WELCOME TO DARE",
-            Subtitle = "The Destiny API Ripping Extension",
+            Title = $"Charm Gear Viewer",
+            Subtitle = "View and Export Player Gear!",
             Description = "You may already be familar with the old DARE, but if you're not, DARE used to be a program used to rip gear models/shaders from the Bungie API." +
             "\n\nThis is it's spiritual successor. Charm rips player gear directly from the game files, which means you can rip even if the API is down or you are offline." +
             "\n\n• Use the search bar to look for specific items and/or the drop downs to filter them." +

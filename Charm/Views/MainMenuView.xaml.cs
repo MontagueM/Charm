@@ -78,7 +78,7 @@ public partial class MainMenuView : UserControl
 
         DareView2 apiView = new();
         apiView.LoadContent();
-        _mainWindow.MakeNewTab("API", apiView);
+        _mainWindow.MakeNewTab("Gear", apiView);
         _mainWindow.SetNewestTabSelected();
     }
 

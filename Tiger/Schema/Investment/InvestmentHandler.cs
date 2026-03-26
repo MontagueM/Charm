@@ -109,7 +109,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         if (Strategy.IsLatest() || Strategy.IsD1())
             GetAllInvestmentTags();
         else
-            Log.Info("API is only supported on the latest verison of D2 or D1.");
+            Log.Info("Gear Viewer is only supported on the latest verison of D2 or D1.");
     }
 
     private void GetAllInvestmentTags()

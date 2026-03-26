@@ -208,13 +208,13 @@
                             MouseLeave="CategoryButton_MouseLeave"
                             Style="{DynamicResource D2StyleButton}">
                             <local:GenericTooltipProperties.TooltipData>
-                                <local:GenericTooltip Name="API VIEWER" Description="View and export any Player Gear." />
+                                <local:GenericTooltip Name="GEAR VIEWER" Description="View and export any Player Gear." />
                             </local:GenericTooltipProperties.TooltipData>
                             <Border Style="{StaticResource MainMenuButton}">
                                 <TextBlock
                                     d:FontFamily="Haas Grot Text 55 Roman"
                                     FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                    Text="API" />
+                                    Text="GEAR" />
                             </Border>
                         </Button>
 
