@@ -73,10 +73,12 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     public void LoadPackageKeys()
     {
         if (!File.Exists("./keys.txt"))
+        {
+            Log.Warning($"No Keys file found, skipping.");
             return;
+        }
 
         string[] txt = File.ReadAllLines("./keys.txt");
-
         foreach (string entry in txt)
         {
             try
@@ -106,6 +108,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
                 Log.Error($"Error processing entry: {entry}\n{ex.Message}");
             }
         }
+        Log.Info($"Loaded {_keys.Count} Keys.");
     }
 
     /// <summary>

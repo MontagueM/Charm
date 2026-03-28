@@ -218,10 +218,7 @@ public partial class MainWindow
             "\n     - Including but not limited to screenshots, recordings, or exports." +
             "\n• You WILL NOT use Charm in any way that violates Bungie’s Terms of Service." +
             "\n     - Including but not limited to using code to develop cheats and/or exploits." +
-            "\n\nBreaking any of the above WILL reduce public updates and result in the removal of features." +
-            "\n\nTo Colony Deaks/quircii. No one cares about your internet points. Fuck off." +
-            "\nYou will be the reason Charm stops being updated. Getting real tired of it.",
-
+            "\n\nBreaking any of the above WILL reduce public updates and result in the removal of features.",
             Style = PopupBanner.PopupStyle.Warning,
             UserInput = $"Accept{(!FontHandler.FontsLoaded ? " (Left Mouse)" : "")}",
             UserInputSecondary = $"Reject{(!FontHandler.FontsLoaded ? " (Right Mouse)" : "")}",
@@ -635,18 +632,6 @@ public partial class MainWindow
                 Progress = true
             };
             test.Show();
-
-            //PopupBanner test = new()
-            //{
-            //    DarkenBackground = false,
-            //    Icon = "⚠️",
-            //    IconImage = ApiImageUtils.MakeBitmapImage(new Texture(new FileHash("7180DC80")).GetTexture(), 648, 495),
-            //    Title = "OOPS",
-            //    Subtitle = "WE DELETED THE FUCKING SERVERS",
-            //    Description = "Jimmy the new intern downloaded a 72 yottabyte zip bomb and deleted all of our server data. The game is gone.\n\nThank you for all of your time and money for Pete...I mean supporting Destiny 2!",
-            //    Style = PopupBanner.PopupStyle.Warning,
-            //};
-            //test.Show();
 
             NotificationBanner test2 = new()
             {

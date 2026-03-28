@@ -311,6 +311,12 @@ public class Texture : TigerReferenceFile<STextureHeader>
 
     public void SavetoFile(string savePath, int index = 0)
     {
+        if (Hash.CheckRedacted())
+        {
+            Log.Warning($"Texture {Hash} is Redacted. Can not export.");
+            return;
+        }
+
         ScratchImage simg = GetScratchImage(index: index);
         if (ConfigSubsystem.Get().GetSBoxExportEnabled()) // TODO make not shit
             simg = ResizeToNearestPowerOf2(simg);
@@ -719,6 +725,12 @@ public class TexturePlate : Tag<S919E8080>
 
     public void SavePlatedTexture(string savePath)
     {
+        if (Hash.CheckRedacted())
+        {
+            Log.Warning($"Texture {Hash} is Redacted. Can not export.");
+            return;
+        }
+
         ScratchImage? simg = MakePlatedTexture();
         if (simg != null)
         {

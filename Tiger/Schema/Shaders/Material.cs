@@ -155,6 +155,12 @@ namespace Tiger.Schema.Shaders
                     if (texture.Texture is null)
                         continue;
 
+                    if (texture.Texture.Hash.CheckRedacted())
+                    {
+                        Log.Warning($"Texture {texture.Texture.Hash} is Redacted. Can not export.");
+                        continue;
+                    }
+
                     psCB.Textures.TryAdd((int)texture.TextureIndex, new()
                     {
                         Hash = texture.Texture.Hash,
@@ -226,6 +232,12 @@ namespace Tiger.Schema.Shaders
                 {
                     if (texture.Texture is null)
                         continue;
+
+                    if (texture.Texture.Hash.CheckRedacted())
+                    {
+                        Log.Warning($"Texture {texture.Texture.Hash} is Redacted. Can not export.");
+                        continue;
+                    }
 
                     vsCB.Textures.TryAdd((int)texture.TextureIndex, new()
                     {
