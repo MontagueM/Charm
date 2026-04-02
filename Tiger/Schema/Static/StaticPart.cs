@@ -150,6 +150,8 @@ public class StaticPart : MeshPart
 
     private void TransformPositions(Vector4 modelTransform)
     {
+        VertexScale = new(modelTransform.W);
+        VertexOffset = modelTransform.ToVec3();
         for (int i = 0; i < VertexPositions.Count; i++)
         {
             // i think theres a different scale and offset for model data vs decals... like 99% sure

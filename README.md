@@ -10,7 +10,7 @@ It supports many versions of Destiny 2 and it's main focus is on the games 3D mo
 > * While it can access many things in the game files, it's main purpose is focused towards **3D artists, content preservation and learning how the game works**!
 > * Please ***DO NOT*** use this tool to spread leaks and spoilers or anything that may break Bungie's TOS. Don't ruin the experience for yourself and others. Uncover things the way they were intended!
 > * Seeing this tool used for such acts WILL result in fewer public updates and the removal of certain features (this unfortunately has already happened).
-> * I enjoy maintaining and updating this for others, don't be the one to ruin it. (Looking at you Deaks. You will be the reason Charm stops being supported.)
+> * I enjoy maintaining and updating this for others, don't be the one to ruin it.
 
 ## How do I install and use it?
 

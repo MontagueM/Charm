@@ -328,6 +328,10 @@ public class DynamicMeshPart : MeshPart
         Vector4 modelScale = !Strategy.IsD1() ? header.ModelScale : mesh.ModelScale;
         Vector4 modelTranslation = !Strategy.IsD1() ? header.ModelTranslation : mesh.ModelTranslation;
 
+        VertexScale = modelScale.ToVec3();
+        VertexOffset = modelTranslation.ToVec3();
+
+        // used for renderer, todo can just use the above
         MeshScale = modelScale;
         MeshTransform = modelTranslation;
 

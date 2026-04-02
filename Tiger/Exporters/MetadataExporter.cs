@@ -111,12 +111,20 @@ class MetadataScene
     {
         if (!_config["Parts"].ContainsKey(part.SubName))
         {
+            var meshPart = part.MeshPart;
             var jsonPart = new JsonPart
             {
                 TranslationOffset = new float[] { 0, 0, 0 },
                 RotationOffset = new float[] { 0, 0, 0, 1 },
                 PartMaterials = new Dictionary<string, string>()
             };
+
+            if (meshPart is not null)
+                jsonPart.Misc = new()
+                {
+                    VertexScale = meshPart.VertexScale.ToFloatArray(),
+                    VertexOffset = meshPart.VertexOffset.ToFloatArray(),
+                };
 
             if (offset is not null)
             {
@@ -216,6 +224,7 @@ class MetadataScene
     {
         public float[] TranslationOffset;
         public float[] RotationOffset;  // Quaternion
+        public JsonMisc Misc;
         public Dictionary<string, string> PartMaterials;
     }
 
@@ -227,30 +236,9 @@ class MetadataScene
         public float Order;
     }
 
-    private struct JsonDecal
+    public struct JsonMisc
     {
-        public string Material;
-        public float[] Origin;
-        public float Scale;
-        public float[] Corner1;
-        public float[] Corner2;
-    }
-
-    private struct JsonMaterial
-    {
-        public JsonMaterial()
-        {
-        }
-
-        public bool BackfaceCulling { get; set; } = true;
-        public List<string> UsedScopes;
-        public Dictionary<string, Dictionary<int, TexInfo>> Textures;
-    }
-
-    public struct TexInfo
-    {
-        public string Hash { get; set; }
-        public string Dimension { get; set; }
-        public bool SRGB { get; set; }
+        public float[] VertexScale;
+        public float[] VertexOffset;
     }
 }

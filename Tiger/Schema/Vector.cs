@@ -283,6 +283,11 @@ public struct Vector3
         return new System.Numerics.Vector3(X, Y, Z);
     }
 
+    public float[] ToFloatArray()
+    {
+        return new float[3] { X, Y, Z };
+    }
+
     public static implicit operator System.Numerics.Vector3(Vector3 m)
     {
         return Unsafe.As<Vector3, System.Numerics.Vector3>(ref m);
