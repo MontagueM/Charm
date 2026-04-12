@@ -170,7 +170,6 @@ public class ExporterScene
     public ConcurrentDictionary<string, List<Transform>> StaticMeshInstances = new();
     public ConcurrentDictionary<string, List<Transform>> ArrangedStaticMeshInstances = new();
     public ConcurrentDictionary<string, List<Transform>> EntityInstances = new();
-    public ConcurrentBag<SMapDataEntry> EntityPoints = new();
     public ConcurrentHashSet<Texture> ExternalTextures = new();
     public ConcurrentHashSet<ExportMaterial> Materials = new();
     public ConcurrentDictionary<string, List<FileHash>> TerrainDyemaps = new();
@@ -268,11 +267,6 @@ public class ExporterScene
             Quaternion = quatRotation,
             Scale = scale
         });
-    }
-
-    public void AddEntityPoints(SMapDataEntry points)
-    {
-        EntityPoints.Add(points);
     }
 
     public void AddEntity(Entity entity, List<DynamicMeshPart> parts, List<BoneNode> boneNodes)
@@ -539,7 +533,6 @@ public enum ExportType
     SpeedTrees,
     WaterDecals,
 
-    EntityPoints,
     API,
     D1API
 }

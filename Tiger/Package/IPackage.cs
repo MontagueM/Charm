@@ -570,7 +570,8 @@ public abstract class Package : IPackage
         int blockCount = GetBlockCount(fileEntry);
 
         List<D2BlockEntry> blocks = GetBlockEntries(fileEntry.StartingBlockIndex, blockCount);
-        return blocks.All(x => (x.BitFlag & 0x8) != 0);
+        return (blocks[0].BitFlag & 0x8) != 0; // checking first should be enough, there arent any partially redacted pkgs afaik
+        //return blocks.All(x => (x.BitFlag & 0x8) != 0);
     }
 
     public PackageMetadata GetPackageMetadata()

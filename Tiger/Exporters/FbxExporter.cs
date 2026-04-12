@@ -107,10 +107,6 @@ public class FbxExporter : AbstractExporter
             //{
             //    AddInstancedMesh(fbxScene, scene.StaticMeshes.First(s => s.Hash == meshInstance.Key).Parts, meshInstance.Value);
             //}
-            foreach (SMapDataEntry p in scene.EntityPoints)
-            {
-                AddDynamicPoint(fbxScene, p);
-            }
 
             //ExportScene(fbxScene, Path.Join(outputDirectory, scene.Name));
         }
@@ -136,18 +132,6 @@ public class FbxExporter : AbstractExporter
             }
         }
 
-    }
-
-    private void AddDynamicPoint(FbxScene fbxScene, SMapDataEntry point)
-    {
-        FbxNode node = FbxNode.Create(_manager, $"{point.Entity.Hash}");
-        Vector3 eulerRot = Vector4.QuaternionToEulerAngles(point.Transfrom.Rotation);
-
-        node.LclTranslation.Set(new FbxDouble3(point.Transfrom.Translation.X * 100, point.Transfrom.Translation.Z * 100, -point.Transfrom.Translation.Y * 100));
-        node.LclRotation.Set(new FbxDouble3(eulerRot.X, eulerRot.Y, eulerRot.Z));
-        node.LclScaling.Set(new FbxDouble3(100, 100, 100));
-
-        fbxScene.GetRootNode().AddChild(node);
     }
 
     private void ExportScene(FbxScene fbxScene, string outputPath)

@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Arithmic;
 using Charm.Shared;
 using Tiger;
 using Tiger.Schema;
@@ -199,6 +200,12 @@ public partial class TextureListView : UserControl
 
     private void LoadTexture(FileHash fileHash)
     {
+        if (fileHash.IsRedacted)
+        {
+            Log.Error($"Texture {fileHash} is redacted. Can not load.");
+            return;
+        }
+
         Texture textureHeader = FileResourcer.Get().GetFile<Texture>(fileHash);
         _isCubemap = textureHeader.IsCubemap();
         _currentDisplayedTexture = fileHash;

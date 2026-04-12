@@ -123,7 +123,7 @@ public partial class EntityView : UserControl
             item.Parent = Investment.Get().GetOrnamentParent(item).Result;
 
         ConfigSubsystem config = ConfigSubsystem.Get();
-        string name = Helpers.SanitizeString(item.Name);
+        string name = item.Name != string.Empty ? Helpers.SanitizeString(item.Name) : $"{item.ApiHash}";
         if (!aggregateOutput)
             savePath = config.GetExportSavePath() + $"/{name}";
 

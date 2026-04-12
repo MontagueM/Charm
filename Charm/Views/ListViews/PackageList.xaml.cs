@@ -133,7 +133,7 @@ public partial class PackageList : UserControl
         if (btn.DataContext is PackageItem item)
         {
             Package pkg = PackageResourcer.Get().GetPackage((ushort)item.ID);
-            if (pkg.GetPackageMetadata().Name.Contains("redacted") && !PackageResourcer.Get().Keys.ContainsKey(pkg.GetPackageMetadata().PackageGroup))
+            if (item.Hashes.Count != 0 && item.Hashes.First().IsRedacted)
             {
                 Log.Error($"No decryption key found for package {pkg.GetPackageMetadata().Name}, can not display content.");
                 PopupBanner.ShowRedactedPopup();

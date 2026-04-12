@@ -193,8 +193,7 @@ class MetadataScene
         string path = args.OutputDirectory;
 
         if (_config["Instances"].Count == 0
-            && _config["Parts"].Count == 0
-            && _exportType is not ExportType.EntityPoints)
+            && _config["Parts"].Count == 0)
             return; //Dont export if theres nothing in the cfg (this is kind of a mess though)
 
         if (!args.AggregateOutput)

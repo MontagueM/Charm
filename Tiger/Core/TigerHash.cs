@@ -213,6 +213,7 @@ public class FileHash : TigerHash
     }
 
     public ushort FileIndex => (ushort)(Hash32 & 0x1fff);
+    public bool IsRedacted => this.CheckRedacted();
 }
 
 public static class FileHashExtensions

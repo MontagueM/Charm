@@ -313,7 +313,7 @@ public partial class TagListView : UserControl
                 || (item.Subname != null && item.Subname.ToLower().Contains(searchStr)))
             {
                 Package pkg = (item.Hash as FileHash) is not null ? PackageResourcer.Get().GetPackage((item.Hash as FileHash).PackageId) : null;
-                if (pkg is not null && pkg.GetPackageMetadata().Name.Contains("redacted"))
+                if (pkg is not null && (item.Hash as FileHash).IsRedacted) //&& pkg.GetPackageMetadata().Name.Contains("redacted"))
                     name = $"🔐 {name}";
 
                 string subname = searchStr != string.Empty && item.Type != "Package" ?
@@ -440,7 +440,7 @@ public partial class TagListView : UserControl
         _previouslySelected = btn;
 
         Package pkg = (tagItem.Hash as FileHash) is not null ? PackageResourcer.Get().GetPackage((tagItem.Hash as FileHash).PackageId) : null;
-        if (pkg is not null && pkg.GetPackageMetadata().Name.Contains("redacted"))
+        if (pkg is not null && (tagItem.Hash as FileHash).IsRedacted)
         {
             if (!PackageResourcer.Get().Keys.ContainsKey(pkg.GetPackageMetadata().PackageGroup))
             {
@@ -1174,7 +1174,7 @@ public partial class TagListView : UserControl
             var loaderType = CharmApp.CharmRedacted.GetType("Charm.Redacted.RedactedActivity");
             if (loaderType != null)
             {
-                var method = loaderType.GetMethod("Load", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                var method = loaderType.GetMethod("LoadDirectiveList", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                 if (method != null)
                 {
                     directiveItems = (ConcurrentDictionary<string, FileHash>)method.Invoke(null, new object[] { fileHash });
