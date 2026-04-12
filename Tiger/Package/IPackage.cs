@@ -26,6 +26,7 @@ public interface IPackageHeader
     public uint GetTimestamp();
     public ushort GetPatchId();
     public uint GetFileCount();
+    public bool GetRedacted();
     public List<D2FileEntry> GetFileEntries(TigerReader reader);
     public List<D2BlockEntry> GetBlockEntries(TigerReader reader);
     public List<SHash64Definition> GetHash64Definitions(TigerReader reader);
@@ -584,6 +585,7 @@ public abstract class Package : IPackage
         packageMetadata.Timestamp = Header.GetTimestamp();
         packageMetadata.FileCount = Header.GetFileCount();
         packageMetadata.PackageGroup = Header.GetPackageGroup();
+        packageMetadata.IsRedacted = Header.GetRedacted(); // *Should* be correct? Every redacted pkg header has -1 at 0x128 while others dont.
         return packageMetadata;
     }
 
@@ -744,6 +746,7 @@ public struct PackageMetadata
     public uint Timestamp;
     public uint FileCount;
     public ulong PackageGroup;
+    public bool IsRedacted;
 }
 
 public struct FileMetadata

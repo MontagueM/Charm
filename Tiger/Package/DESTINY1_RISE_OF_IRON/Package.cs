@@ -49,6 +49,11 @@ public struct PackageHeader : IPackageHeader
         return FileEntryTableCount;
     }
 
+    public bool GetRedacted()
+    {
+        return false;
+    }
+
     public List<D2FileEntry> GetFileEntries(TigerReader reader)
     {
         reader.Seek(FileEntryTableOffset, SeekOrigin.Begin);

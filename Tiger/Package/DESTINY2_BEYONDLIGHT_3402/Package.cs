@@ -29,6 +29,8 @@ public struct PackageHeader : IPackageHeader
     public uint Hash64TableSize;
     [FieldOffset(0xBC)]
     public uint Hash64TableOffset;
+    [FieldOffset(0x128)]
+    public int Unk128;
 
     public ulong GetPackageGroup()
     {
@@ -53,6 +55,11 @@ public struct PackageHeader : IPackageHeader
     public uint GetFileCount()
     {
         return FileEntryTableCount;
+    }
+
+    public bool GetRedacted()
+    {
+        return Unk128 == -1;
     }
 
     public List<D2FileEntry> GetFileEntries(TigerReader reader)
