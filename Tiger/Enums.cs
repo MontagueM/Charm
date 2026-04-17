@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using Arithmic;
 
 namespace Tiger;
 
@@ -454,6 +455,48 @@ public enum DestinyDamageTypeEnum : int
     Stasis,
     [Description(" Strand")]
     Strand
+}
+
+// TODO: Find where these indexes actually go?
+// Would be nice if these stopped changing EVERY UPDATE :)
+public static class DestinyDamageType
+{
+    public static DestinyDamageTypeEnum GetDamageType(int index)
+    {
+        switch (index)
+        {
+            case -1:
+                return DestinyDamageTypeEnum.None;
+
+            case 1492: // TFS
+            case 1961:
+                return DestinyDamageTypeEnum.Kinetic;
+
+            case 1493: // TFS
+            case 1962:
+                return DestinyDamageTypeEnum.Arc;
+
+            case 1494: // TFS
+            case 1963:
+                return DestinyDamageTypeEnum.Solar;
+
+            case 1495: // TFS
+            case 1964:
+                return DestinyDamageTypeEnum.Void;
+
+            case 1496: // TFS
+            case 1965:
+                return DestinyDamageTypeEnum.Stasis;
+
+            case 1497: // TFS
+            case 1966:
+                return DestinyDamageTypeEnum.Strand;
+
+            default:
+                Log.Debug($"Unknown DestinyDamageTypeEnum {index}");
+                return DestinyDamageTypeEnum.None;
+        }
+    }
 }
 
 public enum DestinyTierType

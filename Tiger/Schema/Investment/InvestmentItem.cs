@@ -188,6 +188,11 @@ public class InventoryItem : Tag<S9D798080>
         return GetItemStrings().TagData.ItemFlavourText.Value.ToString();
     }
 
+    public DestinyDamageTypeEnum GetDamageType()
+    {
+        return DestinyDamageType.GetDamageType(DamageTypeIndex);
+    }
+
     public int GetItemDamageTypeIndex()
     {
         var index = -1;
