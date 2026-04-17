@@ -541,7 +541,7 @@ public enum TfxBytecode : byte // Not ordered by value, different versions get m
     Merge_1_3,
     Merge_2_2,
     Merge_3_1,
-    Cubic,
+    Cubic = 0x0F,
     Lerp,
     LerpSaturated,
     MultiplyAdd,
@@ -618,6 +618,11 @@ public enum TfxBytecode : byte // Not ordered by value, different versions get m
     Unk38_EoF,
     Unk39_EoF,
     Unk3A_EoF,
+
+    // Added in Renegades..?
+    Unk10_Rng,
+    Unk11_Rng,
+    Unk12_Rng
 }
 
 // D1 RoI
@@ -875,7 +880,7 @@ public enum TfxBytecode_TFS : byte
     Unk58 = 0x58,
 }
 
-// EoF
+// EoF but was updated in Renegades
 public enum TfxBytecode_EoF : byte
 {
     Add = 0x01,
@@ -892,11 +897,16 @@ public enum TfxBytecode_EoF : byte
     Merge_1_3 = 0x0c,
     Merge_2_2 = 0x0d,
     Merge_3_1 = 0x0e,
+
     Cubic = 0x0f,
-    Lerp = 0x10,
-    LerpSaturated = 0x11,
+    Unk10_Rng, // Added in Renegades
+    Unk11_Rng,
+    Unk12_Rng,
+    Lerp,
+    LerpSaturated,
+
     MultiplyAdd = 0x15,
-    Clamp = 0x16, // is actually 0x13..?
+    Clamp = 0x16,
     Unk14 = 0x17,
     Abs = 0x18,
     Sign = 0x19,
@@ -924,7 +934,7 @@ public enum TfxBytecode_EoF : byte
     Unk2d = 0x34,
     TransformVec4 = 0x35,
 
-    Unk34_EoF = 0x3B, // No clue
+    Unk34_EoF = 0x3B, // No clue, rarely used?
     Unk35_EoF = 0x3C,
     Unk36_EoF = 0x3D,
     Unk37_EoF = 0x3E,
