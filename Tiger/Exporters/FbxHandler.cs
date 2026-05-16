@@ -1,13 +1,14 @@
 ﻿using System.Diagnostics;
 using Internal.Fbx;
-using SharpDX;
+using Tiger.Schema;
 using Tiger.Schema.Entity;
 
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
 
-namespace Tiger.Schema;
+namespace Tiger.Exporters;
 
+[Obsolete("Create an ExporterScene instead to export fbx")]
 public class FbxHandler
 {
     private readonly FbxManager _manager;
@@ -381,7 +382,7 @@ public class FbxHandler
             _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_EMBEDDED, true);
             _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_ANIMATION, true);
             _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_GLOBAL_SETTINGS, true);
-            var exporter = FbxExporter.Create(_manager, "");
+            var exporter = Internal.Fbx.FbxExporter.Create(_manager, "");
             exporter.Initialize(fileName, -1);  // -1 == detect via extension ie binary not ascii, binary is more space efficient
             exporter.Export(_scene);
             exporter.Destroy();
@@ -389,7 +390,7 @@ public class FbxHandler
         _scene.Clear();
     }
 
-    public void AddEntityToScene(Entity.Entity entity, List<DynamicMeshPart> dynamicParts, ExportDetailLevel detailLevel, List<FbxNode> skeletonNodes = null)
+    public void AddEntityToScene(Entity entity, List<DynamicMeshPart> dynamicParts, ExportDetailLevel detailLevel, List<FbxNode> skeletonNodes = null)
     {
         if (skeletonNodes == null)
         {
@@ -453,7 +454,7 @@ public class FbxHandler
                     node = FbxNode.Create(_manager, $"{meshName}_{i}_{j}");
                 }
                 node.SetNodeAttribute(mesh);
-                Quaternion quatRot = new(instances[j].Rotation.X, instances[j].Rotation.Y, instances[j].Rotation.Z, instances[j].Rotation.W);
+                System.Numerics.Quaternion quatRot = new(instances[j].Rotation.X, instances[j].Rotation.Y, instances[j].Rotation.Z, instances[j].Rotation.W);
                 System.Numerics.Vector3 eulerRot = QuaternionToEulerAngles(quatRot);
 
                 node.LclTranslation.Set(new FbxDouble3(instances[j].Position.X, instances[j].Position.Y, instances[j].Position.Z));
@@ -469,7 +470,7 @@ public class FbxHandler
     }
 
     // From https://github.com/OwlGamingCommunity/V/blob/492d0cb3e89a97112ac39bf88de39da57a3a1fbf/Source/owl_core/Server/MapLoader.cs
-    private static System.Numerics.Vector3 QuaternionToEulerAngles(Quaternion q)
+    private static System.Numerics.Vector3 QuaternionToEulerAngles(System.Numerics.Quaternion q)
     {
         System.Numerics.Vector3 retVal = new();
 

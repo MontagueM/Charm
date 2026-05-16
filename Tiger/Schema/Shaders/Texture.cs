@@ -5,6 +5,7 @@ using Arithmic;
 using DirectXTex;
 using DirectXTexNet;
 using Newtonsoft.Json;
+using Tiger.Exporters;
 using Tiger.Schema.Entity;
 using static DirectXTex.DirectXTexUtility;
 using TexMetadata = DirectXTexNet.TexMetadata;
@@ -301,7 +302,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
     {
         try
         {
-            TextureExtractor.SaveTextureToFile(savePath, simg, dimension);
+            TextureExporter.SaveTextureToFile(savePath, simg, dimension);
         }
         catch (FileLoadException e)
         {

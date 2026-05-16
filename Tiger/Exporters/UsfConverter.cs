@@ -1,7 +1,8 @@
 ﻿using System.Text;
+using Tiger.Schema;
 using Tiger.Schema.Shaders;
 
-namespace Tiger.Schema;
+namespace Tiger.Exporters;
 
 public class UsfConverter
 {

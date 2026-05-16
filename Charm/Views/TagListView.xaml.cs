@@ -14,6 +14,7 @@ using System.Windows.Media;
 using Arithmic;
 using ConcurrentCollections;
 using Tiger;
+using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
 using Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
@@ -1227,7 +1228,7 @@ public partial class TagListView : UserControl
 
     private void ExportTexture(ExportInfo info)
     {
-        TextureExtractor.ExportTexture(info.Hash as FileHash);
+        TextureExporter.ExportTexture(info.Hash as FileHash);
     }
 
     #endregion

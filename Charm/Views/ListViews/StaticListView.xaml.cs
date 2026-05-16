@@ -345,8 +345,8 @@ public partial class StaticListView : UserControl
         if (StaticRendererBasic is null)
             return;
 
-        MainViewModel MVM = (MainViewModel)StaticRendererBasic.ModelView.UCModelView.Resources["MVM"];
-        MVM.Dispose();
+        HelixModelView HelixMV = (HelixModelView)StaticRendererBasic.ModelView.UCModelView.Resources["HelixMV"];
+        HelixMV.Dispose();
     }
 }
 

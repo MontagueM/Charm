@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.InteropServices;
+using Tiger.Exporters;
 
 namespace Tiger.Schema;
 
@@ -99,10 +100,10 @@ public class Dye : Tag<SScope>
 
     public void ExportTextures(string savePath, TextureExportFormat outputTextureFormat)
     {
-        TextureExtractor.SetTextureFormat(outputTextureFormat);
+        TextureExporter.SetTextureFormat(outputTextureFormat);
         foreach (STextureTag entry in _tag.Pixel.Value.EnumerateTextures())
         {
-            TextureExtractor.SaveTextureToFile($"{savePath}/{entry.Texture.Hash}", entry.Texture.GetScratchImage());
+            TextureExporter.SaveTextureToFile($"{savePath}/{entry.Texture.Hash}", entry.Texture.GetScratchImage());
         }
     }
 }
@@ -265,11 +266,11 @@ public class DyeD1 : Tag<SDye_D1>
 
     public void ExportTextures(string savePath, TextureExportFormat outputTextureFormat)
     {
-        TextureExtractor.SetTextureFormat(outputTextureFormat);
+        TextureExporter.SetTextureFormat(outputTextureFormat);
         if (_tag.DetailDiffuse is not null)
-            TextureExtractor.SaveTextureToFile($"{savePath}/{_tag.DetailDiffuse.Hash}", _tag.DetailDiffuse.GetScratchImage());
+            TextureExporter.SaveTextureToFile($"{savePath}/{_tag.DetailDiffuse.Hash}", _tag.DetailDiffuse.GetScratchImage());
         if (_tag.DetailNormal is not null)
-            TextureExtractor.SaveTextureToFile($"{savePath}/{_tag.DetailNormal.Hash}", _tag.DetailNormal.GetScratchImage());
+            TextureExporter.SaveTextureToFile($"{savePath}/{_tag.DetailNormal.Hash}", _tag.DetailNormal.GetScratchImage());
     }
 }
 

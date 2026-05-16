@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Tiger;
+using Tiger.Exporters;
 using Tiger.Schema;
 
 namespace Charm;
@@ -81,7 +82,7 @@ public partial class TextureView : UserControl
         Directory.CreateDirectory($"{savePath}/");
 
         if (FlattenVolume.IsChecked.Value && _currentTexture.IsVolume())
-            TextureExtractor.SaveTextureToFile($"{savePath}/{_currentTexture.Hash}", Texture.FlattenVolume(_currentTexture.GetScratchImage(true)));
+            TextureExporter.SaveTextureToFile($"{savePath}/{_currentTexture.Hash}", Texture.FlattenVolume(_currentTexture.GetScratchImage(true)));
         else
             _currentTexture.SavetoFile($"{savePath}/{_currentTexture.Hash}", CurrentSlice);
     }

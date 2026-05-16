@@ -787,7 +787,7 @@ public partial class EntityListView : UserControl
         if (RendererBasic is null)
             return;
 
-        MainViewModel MVM = (MainViewModel)RendererBasic.ModelView.UCModelView.Resources["MVM"];
-        MVM.Dispose();
+        HelixModelView HelixMV = (HelixModelView)RendererBasic.ModelView.UCModelView.Resources["HelixMV"];
+        HelixMV.Dispose();
     }
 }

@@ -1,12 +1,10 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Arithmic;
-using HelixToolkit.SharpDX;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
@@ -20,7 +18,7 @@ public partial class EntityView : UserControl
 {
     public FileHash Hash;
     private bool _isEntityModel = false;
-    private MainViewModel MVM;
+    private HelixModelView HelixMV;
 
     public EntityView()
     {
@@ -42,13 +40,13 @@ public partial class EntityView : UserControl
         List<Entity> entities = new() { entity };
         entities.AddRange(entity.GetEntityChildren());
 
-        MVM ??= (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+        HelixMV ??= (HelixModelView)ModelView.UCModelView.Resources["HelixMV"];
 
-        MVM.Clear();
-        List<MainViewModel.DisplayPart> displayParts = MakeEntityDisplayParts(entities, ModelView.GetSelectedLod());
-        MVM.SetChildren(displayParts);
-        MVM.Title = entityHash;
-        MVM.SubTitle = $"{displayParts.Sum(p => p.BasePart.Indices.Count)} triangles";
+        HelixMV.Clear();
+        List<HelixModelView.DisplayPart> displayParts = ModelView.MakeEntityDisplayParts(entities, ModelView.GetSelectedLod());
+        HelixMV.SetChildren(displayParts);
+        HelixMV.Title = entityHash;
+        HelixMV.SubTitle = $"{displayParts.Sum(p => p.BasePart.Indices.Count)} triangles";
 
         return true;
     }
@@ -61,14 +59,14 @@ public partial class EntityView : UserControl
 
         EntityModel entityModel = FileResourcer.Get().GetFile<EntityModel>(entityModelHash);
 
-        if (MVM is null)
-            MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+        if (HelixMV is null)
+            HelixMV = (HelixModelView)ModelView.UCModelView.Resources["HelixMV"];
 
-        MVM.Clear();
-        List<MainViewModel.DisplayPart> displayParts = MakeEntityModelDisplayParts(entityModel, ModelView.GetSelectedLod());
-        MVM.SetChildren(displayParts);
-        MVM.Title = entityModelHash;
-        MVM.SubTitle = $"{displayParts.Sum(p => p.BasePart.Indices.Count)} triangles";
+        HelixMV.Clear();
+        List<HelixModelView.DisplayPart> displayParts = ModelView.MakeEntityModelDisplayParts(entityModel, ModelView.GetSelectedLod());
+        HelixMV.SetChildren(displayParts);
+        HelixMV.Title = entityModelHash;
+        HelixMV.SubTitle = $"{displayParts.Sum(p => p.BasePart.Indices.Count)} triangles";
 
         return true;
     }
@@ -323,88 +321,12 @@ public partial class EntityView : UserControl
                 config.GetOutputTextureFormat(), dyes.Values.ToList());
 
             Texture iridesceneLookup = Globals.Get().RenderGlobals.TagData.Textures.TagData.IridescenceLookup;
-            TextureExtractor.SaveTextureToFile($"{savePath}/Textures/Iridescence_Lookup", iridesceneLookup.GetScratchImage());
+            TextureExporter.SaveTextureToFile($"{savePath}/Textures/Iridescence_Lookup", iridesceneLookup.GetScratchImage());
         }
         Log.Info($"Exported Gear Shader for: {item.Name}");
     }
 
-    private List<MainViewModel.DisplayPart> MakeEntityDisplayParts(List<Entity> entities, ExportDetailLevel detailLevel)
-    {
-        bool useTextures = ModelView.TextureCheckBox.IsChecked == true;
 
-        ConcurrentBag<MainViewModel.DisplayPart> displayParts = new();
-        foreach (Entity ent in entities)
-        {
-            var offsetTrans = Vector3.Zero;
-            var offsetRot = Vector4.Quaternion;
-            if (ent.HasGeometry())
-            {
-                List<DynamicMeshPart> dynamicParts = ent.Load(detailLevel);
-                ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
-                if (ModelView.GetSelectedGroupIndex() != -1)
-                    dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
-
-                offsetTrans = ent.Model.TranslationOffset.ToVec3();
-                offsetRot = ent.Model.RotationOffset;
-                foreach (DynamicMeshPart part in dynamicParts)
-                {
-                    MainViewModel.DisplayPart displayPart = new();
-                    displayPart.BasePart = part;
-                    displayPart.Translations.Add(Vector3.Zero + offsetTrans);
-                    displayPart.Rotations.Add(new(System.Numerics.Quaternion.Identity * offsetRot.ToQuat()));
-                    displayPart.Scales.Add(Vector3.One);
-
-                    if (useTextures && part.Material?.Pixel.Textures.Any() == true)
-                    {
-                        Stream texture = TextureView.RemoveAlpha(part.Material.Pixel.Textures[0].Texture.GetTexture());
-                        displayPart.DiffuseMaterial = new()
-                        {
-                            DiffuseMap = new TextureModel(texture, true),
-                        };
-                    }
-
-                    displayParts.Add(displayPart);
-                }
-            }
-
-            if (ent.Skeleton != null && ModelView.SkeletonCheckBox.IsChecked == true)
-            {
-                MainViewModel.DisplayPart displayPart = new();
-                displayPart.BoneNodes = ent.Skeleton.GetBoneNodes();
-                displayPart.Translations.Add(offsetTrans);
-                displayPart.Rotations.Add(offsetRot);
-                displayPart.Scales.Add(Vector3.One);
-
-                displayParts.Add(displayPart);
-            }
-        }
-
-        return displayParts.ToList();
-    }
-
-    // TODO combine with above, I don't like this
-    private List<MainViewModel.DisplayPart> MakeEntityModelDisplayParts(EntityModel entModel, ExportDetailLevel detailLevel)
-    {
-        ConcurrentBag<MainViewModel.DisplayPart> displayParts = new();
-
-        List<DynamicMeshPart> dynamicParts = entModel.Load(detailLevel, null);
-        ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
-        if (ModelView.GetSelectedGroupIndex() != -1)
-            dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
-
-        foreach (DynamicMeshPart part in dynamicParts)
-        {
-            MainViewModel.DisplayPart displayPart = new();
-            displayPart.BasePart = part;
-            displayPart.Translations.Add(Vector3.Zero);
-            displayPart.Rotations.Add(Vector4.Zero);
-            displayPart.Scales.Add(Vector3.One);
-
-            displayParts.Add(displayPart);
-        }
-
-        return displayParts.ToList();
-    }
 
     private void SetupCheckboxHandlers()
     {

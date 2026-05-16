@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
@@ -30,12 +30,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\Tiger\Exporters\Shaders\TFXFunctions.hlsl">
-        <Link>Exporters\Shaders\TFXFunctions.hlsl</Link>
+      <Content Include="..\Tiger\Exporters\Sbox\TFXFunctions.hlsl">
+        <Link>Exporters\Sbox\TFXFunctions.hlsl</Link>
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
-      <Content Include="..\Tiger\Exporters\Shaders\D2ShadingModel.hlsl">
-        <Link>Exporters\Shaders\D2ShadingModel.hlsl</Link>
+      <Content Include="..\Tiger\Exporters\Sbox\D2ShadingModel.hlsl">
+        <Link>Exporters\Sbox\D2ShadingModel.hlsl</Link>
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
       
@@ -61,7 +61,7 @@
       <None Update="Exporters\import_to_ue5.py">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="Exporters\sbox_model_template.vmdl">
+      <None Update="Exporters\Sbox\sbox_model_template.vmdl">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

@@ -11,11 +11,11 @@
     d:DesignWidth="960"
     mc:Ignorable="d">
     <UserControl.Resources>
-        <local:MainViewModel x:Key="MVM" />
+        <local:HelixModelView x:Key="HelixMV" />
         <hx:RenderTechniqueConverter x:Key="RenderTechniqueConverter" />
     </UserControl.Resources>
     <UserControl.DataContext>
-        <Binding Source="{StaticResource MVM}" />
+        <Binding Source="{StaticResource HelixMV}" />
     </UserControl.DataContext>
     <Grid
         HorizontalAlignment="Center"

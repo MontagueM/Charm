@@ -74,10 +74,10 @@ namespace Tiger.Schema.Shaders
                         Directory.CreateDirectory($"{saveDirectory}/Shaders/Source2/materials");
 
                         if (!File.Exists($"{saveDirectory}/Shaders/TFXFunctions.hlsl"))
-                            File.Copy("./Exporters/Shaders/TFXFunctions.hlsl", $"{saveDirectory}/Shaders/TFXFunctions.hlsl");
+                            File.Copy("./Exporters/Sbox/TFXFunctions.hlsl", $"{saveDirectory}/Shaders/TFXFunctions.hlsl");
 
                         if (!File.Exists($"{saveDirectory}/Shaders/D2ShadingModel.hlsl"))
-                            File.Copy("./Exporters/Shaders/D2ShadingModel.hlsl", $"{saveDirectory}/Shaders/D2ShadingModel.hlsl");
+                            File.Copy("./Exporters/Sbox/D2ShadingModel.hlsl", $"{saveDirectory}/Shaders/D2ShadingModel.hlsl");
 
                         FileHash hash = (Pixel.GetBytecode().CanInlineBytecode() || RenderStage == TfxRenderStage.WaterReflection) ? Hash : Pixel.Shader.Hash;
                         File.WriteAllText($"{saveDirectory}/Shaders/Source2/PS_{hash}.shader", vfx);
@@ -170,7 +170,7 @@ namespace Tiger.Schema.Shaders
                     });
 
                     string savePath = $"{saveDirectory}/Textures/{texture.Texture.Hash}";
-                    if (File.Exists($"{savePath}.{TextureExtractor.GetExtension(_config.GetOutputTextureFormat())}"))
+                    if (File.Exists($"{savePath}.{TextureExporter.GetExtension(_config.GetOutputTextureFormat())}"))
                         continue;
 
                     texture.Texture.SavetoFile(savePath);
@@ -248,7 +248,7 @@ namespace Tiger.Schema.Shaders
                     });
 
                     string savePath = $"{saveDirectory}/Textures/{texture.Texture.Hash}";
-                    if (File.Exists($"{savePath}.{TextureExtractor.GetExtension(_config.GetOutputTextureFormat())}"))
+                    if (File.Exists($"{savePath}.{TextureExporter.GetExtension(_config.GetOutputTextureFormat())}"))
                         continue;
 
                     texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");

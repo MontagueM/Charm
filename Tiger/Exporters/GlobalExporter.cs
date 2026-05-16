@@ -54,7 +54,7 @@ public class GlobalExporter : AbstractExporter
             foreach (Texture tex in AtmosTextures)
             {
                 // Not ideal but it works
-                TextureExtractor.SaveTextureToFile($"{texSavePath}/{tex.Hash}", tex.IsVolume() ? Texture.FlattenVolume(tex.GetScratchImage(true)) : tex.GetScratchImage());
+                TextureExporter.SaveTextureToFile($"{texSavePath}/{tex.Hash}", tex.IsVolume() ? Texture.FlattenVolume(tex.GetScratchImage(true)) : tex.GetScratchImage());
                 if (_config.GetSBoxExportEnabled())
                     Source2Handler.SaveVTEX(tex, $"{texSavePath}", "Atmosphere");
             }
@@ -182,7 +182,7 @@ public class GlobalExporter : AbstractExporter
                 if (tex is null)
                     continue;
 
-                TextureExtractor.SaveTextureToFile($"{texSavePath}/{tex.Hash}", tex.IsVolume() ? Texture.FlattenVolume(tex.GetScratchImage(true)) : Texture.FlattenCubemap(tex.GetScratchImage()));
+                TextureExporter.SaveTextureToFile($"{texSavePath}/{tex.Hash}", tex.IsVolume() ? Texture.FlattenVolume(tex.GetScratchImage(true)) : Texture.FlattenCubemap(tex.GetScratchImage()));
                 if (_config.GetSBoxExportEnabled())
                     Source2Handler.SaveVTEX(tex, $"{texSavePath}", "Cubemaps");
             }

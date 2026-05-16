@@ -5,6 +5,8 @@ using Tiger.Schema.Investment;
 
 namespace Charm.Shared;
 
+public delegate void ActionRef<T>(ref T value);
+
 public interface IRenderer
 {
     //void Initialize();

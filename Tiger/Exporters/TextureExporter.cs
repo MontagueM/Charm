@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel;
 using Arithmic;
 using DirectXTexNet;
+using Tiger.Schema;
 
-namespace Tiger.Schema;
+namespace Tiger.Exporters;
 
-public class TextureExtractor
+public class TextureExporter
 {
     private static TextureExportFormat _format = TextureExportFormat.PNG;
     private static readonly object _lock = new();

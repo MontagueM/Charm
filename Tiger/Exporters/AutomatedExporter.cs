@@ -86,9 +86,9 @@ public class AutomatedExporter
                     {
                         dye.ExportTextures($"{saveDirectory}/Textures", outputTextureFormat);
                         STextureTag diff = dye.TagData.Pixel.Value.Textures[0];
-                        text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
+                        text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}.{TextureExporter.GetExtension(outputTextureFormat)}");
                         STextureTag norm = dye.TagData.Pixel.Value.Textures[1];
-                        text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
+                        text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}.{TextureExporter.GetExtension(outputTextureFormat)}");
                     }
 
                     foreach (System.Reflection.FieldInfo fieldInfo in dyeInfo.GetType().GetFields())

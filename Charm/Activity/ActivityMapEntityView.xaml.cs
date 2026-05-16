@@ -21,7 +21,6 @@ namespace Charm;
 
 public partial class ActivityMapEntityView : UserControl
 {
-    private FbxHandler _globalFbxHandler = null;
     private static ConfigSubsystem _config = TigerInstance.GetSubsystem<ConfigSubsystem>();
 
     private IActivity _currentActivity;
@@ -31,7 +30,6 @@ public partial class ActivityMapEntityView : UserControl
     public ActivityMapEntityView()
     {
         InitializeComponent();
-        _globalFbxHandler = new FbxHandler(false);
     }
 
     public void LoadUI(IActivity activity)
@@ -561,7 +559,9 @@ public partial class ActivityMapEntityView : UserControl
         Log.Info($"Loading UI for static map hash: {dc.Name}");
         MapControl.Clear();
         MapControl.Visibility = Visibility.Hidden;
-        ExportDetailLevel lod = MapControl.ModelView.GetSelectedLod();
+        // Just gonna do highest level for entity viewing, should be fine
+        ExportDetailLevel lod = ExportDetailLevel.MostDetailed; //MapControl.ModelView.GetSelectedLod();
+
         if (dc.Name == "Select all")
         {
             IEnumerable<DisplayEntityMap> items = EntityContainerList.Items.Cast<DisplayEntityMap>().Where(x => x.Name != "Select all");
@@ -631,7 +631,8 @@ public partial class ActivityMapEntityView : UserControl
         MapControl.Clear();
         Log.Info($"Loading UI for entity: {dc.Name}");
         MapControl.Visibility = Visibility.Hidden;
-        ExportDetailLevel lod = MapControl.ModelView.GetSelectedLod();
+        // Just gonna do highest level for entity viewing, should be fine
+        ExportDetailLevel lod = ExportDetailLevel.MostDetailed; //MapControl.ModelView.GetSelectedLod();
         if (dc.DisplayName == "All Entities")
         {
             List<FileHash> items = dc.Parent;
@@ -655,13 +656,10 @@ public partial class ActivityMapEntityView : UserControl
         }
         else
         {
-            Entity entity = FileResourcer.Get().GetFile<Entity>(dc.Hash);
-            MainWindow.Progress.SetProgressStages(new List<string> { $"Loading Entity to UI: {entity.Hash}" });
-            List<Entity> entities = new() { entity };
-            entities.AddRange(entity.GetEntityChildren());
+            MainWindow.Progress.SetProgressStages(new List<string> { $"Loading Entity to UI: {dc.Hash}" });
             await Task.Run(() =>
             {
-                MapControl.LoadEntity(entities, _globalFbxHandler);
+                MapControl.LoadEntity(new(dc.Hash));
                 MainWindow.Progress.CompleteStage();
             });
         }

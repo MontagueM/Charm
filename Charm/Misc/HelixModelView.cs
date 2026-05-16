@@ -28,7 +28,7 @@ namespace Charm;
 /// <summary>
 /// Provides a ViewModel for the Main window.
 /// </summary>
-public class MainViewModel : INotifyPropertyChanged, IDisposable
+public class HelixModelView : INotifyPropertyChanged, IDisposable
 {
     public EffectsManager EffectsManager { get; set; }
 
@@ -74,7 +74,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
     public LineGeometry3D Grid { get; private set; }
     public Media3D.Transform3D GridTransform { get; private set; }
 
-    public MainViewModel()
+    public HelixModelView()
     {
         EffectsManager = new DefaultEffectsManager();
         Scene = new HelixToolkitScene(new GroupNode());
@@ -94,8 +94,6 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
 
         Grid = LineBuilder.GenerateGrid();
         GridTransform = new TranslateTransform3D(-5, 0, -5);
-
-        // EnvironmentMap = TextureModel.Create("C:/T/full/Textures/2D47A280.dds");
     }
 
     private void ResetCamera()

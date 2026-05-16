@@ -12,6 +12,7 @@ using System.Windows.Media;
 using Arithmic;
 using Charm.Shared;
 using Tiger;
+using Tiger.Exporters;
 using Tiger.Schema;
 using static Charm.PackageList;
 
@@ -253,7 +254,7 @@ public partial class TextureListView : UserControl
         {
             Parallel.ForEach(items, item =>
             {
-                TextureExtractor.ExportTexture(item.Hash);
+                TextureExporter.ExportTexture(item.Hash);
                 MainWindow.Progress.CompleteStage();
             });
         });

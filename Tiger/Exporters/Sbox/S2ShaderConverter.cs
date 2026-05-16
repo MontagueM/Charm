@@ -1,9 +1,10 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using SharpDX.Direct3D11;
+using Tiger.Schema;
 using Tiger.Schema.Shaders;
 
-namespace Tiger.Schema;
+namespace Tiger.Exporters;
 
 
 // ugh this is so ugly

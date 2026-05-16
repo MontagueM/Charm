@@ -9,7 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Forms;
 using Arithmic;
 using Tiger;
-using Tiger.Schema;
+using Tiger.Exporters;
 using ComboBox = System.Windows.Controls.ComboBox;
 using MessageBox = System.Windows.MessageBox;
 using UserControl = System.Windows.Controls.UserControl;
@@ -308,7 +308,7 @@ public partial class GeneralConfigView : UserControl
     {
         int index = ((sender as ComboBox).DataContext as ConfigSettingComboControl).SettingsCombobox.SelectedIndex;
         _config.SetOutputTextureFormat((TextureExportFormat)index);
-        TextureExtractor.SetTextureFormat(_config.GetOutputTextureFormat());
+        TextureExporter.SetTextureFormat(_config.GetOutputTextureFormat());
         PopulateConfigPanel();
     }
 

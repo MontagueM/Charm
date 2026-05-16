@@ -13,12 +13,12 @@
     d:DesignWidth="1920"
     mc:Ignorable="d">
     <UserControl.Resources>
-        <charm:MainViewModel x:Key="MVM" />
+        <charm:HelixModelView x:Key="HelixMV" />
         <hx:RenderTechniqueConverter x:Key="RenderTechniqueConverter" />
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
     </UserControl.Resources>
     <UserControl.DataContext>
-        <Binding Source="{StaticResource MVM}" />
+        <Binding Source="{StaticResource HelixMV}" />
     </UserControl.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>

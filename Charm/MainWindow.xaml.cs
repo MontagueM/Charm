@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Charm.Shared;
 using Tiger;
+using Tiger.Exporters;
 using Tiger.Schema;
 using VersionChecker;
 using static Charm.CategoryView;
@@ -411,7 +412,7 @@ public partial class MainWindow
     {
         // Set texture format
         ConfigSubsystem config = TigerInstance.GetSubsystem<ConfigSubsystem>();
-        TextureExtractor.SetTextureFormat(config.GetOutputTextureFormat());
+        TextureExporter.SetTextureFormat(config.GetOutputTextureFormat());
     }
 
     private void OpenLogPanel_OnClick(object sender, RoutedEventArgs e)

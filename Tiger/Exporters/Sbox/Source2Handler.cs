@@ -17,7 +17,7 @@ public static class Source2Handler
             fbxPath = fbxPath.Replace(@"\", @"/");
             if (!File.Exists($"{savePath}/{name}.vmdl"))
             {
-                File.Copy("Exporters/sbox_model_template.vmdl", $"{savePath}/{name}.vmdl", true);
+                File.Copy("Exporters/Sbox/sbox_model_template.vmdl", $"{savePath}/{name}.vmdl", true);
                 string text = File.ReadAllText($"{savePath}/{name}.vmdl");
 
                 StringBuilder mats = new();
@@ -274,9 +274,9 @@ public static class Source2Handler
             }
 
             STextureTag diff = dye.TagData.Pixel.Value.Textures[0];
-            text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
+            text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}.{TextureExporter.GetExtension(outputTextureFormat)}");
             STextureTag norm = dye.TagData.Pixel.Value.Textures[1];
-            text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
+            text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}.{TextureExporter.GetExtension(outputTextureFormat)}");
             dyeIndex++;
         }
 

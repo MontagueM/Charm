@@ -13,7 +13,7 @@ namespace Charm;
 
 public partial class StaticView : UserControl
 {
-    private MainViewModel MVM;
+    private HelixModelView HelixMV;
     public StaticView()
     {
         InitializeComponent();
@@ -34,14 +34,14 @@ public partial class StaticView : UserControl
         StaticMesh staticMesh = FileResourcer.Get().GetFile<StaticMesh>(hash);
         List<StaticPart> parts = staticMesh.Load(detailLevel);
 
-        if (MVM is null)
-            MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+        if (HelixMV is null)
+            HelixMV = (HelixModelView)ModelView.UCModelView.Resources["HelixMV"];
 
-        MVM.Clear();
-        List<MainViewModel.DisplayPart> displayParts = MakeDisplayParts(parts);
-        MVM.SetChildren(displayParts);
-        MVM.Title = hash;
-        MVM.SubTitle = $"{displayParts.Sum(p => p.BasePart.Indices.Count)} triangles";
+        HelixMV.Clear();
+        List<HelixModelView.DisplayPart> displayParts = MakeDisplayParts(parts);
+        HelixMV.SetChildren(displayParts);
+        HelixMV.Title = hash;
+        HelixMV.SubTitle = $"{displayParts.Sum(p => p.BasePart.Indices.Count)} triangles";
     }
 
 
@@ -77,14 +77,14 @@ public partial class StaticView : UserControl
 
 
 
-    private List<MainViewModel.DisplayPart> MakeDisplayParts(List<StaticPart> containerParts)
+    private List<HelixModelView.DisplayPart> MakeDisplayParts(List<StaticPart> containerParts)
     {
         bool useTextures = ModelView.TextureCheckBox.IsChecked == true;
-        List<MainViewModel.DisplayPart> displayParts = new();
+        List<HelixModelView.DisplayPart> displayParts = new();
 
         foreach (StaticPart part in containerParts)
         {
-            var displayPart = new MainViewModel.DisplayPart
+            var displayPart = new HelixModelView.DisplayPart
             {
                 BasePart = part,
                 Translations = { Vector3.Zero },
