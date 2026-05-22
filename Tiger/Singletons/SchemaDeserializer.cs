@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Arithmic;
@@ -294,6 +295,8 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         //Console.WriteLine($"{u32:X} : {bIs32Bit:X} : {u64:X}");
         if (bIs32Bit is 1 or 2) // TFS can have 2 instead of 1?
         {
+            if (bIs32Bit == 2) // 32 bit shouldn't actually be 2, what was i thinking?
+                Debug.Assert(false, $"bIs32Bit value of 2 in {reader.Hash} at {reader.Position - 0x8 - 0x4:X}");
             return new FileHash(u32);
         }
         else if (bIs32Bit == 0)

@@ -128,11 +128,6 @@ public partial class MainWindow
             // Log game version
             CheckGameVersion();
 
-            if (!ConfigSubsystem.Get().GetAcceptedAgreement())
-            {
-                ShowAgreement();
-            }
-
             // TODO, only shows on initial load after a version is already set, doesnt work when changing version
             LogConfigDetails();
         }
@@ -203,49 +198,50 @@ public partial class MainWindow
         Arithmic.Log.Info($"Export Path: {config.GetExportSavePath()}");
     }
 
-    private void ShowAgreement()
-    {
-        PopupBanner warn = new()
-        {
-            DarkenBackground = true,
-            //Icon = "⚠️",
-            Title = "ATTENTION",
-            Subtitle = "Charm is NOT a datamining tool!",
-            Description =
-            "Charm is intended for 3D artists, content preservation, and understanding how the Tiger engine works." +
-            "\n\nBy using Charm, you agree to the following:" +
-            "\n• You WILL NOT use Charm to share spoilers or secrets that may ruin the experience for others." +
-            "\n• You WILL NOT use Charm to leak or distribute unreleased content." +
-            "\n     - Including but not limited to screenshots, recordings, or exports." +
-            "\n• You WILL NOT use Charm in any way that violates Bungie’s Terms of Service." +
-            "\n     - Including but not limited to using code to develop cheats and/or exploits." +
-            "\n\nBreaking any of the above WILL reduce public updates and result in the removal of features.",
-            Style = PopupBanner.PopupStyle.Warning,
-            UserInput = $"Accept{(!FontHandler.FontsLoaded ? " (Left Mouse)" : "")}",
-            UserInputSecondary = $"Reject{(!FontHandler.FontsLoaded ? " (Right Mouse)" : "")}",
-            HoldDuration = 8000,
-            Progress = true
-        };
-        warn.MouseRightButtonDown += (s, e) =>
-        {
-            warn.Remove(true);
-            PopupBanner warn2 = new()
-            {
-                DarkenBackground = true,
-                //Icon = "⚠️",
-                Title = "THAT'S TOO BAD",
-                Subtitle = "You must accept the agreement to use Charm!",
-                Description = "Charm will now close. You can try reading it again if you want.",
-                Style = PopupBanner.PopupStyle.Warning,
-                UserInput = "Okay",
-            };
-            warn2.OnProgressComplete += () => Application.Current.Shutdown(0);
-            warn2.Show();
-        };
+    // D2 is now end of life, no reason to show this anymore..
+    //private void ShowAgreement()
+    //{
+    //    PopupBanner warn = new()
+    //    {
+    //        DarkenBackground = true,
+    //        //Icon = "⚠️",
+    //        Title = "ATTENTION",
+    //        Subtitle = "Charm is NOT a datamining tool!",
+    //        Description =
+    //        "Charm is intended for 3D artists, content preservation, and understanding how the Tiger engine works." +
+    //        "\n\nBy using Charm, you agree to the following:" +
+    //        "\n• You WILL NOT use Charm to share spoilers or secrets that may ruin the experience for others." +
+    //        "\n• You WILL NOT use Charm to leak or distribute unreleased content." +
+    //        "\n     - Including but not limited to screenshots, recordings, or exports." +
+    //        "\n• You WILL NOT use Charm in any way that violates Bungie’s Terms of Service." +
+    //        "\n     - Including but not limited to using code to develop cheats and/or exploits." +
+    //        "\n\nBreaking any of the above WILL reduce public updates and result in the removal of features.",
+    //        Style = PopupBanner.PopupStyle.Warning,
+    //        UserInput = $"Accept{(!FontHandler.FontsLoaded ? " (Left Mouse)" : "")}",
+    //        UserInputSecondary = $"Reject{(!FontHandler.FontsLoaded ? " (Right Mouse)" : "")}",
+    //        HoldDuration = 8000,
+    //        Progress = true
+    //    };
+    //    warn.MouseRightButtonDown += (s, e) =>
+    //    {
+    //        warn.Remove(true);
+    //        PopupBanner warn2 = new()
+    //        {
+    //            DarkenBackground = true,
+    //            //Icon = "⚠️",
+    //            Title = "THAT'S TOO BAD",
+    //            Subtitle = "You must accept the agreement to use Charm!",
+    //            Description = "Charm will now close. You can try reading it again if you want.",
+    //            Style = PopupBanner.PopupStyle.Warning,
+    //            UserInput = "Okay",
+    //        };
+    //        warn2.OnProgressComplete += () => Application.Current.Shutdown(0);
+    //        warn2.Show();
+    //    };
 
-        warn.OnProgressComplete += () => ConfigSubsystem.Get().SetAcceptedAgreement(true);
-        warn.Show();
-    }
+    //    warn.OnProgressComplete += () => ConfigSubsystem.Get().SetAcceptedAgreement(true);
+    //    warn.Show();
+    //}
 
     private int InitialiseStrategistSingletons()
     {
@@ -440,11 +436,6 @@ public partial class MainWindow
         {
             Task.Run(InitialiseHandlers);
             _bHasInitialised = true;
-        }
-
-        if (!ConfigSubsystem.Get().GetAcceptedAgreement())
-        {
-            ShowAgreement();
         }
     }
 
@@ -668,13 +659,13 @@ public partial class MainWindow
             };
             test2.Show();
         }
-        else if (e.Key == Key.A
-            && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control
-            && (Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt
-            && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
-        {
-            ShowAgreement();
-        }
+        //else if (e.Key == Key.A
+        //    && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control
+        //    && (Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt
+        //    && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+        //{
+        //    ShowAgreement();
+        //}
     }
 
     public static BitmapSource GetBitmapSource(Icon icon)

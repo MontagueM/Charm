@@ -219,7 +219,8 @@ public partial class MainMenuView : UserControl
             Subtitle = "The Destiny tool that does (almost) everything.",
             Description =
             "Charm was developed for 3D artists, nerds, to preserve vaulted content as much as possible, and for learning how the Tiger engine works in general!\n\n" +
-            "By using Charm, you agree to not use it to spread leaks/spoilers or anything that may break Bungie's TOS.",
+            "Thank you Bungie for allowing us to explore and understand the intricacies of Destiny."
+            + "\n- Per Audacia Ad Astra",
             Style = PopupBanner.PopupStyle.Information
         };
         about.Show();
@@ -262,7 +263,7 @@ public partial class MainMenuView : UserControl
                 //strategyIcon = ApiImageUtils.MakeIcon(new FileHash("D643DE80")); // EoF
 
                 col = Color.FromArgb(0xFF, 0xFF, 0x30, 0x10);
-                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("07D7DF80")); // Renegades
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("07D7DF80"));
                 break;
         }
         StrategyIcon.Source = strategyIcon;

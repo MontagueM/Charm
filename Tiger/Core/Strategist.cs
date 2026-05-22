@@ -9,14 +9,8 @@ public class StrategyEventArgs : EventArgs
     public TigerStrategy Strategy { get; set; }
 }
 
-// todo separate the metadata out, no need to put it all in one place - just gets too long and nasty
-// the package type should be done by the resourcer, the app/depot etc should be done by tomograph data
-
 // Order of values matters; Tag definitions are processed top to bottom so if you only provide a tag definition for WQ and not LF,
 // the code will presume that LF is the same as WQ. If this is not the case it will throw an exception.
-
-// At what point do I say screw it and drop support for legacy versions and instead have a "Charm Legacy"?
-// Things are starting to become a mess with all these versions.
 public enum TigerStrategy
 {
     NONE = 0,
@@ -34,11 +28,10 @@ public enum TigerStrategy
     DESTINY2_LIGHTFALL_7366 = 7366,
     [Description("The Final Shape"), StrategyMetadata("w64", 1085660, 1085661, 3593201409625956155, 1085662, 6975584800172104419)]
     DESTINY2_FINAL_SHAPE_8264 = 8264,
-    //[Description("Edge Of Fate"), StrategyMetadata("w64", 1085660, 1085661, ???, 1085662, ???)]
-    //DESTINY2_EDGE_OF_FATE_9xxx = 9xxxx
 
-    [Description("Renegades"), StrategyMetadata("w64")]
-    DESTINY2_LATEST = 20000,  // there probably wont be a destiny version higher than this (surely)
+    // Edge of Fate to Monument of Triumph, the last update  
+    [Description("Latest"), StrategyMetadata("w64")]
+    DESTINY2_LATEST = 20000,  // man this hurts...
 }
 
 public struct StrategyConfiguration

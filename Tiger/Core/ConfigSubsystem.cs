@@ -27,8 +27,6 @@ public class CommonSettings
     public bool CustomRenderer { get; set; } = false;
     public bool SaveShaderHLSL { get; set; } = false;
     public bool SaveEquirectCubemaps { get; set; } = false;
-
-    public bool AcceptedAgreementV320 { get; set; } = false;
 }
 
 // [ConfigSubsystem]
@@ -91,18 +89,6 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
     //     return null;
     // }
 
-    #region General
-    public bool GetAcceptedAgreement()
-    {
-        return _settings.Common.AcceptedAgreementV320;
-    }
-
-    public void SetAcceptedAgreement(bool b)
-    {
-        _settings.Common.AcceptedAgreementV320 = b;
-        Save();
-    }
-    #endregion
 
     #region packagesPath
 

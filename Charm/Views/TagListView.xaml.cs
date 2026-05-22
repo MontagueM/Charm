@@ -643,12 +643,6 @@ public partial class TagListView : UserControl
                         continue;
 
                     string name = destinationGlobalTagBag.DestinationGlobalTagBagName;
-                    if (name.Contains("secret") || name.Contains("raid") || name.Contains("dungeon"))
-                        name = destinationGlobalTagBag.DestinationGlobalTagBag;
-#if DEBUG
-                    if (CharmApp.CharmRedacted is not null)
-                        name = destinationGlobalTagBag.DestinationGlobalTagBagName;
-#endif
                     _allTagItems.Add(new TagItem
                     {
                         Hash = destinationGlobalTagBag.DestinationGlobalTagBag,
@@ -699,13 +693,6 @@ public partial class TagListView : UserControl
             }
 
             string name = val.TagPath ?? "";
-            if (name.Contains("mechanic") || name.Contains("secret") || name.Contains("raid") || name.Contains("dungeon"))
-                name = val.Tag.Hash;
-
-#if DEBUG
-            if (CharmApp.CharmRedacted is not null)
-                name = val.TagPath ?? "";
-#endif
             _allTagItems.Add(new TagItem
             {
                 Hash = val.Tag.Hash,
@@ -1170,17 +1157,79 @@ public partial class TagListView : UserControl
 
         ConcurrentDictionary<string, FileHash> directiveItems = new();
 
-        if (CharmApp.CharmRedacted is not null)
+        switch (Strategy.CurrentStrategy)
         {
-            var loaderType = CharmApp.CharmRedacted.GetType("Charm.Redacted.RedactedActivity");
-            if (loaderType != null)
-            {
-                var method = loaderType.GetMethod("LoadDirectiveList", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                if (method != null)
+            case >= TigerStrategy.DESTINY2_WITCHQUEEN_6307:
+                ActivityWQ activityWQ = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
+                if (activityWQ.TagData.Unk18.GetValue(activityWQ.GetReader()) is S6A988080 a988080)
                 {
-                    directiveItems = (ConcurrentDictionary<string, FileHash>)method.Invoke(null, new object[] { fileHash });
+                    IEnumerable<FileHash> directiveTables = a988080.DirectiveTables.Select(x => x.DirectiveTable.Hash);
+
+                    Parallel.ForEach(directiveTables, hash =>
+                    {
+                        directiveItems.TryAdd(hash, hash);
+                    });
                 }
-            }
+                else if (activityWQ.TagData.Unk18.GetValue(activityWQ.GetReader()) is S20978080 class20978080)
+                {
+                    IEnumerable<FileHash> directiveTables = class20978080.DirectiveTables.Select(x => x.DirectiveTable.Hash);
+
+                    Parallel.ForEach(directiveTables, hash =>
+                    {
+                        directiveItems.TryAdd(hash, hash);
+                    });
+                }
+                break;
+
+            case TigerStrategy.DESTINY2_BEYONDLIGHT_3402:
+                ActivityWQ activityBL = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
+                if (activityBL.TagData.Unk18.GetValue(activityBL.GetReader()) is S19978080 resource)
+                {
+                    IEnumerable<FileHash?> directiveTables = resource.DirectiveTables.Where(x => x.DirectiveTable is not null).Select(x => x.DirectiveTable?.Hash);
+
+                    Parallel.ForEach(directiveTables, hash =>
+                    {
+                        directiveItems.TryAdd(hash ?? "", hash);
+                    });
+                }
+                break;
+
+            case TigerStrategy.DESTINY2_SHADOWKEEP_2601:
+            case TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                ActivitySK activitySK = FileResourcer.Get().GetFile<ActivitySK>(fileHash);
+                ConcurrentHashSet<FileHash> valsSK = PackageResourcer.Get().GetAllHashes<SUnkActivity_SK>();
+                foreach (FileHash val in valsSK)
+                {
+                    Tag<SUnkActivity_SK> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(val);
+                    string activityName = PackageResourcer.Get().GetActivityName(activitySK.FileHash).Split(':')[1];
+
+                    if (tag.TagData.ActivityDevName.Value.Contains(activityName))
+                    {
+                        foreach (FileHash tableHash in activitySK.GetActivityDirectiveTables(val))
+                        {
+                            directiveItems.TryAdd($"{PackageResourcer.Get().GetActivityName(val).Split(":").First()}", tableHash);
+                        }
+                    }
+                }
+                break;
+
+
+            case TigerStrategy.DESTINY1_RISE_OF_IRON:
+                ActivityROI activityROI = FileResourcer.Get().GetFile<ActivityROI>(fileHash);
+                Dictionary<FileHash, TagClassHash> valsROI = PackageResourcer.Get().GetD1Activities();
+                foreach (KeyValuePair<FileHash, TagClassHash> val in valsROI)
+                {
+                    if (val.Value == "16068080")
+                    {
+                        Tag<SUnkActivity_ROI> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(val.Key);
+                        string activityName = PackageResourcer.Get().GetActivityName(activityROI.FileHash).Split(':')[1];
+                        if (tag.TagData.ActivityDevName.Value.Contains(activityName))
+                        {
+                            directiveItems.TryAdd(PackageResourcer.Get().GetActivityName(val.Key).Split(":").First(), val.Key);
+                        }
+                    }
+                }
+                break;
         }
 
         Parallel.ForEach(directiveItems, entry =>

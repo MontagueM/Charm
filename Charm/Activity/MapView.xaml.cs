@@ -119,7 +119,7 @@ public partial class MapView : UserControl
             HelixMV ??= (HelixModelView)ModelView.UCModelView.Resources["HelixMV"];
 
             HelixMV.Clear();
-            List<HelixModelView.DisplayPart> displayParts = ModelView.MakeEntityDisplayParts(entities, ModelView.GetSelectedLod());
+            List<HelixModelView.DisplayPart> displayParts = ModelView.MakeEntityDisplayParts(entities, ExportDetailLevel.MostDetailed);
             HelixMV.SetChildren(displayParts);
             HelixMV.Title = entityHash;
             HelixMV.SubTitle = $"{displayParts.Sum(p => p.BasePart.Indices.Count)} triangles";
