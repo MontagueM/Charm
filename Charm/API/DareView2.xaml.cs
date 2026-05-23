@@ -93,7 +93,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         Focusable = true;
         Focus();
 
-        if (CharmApp.CanUseRenderer())
+        if (IRenderer.CanUseRenderer())
             Multi3DButton.Visibility = Visibility.Visible;
 
 #if DEBUG
@@ -370,7 +370,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         e.Handled = true;
         APIPlugItem apiItem = (sender as FrameworkElement).DataContext as APIPlugItem;
 
-        if (Keyboard.IsKeyDown(Key.LeftCtrl) && CharmApp.CanUseRenderer())
+        if (Keyboard.IsKeyDown(Key.LeftCtrl) && IRenderer.CanUseRenderer())
         {
             var item = apiItem.Item;
             if ((apiItem.Item.Type is "Artifact" or "Seasonal Artifact"))// && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is SC5738080 gearSet)
@@ -393,7 +393,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
             if (!MainWindow.Current.SetCurrentTab($"{apiItem.Item.Name} {apiItem.Item.GetItemIndex()} - 3D"))
             {
-                var renderer = CreateRenderer();
+                var renderer = IRenderer.CreateRenderer(nameof(DareView2));
                 MainWindow.Current.MakeNewTab($"{apiItem.Item.Name} {apiItem.Item.GetItemIndex()} - 3D", renderer as UserControl);
                 MainWindow.Current.SetNewestTabSelected();
 
@@ -409,7 +409,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     private void Multi3DItemView(object sender, RoutedEventArgs e)
     {
-        if (!CharmApp.CanUseRenderer())
+        if (!IRenderer.CanUseRenderer())
             return;
 
         if (SelectedItems.Count == 0)
@@ -440,20 +440,11 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
         if (!MainWindow.Current.SetCurrentTab($"Gear 3D MultiView"))
         {
-            var renderer = CreateRenderer();
+            var renderer = IRenderer.CreateRenderer(nameof(DareView2));
             MainWindow.Current.MakeNewTab($"Gear 3D MultiView", renderer as UserControl);
             MainWindow.Current.SetNewestTabSelected();
             renderer.LoadInvestmentItems(items);
         }
-    }
-
-    private IRenderer CreateRenderer()
-    {
-        Type renderer = CharmApp.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
-        var irenderer = Activator.CreateInstance(renderer) as IRenderer;
-        IRenderer.RegisterRenderer(irenderer, nameof(DareView2));
-
-        return irenderer;
     }
 
     private void ExportButton_Click(object sender, RoutedEventArgs e)

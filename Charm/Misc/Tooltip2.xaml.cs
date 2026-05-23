@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using Charm.Shared;
 using Tiger;
 using Tiger.Schema.Investment;
 using static Charm.CategoryView;
@@ -216,7 +217,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                 break;
         }
 
-        bool canView3D = MainWindow.Current?.CurrentTab?.Content is DareView2 && CharmApp.CanUseRenderer();
+        bool canView3D = MainWindow.Current?.CurrentTab?.Content is DareView2 && IRenderer.CanUseRenderer();
         bool canExport = MainWindow.Current?.CurrentTab?.Content is CategoryView && DareView2.ShouldAddToList(item);
 
         await Task.Run(() =>

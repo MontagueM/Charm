@@ -5,10 +5,10 @@ using System.Reflection;
 using System.Windows;
 using System.Xml;
 using Arithmic;
+using Charm.Shared;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using Microsoft.Win32;
-using Tiger;
 using VersionChecker;
 
 namespace Charm;
@@ -20,7 +20,6 @@ public partial class CharmApp : Application
 {
     public static ApplicationVersion CurrentVersion = new("3.2.3");
     public static Assembly? CharmRedacted = null;
-    public static Assembly? CharmRenderer = null;
 
     private void Application_Startup(object sender, StartupEventArgs e)
     {
@@ -53,7 +52,7 @@ public partial class CharmApp : Application
         }
 
         LoadRedactedDLL();
-        IsRendererDllAvailable();
+        IRenderer.IsRendererDllAvailable();
     }
 
     public void LoadRedactedDLL()
@@ -78,24 +77,6 @@ public partial class CharmApp : Application
             Log.Info("Loaded Charm.Redacted");
             CharmRedacted = asm;
         }
-    }
-
-    public void IsRendererDllAvailable()
-    {
-        string dllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Charm.Renderer.dll");
-        if (File.Exists(dllPath))
-            CharmRenderer = Assembly.LoadFrom(dllPath);
-        else
-            return;
-
-        Log.Info("Loaded Charm.Renderer");
-    }
-
-    public static bool CanUseRenderer()
-    {
-        return CharmRenderer is not null
-            && ConfigSubsystem.Get().GetCustomRenderer()
-            && Strategy.IsLatest();
     }
 
     bool IsVcRedistInstalled()

@@ -174,7 +174,7 @@ public partial class MainWindow
         // It only works if Helix3D gets to create a viewport first for whatever reason, so as long as its alive
         // anything that uses helix will just work fine? Very weird.
 #if !DEBUG // Only for release mode since helix will just crash the program if renderdoc is attached :)
-        if (CharmApp.CharmRenderer is not null && config.GetCustomRenderer())
+        if (IRenderer.CharmRenderer is not null && config.GetCustomRenderer())
         {
             var a = new CubemapView();
             a.Visibility = Visibility.Hidden;

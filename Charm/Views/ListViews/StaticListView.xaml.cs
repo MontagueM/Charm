@@ -42,17 +42,14 @@ public partial class StaticListView : UserControl
             await LoadStaticList(item);
         };
 
-        if (CharmApp.CanUseRenderer())
+        if (IRenderer.CanUseRenderer())
         {
-            Type renderer = CharmApp.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
-            StaticRenderer = Activator.CreateInstance(renderer) as IRenderer;
-            IRenderer.RegisterRenderer(StaticRenderer, nameof(StaticListView));
-
+            StaticRenderer = IRenderer.CreateRenderer(nameof(StaticListView));
             RendererGrid.Children.Add(StaticRenderer as UserControl);
         }
         else
         {
-            if (CharmApp.CharmRenderer is null && Config.GetCustomRenderer())
+            if (IRenderer.CharmRenderer is null && Config.GetCustomRenderer())
                 Log.Warning("Renderer unavailable, falling back to basic viewer.");
 
             StaticRendererBasic = new StaticView();

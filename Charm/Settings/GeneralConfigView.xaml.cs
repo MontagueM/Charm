@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using Arithmic;
+using Charm.Shared;
 using Tiger;
 using Tiger.Exporters;
 using ComboBox = System.Windows.Controls.ComboBox;
@@ -121,7 +122,7 @@ public partial class GeneralConfigView : UserControl
         equirectCubemaps.ChangeButton.Click += ExportEquirectCubemaps_OnClick;
         MaterialsConfigPanel.Children.Add(equirectCubemaps);
 
-        if (CharmApp.CharmRenderer is not null)
+        if (IRenderer.CharmRenderer is not null)
         {
             ConfigSettingToggleControl cusRend = new();
             cusRend.SettingName = "Custom Renderer";

@@ -48,12 +48,9 @@ public partial class EntityListView : UserControl
             await LoadEntityList(item);
         };
 
-        if (CharmApp.CanUseRenderer())
+        if (IRenderer.CanUseRenderer())
         {
-            Type renderer = CharmApp.CharmRenderer.GetType("Charm.Renderer.RendererViewport");
-            Renderer = Activator.CreateInstance(renderer) as IRenderer;
-            IRenderer.RegisterRenderer(Renderer, nameof(EntityListView));
-
+            Renderer = IRenderer.CreateRenderer(nameof(EntityListView));
             RendererGrid.Children.Add(Renderer as UserControl);
         }
         else
