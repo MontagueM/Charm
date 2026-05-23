@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charm.Redacted", "..\..\Cha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charm.Shared", "Charm.Shared\Charm.Shared.csproj", "{8D9D7DF0-5178-443B-B00B-F5CB99CAA219}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charm.Renderer", "..\..\Charm.Renderer\Charm.Renderer.csproj", "{5E6F4FD6-7D8A-5805-B3DC-DFDFAEE52085}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charm.Renderer", "Charm.Renderer\Charm.Renderer.csproj", "{5E6F4FD6-7D8A-5805-B3DC-DFDFAEE52085}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

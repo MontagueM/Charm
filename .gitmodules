@@ -1,0 +1,3 @@
+[submodule "Charm.Renderer"]
+	path = Charm.Renderer
+	url = https://github.com/DeltaDesigns/Charm-Renderer.git
