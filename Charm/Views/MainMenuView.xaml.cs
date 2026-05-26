@@ -262,8 +262,8 @@ public partial class MainMenuView : UserControl
                 //col = Color.FromArgb(0xFF, 0x00, 0x80, 0x81);
                 //strategyIcon = ApiImageUtils.MakeIcon(new FileHash("D643DE80")); // EoF
 
-                col = Color.FromArgb(0xFF, 0xFF, 0x30, 0x10);
-                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("07D7DF80"));
+                col = Color.FromArgb(0xFF, 0x00, 0xB8, 0xFF);
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("C534C280"));
                 break;
         }
         StrategyIcon.Source = strategyIcon;

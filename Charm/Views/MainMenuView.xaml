@@ -27,7 +27,7 @@
 
     <Grid>
         <Grid.Background>
-            <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0,0" Opacity="0.4" RadiusX="2" RadiusY="2">
+            <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0,0" Opacity="0.5" RadiusX="2" RadiusY="2">
                 <RadialGradientBrush.GradientStops>
                     <GradientStop x:Name="Gradient" Offset="0" Color="#008081" />
                     <GradientStop Offset="0.5" Color="#00000000" />
@@ -54,55 +54,57 @@
             <RowDefinition Height="10*" />
         </Grid.RowDefinitions>
 
-        <Border
-            Grid.RowSpan="2"
-            Margin="10,10,10,50"
-            BorderBrush="White"
-            BorderThickness="2,2,2,0"
-            Opacity="0.25" />
+        <Grid x:Name="Decor" Grid.RowSpan="2">
+            <Border
+                Margin="10,10,10,50"
+                BorderBrush="White"
+                BorderThickness="2,2,2,0"
+                Opacity="0.25" />
 
-        <Grid
-            Width="120"
-            Height="120"
-            Margin="30"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            Opacity="0.35">
-            <Grid.Triggers>
-                <EventTrigger RoutedEvent="MouseEnter">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <DoubleAnimation
-                                Storyboard.TargetProperty="Opacity"
-                                To="1"
-                                Duration="0:0:0.075" />
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
+            <Grid
+                Width="120"
+                Height="120"
+                Margin="30"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Opacity="0.35">
+                <Grid.Triggers>
+                    <EventTrigger RoutedEvent="MouseEnter">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation
+                                    Storyboard.TargetProperty="Opacity"
+                                    To="1"
+                                    Duration="0:0:0.075" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
 
-                <EventTrigger RoutedEvent="MouseLeave">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <DoubleAnimation
-                                Storyboard.TargetProperty="Opacity"
-                                To="0.35"
-                                Duration="0:0:0.075" />
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </Grid.Triggers>
+                    <EventTrigger RoutedEvent="MouseLeave">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation
+                                    Storyboard.TargetProperty="Opacity"
+                                    To="0.35"
+                                    Duration="0:0:0.075" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Grid.Triggers>
 
-            <Path
-                Data="{StaticResource Hexagon}"
-                Stretch="Uniform"
-                Stroke="White"
-                StrokeThickness="2" />
+                <Path
+                    Data="{StaticResource Hexagon}"
+                    Stretch="Uniform"
+                    Stroke="White"
+                    StrokeThickness="2" />
 
-            <Image
-                x:Name="StrategyIcon"
-                Width="75"
-                Height="75" />
+                <Image
+                    x:Name="StrategyIcon"
+                    Width="75"
+                    Height="75" />
+            </Grid>
         </Grid>
+
 
 
         <Grid
