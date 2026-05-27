@@ -1,5 +1,36 @@
 [
     {
+        "version": "3.3.0",
+        "date": "06-09-2026",
+        "changes": [
+            {
+                "title": "The one about Destiny 2's end of service...",
+                "notes": [
+                    ""
+                ]
+            },
+            {
+                "title": "Additions",
+                "notes": [
+                    "An experimental renderer has been made available for statics, dynamics and gear models. You can enable it in Settings.",
+                    "Activity List 2.0: A new and cleaner activity list UI that organizes maps/activities into categories.",
+                    "Named Bags 2.0: The Named Bags viewer has been brought up to use the same UI as Entity View and supports the custom renderer.",
+                    "New Collections features: Adds views for badges, lore books, quests, triumphs, medals, patterns/catalysts and titles.",
+                    "String viewing has been readded.",
+                    "Dialogue viewing has been added, for D1 through D2 Shadowkeep this will only be dialouge that comes from activities."
+                ]
+            },
+            {
+                "title": "Misc",
+                "notes": [
+                    "Updated the main menu theme for Monument of Triumph",
+                    "Renamed Renegades to Latest",
+                    "Under the hood cleanup/fixes."
+                ]
+            }
+        ]
+    },
+    {
         "version": "3.2.3",
         "date": "02-05-2026",
         "changes": [
