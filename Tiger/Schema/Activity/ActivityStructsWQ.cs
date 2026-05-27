@@ -18,7 +18,7 @@ public struct SActivity_WQ
 
     [SchemaField(0x10, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public TigerHash LocationName;  // these all have actual string hashes but have no string container given directly
+    public StringHash LocationName;  // these all have actual string hashes but have no string container given directly
     public TigerHash Unk0C;
     public TigerHash Unk10;
     public TigerHash Unk14;

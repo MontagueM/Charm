@@ -198,6 +198,16 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
         return hash;
     }
 
+    /// <summary>
+    /// Checks if an actual string can be found for the given StringHash
+    /// </summary>
+    /// <param name="hash"></param>
+    /// <returns>true if a real string is found, false if not</returns>
+    public bool CheckString(StringHash hash)
+    {
+        return GetString(hash) != $"{hash}";
+    }
+
     public void AddStrings(LocalizedStrings? localizedStrings)
     {
         if (localizedStrings == null || _addedLocalizedStrings.Contains(localizedStrings.Hash))

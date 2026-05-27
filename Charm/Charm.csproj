@@ -19,6 +19,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\icons\crucible.svg" />
+    <None Remove="Assets\icons\dungeon.svg" />
+    <None Remove="Assets\icons\engram.svg" />
+    <None Remove="Assets\icons\gambit.svg" />
+    <None Remove="Assets\icons\globe.png" />
+    <None Remove="Assets\icons\iron-banner.svg" />
+    <None Remove="Assets\icons\lost-sector.svg" />
+    <None Remove="Assets\icons\osiris.svg" />
+    <None Remove="Assets\icons\patrol.svg" />
+    <None Remove="Assets\icons\quest.svg" />
+    <None Remove="Assets\icons\raid.svg" />
+    <None Remove="Assets\icons\strike.svg" />
     <None Remove="Changelog.json" />
     <None Remove="HLSLSyntax.xshd" />
     <None Remove="Shaders\Holofoil_ps.fx" />
@@ -36,6 +48,7 @@
     <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
     <PackageReference Include="Restless.WaveForm" Version="1.1.0" />
     <PackageReference Include="SharpDX.DirectInput" Version="4.2.0" />
+    <PackageReference Include="SharpVectors.Wpf" Version="1.8.5" />
     <PackageReference Include="VersionChecker" Version="1.1.0" />
     <PackageReference Include="VirtualizingWrapPanel" Version="2.3.2" />
   </ItemGroup>
@@ -140,6 +153,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\ListViews\ActivityListView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\ListViews\WeaponAudioListView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -155,6 +171,21 @@
     <Content Include="ThirdParty\vgmstream\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\icons\crucible.svg" />
+    <Resource Include="Assets\icons\dungeon.svg" />
+    <Resource Include="Assets\icons\engram.svg" />
+    <Resource Include="Assets\icons\gambit.svg" />
+    <Resource Include="Assets\icons\globe.png" />
+    <Resource Include="Assets\icons\iron-banner.svg" />
+    <Resource Include="Assets\icons\lost-sector.svg" />
+    <Resource Include="Assets\icons\osiris.svg" />
+    <Resource Include="Assets\icons\patrol.svg" />
+    <Resource Include="Assets\icons\quest.svg" />
+    <Resource Include="Assets\icons\raid.svg" />
+    <Resource Include="Assets\icons\strike.svg" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

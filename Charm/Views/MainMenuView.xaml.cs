@@ -110,9 +110,11 @@ public partial class MainMenuView : UserControl
 
     private void ActivitiesViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        TagListViewerView tagListView = new();
-        tagListView.LoadContent(ETagListType.ActivityList);
-        _mainWindow.MakeNewTab("Activities", tagListView);
+        //TagListViewerView tagListView = new();
+        //tagListView.LoadContent(ETagListType.ActivityList);
+        ActivityListView activityListView = new();
+        activityListView.LoadContent();
+        _mainWindow.MakeNewTab("Activities", activityListView);
         _mainWindow.SetNewestTabSelected();
     }
 

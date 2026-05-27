@@ -728,6 +728,14 @@ public static class StyleHelper
 
 public static class UIHelper
 {
+    public static System.Uri MakePackUri(string relativeFile)
+    {
+        System.Reflection.Assembly a = CharmApp.ResourceAssembly;
+        string assemblyShortName = a.ToString().Split(',')[0];
+        string uriString = "pack://application:,,,/" + assemblyShortName + ";component/" + relativeFile;
+        return new System.Uri(uriString);
+    }
+
     /// <summary>
     /// Animates the opacity of a UI element from a starting value to a target value.
     /// </summary>
@@ -1074,6 +1082,18 @@ public static class UIHelper
             DivideComponent(color.R),
             DivideComponent(color.G),
             DivideComponent(color.B));
+    }
+
+    public static Color Multiply(this Color color, float factor, bool dAlpha = false)
+    {
+        byte MultiComponent(byte component) =>
+            (byte)Math.Clamp(component * factor, 0, 255);
+
+        return Color.FromArgb(
+            dAlpha ? MultiComponent(color.A) : color.A,
+            MultiComponent(color.R),
+            MultiComponent(color.G),
+            MultiComponent(color.B));
     }
 }
 
@@ -1488,6 +1508,30 @@ public class ListCountConverter : IValueConverter
             return collection.Count;
 
         return 0;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class ColorMultiplyConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        float mult = 1f;
+        if (parameter is not null)
+            float.TryParse(parameter.ToString(), out mult);
+
+        if (value is SolidColorBrush color)
+        {
+            var brush = new SolidColorBrush(color.Color.Multiply(mult));
+            brush.Freeze();
+            return brush;
+        }
+
+        return DependencyProperty.UnsetValue;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

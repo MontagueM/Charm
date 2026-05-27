@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using Tiger.Schema.Entity;
 
 namespace Tiger.Schema.Activity
@@ -383,7 +384,18 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
 
         private string GetDestinationName()
         {
-            return GlobalStrings.Get().GetString(new StringHash(_tag.LocationName.Hash32));
+            var name = GlobalStrings.Get().GetString(_tag.LocationName);
+            if (name == $"{_tag.LocationName}")
+            {
+                var stringContainer = FileResourcer.Get().GetSchemaTag<S8B8E8080>(_tag.Destination).TagData.StringContainer;
+                if (stringContainer != null && _tag.Unk50.Count != 0)
+                {
+                    Debug.Assert(_tag.Unk50.Count == 1);
+                    name = stringContainer.GetStringFromHash(_tag.Unk50[0].BubbleName);
+                }
+            }
+
+            return name;
         }
 
         public IEnumerable<Bubble> EnumerateBubbles()

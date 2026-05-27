@@ -20,6 +20,7 @@
     <charm:AddOneConverter x:Key="AddOneConverter" />
     <charm:Investment_IsFeaturedItem x:Key="Investment_IsFeaturedItem" />
     <charm:ListCountConverter x:Key="ListCountConverter" />
+    <charm:ColorMultiplyConverter x:Key="ColorMultiplyConverter" />
 
     <DataTemplate x:Key="ConfigViewSectionTemplate">
         <Grid

@@ -277,5 +277,6 @@ FakesAssemblies/
 !Charm/ThirdParty/*.dll
 !Charm/ThirdParty/*.exe
 !Charm/ThirdParty/vgmstream/*
+!Charm/Assets/*
 .vscode/tasks.json
 .vscode/launch.json
