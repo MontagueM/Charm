@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -109,31 +110,31 @@ public partial class ActivityListView : UserControl
         switch (Strategy.CurrentStrategy)
         {
             case TigerStrategy.DESTINY1_RISE_OF_IRON:
-                foreach (var activity in PackageResourcer.Get().GetD1Activities())
+                Parallel.ForEach(PackageResourcer.Get().GetD1Activities(), activity =>
                 {
-                    if (activity.Value != "16068080") continue;
+                    if (activity.Value != 0x80800616) return;
                     var tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(activity.Key);
                     nameHashes.TryAdd(tag.TagData.ActivityDevName.Value, tag.TagData.DestinationName);
                     globalStrings.AddStrings(tag.TagData.LocalizedStrings);
-                }
+                });
                 break;
 
             case TigerStrategy.DESTINY2_SHADOWKEEP_2601 or TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                foreach (var val in PackageResourcer.Get().GetAllHashes<SUnkActivity_SK>())
+                Parallel.ForEach(PackageResourcer.Get().GetAllHashes<SUnkActivity_SK>(), val =>
                 {
                     var tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(val);
                     nameHashes.TryAdd(tag.TagData.ActivityDevName.Value, tag.TagData.DestinationName);
                     globalStrings.AddStrings(tag.TagData.LocalizedStrings);
-                }
+                });
                 break;
 
             default:
-                foreach (var val in PackageResourcer.Get().GetAllHashes<S8B8E8080>())
+                Parallel.ForEach(PackageResourcer.Get().GetAllHashes<S8B8E8080>(), val =>
                 {
                     var tag = FileResourcer.Get().GetSchemaTag<S8B8E8080>(val);
                     nameHashes.TryAdd(tag.TagData.DestinationName, tag.TagData.LocationName);
                     globalStrings.AddStrings(tag.TagData.StringContainer);
-                }
+                });
                 break;
         }
 
@@ -164,7 +165,6 @@ public partial class ActivityListView : UserControl
                 ActivityName = activityName,
                 ActivityDestinationDev = splitName[1],
                 ActivityDestination = destName,
-                //ParentCategory = category
             });
         }
     }
@@ -236,19 +236,14 @@ public partial class ActivityListView : UserControl
 
     private ActivityCategoryItem GetCategory(ActivityCategoryType categoryType)
     {
-        if (!ActivityCategories.TryGetValue(categoryType, out var category))
+        return ActivityCategories.GetOrAdd(categoryType, type => new ActivityCategoryItem
         {
-            category = new ActivityCategoryItem
-            {
-                CategoryIcon = GetCategoryIcon(categoryType),
-                CategoryColor = GetCategoryColor(categoryType),
-                CategoryName = EnumExtensions.GetEnumDescription(categoryType),
-                CategoryType = categoryType,
-                Activities = new List<ActivityItem>()
-            };
-            ActivityCategories[categoryType] = category;
-        }
-        return category;
+            CategoryIcon = GetCategoryIcon(categoryType),
+            CategoryColor = GetCategoryColor(categoryType),
+            CategoryName = EnumExtensions.GetEnumDescription(categoryType),
+            CategoryType = categoryType,
+            Activities = new()
+        });
     }
 
     private async void ActivityCategory_Checked(object sender, RoutedEventArgs e)
@@ -266,17 +261,10 @@ public partial class ActivityListView : UserControl
     {
         await Task.Run(() =>
         {
-            //MainWindow.Progress.SetProgressStages(new List<string>
-            //{
-            //    "Loading Activities."
-            //});
-
             if (Activities.Count != 0)
                 Activities.Clear();
 
             Activities = new ConcurrentBag<ActivityItem>(item.Activities);
-
-            //MainWindow.Progress.CompleteStage();
         });
 
         RefreshActivityList();
@@ -313,22 +301,21 @@ public partial class ActivityListView : UserControl
             {
                 displayItems.TryAdd(activityCat.Key, activityCat.Value);
             }
-            else if (activityCat.Value.Activities.Any(x =>
-                x.ActivityName.Contains(searchStr, StringComparison.OrdinalIgnoreCase)
-                || x.ActivityDestination.Contains(searchStr, StringComparison.OrdinalIgnoreCase)
-                || x.ActivityDestinationDev.Contains(searchStr, StringComparison.OrdinalIgnoreCase)))
+            else
             {
-                IEnumerable<ActivityItem> activities = activityCat.Value.Activities.Where(x =>
-                    x.ActivityName.Contains(searchStr, StringComparison.OrdinalIgnoreCase)
+                var matched = activityCat.Value.Activities.Where(
+                    x => x.ActivityName.Contains(searchStr, StringComparison.OrdinalIgnoreCase)
                     || x.ActivityDestination.Contains(searchStr, StringComparison.OrdinalIgnoreCase)
-                    || x.ActivityDestinationDev.Contains(searchStr, StringComparison.OrdinalIgnoreCase));
+                    || x.ActivityDestinationDev.Contains(searchStr, StringComparison.OrdinalIgnoreCase)).ToList();
+
+                if (matched.Count == 0) return;
                 displayItems.TryAdd(activityCat.Key, new ActivityCategoryItem
                 {
                     CategoryIcon = activityCat.Value.CategoryIcon,
                     CategoryColor = activityCat.Value.CategoryColor,
                     CategoryName = activityCat.Value.CategoryName,
                     CategoryType = activityCat.Value.CategoryType,
-                    Activities = activities.ToList()
+                    Activities = matched
                 });
             }
         });
@@ -367,21 +354,19 @@ public partial class ActivityListView : UserControl
             }
         });
 
-        List<ActivityItem> items = displayItems.ToList();
-
-        items = SortByIndex switch
+        List<ActivityItem> items = SortByIndex switch
         {
-            1 => items.OrderBy(x => x.ActivityName).ToList(),
-            2 => items.OrderByDescending(x => x.ActivityName).ToList(),
-            3 => items.OrderBy(x => x.ActivityDestination).ToList(),
-            4 => items.OrderByDescending(x => x.ActivityDestination).ToList(),
-            _ => items
+            1 => displayItems.OrderBy(x => x.ActivityName).ToList(),
+            2 => displayItems.OrderByDescending(x => x.ActivityName).ToList(),
+            3 => displayItems.OrderBy(x => x.ActivityDestination).ToList(),
+            4 => displayItems.OrderByDescending(x => x.ActivityDestination).ToList(),
+            _ => displayItems.ToList()
         };
 
         ActivityList.ItemsSource = items;
     }
 
-    private void ActivityItem_Click(object sender, RoutedEventArgs e)
+    private async void ActivityItem_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button btn)
             return;
@@ -389,20 +374,36 @@ public partial class ActivityListView : UserControl
         if (btn.DataContext is ActivityItem item)
         {
             ActivityView activityView = new();
+            await activityView.LoadActivity(item.ActivityHash);
+
             MainWindow.Current.MakeNewTab(PackageResourcer.Get().GetActivityName(item.ActivityHash), activityView);
-            activityView.LoadActivity(item.ActivityHash);
             MainWindow.Current.SetNewestTabSelected();
         }
     }
 
-    private void ActivitySearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    private CancellationTokenSource _searchDebounce;
+    private async void ActivitySearchBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        RefreshActivityCategoryList();
+        _searchDebounce?.Cancel();
+        _searchDebounce = new CancellationTokenSource();
+        try
+        {
+            await Task.Delay(100, _searchDebounce.Token);
+            RefreshActivityCategoryList();
+        }
+        catch (TaskCanceledException) { }
     }
 
-    private void ActivityItemSearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    private async void ActivityItemSearchBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        RefreshActivityList();
+        _searchDebounce?.Cancel();
+        _searchDebounce = new CancellationTokenSource();
+        try
+        {
+            await Task.Delay(100, _searchDebounce.Token);
+            RefreshActivityList();
+        }
+        catch (TaskCanceledException) { }
     }
 
     private void SortBy_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -431,7 +432,6 @@ public partial class ActivityListView : UserControl
         public ImageSource ActivityIcon { get; set; }
         public FileHash ActivityHash { get; set; }
         public string ActivityHashString { get; set; }
-        public ActivityCategoryItem ParentCategory { get; set; }
     }
 
     private enum ActivityCategoryType
@@ -466,7 +466,8 @@ public partial class ActivityListView : UserControl
         IronBanner,
     }
 
-    private SolidColorBrush GetCategoryColor(ActivityCategoryType type)
+    private static readonly Dictionary<ActivityCategoryType, SolidColorBrush> _colorCache = Enum.GetValues<ActivityCategoryType>().ToDictionary(t => t, t => CreateBrush(t));
+    private static SolidColorBrush CreateBrush(ActivityCategoryType type)
     {
         var col = type switch
         {
@@ -490,41 +491,48 @@ public partial class ActivityListView : UserControl
         return brush;
     }
 
+    private SolidColorBrush GetCategoryColor(ActivityCategoryType type) => _colorCache.GetValueOrDefault(type, _colorCache[ActivityCategoryType.All]);
+
+    private static readonly ConcurrentDictionary<ActivityCategoryType, ImageSource> _iconCache = new();
     private ImageSource GetCategoryIcon(ActivityCategoryType type)
     {
-        if (type == ActivityCategoryType.All)
+        return _iconCache.GetOrAdd(type, static t =>
         {
-            var globe = new BitmapImage(UIHelper.MakePackUri($"/Assets/icons/globe.png"));
-            globe.Freeze();
-            return globe;
-        }
+            ImageSource image;
 
-        string filename = type switch
-        {
-            ActivityCategoryType.Crucible => "crucible",
-            ActivityCategoryType.Trials => "osiris",
-            ActivityCategoryType.IronBanner => "iron-banner",
-            ActivityCategoryType.Gambit => "gambit",
-            ActivityCategoryType.Raids => "raid",
-            ActivityCategoryType.Dungeons => "dungeon",
-            ActivityCategoryType.Strikes => "strike",
-            ActivityCategoryType.Patrols => "patrol",
-            ActivityCategoryType.Story => "quest",
-            ActivityCategoryType.ExoticQuests => "engram",
-            ActivityCategoryType.LostSectors => "lost-sector",
-            _ => string.Empty
-        };
-        if (filename == string.Empty)
-            return null;
+            if (t == ActivityCategoryType.All)
+            {
+                image = new BitmapImage(UIHelper.MakePackUri("/Assets/icons/globe.png"));
+            }
+            else
+            {
+                string filename = t switch
+                {
+                    ActivityCategoryType.Crucible => "crucible",
+                    ActivityCategoryType.Trials => "osiris",
+                    ActivityCategoryType.IronBanner => "iron-banner",
+                    ActivityCategoryType.Gambit => "gambit",
+                    ActivityCategoryType.Raids => "raid",
+                    ActivityCategoryType.Dungeons => "dungeon",
+                    ActivityCategoryType.Strikes => "strike",
+                    ActivityCategoryType.Patrols => "patrol",
+                    ActivityCategoryType.Story => "quest",
+                    ActivityCategoryType.ExoticQuests => "engram",
+                    ActivityCategoryType.LostSectors => "lost-sector",
+                    _ => null
+                };
 
-        SvgImageExtension svg = new SvgImageExtension
-        {
-            Source = UIHelper.MakePackUri($"/Assets/icons/{filename}.svg").ToString()
-        };
+                if (filename is null) return null;
 
-        var image = (ImageSource)svg.ProvideValue(null);
-        image.Freeze();
-        return image;
+                image = (ImageSource)new SvgImageExtension
+                {
+                    Source = UIHelper.MakePackUri($"/Assets/icons/{filename}.svg").ToString()
+                }.ProvideValue(null);
+            }
+
+            image.Freeze();
+            return image;
+        });
     }
 }
 

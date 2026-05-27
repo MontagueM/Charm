@@ -16,7 +16,7 @@ public partial class ActivityView : UserControl
         InitializeComponent();
     }
 
-    public async void LoadActivity(FileHash hash)
+    public async Task LoadActivity(FileHash hash)
     {
         MainWindow.Progress.SetProgressStages(new List<string>
         {

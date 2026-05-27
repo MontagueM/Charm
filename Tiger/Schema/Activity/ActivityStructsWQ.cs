@@ -65,11 +65,11 @@ public struct S8B8E8080
     public FileHash Unk2C;
 
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public DynamicArray<SDE448080> TagBags;
+    public DynamicArrayUnloaded<SDE448080> TagBags;
 
     [SchemaField(0xB8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x48, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public DynamicArray<S2E898080> Activities;
+    public DynamicArrayUnloaded<S2E898080> Activities;
     public StringPointer DestinationName;
 }
 
