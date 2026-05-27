@@ -1,0 +1,1040 @@
+﻿<UserControl
+    x:Class="Charm.Collections.BadgeView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:localCollections="clr-namespace:Charm.Collections"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="984"
+    d:DesignWidth="1914"
+    Focusable="True"
+    Loaded="OnControlLoaded"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="CategoryItemTemplate">
+            <RadioButton
+                Margin="0,0,0,0"
+                local:StyleHelper.BorderThickness="1"
+                Checked="Subcategory_OnSelect"
+                Focusable="False"
+                GroupName="Categories"
+                IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                MouseEnter="CategoryButton_MouseEnter"
+                MouseLeave="PlugItem_MouseLeave"
+                Style="{DynamicResource D2StyleCircleRadioButton}">
+                <Border Margin="5">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <!--  Trigger when IsSelected (IsChecked) is false  -->
+                                <DataTrigger Binding="{Binding IsSelected}" Value="False">
+                                    <Setter Property="Opacity" Value="0.4" />
+                                </DataTrigger>
+                                <!--  Trigger when IsSelected (IsChecked) is true  -->
+                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Opacity" Value="1.0" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Image
+                        MaxWidth="44"
+                        MaxHeight="44"
+                        Source="{Binding ItemCategoryIcon}" />
+                </Border>
+            </RadioButton>
+        </DataTemplate>
+
+        <DataTemplate x:Key="CategoryEntryItemTemplate">
+            <Grid Background="Transparent">
+                <Grid Background="#1AFFFFFF" Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <Button
+                        x:Name="RecordItemButton"
+                        Margin="0,0,0,0"
+                        local:StyleHelper.BorderThickness="0.5"
+                        Focusable="False"
+                        MouseEnter="CategoryEntryButton_MouseEnter"
+                        MouseLeave="PlugItem_MouseLeave"
+                        Style="{DynamicResource D2StyleButton}"
+                        Visibility="{Binding EntryType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Record}">
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Rectangle
+                                Grid.Row="0"
+                                Grid.ColumnSpan="2"
+                                VerticalAlignment="Stretch"
+                                Stretch="Fill"
+                                Visibility="{Binding DataContext.ItemCategoryBackground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type localCollections:BadgeView}}, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=False}">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0,1" EndPoint="0,0.5">
+                                        <GradientStop Offset="1" Color="#00000000" />
+                                        <GradientStop Offset="0" Color="#264dd1ff" />
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+
+                            <Grid
+                                Grid.Column="0"
+                                Margin="20"
+                                Background="Transparent">
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="50*" />
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="50*" />
+                                </Grid.RowDefinitions>
+
+                                <StackPanel
+                                    Grid.Row="0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal">
+
+                                    <Image
+                                        Margin="0,0,10,4"
+                                        Opacity="0.75"
+                                        Source="{Binding ItemIcon}">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ItemIcon}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        Margin="0,0,0,5"
+                                        d:FontFamily="Haas Grot Text 55 Roman"
+                                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                                        FontSize="22"
+                                        Foreground="{StaticResource ForegroundColour80}"
+                                        Text="{Binding ItemName}"
+                                        TextWrapping="WrapWithOverflow"
+                                        Typography.CapitalSpacing="True" />
+                                </StackPanel>
+
+                                <Border
+                                    Grid.Row="1"
+                                    Margin="0,4,0,4"
+                                    BorderBrush="#3AFFFFFF"
+                                    BorderThickness="0,0,0,2"
+                                    Visibility="Visible" />
+
+                                <Grid
+                                    Grid.Row="2"
+                                    Margin="0,0,0,0"
+                                    Background="Transparent">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Margin="0,0,0,0"
+                                        HorizontalAlignment="Left"
+                                        d:FontFamily="Haas Grot Text 55 Roman"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                        FontSize="20"
+                                        Foreground="{StaticResource ForegroundColour60}"
+                                        Text="{Binding ItemDescription}"
+                                        TextTrimming="WordEllipsis"
+                                        Typography.CapitalSpacing="True" />
+
+                                    <ItemsControl
+                                        Grid.Column="1"
+                                        Margin="5,5,0,0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Bottom"
+                                        ItemTemplate="{DynamicResource RewardItemTemplate}"
+                                        KeyboardNavigation.TabNavigation="None">
+                                        <ItemsControl.Style>
+                                            <Style TargetType="ItemsControl">
+                                                <Setter Property="ItemsSource" Value="{Binding Rewards}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Rewards.Count}" Value="0">
+                                                        <Setter Property="ItemsSource" Value="{Binding IntervalRewards}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ItemsControl.Style>
+
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <UniformGrid
+                                                    Grid.Row="0"
+                                                    Width="auto"
+                                                    Margin="0,0,0,0"
+                                                    HorizontalAlignment="Stretch"
+                                                    VerticalAlignment="Center"
+                                                    Background="Transparent"
+                                                    FlowDirection="RightToLeft"
+                                                    Rows="1" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+
+                                        <ItemsControl.ItemContainerStyle>
+                                            <Style TargetType="ContentPresenter">
+                                                <Setter Property="Margin" Value="0,0,4,0" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsPlaceholder}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ItemsControl.ItemContainerStyle>
+                                    </ItemsControl>
+                                </Grid>
+                            </Grid>
+
+                            <Border
+                                Grid.Column="1"
+                                Margin="0,0,20,0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                BorderBrush="#CCFFFFFF"
+                                BorderThickness="2">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ItemIcon2}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Image
+                                    Width="86"
+                                    Height="86"
+                                    Source="{Binding ItemIcon2}"
+                                    Stretch="Fill" />
+                            </Border>
+
+                        </Grid>
+                    </Button>
+
+                    <Button
+                        x:Name="CollectibleItemButton"
+                        Margin="0,0,0,0"
+                        local:StyleHelper.BorderThickness="0.5"
+                        Focusable="False"
+                        MouseEnter="CategoryEntryButton_MouseEnter"
+                        MouseLeave="PlugItem_MouseLeave"
+                        MouseRightButtonDown="Button_MouseRightButtonDown"
+                        Style="{DynamicResource D2StyleButton}"
+                        Visibility="{Binding EntryType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Collectible}">
+
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid>
+                                <Image
+                                    Margin="0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Source="{Binding Collectible.IconBackground}" />
+
+                                <Image
+                                    Margin="0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Source="{Binding Collectible.Icon}" />
+
+                                <Image
+                                    Margin="0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Source="{Binding Collectible.IconOverlay}" />
+                            </Grid>
+
+                            <!--  Icon Watermark  -->
+                            <Grid
+                                Width="28"
+                                Height="48"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Panel.ZIndex="10"
+                                IsHitTestVisible="False"
+                                Visibility="{Binding Collectible.ItemWatermark, Converter={StaticResource NullToVisibilityConverter}}">
+                                <Rectangle
+                                    Grid.Row="1"
+                                    Width="22"
+                                    Height="48"
+                                    Margin="0,3,0,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Top"
+                                    Opacity="0.6"
+                                    RenderOptions.EdgeMode="Aliased"
+                                    Stretch="Fill">
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                                            <GradientStop Offset="0" Color="#00000000" />
+                                            <GradientStop Offset="1" Color="Black" />
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+
+                                <!--  Featured item banner  -->
+                                <Polygon
+                                    Width="28"
+                                    Height="32"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Fill="#109191"
+                                    Points="0,0 0,32 14,28 28,32 28,0">
+                                    <Polygon.Style>
+                                        <Style TargetType="Polygon">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Collectible.Hash, Converter={StaticResource Investment_IsFeaturedItem}}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Polygon.Style>
+                                </Polygon>
+
+                                <Image
+                                    Width="20"
+                                    Height="20"
+                                    Margin="0,3,0,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Top"
+                                    Source="{Binding Collectible.ItemWatermark}" />
+                            </Grid>
+
+
+                            <Grid
+                                Grid.Column="1"
+                                Margin="20,0,0,0"
+                                Background="Transparent">
+
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Margin="0,20,40,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="21"
+                                    Foreground="{StaticResource ForegroundColour90}"
+                                    Text="{Binding ItemName}"
+                                    TextAlignment="Left"
+                                    TextWrapping="WrapWithOverflow" />
+
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="1"
+                                    Margin="0,0,5,2"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="12"
+                                    Foreground="{StaticResource ForegroundColour70}"
+                                    Text="{Binding ItemHash}"
+                                    TextAlignment="Left"
+                                    TextWrapping="Wrap"
+                                    Visibility="Visible" />
+                            </Grid>
+                        </Grid>
+
+                    </Button>
+
+                    <Button
+                        x:Name="CollectibleSetItemButton"
+                        Margin="0,0,0,0"
+                        local:StyleHelper.BorderThickness="0.5"
+                        Focusable="False"
+                        Style="{DynamicResource D2StyleButton}"
+                        Visibility="{Binding EntryType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=CollectibleSet}">
+
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <ItemsControl
+                                x:Name="SetEntries"
+                                Margin="0,0,0,0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                ItemsSource="{Binding Rewards}"
+                                KeyboardNavigation.TabNavigation="None">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid
+                                            Grid.Row="0"
+                                            Width="auto"
+                                            Margin="0,0,0,0"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Top"
+                                            Background="Transparent"
+                                            Rows="1" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Background="Transparent">
+                                            <Button
+                                                x:Name="SetEntryItemButton"
+                                                Margin="0,0,0,0"
+                                                local:StyleHelper.BorderThickness="0.5"
+                                                Focusable="False"
+                                                MouseEnter="CategoryEntryButton_MouseEnter"
+                                                MouseLeave="PlugItem_MouseLeave"
+                                                MouseRightButtonDown="Button_MouseRightButtonDown"
+                                                Style="{DynamicResource D2StyleButtonNoOverlay}"
+                                                Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                                <Image
+                                                    Margin="-2"
+                                                    Opacity="1"
+                                                    Source="{Binding ItemIcon}">
+                                                    <Image.Style>
+                                                        <Style TargetType="Image">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ItemIcon}" Value="{x:Null}">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Image.Style>
+                                                </Image>
+                                            </Button>
+
+                                            <!--  Placeholder Rectangle  -->
+                                            <Border
+                                                Margin="-1"
+                                                Panel.ZIndex="-1"
+                                                BorderBrush="White"
+                                                BorderThickness="1"
+                                                Opacity="0.2"
+                                                Visibility="{Binding IsPlaceholder, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <Rectangle
+                                                    Width="1"
+                                                    Margin="-20"
+                                                    Fill="White">
+                                                    <Rectangle.LayoutTransform>
+                                                        <TransformGroup>
+                                                            <RotateTransform Angle="45" />
+                                                        </TransformGroup>
+                                                    </Rectangle.LayoutTransform>
+                                                </Rectangle>
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="Margin" Value="0,0,8,0" />
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+                            </ItemsControl>
+
+                            <Grid
+                                Grid.Column="1"
+                                Margin="20,0,0,0"
+                                Background="Transparent">
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Margin="0,20,40,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="21"
+                                    Foreground="{StaticResource ForegroundColour90}"
+                                    Text="{Binding ItemName}"
+                                    TextAlignment="Left"
+                                    TextWrapping="WrapWithOverflow" />
+
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="1"
+                                    Margin="0,0,5,2"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="12"
+                                    Foreground="{StaticResource ForegroundColour70}"
+                                    Text="{Binding ItemHash}"
+                                    TextAlignment="Left"
+                                    TextWrapping="Wrap" />
+                            </Grid>
+                        </Grid>
+
+                    </Button>
+                </Grid>
+
+                <!--  Placeholder Rectangle  -->
+                <Rectangle Panel.ZIndex="-1" Fill="#08FFFFFF" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="RewardItemTemplate">
+            <Image
+                MaxWidth="36"
+                MaxHeight="36"
+                Opacity="0.75"
+                Source="{Binding ItemIcon}" />
+        </DataTemplate>
+
+        <Storyboard x:Key="TextChangeAnimation">
+            <DoubleAnimation
+                Storyboard.TargetProperty="Opacity"
+                From="0"
+                To="1.0"
+                Duration="0:0:0.4" />
+            <ThicknessAnimation
+                Storyboard.TargetProperty="Margin"
+                From="30,0,0,0"
+                To="0,0,0,0"
+                Duration="0:0:0.4">
+                <ThicknessAnimation.EasingFunction>
+                    <SineEase EasingMode="EaseOut" />
+                </ThicknessAnimation.EasingFunction>
+            </ThicknessAnimation>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid x:Name="MainGrid" Focusable="True">
+        <Grid.Background>
+            <RadialGradientBrush Center="0.5,0.25" GradientOrigin="0.5,0.25" RadiusX="1" RadiusY="1">
+                <RadialGradientBrush.GradientStops>
+                    <GradientStop Offset="0" Color="#FF37393E" />
+                    <GradientStop Offset="0.8" Color="#111113" />
+                </RadialGradientBrush.GradientStops>
+            </RadialGradientBrush>
+        </Grid.Background>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="5*" />
+            <RowDefinition Height="90*" />
+            <RowDefinition Height="5*" />
+        </Grid.RowDefinitions>
+
+        <Grid
+            Grid.RowSpan="3"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Background="Transparent"
+            Opacity="0.25">
+            <Border
+                x:Name="Spinner"
+                Background="Transparent"
+                BorderThickness="0"
+                Opacity="1" />
+        </Grid>
+
+        <Viewbox
+            Grid.RowSpan="3"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top">
+            <Grid
+                x:Name="CornerBanner"
+                Width="1920"
+                Height="990"
+                d:Opacity="1"
+                Background="Transparent"
+                Opacity="0">
+                <Image
+                    x:Name="BadgeCornerDecor"
+                    Width="280"
+                    Height="760"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Opacity="0.1"
+                    RenderTransformOrigin="0.5,0.5">
+
+                    <Image.RenderTransform>
+                        <TransformGroup>
+                            <RotateTransform Angle="45" />
+                            <TranslateTransform X="0" Y="-125" />
+                            <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
+                        </TransformGroup>
+                    </Image.RenderTransform>
+
+                </Image>
+
+                <Polygon
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Fill="{Binding CategoryBannerColor}"
+                    Opacity="0.25"
+                    Points="0,0 0,650 650,0"
+                    Stroke="Transparent"
+                    StrokeThickness="1" />
+            </Grid>
+        </Viewbox>
+
+        <Viewbox Grid.RowSpan="3" Focusable="True">
+
+            <Grid
+                x:Name="MainContainer"
+                Width="1920"
+                Height="990"
+                Background="Transparent"
+                ClipToBounds="True"
+                RenderTransformOrigin="0.5,0.5"
+                SnapsToDevicePixels="True">
+                <Grid.RenderTransform>
+                    <TranslateTransform />
+                </Grid.RenderTransform>
+
+                <Grid.Triggers>
+                    <EventTrigger RoutedEvent="Grid.Loaded">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation
+                                    Storyboard.TargetProperty="Opacity"
+                                    From="0"
+                                    To="1"
+                                    Duration="0:0:0.25" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Grid.Triggers>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="170*" />
+                    <RowDefinition Height="700*" />
+                    <RowDefinition Height="110*" />
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140*" />
+                    <ColumnDefinition Width="440*" />
+                    <ColumnDefinition Width="50*" />
+                    <ColumnDefinition Width="1150*" />
+                    <ColumnDefinition Width="100*" />
+                </Grid.ColumnDefinitions>
+
+                <Border
+                    Grid.Column="1"
+                    Margin="0,125,0,0"
+                    VerticalAlignment="Top"
+                    BorderBrush="#30FFFFFF"
+                    BorderThickness="0,0,0,2"
+                    Visibility="Visible" />
+
+                <Border
+                    Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Grid.Column="2"
+                    Margin="0,125,5,0"
+                    HorizontalAlignment="Right"
+                    BorderBrush="#30FFFFFF"
+                    BorderThickness="2,0,0,0"
+                    Visibility="Visible" />
+
+                <Grid Grid.Column="3" VerticalAlignment="Top">
+                    <Grid Visibility="{Binding DisplayStyle, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Badge}">
+                        <Border
+                            Margin="40,125,720,0"
+                            BorderBrush="#30FFFFFF"
+                            BorderThickness="0,0,0,2"
+                            Visibility="Visible" />
+
+                        <Border
+                            Margin="720,125,40,0"
+                            BorderBrush="#30FFFFFF"
+                            BorderThickness="0,0,0,2"
+                            Visibility="Visible" />
+                    </Grid>
+
+                    <Grid Visibility="{Binding DisplayStyle, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Medals}">
+                        <Border
+                            Margin="40,125,40,0"
+                            BorderBrush="#30FFFFFF"
+                            BorderThickness="0,0,0,2"
+                            Visibility="Visible" />
+                    </Grid>
+
+                </Grid>
+
+
+                <Grid
+                    Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Grid.Column="0"
+                    Margin="0,125,50,-10"
+                    Background="Transparent"
+                    Opacity="0.4">
+                    <Border
+                        Width="10"
+                        Height="10"
+                        Margin="0,-8,0,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        BorderBrush="White"
+                        BorderThickness="0,0,2,2" />
+
+                    <Border
+                        Width="10"
+                        Height="10"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        BorderBrush="White"
+                        BorderThickness="0,2,2,0" />
+                </Grid>
+
+                <Grid
+                    Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Grid.Column="4"
+                    Margin="0,125,80,-10"
+                    Background="Transparent"
+                    Opacity="0.4">
+                    <Border
+                        Width="10"
+                        Height="10"
+                        Margin="0,-8,0,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        BorderBrush="White"
+                        BorderThickness="2,0,0,2" />
+
+                    <Border
+                        Width="10"
+                        Height="10"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        BorderBrush="White"
+                        BorderThickness="2,2,0,0" />
+                </Grid>
+
+                <!--  Category Header  -->
+                <Grid
+                    x:Name="Header"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Stretch"
+                    Background="Transparent">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="10*" />
+                    </Grid.RowDefinitions>
+
+                    <Image
+                        Grid.Row="0"
+                        d:Source="https://www.bungie.net/common/destiny2_content/icons/fe56ac0b6b8f9dcc7a149cfc72498b41.png"
+                        Source="{Binding ItemCategoryIcon2}" />
+
+                    <Grid
+                        Grid.Row="1"
+                        Margin="0,25,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Background="Transparent">
+                        <StackPanel>
+
+                            <TextBlock
+                                x:Name="CategoryName"
+                                Margin="0,0,0,0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Panel.ZIndex="1"
+                                d:FontFamily="Haas Grot Text 65 Medium"
+                                d:Text="PALE HEART PATHFINDER"
+                                FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                                FontSize="40"
+                                Foreground="{StaticResource ForegroundColour100}"
+                                Text="{Binding ItemCategoryName}"
+                                TextAlignment="Left"
+                                TextWrapping="Wrap"
+                                Typography.CapitalSpacing="True" />
+
+                            <TextBlock
+                                x:Name="CategoryDescription"
+                                Margin="0,5,0,0"
+                                VerticalAlignment="Top"
+                                Panel.ZIndex="1"
+                                d:FontFamily="Haas Grot Text 55 Roman"
+                                d:Text="Trophies from the Pale Heart."
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="22"
+                                Foreground="{StaticResource ForegroundColour50}"
+                                Text="{Binding ItemCategoryDescription}"
+                                TextWrapping="WrapWithOverflow"
+                                Typography.CapitalSpacing="True" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid
+                        x:Name="BadgeProgress"
+                        Grid.Row="2"
+                        Margin="0,0,0,0"
+                        VerticalAlignment="Bottom"
+                        Background="Transparent">
+                        <StackPanel Orientation="Vertical">
+
+                            <TextBlock
+                                VerticalAlignment="Top"
+                                Panel.ZIndex="1"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="22"
+                                Foreground="{StaticResource ForegroundColour50}"
+                                Text="BADGE PROGRESS"
+                                TextWrapping="WrapWithOverflow"
+                                Typography.CapitalSpacing="True" />
+
+                            <ItemsControl x:Name="CategoryDetails" KeyboardNavigation.TabNavigation="None">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid
+                                            Grid.Row="0"
+                                            Margin="0,0,0,0"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Stretch"
+                                            Background="Transparent"
+                                            Rows="3" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Background="#0dFFFFFF">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="90*" />
+                                                <RowDefinition Height="10*" />
+                                            </Grid.RowDefinitions>
+
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="10*" />
+                                                <ColumnDefinition Width="90*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Background="#1AFFFFFF">
+                                                <Image
+                                                    Margin="2"
+                                                    Opacity="0.5"
+                                                    Source="{Binding ItemCategoryIcon}" />
+                                            </Border>
+
+                                            <Grid
+                                                Grid.Column="1"
+                                                Height="45"
+                                                Background="Transparent">
+                                                <TextBlock
+                                                    x:Name="CategoryDescription"
+                                                    Margin="10,0,0,0"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Center"
+                                                    Panel.ZIndex="1"
+                                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                                    FontSize="20"
+                                                    FontWeight="Bold"
+                                                    Foreground="{StaticResource ForegroundColour50}"
+                                                    Text="{Binding ItemCategoryName}"
+                                                    TextWrapping="WrapWithOverflow"
+                                                    Typography.CapitalSpacing="True" />
+
+                                                <TextBlock
+                                                    x:Name="CategoryAmount"
+                                                    Margin="0,0,10,0"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Panel.ZIndex="1"
+                                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                                    FontSize="20"
+                                                    FontWeight="Bold"
+                                                    Foreground="{StaticResource ForegroundColour50}"
+                                                    Text="{Binding Tag}"
+                                                    TextAlignment="Right"
+                                                    TextWrapping="WrapWithOverflow"
+                                                    Typography.CapitalSpacing="True" />
+                                            </Grid>
+
+
+
+                                            <Border
+                                                Grid.Row="1"
+                                                Grid.ColumnSpan="2"
+                                                Height="6"
+                                                Background="#4Bffffff" />
+
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="Margin" Value="0,3,0,3" />
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Grid>
+
+
+                    <Grid
+                        x:Name="TitleProgress"
+                        Grid.Row="2"
+                        Margin="0,0,0,0"
+                        VerticalAlignment="Bottom"
+                        Background="Transparent">
+                        <StackPanel Orientation="Vertical">
+                            <Grid Margin="0,0,0,0" VerticalAlignment="Center">
+                                <TextBlock
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    FontSize="22"
+                                    Foreground="{StaticResource ForegroundColour50}"
+                                    Text="TITLE PROGRESS" />
+
+                                <TextBlock
+                                    HorizontalAlignment="Right"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    FontSize="22"
+                                    Foreground="{StaticResource ForegroundColour50}"
+                                    Text="{Binding ItemCategoryAmount}" />
+                            </Grid>
+
+                            <Border
+                                Height="6"
+                                Margin="0,5,0,10"
+                                Background="#aa52ba"
+                                BorderBrush="Transparent"
+                                BorderThickness="0" />
+
+                            <Button local:StyleHelper.Margin="-1" Style="{StaticResource D2StyleButtonNoOverlay}">
+                                <Border
+                                    Background="#421b49"
+                                    BorderBrush="#aa52ba"
+                                    BorderThickness="1">
+                                    <TextBlock
+                                        x:Name="TitleName"
+                                        Margin="10"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                        FontSize="22"
+                                        Foreground="{StaticResource ForegroundColour90}" />
+                                </Border>
+                            </Button>
+
+                        </StackPanel>
+
+                    </Grid>
+
+                </Grid>
+
+                <!--  Categories  -->
+                <Grid
+                    Grid.Column="3"
+                    Margin="0,95,0,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Background="Transparent">
+
+                    <Grid
+                        Grid.Column="0"
+                        Background="Transparent"
+                        KeyboardNavigation.TabNavigation="None">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+
+                        <ItemsControl
+                            x:Name="Categories"
+                            Margin="0,0,0,0"
+                            VerticalAlignment="Center"
+                            ItemTemplate="{StaticResource CategoryItemTemplate}"
+                            KeyboardNavigation.TabNavigation="None">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid
+                                        Grid.Row="0"
+                                        Width="auto"
+                                        Margin="0,0,0,0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Top"
+                                        Background="Transparent"
+                                        Rows="1" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="Margin" Value="10,0,10,0" />
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+                        </ItemsControl>
+
+                    </Grid>
+                </Grid>
+
+                <!--  Entries  -->
+                <Grid
+                    Grid.Row="1"
+                    Grid.Column="3"
+                    Margin="0,0,0,0"
+                    Background="Transparent">
+
+                    <local:ItemPage
+                        x:Name="SubcategoryItems"
+                        CollapsePageButtons="false"
+                        Columns="2"
+                        ItemMargin="3"
+                        ItemsPerPage="10"
+                        UsePlaceholders="True" />
+                </Grid>
+
+            </Grid>
+        </Viewbox>
+
+        <!--  User Controls  -->
+        <Grid
+            Grid.Row="2"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Bottom"
+            Background="#38000000">
+            <Viewbox HorizontalAlignment="Right" VerticalAlignment="Center">
+                <StackPanel
+                    Margin="0,10,75,10"
+                    FlowDirection="RightToLeft"
+                    Orientation="Horizontal">
+
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Panel.ZIndex="1"
+                        d:FontFamily="Haas Grot Text 55 Roman, Destiny Keys"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="20"
+                        Foreground="{StaticResource ForegroundColour80}"
+                        Text=" Dismiss"
+                        TextAlignment="Left"
+                        TextWrapping="Wrap" />
+
+                </StackPanel>
+            </Viewbox>
+        </Grid>
+
+    </Grid>
+
+</UserControl>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -381,6 +382,9 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
 
     public ItemPage()
     {
+#if DEBUG
+        PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
+#endif
         InitializeComponent();
     }
 

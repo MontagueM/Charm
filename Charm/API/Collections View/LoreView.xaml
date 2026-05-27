@@ -1,0 +1,422 @@
+﻿<UserControl
+    x:Class="Charm.Collections.LoreView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:localCollections="clr-namespace:Charm.Collections"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="984"
+    d:DesignWidth="1914"
+    Loaded="OnControlLoaded"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+
+        <DataTemplate x:Key="CategoryItemTemplate">
+            <RadioButton
+                Margin="0,0,0,0"
+                Checked="Category_OnSelect"
+                Focusable="False"
+                GroupName="Categories"
+                IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                MouseEnter="CategoryButton_MouseEnter"
+                MouseLeave="PlugItem_MouseLeave"
+                Style="{DynamicResource D2StyleRadioButton}">
+                <Border>
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <!--  Trigger when IsSelected (IsChecked) is false  -->
+                                <DataTrigger Binding="{Binding IsSelected}" Value="False">
+                                    <Setter Property="Opacity" Value="0.4" />
+                                </DataTrigger>
+                                <!--  Trigger when IsSelected (IsChecked) is true  -->
+                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Opacity" Value="1.0" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Image Source="{Binding ItemCategoryIcon}" />
+                </Border>
+            </RadioButton>
+        </DataTemplate>
+
+        <DataTemplate x:Key="LoreItemTemplate">
+            <StackPanel Orientation="Vertical">
+                <RadioButton
+                    Margin="0,10,0,0"
+                    Checked="Subcategory_OnSelect"
+                    Focusable="False"
+                    GroupName="LoreBooks"
+                    IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                    MouseEnter="CategoryButton_MouseEnter"
+                    MouseLeave="PlugItem_MouseLeave"
+                    Style="{DynamicResource D2StyleRadioButtonNoOverlay}"
+                    Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+
+                    <Image
+                        Margin="0"
+                        Source="{Binding ItemCategoryIcon}"
+                        Stretch="UniformToFill">
+                        <Image.Effect>
+                            <DropShadowEffect
+                                BlurRadius="20"
+                                Direction="-90"
+                                Opacity="0.5"
+                                ShadowDepth="10" />
+                        </Image.Effect>
+                    </Image>
+                </RadioButton>
+
+                <Border
+                    Margin="15,10,15,0"
+                    VerticalAlignment="Top"
+                    BorderBrush="{StaticResource ForegroundColour65}"
+                    BorderThickness="0,0,0,5"
+                    Opacity="0">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <!--  Trigger when IsSelected is True  -->
+                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation
+                                                    FillBehavior="HoldEnd"
+                                                    Storyboard.TargetProperty="Opacity"
+                                                    From="0"
+                                                    To="1"
+                                                    Duration="0:0:0.15" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation
+                                                    FillBehavior="HoldEnd"
+                                                    Storyboard.TargetProperty="Opacity"
+                                                    To="0"
+                                                    Duration="0:0:0.1" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+
+            </StackPanel>
+
+        </DataTemplate>
+
+
+        <DataTemplate x:Key="PlaceholderTemplate">
+            <Border Margin="0" Background="#50505055" />
+        </DataTemplate>
+        <DataTemplate x:Key="PlaceholderTemplate2">
+            <Border Margin="0" Background="#50505055" />
+        </DataTemplate>
+
+        <Storyboard x:Key="TextChangeAnimation">
+            <DoubleAnimation
+                Storyboard.TargetProperty="Opacity"
+                From="0"
+                To="1.0"
+                Duration="0:0:0.4" />
+            <ThicknessAnimation
+                Storyboard.TargetProperty="Margin"
+                From="30,0,0,0"
+                To="0,0,0,0"
+                Duration="0:0:0.4">
+                <ThicknessAnimation.EasingFunction>
+                    <SineEase EasingMode="EaseOut" />
+                </ThicknessAnimation.EasingFunction>
+            </ThicknessAnimation>
+        </Storyboard>
+
+        <Storyboard x:Key="FadeIn 0.3">
+            <DoubleAnimation
+                Storyboard.TargetProperty="Opacity"
+                From="0"
+                To="1"
+                Duration="0:0:0.3" />
+        </Storyboard>
+        <Storyboard x:Key="FadeIn 0.2">
+            <DoubleAnimation
+                Storyboard.TargetProperty="Opacity"
+                From="0"
+                To="1"
+                Duration="0:0:0.2" />
+        </Storyboard>
+        <Storyboard x:Key="FadeIn 0.1">
+            <DoubleAnimation
+                Storyboard.TargetProperty="Opacity"
+                From="0"
+                To="1"
+                Duration="0:0:0.1" />
+        </Storyboard>
+
+
+    </UserControl.Resources>
+
+    <Grid x:Name="MainGrid" Focusable="False">
+        <Grid.Background>
+            <RadialGradientBrush Center="0.5,0.25" GradientOrigin="0.5,0.25" RadiusX="1" RadiusY="1">
+                <RadialGradientBrush.GradientStops>
+                    <GradientStop Offset="0" Color="#FF37393E" />
+                    <GradientStop Offset="0.8" Color="#111113" />
+                </RadialGradientBrush.GradientStops>
+            </RadialGradientBrush>
+        </Grid.Background>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="5*" />
+            <RowDefinition Height="90*" />
+            <RowDefinition Height="5*" />
+        </Grid.RowDefinitions>
+
+        <Grid
+            Grid.RowSpan="3"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Background="Transparent"
+            Opacity="0.25">
+            <Border
+                x:Name="Spinner"
+                Background="Transparent"
+                BorderThickness="0"
+                Opacity="1" />
+        </Grid>
+
+        <!--  Item Rarity banner  -->
+        <Grid
+            Name="ItemRarityBanner"
+            Grid.Row="0"
+            Width="auto"
+            VerticalAlignment="Stretch"
+            Panel.ZIndex="1"
+            Background="Transparent">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="80*" />
+                <RowDefinition Height="20*" />
+            </Grid.RowDefinitions>
+
+            <Rectangle
+                Grid.Row="0"
+                Grid.RowSpan="1"
+                Fill="{Binding CategoryBannerColor}"
+                Opacity="0.651" />
+            <Rectangle
+                Grid.Row="1"
+                Fill="{Binding CategoryBannerColor}"
+                Opacity="0.902" />
+        </Grid>
+
+        <Grid Grid.RowSpan="3" Background="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="35*" />
+                <ColumnDefinition Width="65*" />
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="1" Background="#2A000000" />
+        </Grid>
+
+        <Viewbox Grid.RowSpan="3">
+            <Grid
+                x:Name="MainContainer"
+                Width="1920"
+                Height="990"
+                Background="Transparent"
+                ClipToBounds="True"
+                RenderTransformOrigin="0.5,0.5"
+                SnapsToDevicePixels="True">
+                <Grid.RenderTransform>
+                    <TranslateTransform />
+                </Grid.RenderTransform>
+
+                <Grid.Triggers>
+                    <EventTrigger RoutedEvent="Grid.Loaded">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation
+                                    Storyboard.TargetProperty="Opacity"
+                                    From="0"
+                                    To="1"
+                                    Duration="0:0:0.25" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Grid.Triggers>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="195*" />
+                    <RowDefinition Height="750*" />
+                    <RowDefinition Height="50*" />
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130*" />
+                    <ColumnDefinition Width="400*" />
+                    <ColumnDefinition Width="1389*" />
+                </Grid.ColumnDefinitions>
+
+                <Image
+                    Grid.RowSpan="3"
+                    Grid.ColumnSpan="3"
+                    Width="1920"
+                    HorizontalAlignment="Left"
+                    Panel.ZIndex="100"
+                    IsHitTestVisible="False"
+                    Opacity="0.7"
+                    Source="C:\Users\Michael\Desktop\lOre.png"
+                    Stretch="UniformToFill"
+                    Visibility="Collapsed" />
+
+                <Grid
+                    x:Name="Header"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="2"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Bottom"
+                    Background="Transparent">
+                    <StackPanel Orientation="Horizontal">
+                        <Image
+                            Width="86"
+                            Height="86"
+                            d:Source="https://www.bungie.net/common/destiny2_content/icons/7564027686d50ee4438e0f66466f3abc.png"
+                            Source="{Binding ItemCategoryIcon2}" />
+
+                        <Grid
+                            Margin="15,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Stretch"
+                            Background="Transparent">
+                            <StackPanel>
+                                <TextBlock
+                                    x:Name="SubcategoryName"
+                                    Margin="0,0,0,-10"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Panel.ZIndex="1"
+                                    d:FontFamily="Haas Grot Text 65 Medium"
+                                    d:Text="LORE"
+                                    FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                                    FontSize="44"
+                                    Foreground="{StaticResource ForegroundColour90}"
+                                    Text="{Binding ItemCategoryName}"
+                                    TextAlignment="Left"
+                                    TextWrapping="Wrap"
+                                    Typography.CapitalSpacing="True"
+                                    Typography.Kerning="True" />
+                                <TextBlock
+                                    x:Name="SubcategoryType"
+                                    VerticalAlignment="Top"
+                                    Panel.ZIndex="1"
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    d:Text="THE LIGHT"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    FontSize="30"
+                                    Foreground="{StaticResource ForegroundColour50}"
+                                    Typography.CapitalSpacing="True" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+
+                <Grid
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Background="Transparent">
+
+                    <Grid Grid.Column="0" Background="Transparent">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <ItemsControl
+                            x:Name="Categories"
+                            Margin="0,10,0,0"
+                            VerticalAlignment="Top"
+                            ItemTemplate="{StaticResource CategoryItemTemplate}"
+                            KeyboardNavigation.TabNavigation="None">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid
+                                        Grid.Row="0"
+                                        Width="auto"
+                                        Height="65"
+                                        Margin="0,0,0,0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Top"
+                                        Background="Transparent"
+                                        Rows="1" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="Margin" Value="3,0,3,0" />
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+                        </ItemsControl>
+
+                        <local:ItemPage
+                            x:Name="LoreBooks"
+                            Grid.Row="1"
+                            Margin="0,35,0,35"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            CollapsePageButtons="False"
+                            Columns="4"
+                            IsVertical="True"
+                            ItemsPerPage="16"
+                            UsePlaceholders="True" />
+                    </Grid>
+
+                </Grid>
+
+                <localCollections:LoreBookView
+                    x:Name="LoreBookView"
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    Margin="0,0,0,0"
+                    Background="Transparent" />
+            </Grid>
+        </Viewbox>
+
+        <!--  User Controls  -->
+        <Grid
+            Grid.Row="2"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Bottom"
+            Background="#38000000">
+            <Viewbox HorizontalAlignment="Right" VerticalAlignment="Center">
+                <StackPanel
+                    Margin="0,10,75,10"
+                    FlowDirection="RightToLeft"
+                    Orientation="Horizontal">
+
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Panel.ZIndex="1"
+                        d:FontFamily="Haas Grot Text 55 Roman, Destiny Keys"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="20"
+                        Foreground="{StaticResource ForegroundColour80}"
+                        Text=" Dismiss"
+                        TextAlignment="Left"
+                        TextWrapping="Wrap" />
+
+                </StackPanel>
+            </Viewbox>
+        </Grid>
+
+    </Grid>
+
+</UserControl>

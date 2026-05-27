@@ -1,0 +1,318 @@
+﻿<UserControl
+    x:Class="Charm.Collections.LoreBookView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="746"
+    d:DesignWidth="1390"
+    Loaded="OnControlLoaded"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="LoreEntryTemplate">
+            <StackPanel
+                Width="48"
+                Margin="0"
+                Orientation="Vertical">
+                <RadioButton
+                    Margin="0"
+                    Checked="LoreEntry_OnSelect"
+                    Focusable="False"
+                    GroupName="LoreEntries"
+                    IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                    Opacity="0.65"
+                    Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <Grid Background="Transparent">
+                        <Image Source="{Binding ItemIcon}" Stretch="UniformToFill" />
+                        <TextBlock
+                            Margin="-2"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Panel.ZIndex="1"
+                            FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                            FontSize="20"
+                            Foreground="{StaticResource ForegroundColour90}"
+                            Text="{Binding Index}"
+                            TextWrapping="Wrap" />
+                    </Grid>
+
+                    <RadioButton.Style>
+                        <Style BasedOn="{StaticResource D2StyleRadioButtonNoOverlay}" TargetType="RadioButton">
+                            <Style.Triggers>
+                                <!--  Trigger when IsSelected is True  -->
+                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation
+                                                    FillBehavior="HoldEnd"
+                                                    Storyboard.TargetProperty="Opacity"
+                                                    From="0.65"
+                                                    To="1"
+                                                    Duration="0:0:0.15" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation
+                                                    FillBehavior="HoldEnd"
+                                                    Storyboard.TargetProperty="Opacity"
+                                                    To="0.65"
+                                                    Duration="0:0:0.1" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </RadioButton.Style>
+                </RadioButton>
+
+                <Border
+                    Margin="0,0,0,0"
+                    VerticalAlignment="Top"
+                    BorderBrush="{StaticResource ForegroundColour65}"
+                    BorderThickness="0,0,0,5"
+                    Opacity="0">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <!--  Trigger when IsSelected is True  -->
+                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation
+                                                    FillBehavior="HoldEnd"
+                                                    Storyboard.TargetProperty="Opacity"
+                                                    From="0"
+                                                    To="1"
+                                                    Duration="0:0:0.15" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation
+                                                    FillBehavior="HoldEnd"
+                                                    Storyboard.TargetProperty="Opacity"
+                                                    To="0"
+                                                    Duration="0:0:0.1" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+
+            </StackPanel>
+
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid HorizontalAlignment="Stretch" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100*" />
+            <RowDefinition Height="15*" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="5*" />
+            <ColumnDefinition Width="30*" />
+            <ColumnDefinition Width="70*" />
+            <ColumnDefinition Width="5*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid
+            Grid.Row="0"
+            Grid.Column="1"
+            Margin="0,0,0,0"
+            HorizontalAlignment="Stretch"
+            Background="Transparent">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="15*" />
+                <RowDefinition Height="90*" />
+            </Grid.RowDefinitions>
+
+
+            <TextBlock
+                Margin="5,0,5,0"
+                VerticalAlignment="Bottom"
+                Panel.ZIndex="1"
+                d:FontFamily="Haas Grot Text 55 Roman"
+                d:Text="STOLEN INTELLIGENCE"
+                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                FontSize="18"
+                Foreground="{StaticResource ForegroundColour60}"
+                Text="{Binding LoreBookName}"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+
+
+            <Image
+                Grid.Row="1"
+                Margin="0,0,0,0"
+                VerticalAlignment="Bottom"
+                d:Source="https://www.bungie.net/common/destiny2_content/icons/45cec43cc4044c8da4860cc737b27bc9.png"
+                Source="{Binding LoreBookIcon}">
+                <Image.Effect>
+                    <DropShadowEffect
+                        BlurRadius="20"
+                        Direction="-90"
+                        Opacity="0.5"
+                        ShadowDepth="10" />
+                </Image.Effect>
+            </Image>
+        </Grid>
+
+        <Grid
+            Grid.Row="0"
+            Grid.Column="2"
+            Grid.ColumnSpan="2"
+            Margin="30,75,15,0"
+            Background="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100*" />
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
+
+            <Rectangle Grid.Column="0" Panel.ZIndex="0">
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="1,-1" EndPoint="0.25,0.25">
+                        <GradientStop Offset="0" Color="#A3000000" />
+                        <GradientStop Offset="1" Color="#00000000" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <Rectangle
+                Grid.Column="1"
+                Margin="0,20,0,-20"
+                Panel.ZIndex="0">
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="1,-1" EndPoint="0,1">
+                        <GradientStop Offset="0" Color="#A3000000" />
+                        <GradientStop Offset="1" Color="#00000000" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <Rectangle
+                Grid.Column="2"
+                Margin="0,40,0,-40"
+                Panel.ZIndex="0">
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="1,-1" EndPoint="0,1">
+                        <GradientStop Offset="0" Color="#A3000000" />
+                        <GradientStop Offset="1" Color="#00000000" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+        </Grid>
+
+
+        <Grid
+            Grid.Row="0"
+            Grid.Column="2"
+            Margin="30,70,15,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Background="Transparent">
+
+            <Grid
+                x:Name="LoreEntryMain"
+                Grid.Row="0"
+                Margin="40,10,40,10"
+                Background="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="15*" />
+                    <RowDefinition Height="90*" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel
+                    Grid.Row="0"
+                    Margin="0"
+                    VerticalAlignment="Top"
+                    Background="Transparent"
+                    Orientation="Vertical">
+                    <TextBlock
+                        x:Name="LoreEntryName"
+                        Margin="0,0,0,5"
+                        HorizontalAlignment="Left"
+                        Panel.ZIndex="1"
+                        d:FontFamily="Haas Grot Text 65 Medium"
+                        d:Text="Outliers"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                        FontSize="28"
+                        FontWeight="Bold"
+                        Foreground="{StaticResource ForegroundColour90}"
+                        TextWrapping="Wrap" />
+
+                    <Border BorderBrush="{StaticResource BackgroundColour30}" BorderThickness="0,2,0,0" />
+                </StackPanel>
+
+                <Border
+                    Grid.Row="1"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top">
+                    <ScrollViewer
+                        x:Name="LoreEntryScroll"
+                        Grid.Row="1"
+                        Margin="0,0,0,0"
+                        HorizontalScrollBarVisibility="Disabled"
+                        VerticalScrollBarVisibility="Auto">
+                        <ScrollViewer.Resources>
+                            <Style BasedOn="{StaticResource VerticalScrollBarStyle}" TargetType="ScrollBar">
+                                <Setter Property="Width" Value="7" />
+                            </Style>
+                        </ScrollViewer.Resources>
+
+                        <TextBlock
+                            x:Name="LoreEntry"
+                            Margin="0,0,25,0"
+                            VerticalAlignment="Top"
+                            d:Text="ACCESS: RESTRICTED&#x0a;DECRYPTION KEY: 73XK5V2PG1$AUN-326&#x0a;REP #: 692-FALLEN-DUS&#x0a;AGENT(S): RAN-187&#x0a;SUBJ: Countercultural intelligence update&#x0a;&#x0a;1. Fallen armed forces continue to fall back from active fronts across Terra. Factions of House Dusk remain active in the European Dead Zone. Throughout the rest of the globe, refugee attack incidents have dropped by more than 70% since the conclusion of the Red War—largely attributable to depressed Fallen and human populations rather than any significant change in interspecies relations.  2. In absence of any united leadership, House Dusk continues to splinter and radicalize.  The recent trending emergence of so-called crime syndicates (cf. report #004-FALLEN-SIV) is emblematic of the continuing destructuralization of Fallen society. Likely an artifact of multi-generational colonization of human strongholds, this agent believes that because these syndicates have no relation to indigenous Fallen culture, young Fallen are appropriating and imitating human mythology in absence of a strong cultural heritage of their own.  Much like the dissolution of the Kell/Archon theology, this is positive news for those interested in the complete extirpation of invasive Fallen from the system.  3. That being said, we should continue to monitor reunification efforts. Several personalities have emerged as potential leaders. First, the would-be integrationists:  VIP #1121, well-known to Guardians of the inner system as Variks, or Variks the Loyal. Directly responsible for the release of the murderer Uldren Sov from the Prison of Elders, #1121 subsequently fled Awoken holdings in the Reef and now styles himself the Kell of Kells, still representing House Judgement. The Praxic Order has petitioned the Vanguard for permission to detain #1121. The Awoken monarchy, acting through the Queen's Wrath, has claimed jurisdiction over #1121 and further stated that any prosecution in absence of their involvement will be considered an act of war. The Vanguard has not yet made a statement about their position on the issue.  VIP #3987, another former confederate of the Awoken, is a lesser-known personality known as Mithrax. Scattered field reports suggest that like #1121, #3987 styles himself a Kell of the so-called House Light, an otherwise unknown House apparently founded by #3987 himself. We have secondhand accounts that Mithrax has engaged in allied operations with Guardians in the field, though we have not as yet been able to corroborate these accounts with any degree of veracity. This agent is inclined to treat these reports with a healthy degree of skepticism until otherwise confirmed, as they may be propaganda from Fallen sympathizers in the Old Russian and Red War Guardian cohorts. We have requested intelligence records from the Awoken which may further clarify the matter.  In addition, whatever the findings of said intelligence records may be, it should be stressed that one or two sympathetic outliers cannot be relied upon to erase the wrongs of past centuries, nor should their good-faith efforts to correct the sins of their forebears be taken as sufficient symbolic reparation.  Second, the would-be separatists:  VIP #4503, a recent personality known as Fikrul, or the Fanatic. A close confederate of the murderer Uldren Sov, #4503 has the apparent ability to raise himself from the dead in a manner not dissimilar to Ghost-aided resurrection. Though his reign on the Tangled Shore was limited, he possesses sufficient skill, hatred, and motive to warrant on-going surveillance. Given #4503's propensity for resurrection, the inherent risk of #4503 reclaiming the body of the murderer Uldren Sov from his final resting place in the Dreaming City goes without saying. The Vanguard continues to deploy fireteams to suppress #4503; our agents have reached out to the Cryptarchy and the Gensym Scribes to request guidance as to his permanent destruction.  VIP #2029, a once-known personality known as Eramis, or Eramis, the Shipstealer. A House Devils Baroness incarcerated during the Wolf Wars, #2029 successfully fled the Prison of Elders during the mass escape orchestrated by #1121. #2029 is a classical Fallen pirate of the old ways: vicious, uncompromising, and possessing cunning of the highest degree. Field reports indicate that she is rallying violent dissidents to reconstruct House Devils from the ground up. This agent believes her to be the most viable candidate for universal Fallen reunification, and would urge the Vanguard and other interested leadership to aggressively prioritize her destruction.  We have come too far to pull our punches now.  MESSAGE ENDS"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                            FontSize="23"
+                            Foreground="{StaticResource ForegroundColour80}"
+                            LineHeight="34px"
+                            TextWrapping="WrapWithOverflow" />
+
+                    </ScrollViewer>
+                </Border>
+
+                <Border
+                    Grid.Row="2"
+                    Margin="0,0,35,0"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="0,2,0,0" />
+
+            </Grid>
+
+        </Grid>
+
+        <local:ItemPage
+            x:Name="LoreBookEntries"
+            Grid.Row="2"
+            Grid.Column="2"
+            Margin="15,0,15,0"
+            VerticalAlignment="Center"
+            Background="Transparent"
+            CollapsePageButtons="false"
+            Columns="10"
+            ItemsPerPage="10"
+            UsePlaceholders="True" />
+
+    </Grid>
+
+</UserControl>

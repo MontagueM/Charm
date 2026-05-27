@@ -689,7 +689,7 @@
                     <StackPanel
                         Name="CollectionsPanel"
                         Grid.Row="0"
-                        Margin="125"
+                        Margin="0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Top"
                         Visibility="Visible">
@@ -712,7 +712,6 @@
                     </StackPanel>
 
                     <Border
-                        x:Name="RedactedPanelSeperator"
                         Height="auto"
                         Margin="25,0,25,0"
                         HorizontalAlignment="Center"
@@ -720,16 +719,15 @@
                         BorderBrush="{StaticResource BackgroundColour50}"
                         BorderThickness="1,0,1,0"
                         Opacity=".5"
-                        Visibility="Collapsed" />
+                        Visibility="Visible" />
 
                     <!--  Right side StackPanel  -->
                     <Grid
-                        x:Name="RedactedPanel"
                         Margin="0,0,0,0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Stretch"
                         Background="Transparent"
-                        Visibility="Collapsed">
+                        Visibility="Visible">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="90*" />
                             <RowDefinition Height="5*" />

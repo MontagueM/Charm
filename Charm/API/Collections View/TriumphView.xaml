@@ -1,0 +1,500 @@
+﻿<UserControl
+    x:Class="Charm.Collections.TriumphView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="984"
+    d:DesignWidth="1914"
+    Loaded="OnControlLoaded"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+
+        <Style x:Key="TriumphButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Background="Transparent" Cursor="Hand">
+                            <Image x:Name="Inactive" Source="{Binding ItemCategoryIcon}" />
+                            <Image x:Name="Active" Source="{Binding ItemCategoryIcon4}" />
+                            <Image
+                                x:Name="InnerIcon"
+                                Margin="10,0,10,10"
+                                Opacity="0.5"
+                                Source="{Binding ItemCategoryIcon3}" />
+
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <Storyboard>
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="Active"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="0"
+                                                Duration="0:0:0.1" />
+
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="InnerIcon"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="0.5"
+                                                Duration="0:0:0.1" />
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="Active"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="1"
+                                                Duration="0:0:0.1" />
+
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="InnerIcon"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="1"
+                                                Duration="0:0:0.1" />
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <VisualState x:Name="Pressed" />
+
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="LegacyTriumphButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid
+                            Margin="5"
+                            Background="Transparent"
+                            Cursor="Hand">
+                            <Ellipse
+                                x:Name="Active"
+                                Fill="Transparent"
+                                Stretch="UniformToFill"
+                                Stroke="White" />
+
+                            <Ellipse
+                                Fill="#801a1a1a"
+                                Stretch="UniformToFill"
+                                Stroke="#A6848484"
+                                StrokeThickness="4" />
+
+                            <Ellipse
+                                Margin="8"
+                                Fill="Transparent"
+                                Stretch="UniformToFill"
+                                Stroke="#8F4a4a4a"
+                                StrokeThickness="1" />
+
+                            <Image
+                                x:Name="InnerIcon"
+                                Margin="0"
+                                Opacity="0.5"
+                                Source="{Binding ItemCategoryIcon3}" />
+
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <Storyboard>
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="Active"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="0"
+                                                Duration="0:0:0.1" />
+
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="InnerIcon"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="0.5"
+                                                Duration="0:0:0.1" />
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="Active"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="1"
+                                                Duration="0:0:0.1" />
+
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="InnerIcon"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="1"
+                                                Duration="0:0:0.1" />
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <VisualState x:Name="Pressed" />
+
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SealButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Background="Transparent" Cursor="Hand">
+                            <Image x:Name="Inactive" Source="{Binding ItemCategoryIcon}" />
+                            <Image x:Name="Active" Source="{Binding ItemCategoryIcon4}" />
+
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <Storyboard>
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="Active"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="0"
+                                                Duration="0:0:0.1" />
+
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="Inactive"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="0.75"
+                                                Duration="0:0:0.1" />
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="Active"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="1"
+                                                Duration="0:0:0.1" />
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <VisualState x:Name="Pressed" />
+
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="TriumphItemTemplate">
+            <Grid Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                <Button
+                    Margin="0"
+                    Click="Triumph_OnClick"
+                    Focusable="False"
+                    MouseEnter="CategoryButton_MouseEnter"
+                    MouseLeave="PlugItem_MouseLeave"
+                    Style="{DynamicResource TriumphButtonStyle}"
+                    Visibility="{Binding DisplayStyle, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Category}" />
+
+                <Button
+                    Margin="0"
+                    Click="Triumph_OnClick"
+                    Focusable="False"
+                    MouseEnter="CategoryButton_MouseEnter"
+                    MouseLeave="PlugItem_MouseLeave"
+                    Style="{DynamicResource SealButtonStyle}"
+                    Visibility="{Binding DisplayStyle, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Medals}" />
+            </Grid>
+
+        </DataTemplate>
+
+        <DataTemplate x:Key="LegacyTriumphItemTemplate">
+            <Grid Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                <Button
+                    Margin="0"
+                    Click="Triumph_OnClick"
+                    Focusable="False"
+                    MouseEnter="CategoryButton_MouseEnter"
+                    MouseLeave="PlugItem_MouseLeave"
+                    Style="{DynamicResource LegacyTriumphButtonStyle}"
+                    Visibility="{Binding DisplayStyle, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Category}" />
+
+                <Button
+                    Margin="0"
+                    Click="Triumph_OnClick"
+                    Focusable="False"
+                    MouseEnter="CategoryButton_MouseEnter"
+                    MouseLeave="PlugItem_MouseLeave"
+                    Style="{DynamicResource SealButtonStyle}"
+                    Visibility="{Binding DisplayStyle, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Medals}" />
+            </Grid>
+        </DataTemplate>
+
+    </UserControl.Resources>
+
+    <Grid
+        x:Name="MainGrid"
+        Focusable="False"
+        Style="{StaticResource GradientBackgroundSemiTransparent}">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="5*" />
+            <RowDefinition Height="90*" />
+            <RowDefinition Height="5*" />
+        </Grid.RowDefinitions>
+
+        <Grid
+            Grid.RowSpan="3"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Background="Transparent"
+            Opacity="0.25">
+            <Border
+                x:Name="Spinner"
+                Background="Transparent"
+                BorderThickness="0"
+                Opacity="1" />
+        </Grid>
+
+        <!--  Item Rarity banner  -->
+        <Grid
+            Name="ItemRarityBanner"
+            Grid.Row="0"
+            Width="auto"
+            VerticalAlignment="Stretch"
+            Panel.ZIndex="1"
+            Background="Transparent">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="80*" />
+                <RowDefinition Height="20*" />
+            </Grid.RowDefinitions>
+
+            <Rectangle
+                Grid.Row="0"
+                Grid.RowSpan="1"
+                Fill="{Binding CategoryBannerColor}"
+                Opacity="0.651" />
+            <Rectangle
+                Grid.Row="1"
+                Fill="{Binding CategoryBannerColor}"
+                Opacity="0.902" />
+        </Grid>
+
+        <Image
+            Grid.RowSpan="3"
+            Panel.ZIndex="100"
+            Source="C:\Users\Michael\Desktop\triumphs.png"
+            Stretch="Uniform"
+            Visibility="Collapsed" />
+
+        <Viewbox Grid.RowSpan="3">
+            <Grid
+                x:Name="MainContainer"
+                Width="1920"
+                Height="990"
+                Background="Transparent"
+                ClipToBounds="True"
+                RenderTransformOrigin="0.5,0.5"
+                SnapsToDevicePixels="True">
+                <Grid.RenderTransform>
+                    <TranslateTransform />
+                </Grid.RenderTransform>
+
+                <Grid.Triggers>
+                    <EventTrigger RoutedEvent="Grid.Loaded">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation
+                                    Storyboard.TargetProperty="Opacity"
+                                    From="0"
+                                    To="1"
+                                    Duration="0:0:0.25" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Grid.Triggers>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="18*" />
+                    <RowDefinition Height="95*" />
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="10*" />
+                    <ColumnDefinition Width="55*" />
+                    <ColumnDefinition Width="10*" />
+                </Grid.ColumnDefinitions>
+
+                <!--  Category Header  -->
+                <Grid
+                    x:Name="Header"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="50,0,50,15"
+                    VerticalAlignment="Bottom"
+                    Background="Transparent">
+                    <StackPanel Orientation="Horizontal">
+
+                        <Image
+                            x:Name="HeaderIcon"
+                            Height="auto"
+                            MaxWidth="55"
+                            Margin="0,0,20,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+                            d:Source="https://www.bungie.net/common/destiny2_content/icons/7564027686d50ee4438e0f66466f3abc.png"
+                            Opacity="0.8"
+                            Source="{Binding ItemCategoryIcon2}" />
+
+
+
+                        <TextBlock
+                            x:Name="SubcategoryName"
+                            Margin="0,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Panel.ZIndex="1"
+                            d:FontFamily="Haas Grot Text 65 Medium"
+                            d:Text="TRIUMPHS"
+                            FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                            FontSize="64"
+                            Foreground="{StaticResource ForegroundColour80}"
+                            Text="{Binding ItemCategoryName}"
+                            TextAlignment="Left"
+                            TextWrapping="Wrap"
+                            Typography.CapitalSpacing="True" />
+                    </StackPanel>
+                    <TextBlock
+                        x:Name="MaxTriumphScore"
+                        Margin="0,0,0,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Panel.ZIndex="1"
+                        d:FontFamily="Haas Grot Text 65 Medium"
+                        d:Text="TRIUMPHS"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                        FontSize="22"
+                        Foreground="{StaticResource ForegroundColour70}"
+                        TextAlignment="Left"
+                        TextWrapping="Wrap"
+                        Typography.CapitalSpacing="True">
+                        <Run Text="M A X  T R I U M P H  S C O R E : " />
+                        <Run Foreground="{StaticResource ForegroundColour90}" Text="{Binding ItemCategoryLabel1}" />
+                    </TextBlock>
+
+                </Grid>
+
+                <!--  Triumphs  -->
+                <Grid
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="0,0,0,0"
+                    Background="Transparent">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="90*" />
+                        <RowDefinition Height="50*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Margin="0,0,0,0" VerticalAlignment="Top">
+                        <ContentControl Margin="50,0,50,0" Style="{StaticResource ColumnHeader}">
+                            <TextBlock
+                                x:Name="TriumphsTextBlock"
+                                d:FontFamily="Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                FontSize="14"
+                                Text="T R I U M P H S" />
+                        </ContentControl>
+
+                        <local:ItemPage
+                            x:Name="Triumphs"
+                            Grid.Row="1"
+                            Margin="0,10,0,0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            CollapsePageButtons="False"
+                            Columns="6"
+                            IsVertical="False"
+                            ItemMargin="5"
+                            ItemsPerPage="12"
+                            PageIndicatorMargin="0,0,0,0"
+                            UsePlaceholders="True" />
+                    </StackPanel>
+
+
+
+                    <!--  Legacy Triumphs  -->
+
+                    <StackPanel
+                        Grid.Row="1"
+                        Margin="0,15,0,0"
+                        VerticalAlignment="Top">
+                        <ContentControl Margin="50,0,50,0" Style="{StaticResource ColumnHeader}">
+                            <TextBlock
+                                x:Name="LegacyTextBlock"
+                                d:FontFamily="Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                FontSize="14"
+                                Text="L E G A C Y  T R I U M P H S" />
+                        </ContentControl>
+
+                        <local:ItemPage
+                            x:Name="LegacyTriumphs"
+                            Grid.Row="1"
+                            Margin="0,10,0,0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            CollapsePageButtons="False"
+                            Columns="10"
+                            IsVertical="False"
+                            ItemMargin="3,0,3,0"
+                            ItemsPerPage="10"
+                            PageIndicatorMargin="0,0,0,-10"
+                            UsePlaceholders="True" />
+                    </StackPanel>
+
+
+                </Grid>
+
+            </Grid>
+        </Viewbox>
+
+        <!--  User Controls  -->
+        <Grid
+            Grid.Row="2"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Bottom"
+            Background="#38000000">
+            <Viewbox HorizontalAlignment="Right" VerticalAlignment="Center">
+                <StackPanel
+                    Margin="0,10,75,10"
+                    FlowDirection="RightToLeft"
+                    Orientation="Horizontal">
+
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Panel.ZIndex="1"
+                        d:FontFamily="Haas Grot Text 55 Roman, Destiny Keys"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="20"
+                        Foreground="{StaticResource ForegroundColour80}"
+                        Text=" Dismiss"
+                        TextAlignment="Left"
+                        TextWrapping="Wrap" />
+
+                </StackPanel>
+            </Viewbox>
+        </Grid>
+
+    </Grid>
+
+</UserControl>

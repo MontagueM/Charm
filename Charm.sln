@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charm", "Charm\Charm.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RevorbStd", "ThirdParty\revorbstd\RevorbStd.csproj", "{C407B28F-077C-41C2-8C16-277CB9681E92}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charm.Redacted", "..\..\Charm-Redacted\Charm.Redacted.csproj", "{2DD4F8CA-70D7-9004-5636-89E7464336EC}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charm.Shared", "Charm.Shared\Charm.Shared.csproj", "{8D9D7DF0-5178-443B-B00B-F5CB99CAA219}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charm.Renderer", "Charm.Renderer\Charm.Renderer.csproj", "{5E6F4FD6-7D8A-5805-B3DC-DFDFAEE52085}"
@@ -57,14 +55,6 @@ Global
 		{C407B28F-077C-41C2-8C16-277CB9681E92}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C407B28F-077C-41C2-8C16-277CB9681E92}.Release|x64.ActiveCfg = Release|Any CPU
 		{C407B28F-077C-41C2-8C16-277CB9681E92}.Release|x64.Build.0 = Release|Any CPU
-		{2DD4F8CA-70D7-9004-5636-89E7464336EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2DD4F8CA-70D7-9004-5636-89E7464336EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2DD4F8CA-70D7-9004-5636-89E7464336EC}.Debug|x64.ActiveCfg = Debug|x64
-		{2DD4F8CA-70D7-9004-5636-89E7464336EC}.Debug|x64.Build.0 = Debug|x64
-		{2DD4F8CA-70D7-9004-5636-89E7464336EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2DD4F8CA-70D7-9004-5636-89E7464336EC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2DD4F8CA-70D7-9004-5636-89E7464336EC}.Release|x64.ActiveCfg = Release|x64
-		{2DD4F8CA-70D7-9004-5636-89E7464336EC}.Release|x64.Build.0 = Release|x64
 		{8D9D7DF0-5178-443B-B00B-F5CB99CAA219}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8D9D7DF0-5178-443B-B00B-F5CB99CAA219}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D9D7DF0-5178-443B-B00B-F5CB99CAA219}.Debug|x64.ActiveCfg = Debug|Any CPU

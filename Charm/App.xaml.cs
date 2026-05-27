@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Windows;
 using System.Xml;
-using Arithmic;
 using Charm.Shared;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
@@ -19,7 +17,6 @@ namespace Charm;
 public partial class CharmApp : Application
 {
     public static ApplicationVersion CurrentVersion = new("3.2.3");
-    public static Assembly? CharmRedacted = null;
 
     private void Application_Startup(object sender, StartupEventArgs e)
     {
@@ -51,32 +48,7 @@ public partial class CharmApp : Application
             HighlightingManager.Instance.RegisterHighlighting("HLSL", new[] { ".hlsl", ".cg" }, highlighting);
         }
 
-        LoadRedactedDLL();
         IRenderer.IsRendererDllAvailable();
-    }
-
-    public void LoadRedactedDLL()
-    {
-        string dllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Charm.Redacted.dll");
-        if (File.Exists(dllPath))
-        {
-            var asm = Assembly.LoadFrom(dllPath);
-
-            Type type = asm.GetType("Charm.Redacted.CharmRedacted");
-            if (type == null)
-                return;
-
-            FieldInfo field = type.GetField("CurrentVersion", BindingFlags.Public | BindingFlags.Static);
-            if (field == null)
-                return;
-
-            var redactedVersion = field.GetValue(null) as ApplicationVersion;
-            if (redactedVersion.Id != CurrentVersion.Id)
-                return;
-
-            Log.Info("Loaded Charm.Redacted");
-            CharmRedacted = asm;
-        }
     }
 
     bool IsVcRedistInstalled()

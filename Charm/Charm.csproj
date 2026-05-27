@@ -153,6 +153,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="API\Collections View\QuestListView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="API\Collections View\QuestView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\ListViews\ActivityListView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
