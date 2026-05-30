@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Arithmic;
 using Charm.Shared;
 using ConcurrentCollections;
@@ -216,6 +217,7 @@ public partial class AudioListView : UserControl
             };
 
             AudioList.ItemsSource = items;
+            UIHelper.ScrollToTop(AudioList);
             BulkExportButton.IsEnabled = items.Count > 0;
         });
     }

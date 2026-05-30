@@ -161,6 +161,7 @@ public partial class StaticListView : UserControl
         };
 
         StaticList.ItemsSource = items;
+        UIHelper.ScrollToTop(StaticList);
         BulkExportButton.IsEnabled = items.Count > 0;
     }
 

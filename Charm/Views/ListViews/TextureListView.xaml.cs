@@ -116,7 +116,10 @@ public partial class TextureListView : UserControl
     private async Task LoadTextureList(PackageItem item)
     {
         if (Textures.Count != 0)
+        {
+            TextureList.ItemsSource = null;
             Textures.Clear();
+        }
 
         Dispatcher.Invoke(() => TextureListLoading.Visibility = Visibility.Visible);
 
@@ -142,8 +145,6 @@ public partial class TextureListView : UserControl
         RefreshTextureList();
         Dispatcher.Invoke(() => TextureListLoading.Visibility = Visibility.Collapsed);
     }
-
-
 
     private void RefreshTextureList()
     {
@@ -186,7 +187,7 @@ public partial class TextureListView : UserControl
         };
 
         TextureList.ItemsSource = items;
-
+        UIHelper.ScrollToTop(TextureList);
         BulkExportButton.IsEnabled = items.Count > 0;
     }
 

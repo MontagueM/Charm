@@ -728,6 +728,18 @@ public static class StyleHelper
 
 public static class UIHelper
 {
+    public static void ScrollToTop(ListView listView)
+    {
+        if (listView == null)
+            return;
+
+        listView.Dispatcher.BeginInvoke(() =>
+        {
+            if (listView.Items.Count > 0)
+                listView.ScrollIntoView(listView.Items[0]);
+        }, DispatcherPriority.Loaded);
+    }
+
     public static System.Uri MakePackUri(string relativeFile)
     {
         System.Reflection.Assembly a = CharmApp.ResourceAssembly;

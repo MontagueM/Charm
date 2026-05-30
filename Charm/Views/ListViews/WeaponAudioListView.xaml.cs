@@ -151,6 +151,7 @@ public partial class WeaponAudioListView : UserControl
         List<WeaponAudioCategory> items = displayItems.OrderBy(x => x.Name).ToList();
 
         WeaponAudioEntries.ItemsSource = items;
+        UIHelper.ScrollToTop(WeaponAudioEntries);
         BulkExportButton.IsEnabled = items.Count > 0;
     }
 

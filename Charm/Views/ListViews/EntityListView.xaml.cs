@@ -252,6 +252,7 @@ public partial class EntityListView : UserControl
         };
 
         EntityList.ItemsSource = items;
+        UIHelper.ScrollToTop(EntityList);
         BulkExportButton.IsEnabled = items.Count > 0;
     }
 

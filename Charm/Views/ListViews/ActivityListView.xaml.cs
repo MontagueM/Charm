@@ -364,6 +364,7 @@ public partial class ActivityListView : UserControl
         };
 
         ActivityList.ItemsSource = items;
+        UIHelper.ScrollToTop(ActivityList);
     }
 
     private async void ActivityItem_Click(object sender, RoutedEventArgs e)
