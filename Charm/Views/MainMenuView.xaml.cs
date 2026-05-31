@@ -176,6 +176,14 @@ public partial class MainMenuView : UserControl
         _mainWindow.SetNewestTabSelected();
     }
 
+    private void AllStringsViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        TagListViewerView tagListView = new TagListViewerView();
+        tagListView.LoadContent(ETagListType.StringContainersList);
+        _mainWindow.MakeNewTab("Strings", tagListView);
+        _mainWindow.SetNewestTabSelected();
+    }
+
     private void GithubButton_OnClick(object sender, RoutedEventArgs e)
     {
         Process.Start(new ProcessStartInfo { FileName = "https://github.com/MontagueM/Charm/tree/delta/EOF", UseShellExecute = true });

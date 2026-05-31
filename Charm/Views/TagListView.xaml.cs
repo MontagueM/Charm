@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,6 +24,7 @@ using Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
+using Tiger.Schema.Strings;
 using ActivityROI = Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON.Activity;
 using ActivitySK = Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601.Activity;
 using ActivityWQ = Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402.Activity;
@@ -86,6 +88,15 @@ public enum ETagListType
     MaterialList,
     [Description("Material [Final]")]
     Material,
+
+    [Description("String Containers List [Packages]")]
+    StringContainersList,
+    [Description("String Container [Final]")]
+    StringContainer,
+    [Description("Strings")]
+    Strings,
+    [Description("String [Final]")]
+    String,
 }
 
 // TODO Start phasing this out for some things (already done for Texture and Audio viewing).
@@ -220,6 +231,18 @@ public partial class TagListView : UserControl
                     break;
                 case ETagListType.Material:
                     LoadMaterial(contentValue as FileHash);
+                    break;
+
+                case ETagListType.StringContainersList:
+                    await LoadStringContainersList();
+                    break;
+                case ETagListType.StringContainer:
+                    LoadStringContainer(contentValue as FileHash);
+                    break;
+                case ETagListType.Strings:
+                    LoadStrings(contentValue as FileHash);
+                    break;
+                case ETagListType.String:
                     break;
 
                 default:
@@ -1399,6 +1422,91 @@ public partial class TagListView : UserControl
         _mainWindow.MakeNewTab(fileHash, materialView);
         _mainWindow.SetNewestTabSelected();
     }
+    #endregion
+
+    #region String
+
+    private async Task LoadStringContainersList()
+    {
+        if (_allTagItems != null)
+            return;
+
+        MainWindow.Progress.SetProgressStages(new List<string>
+        {
+            "Caching string tags",
+            "Loading string list",
+        });
+
+        await Task.Run(() =>
+        {
+            _allTagItems = new ConcurrentBag<TagItem>();
+            var vals = PackageResourcer.Get().GetAllHashes<LocalizedStrings>();
+            MainWindow.Progress.CompleteStage();
+
+            Parallel.ForEach(vals, val =>
+            {
+                _allTagItems.Add(new TagItem
+                {
+                    Hash = val,
+                    Name = $"{val}",
+                    TagType = ETagListType.StringContainer
+                });
+            });
+            MainWindow.Progress.CompleteStage();
+
+            MakePackageTagItems();
+        });
+
+        RefreshItemList();  // bc of async stuff
+    }
+
+    private void LoadStringContainer(FileHash fileHash)
+    {
+        SetViewer(TagView.EViewerType.TagList);
+        var viewer = GetViewer();
+        viewer.TagListControl.LoadContent(ETagListType.Strings, fileHash, true);
+    }
+
+    // Would be nice to do something with colour formatting.
+    private void LoadStrings(FileHash fileHash)
+    {
+        var viewer = GetViewer();
+        _allTagItems = new ConcurrentBag<TagItem>();
+        LocalizedStrings localizedStrings = FileResourcer.Get().GetFile<LocalizedStrings>(fileHash);
+
+        localizedStrings.GetAllStringViews().ForEach(view =>
+        {
+            _allTagItems.Add(new TagItem
+            {
+                Name = view.RawString,
+                Hash = view.StringHash,
+                TagType = ETagListType.String
+            });
+        });
+
+        RefreshItemList();
+        SetExportFunction(ExportString, (int)ExportTypeFlag.Full);
+        viewer.ExportControl.SetExportInfo(fileHash);
+    }
+
+    private void ExportString(ExportInfo info)
+    {
+        LocalizedStrings localizedStrings = FileResourcer.Get().GetFile<LocalizedStrings>(info.Hash);
+        StringBuilder text = new();
+
+        localizedStrings.GetAllStringViews().OrderBy(x => x.RawString).ToList().ForEach(view =>
+        {
+            text.Append($"{view.StringHash} : {view.RawString} \n");
+        });
+
+        ConfigSubsystem config = ConfigSubsystem.Get();
+        string saveDirectory = config.GetExportSavePath() + $"/Strings/{info.Hash}_{info.Name}/";
+        Directory.CreateDirectory(saveDirectory);
+
+        File.WriteAllText(saveDirectory + "strings.txt", text.ToString());
+
+    }
+
     #endregion
 
     private async void TagImage_Loaded(object sender, RoutedEventArgs e)

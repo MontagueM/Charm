@@ -412,6 +412,23 @@
 
                         <Button
                             Margin="10"
+                            Click="AllStringsViewButton_OnClick"
+                            MouseEnter="CategoryButton_MouseEnter"
+                            MouseLeave="CategoryButton_MouseLeave"
+                            Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="STRINGS" Description="View and export strings." />
+                            </local:GenericTooltipProperties.TooltipData>
+                            <Border Style="{StaticResource MainMenuButton}">
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    Text="STRINGS" />
+                            </Border>
+                        </Button>
+
+                        <Button
+                            Margin="10"
                             Click="AllMaterialsViewButton_OnClick"
                             MouseEnter="CategoryButton_MouseEnter"
                             MouseLeave="CategoryButton_MouseLeave"
