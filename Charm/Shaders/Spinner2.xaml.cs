@@ -211,6 +211,7 @@ public partial class Spinner2 : UserControl, IDisposable
 
             // This will contain the output image on each render cycle, bind it to an Image control for example.
             _renderedImage = new D3DImage(96, 96);
+            D3DImageHost.Source = _renderedImage;
 
             using (var sur = _direct3D9Texture.GetSurfaceLevel(0))
             {
@@ -272,13 +273,11 @@ public partial class Spinner2 : UserControl, IDisposable
             Device.ImmediateContext.Flush();
 
             //Call Lock(),AddDirtyRect(), Unlock() in a dispatcher call if you need the screen updated with the new image.
-            Dispatcher.BeginInvoke(() =>
+            Dispatcher.InvokeAsync(() =>
             {
                 _renderedImage.Lock();
                 _renderedImage.AddDirtyRect(new Int32Rect(0, 0, _width, _height));
                 _renderedImage.Unlock();
-                if (D3DImageHost.Source is null)
-                    D3DImageHost.Source = _renderedImage;
             });
         }
         catch (Exception e)
