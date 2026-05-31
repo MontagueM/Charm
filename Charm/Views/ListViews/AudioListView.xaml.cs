@@ -142,7 +142,7 @@ public partial class AudioListView : UserControl
                 {
                     NarratorGroups.GetOrAdd(entry.Narrator, _ => new ConcurrentBag<VoicelineItem>()).Add(new()
                     {
-                        Voiceline = entry.Voiceline,
+                        Voiceline = entry.Voiceline ?? "[No Subtitle]",
                         WemHash = entry.WemHash,
                     });
                 }
@@ -224,18 +224,29 @@ public partial class AudioListView : UserControl
         sortBy.Text = "Sort By";
         sortBy.TextFontSize = 16;
         sortBy.Box.MinWidth = 175;
-        sortBy.Box.ItemsSource = new List<ComboBoxItem>()
+
+        List<ComboBoxItem> filterItems = new();
+        bool isDialogue = _loadType == AudioListViewType.Dialogue;
+        filterItems = new List<ComboBoxItem>()
         {
-            new() { Content = "Hash ↓", Tag = 5 },
-            new() { Content = "Hash ↑", Tag = 4 },
+            new() { Content = isDialogue ? "Index ↓" : "Hash ↓", Tag = 5 },
+            new() { Content = isDialogue ? "Index ↑" : "Hash ↑", Tag = 4 },
             new() { Content = "Duration ↓", Tag = 3 },
             new() { Content = "Duration ↑", Tag = 2 },
             new() { Content = "Channels ↓", Tag = 1 }
         };
-        if (sortBy.Box.SelectedIndex == -1)
+        if (isDialogue)
         {
-            sortBy.Box.SelectedIndex = 0;
+            filterItems.AddRange(new List<ComboBoxItem>()
+            {
+                new() { Content = "String ↓", Tag = 7 },
+                new() { Content = "String ↑", Tag = 6 },
+            });
         }
+
+        sortBy.Box.ItemsSource = filterItems;
+        if (sortBy.Box.SelectedIndex == -1)
+            sortBy.Box.SelectedIndex = 0;
 
         sortBy.Box.SelectionChanged += SortBy_OnSelectionChanged;
         FilterOptions.Children.Add(sortBy);
@@ -321,11 +332,15 @@ public partial class AudioListView : UserControl
             });
 
             List<AudioItem> items = displayItems.ToList();
-
+            bool isDialogue = _loadType == AudioListViewType.Dialogue;
             items = SortByIndex switch
             {
-                5 => items.OrderByDescending(x => x.Hash).ToList(),
-                4 => items.OrderBy(x => x.Hash).ToList(),
+                // Dialogue string sorting
+                7 => items.OrderByDescending(x => x.DisplayHash).ToList(),
+                6 => items.OrderBy(x => x.DisplayHash).ToList(),
+
+                5 => (isDialogue ? items.OrderByDescending(x => x.Index) : items.OrderByDescending(x => x.Hash)).ToList(),
+                4 => (isDialogue ? items.OrderBy(x => x.Index) : items.OrderBy(x => x.Hash)).ToList(),
                 3 => items.OrderByDescending(x => x.Seconds).ToList(),
                 2 => items.OrderBy(x => x.Seconds).ToList(),
                 1 => items.OrderByDescending(x => x.Channels).ToList(),
@@ -370,12 +385,44 @@ public partial class AudioListView : UserControl
             return;
 
         string searchStr = PackageList.SearchBox.Text;
+
+        bool searchVoicelines = searchStr.StartsWith(
+            "voiceline:",
+            StringComparison.InvariantCultureIgnoreCase);
+
+        string search = searchVoicelines
+            ? searchStr.Substring("voiceline:".Length).Trim()
+            : searchStr;
+
         var displayItems = new ConcurrentBag<PackageItem>();
         Parallel.ForEach(PackageList.PackageItems, pkg =>
         {
-            if (pkg.Name.Contains(searchStr, StringComparison.InvariantCultureIgnoreCase))
+            bool packageMatch = pkg.Name.Contains(search, StringComparison.InvariantCultureIgnoreCase);
+            List<VoicelineItem> searchItems = new();
+
+            if (searchVoicelines)
             {
-                displayItems.Add(pkg);
+                searchItems = pkg.DynamicItems
+                    .Cast<VoicelineItem>()
+                    .Where(x => x.Voiceline != null && x.Voiceline.Contains(search, StringComparison.InvariantCultureIgnoreCase))
+                    .ToList();
+            }
+
+            if (packageMatch || searchItems.Count > 0)
+            {
+                var filteredPackage = new PackageItem
+                {
+                    Name = pkg.Name,
+                    Count = searchVoicelines
+                    ? searchItems.Count
+                    : pkg.Count,
+                    Content = PackageItemContents.Dialogue,
+                    DynamicItems = searchVoicelines
+                    ? new(searchItems)
+                    : pkg.DynamicItems
+                };
+
+                displayItems.Add(filteredPackage);
             }
         });
 

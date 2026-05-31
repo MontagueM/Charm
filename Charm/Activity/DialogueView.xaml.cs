@@ -92,13 +92,22 @@ public partial class DialogueView : UserControl
                     if (a.StringsF is not null)
                         GlobalStrings.Get().AddStrings(a.StringsF);
 
-                    result.Add(new VoicelineItem
+                    var narrator = GlobalStrings.Get().GetString(a.Narrator);
+                    var voiceline = GlobalStrings.Get().GetString(a.VoiceLine);
+
+                    foreach (var wem in a.Dialogue.TagData.Wems)
                     {
-                        Narrator = GlobalStrings.Get().GetString(a.Narrator),
-                        Voiceline = GlobalStrings.Get().GetString(a.VoiceLine),
-                        WemHash = a.Dialogue.TagData.Wems[0].Hash,
-                        RecursionDepth = recursionDepth,
-                    });
+                        if (wem.GetReferenceHash().IsInvalid())
+                            continue;
+
+                        result.Add(new VoicelineItem
+                        {
+                            Narrator = narrator,
+                            Voiceline = voiceline,
+                            WemHash = wem.Hash,
+                            RecursionDepth = recursionDepth,
+                        });
+                    }
 
                     if (a.DialogueF is null)
                         continue;
@@ -107,30 +116,40 @@ public partial class DialogueView : UserControl
                     if (GlobalStrings.Get().GetString(a.VoiceLineF) == GlobalStrings.Get().GetString(a.VoiceLine))
                         continue;
 
-                    result.Add(new VoicelineItem
+                    var voicelineF = GlobalStrings.Get().GetString(a.VoiceLineF);
+                    foreach (var wem in a.DialogueF.TagData.Wems)
                     {
-                        Narrator = GlobalStrings.Get().GetString(a.Narrator),
-                        Voiceline = GlobalStrings.Get().GetString(a.VoiceLineF),
-                        WemHash = a.DialogueF.TagData.Wems[0].Hash,
-                        RecursionDepth = recursionDepth,
-                    });
+                        if (wem.GetReferenceHash().IsInvalid())
+                            continue;
+
+                        result.Add(new VoicelineItem
+                        {
+                            Narrator = narrator,
+                            Voiceline = voicelineF,
+                            WemHash = wem.Hash,
+                            RecursionDepth = recursionDepth,
+                        });
+                    }
                 }
                 else
                 {
                     S33978080 entry = dyn;
-                    if (entry.SoundM is null
-                        || !entry.SoundM.TagData.Wems.Any()
-                        || entry.SoundM.TagData.Wems[0].GetReferenceHash().IsInvalid())
+                    if (entry.SoundM is null || !entry.SoundM.TagData.Wems.Any())
                         continue;
 
-                    var wem = entry.SoundM.TagData.Wems[0];
-                    result.Add(new VoicelineItem
+                    foreach (var wem in entry.SoundM.TagData.Wems)
                     {
-                        Narrator = entry.GetNarratorString(),
-                        Voiceline = entry.GetVoiceline(),
-                        WemHash = wem.Hash,
-                        RecursionDepth = recursionDepth,
-                    });
+                        if (wem.GetReferenceHash().IsInvalid())
+                            continue;
+
+                        result.Add(new VoicelineItem
+                        {
+                            Narrator = entry.GetNarratorString(),
+                            Voiceline = entry.GetVoiceline(),
+                            WemHash = wem.Hash,
+                            RecursionDepth = recursionDepth,
+                        });
+                    }
                 }
             }
         }
