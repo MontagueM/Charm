@@ -34,6 +34,7 @@ public partial class AudioListView : UserControl
     private ConfigSubsystem Config = TigerInstance.GetSubsystem<ConfigSubsystem>();
 
     private ConcurrentBag<AudioItem> Sounds = new();
+    private ConcurrentDictionary<string, ConcurrentBag<VoicelineItem>> NarratorGroups = new();
 
     private int SortByIndex = 5;
     private PackageItem _currentPkg;
@@ -54,13 +55,24 @@ public partial class AudioListView : UserControl
 
         PackageList.PackageItemChecked += async (s, item) =>
         {
-            MainWindow.Progress.SetProgressStage($"Loading Audio From {item.Name}");
-            await Task.Run(() => LoadAudioList(item));
+            if (_loadType == AudioListViewType.Dialogue)
+            {
+                MainWindow.Progress.SetProgressStage($"Loading Dialogue For {item.Name}");
+                await Task.Run(() => LoadNarratorDialogue(item));
+            }
+            else
+            {
+                MainWindow.Progress.SetProgressStage($"Loading Audio From {item.Name}");
+                await Task.Run(() => LoadAudioList(item));
+            }
+
             MainWindow.Progress.CompleteStage();
         };
 
         if (_loadType == AudioListViewType.SoundBanks)
             PackageList.OnSearchBarChanged += (s, e) => RefreshSoundbankList();
+        else if (_loadType == AudioListViewType.Dialogue)
+            PackageList.OnSearchBarChanged += (s, e) => RefreshDialogueList();
     }
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
@@ -71,15 +83,91 @@ public partial class AudioListView : UserControl
 
     public async void LoadContent()
     {
-        MainWindow.Progress.SetProgressStage(_loadType == AudioListViewType.Sounds ? "Creating Audio List" : "Loading Soundbanks");
-        if (_loadType == AudioListViewType.Sounds)
-            await PackageList.MakePackageItems<Wem>();
-        else
-            await MakeSoundbanks();
+        MainWindow.Progress.SetProgressStage(
+            _loadType == AudioListViewType.Sounds
+            ? "Creating Audio List"
+            : _loadType == AudioListViewType.Dialogue
+            ? "Loading Dialogue Tables"
+            : "Loading Soundbanks");
+
+        switch (_loadType)
+        {
+            case AudioListViewType.Sounds:
+                await PackageList.MakePackageItems<Wem>();
+                break;
+            case AudioListViewType.SoundBanks:
+                await MakeSoundbanks();
+                break;
+            case AudioListViewType.Dialogue:
+                await MakeDialogueList();
+                break;
+        }
 
         MainWindow.Progress.CompleteStage();
 
         CreateFilterOptions();
+    }
+
+    private async Task MakeDialogueList()
+    {
+        if (PackageList.PackageItems != null)
+            return;
+
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        await Task.Run(() =>
+        {
+            PackageList.PackageItems = new();
+            NarratorGroups = new();
+
+            ConcurrentHashSet<FileHash> hashes = new();
+            if (Strategy.IsD1())
+            {
+                foreach (var val in PackageResourcer.Get().GetD1Activities())
+                {
+                    if (val.Value == "16068080")
+                        hashes.Add(val.Key);
+                }
+            }
+            else
+                hashes = PackageResourcer.Get().GetAllHashes<Dialogue>();
+
+            stopwatch.Stop();
+            Log.Debug($"Stage 1: Getting all Dialogue Tags took {stopwatch.Elapsed.TotalSeconds} seconds to process. ({hashes.Count})");
+            stopwatch = Stopwatch.StartNew();
+
+            Parallel.ForEach(hashes, hash =>
+            {
+                var dialogueTable = DialogueView.Load(hash);
+                foreach (var entry in dialogueTable)
+                {
+                    NarratorGroups.GetOrAdd(entry.Narrator, _ => new ConcurrentBag<VoicelineItem>()).Add(new()
+                    {
+                        Voiceline = entry.Voiceline,
+                        WemHash = entry.WemHash,
+                    });
+                }
+            });
+
+            Parallel.ForEach(NarratorGroups, group =>
+            {
+                PackageList.PackageItems.Add(new PackageItem
+                {
+                    Name = group.Key,
+                    Count = group.Value.Count,
+                    Content = PackageItemContents.Dialogue,
+                    DynamicItems = new ConcurrentBag<dynamic>(group.Value),
+                });
+            });
+
+            stopwatch.Stop();
+            Log.Debug($"Stage 2: Creating all Dialogue entries took {stopwatch.Elapsed.TotalSeconds} seconds to process. ({PackageList.PackageItems.Count})");
+            stopwatch = Stopwatch.StartNew();
+        });
+
+        RefreshDialogueList();
+
+        stopwatch.Stop();
+        Log.Debug($"Stage 3: Refreshing List took {stopwatch.Elapsed.TotalSeconds} seconds to process.");
     }
 
     private async Task MakeSoundbanks()
@@ -179,6 +267,33 @@ public partial class AudioListView : UserControl
         RefreshSoundList();
     }
 
+    private async Task LoadNarratorDialogue(PackageItem item)
+    {
+        if (Sounds.Count != 0)
+            Sounds.Clear();
+
+        _currentPkg = item;
+        await Task.Run(() => Parallel.ForEachAsync(item.DynamicItems, async (entry, ct) =>
+        {
+            VoicelineItem voiceline = entry as VoicelineItem;
+            if (voiceline.WemHash.GetReferenceHash().IsInvalid())
+                return;
+
+            AudioItem item = new()
+            {
+                Hash = voiceline.WemHash,
+                Index = voiceline.WemHash.FileIndex,
+                DisplayHash = $"{voiceline.Voiceline}",
+                DisplayID = voiceline.WemHash.GetReferenceHash(),
+            };
+            await item.LoadWEMAsync(AudioListViewType.Dialogue);
+
+            Sounds.Add(item);
+        }));
+
+        RefreshSoundList();
+    }
+
     private void RefreshSoundList()
     {
         if (Sounds == null)
@@ -198,7 +313,8 @@ public partial class AudioListView : UserControl
             {
                 if ((isHash && sound.Hash.Hash32 == parsedHash)
                 || sound.Hash.GetReferenceHash().ToString().Contains(searchStr, StringComparison.OrdinalIgnoreCase)
-                || sound.Hash.ToString().Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+                || sound.Hash.ToString().Contains(searchStr, StringComparison.OrdinalIgnoreCase)
+                || sound.DisplayHash.Contains(searchStr, StringComparison.OrdinalIgnoreCase))
                 {
                     displayItems.Add(sound);
                 }
@@ -223,6 +339,30 @@ public partial class AudioListView : UserControl
     }
 
     public void RefreshSoundbankList()
+    {
+        if (PackageList.PackageItems == null)
+            return;
+        if (PackageList.PackageItems.IsEmpty)
+            return;
+
+        string searchStr = PackageList.SearchBox.Text;
+        var displayItems = new ConcurrentBag<PackageItem>();
+        Parallel.ForEach(PackageList.PackageItems, pkg =>
+        {
+            if (pkg.Name.Contains(searchStr, StringComparison.InvariantCultureIgnoreCase))
+            {
+                displayItems.Add(pkg);
+            }
+        });
+
+        List<PackageItem> items = displayItems.OrderBy(x => x.Name).ToList();
+        Dispatcher.Invoke(() =>
+        {
+            PackageList.PackageListView.ItemsSource = items;
+        });
+    }
+
+    public void RefreshDialogueList()
     {
         if (PackageList.PackageItems == null)
             return;
@@ -571,7 +711,7 @@ public partial class AudioListView : UserControl
             }
         }
 
-        public async Task LoadWEMAsync()
+        public async Task LoadWEMAsync(AudioListViewType type = AudioListViewType.Sounds)
         {
             if (Hash == null)
                 return;
@@ -582,7 +722,8 @@ public partial class AudioListView : UserControl
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                DisplayHash = $"[{Hash}] {(wem.Channels > 2 ? "⚠" : "")}";
+                DisplayHash = type == AudioListViewType.Dialogue
+                ? $"{DisplayHash}" : $"[{Hash}] {(wem.Channels > 2 ? "⚠" : "")}";
                 DisplayID = Hash.GetReferenceHash();
                 Duration = wem.Duration;
                 Seconds = wem.Seconds;
@@ -633,6 +774,7 @@ public partial class AudioListView : UserControl
     {
         Sounds,
         SoundBanks,
+        Dialogue
     }
 }
 

@@ -48,7 +48,23 @@ public partial class DialogueView : UserControl
         ListView.ItemsSource = GenerateUIRecursive(0, dialogueTree);
     }
 
-    private ObservableCollection<VoicelineItem> GenerateUIRecursive(int recursionDepth, List<dynamic?> dialogueTree)
+    public static ObservableCollection<VoicelineItem> Load(FileHash hash)
+    {
+        List<dynamic?> result = new();
+        if (Strategy.IsD1())
+        {
+            DialogueD1 dialogueD1 = new DialogueD1(hash);
+            result = dialogueD1.Load();
+        }
+        else
+        {
+            Dialogue dialogue = FileResourcer.Get().GetFile<Dialogue>(hash, shouldCache: false);
+            result = dialogue.Load();
+        }
+        return GenerateUIRecursive(0, result);
+    }
+
+    public static ObservableCollection<VoicelineItem> GenerateUIRecursive(int recursionDepth, List<dynamic?> dialogueTree)
     {
         ObservableCollection<VoicelineItem> result = new();
         foreach (dynamic? dyn in dialogueTree)
@@ -67,7 +83,7 @@ public partial class DialogueView : UserControl
                 {
                     SAA078080 a = dyn;
 
-                    if (a.Dialogue is null)
+                    if (a.Dialogue is null || !a.Dialogue.TagData.Wems.Any())
                         continue;
 
                     if (a.Strings is not null)
@@ -80,9 +96,8 @@ public partial class DialogueView : UserControl
                     {
                         Narrator = GlobalStrings.Get().GetString(a.Narrator),
                         Voiceline = GlobalStrings.Get().GetString(a.VoiceLine),
-                        Wem = a.Dialogue.TagData.Wems[0],
+                        WemHash = a.Dialogue.TagData.Wems[0].Hash,
                         RecursionDepth = recursionDepth,
-                        Duration = a.Dialogue.TagData.Wems[0].Duration
                     });
 
                     if (a.DialogueF is null)
@@ -96,31 +111,32 @@ public partial class DialogueView : UserControl
                     {
                         Narrator = GlobalStrings.Get().GetString(a.Narrator),
                         Voiceline = GlobalStrings.Get().GetString(a.VoiceLineF),
-                        Wem = a.DialogueF.TagData.Wems[0],
+                        WemHash = a.DialogueF.TagData.Wems[0].Hash,
                         RecursionDepth = recursionDepth,
-                        Duration = a.DialogueF.TagData.Wems[0].Duration
                     });
                 }
                 else
                 {
                     S33978080 entry = dyn;
-                    if (entry.SoundM is null || entry.SoundM.TagData.Wems[0].GetReferenceHash().IsInvalid())
+                    if (entry.SoundM is null
+                        || !entry.SoundM.TagData.Wems.Any()
+                        || entry.SoundM.TagData.Wems[0].GetReferenceHash().IsInvalid())
                         continue;
 
+                    var wem = entry.SoundM.TagData.Wems[0];
                     result.Add(new VoicelineItem
                     {
-                        Narrator = GlobalStrings.Get().GetString(entry.NarratorString),
+                        Narrator = entry.GetNarratorString(),
                         Voiceline = entry.GetVoiceline(),
-                        Wem = entry.SoundM.TagData.Wems[0],
+                        WemHash = wem.Hash,
                         RecursionDepth = recursionDepth,
-                        Duration = entry.SoundM.TagData.Wems[0].Duration
                     });
                 }
             }
         }
 
         // Filter out duplicates
-        return new ObservableCollection<VoicelineItem>(result.GroupBy(x => x.Wem.Hash)
+        return new ObservableCollection<VoicelineItem>(result.GroupBy(x => x.WemHash)
                                                       .Select(group => group.First()));
     }
 
@@ -128,7 +144,7 @@ public partial class DialogueView : UserControl
     {
         VoicelineItem item = (VoicelineItem)(sender as Button).DataContext;
         _activeItem = item;
-        MusicPlayer.SetWem(item.Wem);
+        MusicPlayer.SetWem(FileResourcer.Get().GetFile<Wem>(item.WemHash));
         MusicPlayer.Play();
 
         if (_viewer is not null)
@@ -177,11 +193,9 @@ public class VoicelineItem
 
     public string Voiceline { get; set; }
 
-    public Wem Wem { get; set; }
+    public FileHash WemHash { get; set; }
 
     public int RecursionDepth { get; set; }
-
-    public string Duration { get; set; }
 
     public Thickness Padding  // todo make this work nicely
     {

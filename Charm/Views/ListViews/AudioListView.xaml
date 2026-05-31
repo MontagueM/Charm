@@ -15,7 +15,7 @@
         <DataTemplate x:Key="AudioTemplate">
             <RadioButton
                 Width="550"
-                MaxHeight="128"
+                MinHeight="110"
                 Margin="0,0,0,0"
                 HorizontalAlignment="Left"
                 local:StyleHelper.BorderThickness="1"
@@ -38,13 +38,14 @@
 
                         <StackPanel Orientation="Vertical">
                             <TextBlock
-                                Margin="0"
+                                Margin="0,0,50,0"
                                 HorizontalAlignment="Left"
                                 d:FontFamily="Haas Grot Text 55 Roman"
                                 FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                                 FontSize="16"
                                 Foreground="{StaticResource ForegroundColour70}"
-                                Text="{Binding DisplayHash}" />
+                                Text="{Binding DisplayHash}"
+                                TextWrapping="WrapWithOverflow" />
 
                             <TextBlock
                                 Margin="0"
@@ -189,7 +190,7 @@
 
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <wrap:VirtualizingWrapPanel HorizontalAlignment="Left" Orientation="Horizontal" />
+                            <VirtualizingStackPanel HorizontalAlignment="Left" Orientation="Vertical" />
                         </ItemsPanelTemplate>
                     </ListView.ItemsPanel>
                 </ListView>

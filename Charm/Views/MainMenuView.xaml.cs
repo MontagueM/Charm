@@ -152,6 +152,14 @@ public partial class MainMenuView : UserControl
         _mainWindow.SetNewestTabSelected();
     }
 
+    private void AllDialogueViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        AudioListView audioListView = new(AudioListView.AudioListViewType.Dialogue);
+        audioListView.LoadContent();
+        _mainWindow.MakeNewTab("Dialogue", audioListView);
+        _mainWindow.SetNewestTabSelected();
+    }
+
     private void AllTexturesView2Button_OnClick(object sender, RoutedEventArgs e)
     {
         TextureListView textureListView = new();

@@ -350,6 +350,24 @@
                             </Border>
                         </Button>
 
+                        <Button
+                            x:Name="DialogueListButton"
+                            Margin="10"
+                            Click="AllDialogueViewButton_OnClick"
+                            MouseEnter="CategoryButton_MouseEnter"
+                            MouseLeave="CategoryButton_MouseLeave"
+                            Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="DIALOGUE" Description="View and export activity dialogue, grouped by narrator." />
+                            </local:GenericTooltipProperties.TooltipData>
+                            <Border Style="{StaticResource MainMenuButton}">
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    Text="DIALOGUE" />
+                            </Border>
+                        </Button>
+
                         <Grid Margin="10" />
                     </StackPanel>
 

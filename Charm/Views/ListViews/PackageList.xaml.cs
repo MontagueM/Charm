@@ -132,6 +132,12 @@ public partial class PackageList : UserControl
 
         if (btn.DataContext is PackageItem item)
         {
+            if (item.Content == PackageItemContents.Dialogue)
+            {
+                PackageItemChecked?.Invoke(this, item);
+                return;
+            }
+
             Package pkg = PackageResourcer.Get().GetPackage((ushort)item.ID);
             if (item.Hashes.Count != 0 && item.Hashes.First().IsRedacted)
             {
@@ -171,6 +177,7 @@ public partial class PackageList : UserControl
         public int ID { get; set; }
         public int Count { get; set; }
         public ConcurrentHashSet<FileHash> Hashes { get; set; }
+        public ConcurrentBag<dynamic> DynamicItems { get; set; }
         public bool IsSelected { get; set; } = false;
         public PackageItemContents Content { get; set; }
     }
@@ -184,6 +191,7 @@ public partial class PackageList : UserControl
         Sounds,
         Entities,
         Statics,
+        Dialogue,
     }
 }
 

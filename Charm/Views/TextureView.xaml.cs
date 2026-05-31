@@ -45,6 +45,7 @@ public partial class TextureView : UserControl
         TextureDisplayData data = new()
         {
             Hash = textureHeader.Hash,
+            Reference = textureHeader.GetReferenceHash(),
             Image = bitmapImage,
             Dimensions = $"{textureHeader.GetDimension().GetEnumDescription()}: {textureHeader.TagData.Width}x{textureHeader.TagData.Height}x{textureHeader.TagData.Depth}",
             Format = $"{textureHeader.TagData.GetFormat().ToString()} ({(textureHeader.IsSrgb() ? "Srgb" : "Linear")})",
@@ -116,6 +117,7 @@ public partial class TextureView : UserControl
     public struct TextureDisplayData
     {
         public FileHash Hash { get; set; }
+        public FileHash Reference { get; set; }
         public ImageSource Image { get; set; }
         public string Dimensions { get; set; }
         public string Format { get; set; }

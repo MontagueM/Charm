@@ -55,8 +55,15 @@
                                 FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                                 FontSize="20"
                                 IsHitTestVisible="False"
-                                Text="{Binding Hash}"
-                                TextAlignment="Center" />
+                                TextAlignment="Center">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0} (Ref: {1})">
+                                        <Binding Path="Hash" />
+                                        <Binding Path="Reference" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+
                             <TextBlock
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"

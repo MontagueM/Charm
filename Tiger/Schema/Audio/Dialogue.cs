@@ -1,4 +1,5 @@
-﻿using Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
+﻿using Arithmic;
+using Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
 using Tiger.Schema.Entity;
 
 namespace Tiger.Schema.Audio;
@@ -17,22 +18,23 @@ public class Dialogue : Tag<SDialogueTable>
     public List<dynamic?> Load()
     {
         List<dynamic?> result = new();
+        using TigerReader reader = GetReader();
         foreach (S29978080 entry1 in _tag.Unk18)
         {
             foreach (S29978080 u in _tag.Unk18)
             {
-                dynamic? entry = u.Unk08.GetValue(GetReader());
+                dynamic? entry = u.Unk08.GetValue(reader);
                 switch (entry)
                 {
                     case S2D978080:
-                        List<dynamic?> res2d = Collapse2D97(entry);
+                        List<dynamic?> res2d = Collapse2D97(entry, reader);
                         if (res2d.Count > 0)
                         {
                             result.Add(res2d.Count > 1 ? res2d : res2d[0]);
                         }
                         break;
                     case S2A978080:
-                        List<dynamic?> res2a = Collapse2A97(entry);
+                        List<dynamic?> res2a = Collapse2A97(entry, reader);
                         if (res2a.Count > 0)
                         {
                             result.Add(res2a.Count > 1 ? res2a : res2a[0]);
@@ -42,7 +44,7 @@ public class Dialogue : Tag<SDialogueTable>
                         result.Add(entry);
                         break;
                     case S1D8D8080: // Shadowkeep
-                        List<dynamic?> res1d = Collapse1D8D(entry);
+                        List<dynamic?> res1d = Collapse1D8D(entry, reader);
                         if (res1d.Count > 0)
                         {
                             result.Add(res1d.Count > 1 ? res1d : res1d[0]);
@@ -56,15 +58,15 @@ public class Dialogue : Tag<SDialogueTable>
         return result;
     }
 
-    private List<dynamic?> Collapse2D97(S2D978080 entry)
+    private List<dynamic?> Collapse2D97(S2D978080 entry, TigerReader reader)
     {
         List<dynamic?> sounds = new();
-        foreach (dynamic? e in entry.Unk20.Select(u => u.Unk20.GetValue(GetReader())))
+        foreach (dynamic? e in entry.Unk20.Select(u => u.Unk20.GetValue(reader)))
         {
             switch (e)
             {
                 case S2A978080:
-                    List<dynamic?> result = Collapse2A97(e);
+                    List<dynamic?> result = Collapse2A97(e, reader);
                     if (result.Count > 0)
                     {
                         sounds.Add(result.Count > 1 ? result : result[0]);
@@ -73,34 +75,37 @@ public class Dialogue : Tag<SDialogueTable>
                 case S33978080:
                     sounds.Add(e);
                     break;
+                case S8080B6CE:
+                    break;
                 default:
-                    Console.WriteLine($"{Hash}");
-                    throw new NotImplementedException();
+                    Log.Debug($"Unknown Dialogue Table Unk20 in {Hash}!");
+                    break;
+                    //throw new NotImplementedException();
             }
         }
 
         return sounds;
     }
 
-    private List<dynamic?> Collapse2A97(S2A978080 entry)
+    private List<dynamic?> Collapse2A97(S2A978080 entry, TigerReader reader)
     {
         List<dynamic?> sounds = new();
 
         // todo GetReader() here is wrong
         // todo do a performance comparison of using the manual GetReader vs loading automatically and ignoring it
-        foreach (dynamic? e in entry.Unk28.Select(u => u.Unk40.GetValue(GetReader())))
+        foreach (dynamic? e in entry.Unk28.Select(u => u.Unk40.GetValue(reader)))
         {
             switch (e)
             {
                 case S2A978080:
-                    List<dynamic?> result = Collapse2A97(e);
+                    List<dynamic?> result = Collapse2A97(e, reader);
                     if (result.Count > 0)
                     {
                         sounds.Add(result.Count > 1 ? result : result[0]);
                     }
                     break;
                 case S2D978080:
-                    List<dynamic?> result2 = Collapse2D97(e);
+                    List<dynamic?> result2 = Collapse2D97(e, reader);
                     if (result2.Count > 0)
                     {
                         sounds.Add(result2.Count > 1 ? result2 : result2[0]);
@@ -110,13 +115,16 @@ public class Dialogue : Tag<SDialogueTable>
                     sounds.Add(e);
                     break;
                 case S1D8D8080: // Shadowkeep
-                    List<dynamic?> result3 = Collapse1D8D(e);
+                    List<dynamic?> result3 = Collapse1D8D(e, reader);
                     if (result3.Count > 0)
                     {
                         sounds.Add(result3.Count > 1 ? result3 : result3[0]);
                     }
                     break;
+                case S8080B6CE:
+                    break;
                 default:
+                    Log.Debug($"Unknown Dialogue Table Unk28 in {Hash}!");
                     throw new NotImplementedException();
             }
         }
@@ -124,15 +132,15 @@ public class Dialogue : Tag<SDialogueTable>
         return sounds;
     }
 
-    private List<dynamic?> Collapse1D8D(S1D8D8080 entry)
+    private List<dynamic?> Collapse1D8D(S1D8D8080 entry, TigerReader reader)
     {
         List<dynamic?> sounds = new();
-        foreach (dynamic? e in entry.Unk18.Select(u => u.Pointer.GetValue(GetReader())))
+        foreach (dynamic? e in entry.Unk18.Select(u => u.Pointer.GetValue(reader)))
         {
             switch (e)
             {
                 case S2A978080:
-                    List<dynamic?> result = Collapse2A97(e);
+                    List<dynamic?> result = Collapse2A97(e, reader);
                     if (result.Count > 0)
                     {
                         sounds.Add(result.Count > 1 ? result : result[0]);
@@ -140,6 +148,8 @@ public class Dialogue : Tag<SDialogueTable>
                     break;
                 case S33978080:
                     sounds.Add(e);
+                    break;
+                case S8080B6CE:
                     break;
                 default:
                     throw new NotImplementedException();

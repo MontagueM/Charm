@@ -102,6 +102,10 @@ public struct S33978080
     [SchemaField(0x94, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public StringHash NarratorString;
 
+    [SchemaField(0x3C, TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    [SchemaField(0x88, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
+    [SchemaField(0x98, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    public StringHash NarratorString2;
 
     public string GetVoiceline()
     {
@@ -109,6 +113,19 @@ public struct S33978080
             return VoicelineM_BL.Value.ToString();
         else
             return VoicelineM.Value.ToString();
+    }
+
+    public string GetNarratorString()
+    {
+        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_LIGHTFALL_7366)
+        {
+            if (NarratorString2.IsInvalid() || !GlobalStrings.Get().CheckString(NarratorString2))
+                return GlobalStrings.Get().GetString(NarratorString);
+            else
+                return GlobalStrings.Get().GetString(NarratorString2);
+        }
+
+        return GlobalStrings.Get().GetString(NarratorString);
     }
 }
 
@@ -216,6 +233,13 @@ public struct S208D8080
     public ResourcePointer Pointer; // 238D8080, 1A8D8080
 }
 
+// I think this is used for the interactive text popups introduced in EoF
+// Idk why they are in dialogue tables though
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "CEB68080", 0x64)]
+public struct S8080B6CE
+{
+
+}
 
 
 
