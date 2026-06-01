@@ -44,7 +44,7 @@
         <DataTemplate x:Key="EntityTemplate">
             <RadioButton
                 Width="500"
-                MaxHeight="128"
+                MinHeight="110"
                 Margin="0,0,0,0"
                 HorizontalAlignment="Left"
                 local:StyleHelper.BorderThickness="1"
@@ -53,51 +53,127 @@
                 Loaded="Tag_Loaded"
                 Style="{DynamicResource D2StyleRadioButton}"
                 Unloaded="Tag_Unloaded">
-                <Border Background="{StaticResource BackgroundColour14a}">
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel Margin="5" Orientation="Vertical">
+                <Border VerticalAlignment="Center" Background="{StaticResource BackgroundColour14a}">
+                    <Grid Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            Grid.Row="0"
+                            Margin="0,0,200,10"
+                            HorizontalAlignment="Left"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="18"
+                            Foreground="{StaticResource ForegroundColour70}"
+                            Text="{Binding DisplayName}"
+                            TextWrapping="Wrap" />
+
+                        <TextBlock
+                            Grid.Row="1"
+                            Margin="0"
+                            HorizontalAlignment="Left"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="16"
+                            Foreground="{StaticResource ForegroundColour70}"
+                            Text="{Binding Hash}" />
+
+                        <TextBlock
+                            Grid.Row="2"
+                            Margin="0"
+                            HorizontalAlignment="Left"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="16"
+                            Foreground="{StaticResource ForegroundColour70}">
+                            <Run Text="Resources: " />
+                            <Run Text="{Binding ResourceCount}" />
+                        </TextBlock>
+
+                        <TextBlock
+                            Grid.Row="3"
+                            Margin="0"
+                            HorizontalAlignment="Left"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="16"
+                            Foreground="{StaticResource ForegroundColour70}">
+                            <Run Text="Has Skeleton: " />
+                            <Run Text="{Binding HasSkeleton}" />
+                        </TextBlock>
+
+                        <TextBlock
+                            Grid.Row="0"
+                            Margin="0,0,0,0"
+                            HorizontalAlignment="Right"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="14"
+                            Foreground="{StaticResource ForegroundColour50}"
+                            Text="{Binding BudgetSetName}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding BudgetSetName}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <Viewbox
+                            Grid.Row="4"
+                            Margin="0,5,10,5"
+                            HorizontalAlignment="Left"
+                            StretchDirection="DownOnly">
                             <TextBlock
-                                Margin="0,0,0,10"
+                                Margin="0,0,0,0"
                                 HorizontalAlignment="Left"
                                 d:FontFamily="Haas Grot Text 55 Roman"
                                 FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                FontSize="18"
-                                Foreground="{StaticResource ForegroundColour70}"
-                                Text="{Binding DisplayName}" />
+                                FontSize="14"
+                                Foreground="{StaticResource ForegroundColour50}"
+                                Text="{Binding TagPath}" />
+                            <Viewbox.Style>
+                                <Style TargetType="Viewbox">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding TagPath}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Viewbox.Style>
+                        </Viewbox>
 
-                            <TextBlock
-                                Margin="0"
-                                HorizontalAlignment="Left"
-                                d:FontFamily="Haas Grot Text 55 Roman"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                FontSize="16"
-                                Foreground="{StaticResource ForegroundColour70}"
-                                Text="{Binding Hash}" />
+                        <TextBlock
+                            Grid.Row="5"
+                            Margin="0,0,10,0"
+                            HorizontalAlignment="Left"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="14"
+                            Foreground="{StaticResource ForegroundColour50}"
+                            Text="{Binding TagNote}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding TagNote}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
 
-                            <TextBlock
-                                Margin="0"
-                                HorizontalAlignment="Left"
-                                d:FontFamily="Haas Grot Text 55 Roman"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                FontSize="16"
-                                Foreground="{StaticResource ForegroundColour70}">
-                                <Run Text="Resources: " />
-                                <Run Text="{Binding ResourceCount}" />
-                            </TextBlock>
-
-                            <TextBlock
-                                Margin="0"
-                                HorizontalAlignment="Left"
-                                d:FontFamily="Haas Grot Text 55 Roman"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                FontSize="16"
-                                Foreground="{StaticResource ForegroundColour70}">
-                                <Run Text="Has Skeleton: " />
-                                <Run Text="{Binding HasSkeleton}" />
-                            </TextBlock>
-                        </StackPanel>
-                    </StackPanel>
-
+                    </Grid>
                 </Border>
             </RadioButton>
         </DataTemplate>
@@ -195,7 +271,7 @@
 
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <wrap:VirtualizingWrapPanel HorizontalAlignment="Left" Orientation="Horizontal" />
+                            <VirtualizingStackPanel HorizontalAlignment="Left" Orientation="Vertical" />
                         </ItemsPanelTemplate>
                     </ListView.ItemsPanel>
                 </ListView>

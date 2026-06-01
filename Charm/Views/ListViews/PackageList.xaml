@@ -28,7 +28,8 @@
                         FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                         FontSize="18"
                         Foreground="{StaticResource ForegroundColour100}"
-                        Text="{Binding Name}">
+                        Text="{Binding Name}"
+                        TextWrapping="WrapWithOverflow">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Style.Triggers>
@@ -45,31 +46,83 @@
                         </TextBlock.Style>
                     </TextBlock>
 
-                    <TextBlock
-                        Margin="15,5,15,10"
-                        HorizontalAlignment="Left"
-                        d:FontFamily="Haas Grot Text 55 Roman"
-                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                        FontSize="16"
-                        Foreground="{StaticResource ForegroundColour70}">
-                        <Run Text="{Binding Content}" />
-                        <Run Text=": " />
-                        <Run Text="{Binding Count}" />
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Style.Triggers>
-                                    <!--  Trigger when IsSelected (IsChecked) is false  -->
-                                    <DataTrigger Binding="{Binding IsSelected}" Value="False">
-                                        <Setter Property="Opacity" Value="0.75" />
-                                    </DataTrigger>
-                                    <!--  Trigger when IsSelected (IsChecked) is true  -->
-                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                        <Setter Property="Opacity" Value="1.0" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
+                    <Grid Margin="15,5,5,10">
+                        <!--  dumb but oh well  -->
+                        <TextBlock
+                            HorizontalAlignment="Left"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="16"
+                            Foreground="{StaticResource ForegroundColour70}"
+                            Text="Named Bag">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsSelected}" Value="False">
+                                            <Setter Property="Opacity" Value="0.75" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="Opacity" Value="1.0" />
+                                        </DataTrigger>
+
+                                        <DataTrigger Binding="{Binding Content}" Value="NamedBag">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <TextBlock
+                            HorizontalAlignment="Left"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="16"
+                            Foreground="{StaticResource ForegroundColour70}">
+                            <Run Text="{Binding Content}" />
+                            <Run Text=": " />
+                            <Run Text="{Binding Count}" />
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsSelected}" Value="False">
+                                            <Setter Property="Opacity" Value="0.75" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="Opacity" Value="1.0" />
+                                        </DataTrigger>
+
+                                        <DataTrigger Binding="{Binding Content}" Value="NamedBag">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <TextBlock
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="15"
+                            Foreground="{StaticResource ForegroundColour50}">
+                            <Run Text="[" />
+                            <Run Text="{Binding DisplayHash}" />
+                            <Run Text="]" />
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DisplayHash}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+
                 </StackPanel>
 
             </RadioButton>

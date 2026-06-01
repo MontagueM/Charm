@@ -94,9 +94,11 @@ public partial class MainMenuView : UserControl
 
     private void NamedEntitiesBagsViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        TagListViewerView tagListView = new();
-        tagListView.LoadContent(ETagListType.DestinationGlobalTagBagList);
-        _mainWindow.MakeNewTab("Destination Global Tag Bag", tagListView);
+        //TagListViewerView tagListView = new();
+        //tagListView.LoadContent(ETagListType.DestinationGlobalTagBagList);
+        EntityListView namedBagsView = new(EntityListView.EntityListViewType.NamedBags);
+        namedBagsView.LoadContent();
+        _mainWindow.MakeNewTab("Destination Global Tag Bags", namedBagsView);
         _mainWindow.SetNewestTabSelected();
     }
 

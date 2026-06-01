@@ -97,7 +97,8 @@ public partial class PackageList : UserControl
                     ID = pkg.ID,
                     Count = hashes.Count(),
                     Hashes = new(hashes),
-                    Content = pkg.Content
+                    Content = pkg.Content,
+                    DisplayHash = pkg.DisplayHash
                 });
             }
             else if (pkg.Name.Contains(searchStr, StringComparison.OrdinalIgnoreCase))
@@ -113,7 +114,8 @@ public partial class PackageList : UserControl
                     ID = pkg.ID,
                     Count = hashes.Count(),
                     Hashes = new(hashes),
-                    Content = pkg.Content
+                    Content = pkg.Content,
+                    DisplayHash = pkg.DisplayHash
                 });
             }
         });
@@ -180,6 +182,7 @@ public partial class PackageList : UserControl
         public ConcurrentBag<dynamic> DynamicItems { get; set; }
         public bool IsSelected { get; set; } = false;
         public PackageItemContents Content { get; set; }
+        public string DisplayHash { get; set; }
     }
 
     /// <summary>
@@ -192,6 +195,7 @@ public partial class PackageList : UserControl
         Entities,
         Statics,
         Dialogue,
+        NamedBag,
     }
 }
 

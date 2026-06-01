@@ -627,11 +627,24 @@ public struct SB67E8080
 
 #region Named Bags
 
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "1D478080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "20978080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "1D478080", 0x18)]
 public struct S1D478080
 {
     public long FileSize;
+
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<SD3598080> DestinationGlobalTagBags;
+
+    // Below only for Beyond Light
+    [SchemaField(0x8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public StringPointer DestinationGlobalTagBagNameBL;
+
+    [SchemaField(0x10, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public Tag<S30898080> DestinationGlobalTagBagBL;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "D3598080", 0x10)]

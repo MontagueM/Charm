@@ -33,19 +33,24 @@ public partial class EntityListView : UserControl
 
     private IRenderer Renderer = null;
     private EntityView RendererBasic = null;
+    private EntityListViewType _loadType = EntityListViewType.Entities;
 
-    public EntityListView()
+    public EntityListView(EntityListViewType loadType = EntityListViewType.Entities)
     {
         InitializeComponent();
 #if DEBUG
         // I can't be asked to fix these seemingly harmless but lag inducing xaml binding errors
         PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
 #endif
+        _loadType = loadType;
 
         PackageList.OnSearchBarChanged += (s, e) => RefreshPackageListCustom();
         PackageList.PackageItemChecked += async (s, item) =>
         {
-            await LoadEntityList(item);
+            if (_loadType == EntityListViewType.Entities)
+                await LoadEntityList(item);
+            else
+                await LoadNamedBag(item);
         };
 
         if (IRenderer.CanUseRenderer())
@@ -67,6 +72,16 @@ public partial class EntityListView : UserControl
 
     public async void LoadContent()
     {
+        if (_loadType == EntityListViewType.Entities)
+            CreateEntityList();
+        else
+            await CreateNamedBagsList();
+
+        CreateFilterOptions();
+    }
+
+    private async void CreateEntityList()
+    {
         HideBasicRenderer();
         MainWindow.Progress.SetProgressStages(new List<string>
         {
@@ -83,8 +98,6 @@ public partial class EntityListView : UserControl
         await PackageList.MakePackageItems<Entity>();
         await CleanPackageList();
         MainWindow.Progress.CompleteStage();
-
-        CreateFilterOptions();
     }
 
     private async Task CleanPackageList()
@@ -159,7 +172,7 @@ public partial class EntityListView : UserControl
     {
         await Task.Run(() =>
         {
-            Dispatcher.Invoke(() => ShowBasicRenderer());
+            Dispatcher.Invoke(() => HideBasicRenderer());
             MainWindow.Progress.SetProgressStages(new List<string>
             {
                 "Loading Entities."
@@ -209,10 +222,204 @@ public partial class EntityListView : UserControl
             });
 
             MainWindow.Progress.CompleteStage();
+            Dispatcher.Invoke(() => ShowBasicRenderer());
         });
 
         RefreshEntityList();
     }
+
+    #region Named Bags
+    private async Task CreateNamedBagsList()
+    {
+        if (PackageList.PackageItems != null)
+            return;
+
+        HideBasicRenderer();
+        MainWindow.Progress.SetProgressStages(new List<string>
+        {
+            "Creating Named Bags List.",
+        });
+
+        await Task.Run(() =>
+        {
+            PackageList.PackageItems = new();
+            if (Strategy.IsPreBL())
+            {
+                ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S30898080>();
+                Parallel.ForEach(vals, val =>
+                {
+                    Tag<S30898080> bag = FileResourcer.Get().GetSchemaTag<S30898080>(val);
+                    if (bag.TagData.Entries.Count == 0)
+                        return;
+
+                    PackageList.PackageItems.Add(new PackageItem
+                    {
+                        Name = bag.Hash,
+                        ID = bag.Hash.PackageId,
+                        Count = bag.TagData.Entries.Count,
+                        Hashes = new() { val },
+                        Content = PackageItemContents.NamedBag,
+                        DisplayHash = val
+                    });
+                });
+            }
+            else
+            {
+                ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S1D478080>();
+                Parallel.ForEach(vals, val =>
+                {
+                    Tag<S1D478080> dgtbParent = FileResourcer.Get().GetSchemaTag<S1D478080>(val);
+
+                    if (Strategy.IsBL())
+                    {
+                        if (dgtbParent.TagData.DestinationGlobalTagBagBL is not null)
+                        {
+                            var bag = dgtbParent.TagData.DestinationGlobalTagBagBL;
+                            string fullPath = dgtbParent.TagData.DestinationGlobalTagBagNameBL ?? "";
+                            string name = string.IsNullOrEmpty(fullPath)
+                                    ? $"{bag.Hash}"
+                                    : Path.GetFileNameWithoutExtension(fullPath).Split(".")[0];
+                            PackageList.PackageItems.Add(new PackageItem
+                            {
+                                Name = name,
+                                ID = bag.Hash.PackageId,
+                                Hashes = new() { bag.Hash },
+                                Content = PackageItemContents.NamedBag,
+                                DisplayHash = bag.Hash
+                            });
+                        }
+                    }
+                    else
+                    {
+                        if (dgtbParent.TagData.DestinationGlobalTagBags.Count == 0)
+                            return;
+
+                        foreach (SD3598080 bag in dgtbParent.TagData.DestinationGlobalTagBags)
+                        {
+                            if (!bag.DestinationGlobalTagBag.IsValid())
+                                continue;
+
+                            string name = bag.DestinationGlobalTagBagName;
+                            PackageList.PackageItems.Add(new PackageItem
+                            {
+                                Name = name,
+                                ID = bag.DestinationGlobalTagBag.PackageId,
+                                Hashes = new() { bag.DestinationGlobalTagBag },
+                                Content = PackageItemContents.NamedBag,
+                                DisplayHash = bag.DestinationGlobalTagBag
+                            });
+                        }
+                    }
+
+                });
+            }
+        });
+
+        PackageList.RefreshPackageList();
+        MainWindow.Progress.CompleteStage();
+    }
+
+    private async Task LoadNamedBag(PackageItem item)
+    {
+        await Task.Run(() =>
+        {
+            Dispatcher.Invoke(HideBasicRenderer);
+            MainWindow.Progress.SetProgressStages(new List<string> { $"Loading {item.Name}" });
+
+            Entities.Clear();
+
+            Parallel.ForEach(item.Hashes, hash =>
+            {
+                var tagBag = FileResourcer.Get().GetSchemaTag<S30898080>(hash);
+                foreach (var val in tagBag.TagData.Entries)
+                {
+                    FileHash reference = val.Tag?.Hash.GetReferenceHash() ?? null;
+                    if (reference is null || reference.IsInvalid())
+                        continue;
+
+                    switch (reference.Hash32)
+                    {
+                        case 0x808099D1 when Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                        case 0x8080987E when Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402:
+                            LoadBudgetSetEntities(val);
+                            break;
+
+                        case 0x80809C0F when Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                        case 0x80809AD8 when Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402:
+                            TryAddEntity(val.Tag.Hash, val.TagPath ?? "", tagNote: val.TagNote ?? "");
+                            break;
+                    }
+                }
+            });
+
+            MainWindow.Progress.CompleteStage();
+            Dispatcher.Invoke(ShowBasicRenderer);
+        });
+
+        RefreshEntityList();
+    }
+
+    private void LoadBudgetSetEntities(S33898080 entry)
+    {
+        var budgetSetHeader = FileResourcer.Get().GetSchemaTag<S7E988080>(entry.Tag.Hash);
+        var budgetSet = FileResourcer.Get().GetSchemaTag<SED9E8080>(budgetSetHeader.TagData.Bag.Hash);
+
+        foreach (var val in budgetSet.TagData.Unk28)
+        {
+            FileHash reference = val.Tag?.Hash.GetReferenceHash() ?? null;
+            if (reference is null || reference.IsInvalid())
+                continue;
+
+            bool isEntityHash =
+                (reference.Hash32 == 0x80809C0F && Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) ||
+                (reference.Hash32 == 0x80809AD8 && Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402);
+
+            if (!isEntityHash) continue;
+
+            string parentPath = val.TagPath.Value ?? "";
+            string tagPath = string.IsNullOrEmpty(parentPath)
+                ? ""
+                : parentPath[..(parentPath.LastIndexOf('\\') + 1)];
+
+            string budgetSetName = string.IsNullOrEmpty(entry.TagPath)
+                ? ""
+                : $"[{entry.TagPath.Value.Split("\\").Last().Split(".")[0]}]";
+
+            TryAddEntity(val.Tag.Hash, val.TagPath ?? "", tagPath, budgetSetName, entry.TagNote ?? "");
+        }
+    }
+
+    private void TryAddEntity(FileHash hash,
+        string fullPath,
+        string tagPath = "",
+        string budgetSetName = "",
+        string tagNote = "")
+    {
+        if (hash.GetReferenceHash().IsInvalid()) return;
+
+        string name = string.IsNullOrEmpty(fullPath)
+            ? ""
+            : Path.GetFileNameWithoutExtension(fullPath).Split(".")[0];
+
+        if (string.IsNullOrEmpty(tagPath))
+            tagPath = string.IsNullOrEmpty(fullPath)
+                ? ""
+                : fullPath[..(fullPath.LastIndexOf('\\') + 1)];
+
+        var entity = FileResourcer.Get().GetFile<Entity>(hash);
+        Entities.Add(new()
+        {
+            Hash = hash,
+            HasGeometry = entity.HasGeometry(),
+            DisplayName = name,
+            ResourceCount = entity.Components.Count(),
+            HasSkeleton = entity.Skeleton != null,
+            TagPath = tagPath ?? "",
+            BudgetSetName = budgetSetName ?? "",
+            TagNote = tagNote ?? ""
+        });
+    }
+    #endregion
 
     private void RefreshEntityList()
     {
@@ -516,6 +723,8 @@ public partial class EntityListView : UserControl
         public int ResourceCount { get; set; } = 0;
         public bool HasSkeleton { get; set; } = false;
 
+        public bool HasGeometry { get; set; } = true;
+
         private string _displayName;
         public string DisplayName
         {
@@ -526,6 +735,10 @@ public partial class EntityListView : UserControl
                 OnPropertyChanged(nameof(DisplayName));
             }
         }
+
+        public string BudgetSetName { get; set; } = "";
+        public string TagPath { get; set; } = "";
+        public string TagNote { get; set; } = "";
     }
 
     private async Task<ConcurrentDictionary<string, List<string>>> TryGetEntityNames()
@@ -787,5 +1000,11 @@ public partial class EntityListView : UserControl
 
         HelixModelView HelixMV = (HelixModelView)RendererBasic.ModelView.UCModelView.Resources["HelixMV"];
         HelixMV.Dispose();
+    }
+
+    public enum EntityListViewType
+    {
+        Entities,
+        NamedBags
     }
 }
