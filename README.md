@@ -6,6 +6,7 @@ It supports many versions of Destiny 2 and it's main focus is on the games 3D mo
 
 > [!CAUTION]
 > # Disclaimer
+> Although Destiny 2 may be at it's end of live service, the following still apply:
 > * Before you go any further, understand that Charm ***IS NOT a datamining tool!!***
 > * While it can access many things in the game files, it's main purpose is focused towards **3D artists, content preservation and learning how the game works**!
 > * Please ***DO NOT*** use this tool to spread leaks and spoilers or anything that may break Bungie's TOS. Don't ruin the experience for yourself and others. Uncover things the way they were intended!
@@ -26,7 +27,7 @@ Charm currently supports:
 | 6.3.0.7 | Witch Queen last update  | DepotDownloader | 6051526863119423207 | 1078048403901153652  |
 | 7.3.6.6 | Lightfall last update    | DepotDownloader | 7707143404100984016 | 5226038440689554798  |
 | 8.2.6.4 | The Final Shape last update | DepotDownloader | 3593201409625956155 | 6975584800172104419 |
-| 9.5.0.1+     | Renegades (Latest)      | Steam           | N/A                 | N/A                  |
+| 9.5.0.1+     | Monument of Triumph (Latest)      | Steam           | N/A                 | N/A                  |
 
 If you just want to look at the latest release, you only need Destiny 2 downloaded on Steam, Epic Games, or the Windows Store
 
