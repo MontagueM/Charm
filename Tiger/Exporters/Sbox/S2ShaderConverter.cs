@@ -261,8 +261,8 @@ PS
             switch (op.op)
             {
                 case TfxBytecode.PushGlobalChannelVector:
-                    var channelData = (PushGlobalChannelVectorData)op.data;
-                    byte channelIndex = channelData.Index;
+                    var channelData = (TfxData1Byte)op.data;
+                    byte channelIndex = channelData.value;
                     ids.Add(channelIndex);
                     break;
             }
@@ -274,8 +274,8 @@ PS
             switch (op.op)
             {
                 case TfxBytecode.PushGlobalChannelVector:
-                    var channelData = (PushGlobalChannelVectorData)op.data;
-                    byte channelIndex = channelData.Index;
+                    var channelData = (TfxData1Byte)op.data;
+                    byte channelIndex = channelData.value;
                     ids.Add(channelIndex);
                     break;
             }
@@ -297,14 +297,14 @@ PS
         TfxBytecodeInterpreterHLSL opcodes = Material.Pixel.GetBytecode();
         foreach (var objectChannel in opcodes.Opcodes.Where(x => x.op == TfxBytecode.PushObjectChannelVector))
         {
-            var hash = new StringHash(((PushObjectChannelVectorData)objectChannel.data).hash);
+            var hash = new StringHash(((TfxDataUint)objectChannel.data).value);
             channels.Add(GlobalStrings.Get().GetString(hash));
         }
 
         opcodes = Material.Vertex.GetBytecode();
         foreach (var objectChannel in opcodes.Opcodes.Where(x => x.op == TfxBytecode.PushObjectChannelVector))
         {
-            var hash = new StringHash(((PushObjectChannelVectorData)objectChannel.data).hash);
+            var hash = new StringHash(((TfxDataUint)objectChannel.data).value);
             channels.Add(GlobalStrings.Get().GetString(hash));
         }
 
@@ -418,8 +418,8 @@ PS
             switch (op.op)
             {
                 case TfxBytecode.PushExternInputFloat:
-                    var externFloatData = (PushExternInputFloatData)op.data;
-                    int externIndex = externFloatData.element * 4;
+                    var externFloatData = (TfxData2Byte)op.data;
+                    int externIndex = externFloatData.value2 * 4;
 
                     if (bInline)
                     {
@@ -463,7 +463,7 @@ PS
                             }
                         };
 
-                        if (attributeMap.TryGetValue(externFloatData.extern_, out Dictionary<int, string>? externDict) &&
+                        if (attributeMap.TryGetValue((TfxExtern)externFloatData.value, out Dictionary<int, string>? externDict) &&
                             externDict.TryGetValue(externIndex, out string? attributeString) &&
                             !funcDef.ToString().Contains(attributeString))
                         {
@@ -473,8 +473,8 @@ PS
                     break;
 
                 case TfxBytecode.PushExternInputVec4:
-                    var externVec4Data = (PushExternInputVec4Data)op.data;
-                    externIndex = externVec4Data.element * 16;
+                    var externVec4Data = (TfxData2Byte)op.data;
+                    externIndex = externVec4Data.value2 * 16;
 
                     if (bInline)
                     {
@@ -493,7 +493,7 @@ PS
                             }
                         };
 
-                        if (attributeMap.TryGetValue(externVec4Data.extern_, out Dictionary<int, string>? externDict) &&
+                        if (attributeMap.TryGetValue((TfxExtern)externVec4Data.value, out Dictionary<int, string>? externDict) &&
                             externDict.TryGetValue(externIndex, out string? attributeString) &&
                             !funcDef.ToString().Contains(attributeString))
                         {
@@ -503,11 +503,11 @@ PS
                     break;
 
                 case TfxBytecode.PushExternInputTextureView:
-                    var data = (PushExternInputTextureViewData)op.data;
-                    int slot = ((SetShaderTextureData)opcodes.Opcodes[i + 1].data).value & 0x1F;
-                    int index = data.element * 8;
+                    var data = (TfxData2Byte)op.data;
+                    int slot = ((TfxData1Byte)opcodes.Opcodes[i + 1].data).value & 0x1F;
+                    int index = data.value2 * 8;
                     ExternTextureSlots.Add(slot);
-                    switch (data.extern_)
+                    switch ((TfxExtern)data.value)
                     {
                         case TfxExtern.Frame:
                             switch (index)
@@ -1005,13 +1005,13 @@ PS
                             if (op.op != TfxBytecode.PushExternInputTextureView)
                                 continue;
 
-                            var data = (PushExternInputTextureViewData)op.data;
-                            int slot = ((SetShaderTextureData)opcodes.Opcodes[i + 1].data).value & 0x1F;
+                            var data = (TfxData2Byte)op.data;
+                            int slot = ((TfxData1Byte)opcodes.Opcodes[i + 1].data).value & 0x1F;
                             if (texIndex != slot)
                                 continue;
 
-                            int index = data.element * 8;
-                            switch (data.extern_)
+                            int index = data.value2 * 8;
+                            switch ((TfxExtern)data.value)
                             {
                                 //funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.{equal_tex_post}");
                                 case TfxExtern.Frame:

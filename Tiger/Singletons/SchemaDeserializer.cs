@@ -361,12 +361,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             else if (IsTigerDeserializeType(fieldType))
             {
                 fieldValue = DeserializeTigerType(reader, fieldType);
-
-                // fieldSize for DynamicStruct has to be the size of the type given, this seems to work fine, but idk if its optimal or not
-                if (fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(DynamicStruct<>))
-                    fieldSize = GetSchemaTypeSize(fieldType.GetGenericArguments()[0]); // Needs to be the type inside DynamicStruct<T>
-                else
-                    fieldSize = GetSchemaTypeSize(fieldType);
+                fieldSize = GetSchemaTypeSize(fieldType);
             }
             else if (IsTigerFileType(fieldType))
             {
@@ -539,18 +534,20 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
 
     private int GetSchemaTypeSize(Type type)
     {
-        if (type.IsGenericType)
+        // fieldSize for DynamicStruct has to be the size of the type given, this seems to work fine, but idk if its optimal or not
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(DynamicStruct<>))
+        {
+            type = type.GetGenericArguments()[0];  // Needs to be the type inside DynamicStruct<T>
+        }
+        else if (type.IsGenericType)
         {
             type = type.GetGenericTypeDefinition();
         }
+
         if (_schemaSerializedSizeMap.TryGetValue(type, out int size))
-        {
             return size;
-        }
-        else
-        {
-            throw new Exception($"Failed to get schema type size for type {type} as it has no schema type attribute");
-        }
+
+        throw new Exception($"Failed to get schema type size for type {type}");
     }
 
     private bool GetSchemaFieldOffset(Type schemaType, FieldInfo fieldInfo, out int offset)

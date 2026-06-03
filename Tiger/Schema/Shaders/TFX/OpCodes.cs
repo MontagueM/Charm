@@ -69,206 +69,68 @@ public static class TfxBytecodeOp
             switch (tfxData.op)
             {
                 case TfxBytecode.Permute:
-                    PermuteData PermuteData = new();
-                    PermuteData.fields = reader.ReadByte();
-                    tfxData.data = PermuteData;
-                    break;
-
                 case TfxBytecode.PushConstantVec4:
-                    PushConstantVec4Data PushConstantVec4Data = new();
-                    PushConstantVec4Data.constant_index = reader.ReadByte();
-                    tfxData.data = PushConstantVec4Data;
-                    break;
-
                 case TfxBytecode.LerpConstant:
-                    LerpConstantData LerpConstantData = new();
-                    LerpConstantData.constant_start = reader.ReadByte();
-                    tfxData.data = LerpConstantData;
-                    break;
-
                 case TfxBytecode.LerpConstantSaturated:
-                    LerpConstantData LerpConstantSatData = new();
-                    LerpConstantSatData.constant_start = reader.ReadByte();
-                    tfxData.data = LerpConstantSatData;
-                    break;
-
                 case TfxBytecode.Spline4Const:
-                    Spline4ConstData Spline4ConstData = new();
-                    Spline4ConstData.constant_index = reader.ReadByte();
-                    tfxData.data = Spline4ConstData;
-                    break;
-
                 case TfxBytecode.Spline8Const:
-                    Spline8ConstData Spline8ConstData = new();
-                    Spline8ConstData.constant_index = reader.ReadByte();
-                    tfxData.data = Spline8ConstData;
-                    break;
-
                 case TfxBytecode.Spline8ConstChain:
-                    Spline8ConstChainData Unk39Data = new();
-                    Unk39Data.constant_index = reader.ReadByte();
-                    tfxData.data = Unk39Data;
-                    break;
-
                 case TfxBytecode.Gradient4Const:
-                    Gradient4ConstData Unk3aData = new();
-                    Unk3aData.constant_index = reader.ReadByte();
-                    tfxData.data = Unk3aData;
-                    break;
-
                 case TfxBytecode.Gradient8Const:
-                    Gradient8ConstData Gradient8ConstData = new();
-                    Gradient8ConstData.constant_index = reader.ReadByte();
-                    tfxData.data = Gradient8ConstData;
+                case TfxBytecode.PushFromOutput:
+                case TfxBytecode.PopOutput:
+                case TfxBytecode.PopOutputMat4:
+                case TfxBytecode.PushTemp:
+                case TfxBytecode.PopTemp:
+                case TfxBytecode.SetShaderTexture:
+                case TfxBytecode.Unk49:
+                case TfxBytecode.SetShaderSampler:
+                case TfxBytecode.SetShaderUav:
+                case TfxBytecode.Unk4c:
+                case TfxBytecode.PushSampler:
+                case TfxBytecode.PushGlobalChannelVector:
+                case TfxBytecode.Unk50:
+                    tfxData.data = new TfxData1Byte()
+                    {
+                        value = reader.ReadByte()
+                    };
                     break;
 
                 case TfxBytecode.PushExternInputFloat:
-                    PushExternInputFloatData PushExternInputFloatData = new();
-                    if (type != BytecodeType.Sequencer)
-                        PushExternInputFloatData.extern_ = Externs.GetExtern(reader.ReadByte());
-
-                    PushExternInputFloatData.element = reader.ReadByte();
-                    tfxData.data = PushExternInputFloatData;
+                    tfxData.data = new TfxData2Byte()
+                    {
+                        value = type != BytecodeType.Sequencer ? (byte)Externs.GetExtern(reader.ReadByte()) : (byte)0,
+                        value2 = reader.ReadByte()
+                    };
                     break;
 
                 case TfxBytecode.PushExternInputVec4:
-                    PushExternInputVec4Data PushExternInputVec4Data = new();
-                    PushExternInputVec4Data.extern_ = Externs.GetExtern(reader.ReadByte());
-                    PushExternInputVec4Data.element = reader.ReadByte();
-                    tfxData.data = PushExternInputVec4Data;
-                    break;
-
                 case TfxBytecode.PushExternInputMat4:
-                    PushExternInputMat4Data PushExternInputMat4Data = new();
-                    PushExternInputMat4Data.extern_ = Externs.GetExtern(reader.ReadByte());
-                    PushExternInputMat4Data.element = reader.ReadByte();
-                    tfxData.data = PushExternInputMat4Data;
-                    break;
-
                 case TfxBytecode.PushExternInputTextureView:
-                    PushExternInputTextureViewData Unk3fData = new();
-                    Unk3fData.extern_ = Externs.GetExtern(reader.ReadByte());
-                    Unk3fData.element = reader.ReadByte();
-                    tfxData.data = Unk3fData;
-                    break;
-
                 case TfxBytecode.PushExternInputU32:
-                    PushExternInputU32Data PushExternInputU32Data = new();
-                    PushExternInputU32Data.extern_ = Externs.GetExtern(reader.ReadByte());
-                    PushExternInputU32Data.element = reader.ReadByte();
-                    tfxData.data = PushExternInputU32Data;
-                    break;
-
                 case TfxBytecode.PushExternInputUav:
-                    PushExternInputUavData Unk41Data = new();
-                    Unk41Data.extern_ = Externs.GetExtern(reader.ReadByte());
-                    Unk41Data.element = reader.ReadByte();
-                    tfxData.data = Unk41Data;
-                    break;
-
-                case TfxBytecode.PushFromOutput:
-                    PushFromOutputData Unk43Data = new();
-                    Unk43Data.element = reader.ReadByte();
-                    tfxData.data = Unk43Data;
-                    break;
-
-                case TfxBytecode.PopOutput:
-                    PopOutputData PopOutputData = new();
-                    PopOutputData.slot = reader.ReadByte();
-                    tfxData.data = PopOutputData;
-                    break;
-
-                case TfxBytecode.PopOutputMat4:
-                    PopOutputMat4Data Unk45Data = new();
-                    Unk45Data.slot = reader.ReadByte();
-                    tfxData.data = Unk45Data;
-                    break;
-
-                case TfxBytecode.PushTemp:
-                    PushTempData PushTempData = new();
-                    PushTempData.slot = reader.ReadByte();
-                    tfxData.data = PushTempData;
-                    break;
-
-                case TfxBytecode.PopTemp:
-                    PopTempData PopTempData = new();
-                    PopTempData.slot = reader.ReadByte();
-                    tfxData.data = PopTempData;
-                    break;
-
-                case TfxBytecode.SetShaderTexture:
-                    SetShaderTextureData Unk48Data = new();
-                    Unk48Data.value = reader.ReadByte();
-                    tfxData.data = Unk48Data;
-                    break;
-
-                case TfxBytecode.Unk49:
-                    Unk49Data Unk49 = new();
-                    Unk49.unk1 = reader.ReadByte();
-                    tfxData.data = Unk49;
-                    break;
-
-                case TfxBytecode.SetShaderSampler:
-                    SetShaderSamplerData Unk4aData = new();
-                    Unk4aData.value = reader.ReadByte();
-                    tfxData.data = Unk4aData;
-                    break;
-
-                case TfxBytecode.SetShaderUav:
-                    SetShaderUavData Unk4bData = new();
-                    Unk4bData.value = reader.ReadByte();
-                    tfxData.data = Unk4bData;
-                    break;
-
-                case TfxBytecode.Unk4c:
-                    Unk4cData Unk4cData = new();
-                    Unk4cData.unk1 = reader.ReadByte();
-                    tfxData.data = Unk4cData;
-                    break;
-
-                case TfxBytecode.PushSampler:
-                    PushSamplerData PushSampler = new();
-                    PushSampler.unk1 = reader.ReadByte();
-                    tfxData.data = PushSampler;
-                    break;
-
-                case TfxBytecode.PushObjectChannelVector:
-                    PushObjectChannelVectorData PushObjectChannelVector = new();
-                    PushObjectChannelVector.hash = Strategy.IsD1() ? reader.ReadByte() : Endian.SwapU32(reader.ReadUInt32());
-                    tfxData.data = PushObjectChannelVector;
-                    break;
-
-                case TfxBytecode.PushGlobalChannelVector:
-                    PushGlobalChannelVectorData PushGlobalChannelVector = new();
-                    PushGlobalChannelVector.Index = reader.ReadByte();
-                    tfxData.data = PushGlobalChannelVector;
-                    break;
-
-                case TfxBytecode.Unk50:
-                    Unk50Data Unk50Data = new();
-                    Unk50Data.unk1 = reader.ReadByte();
-                    tfxData.data = Unk50Data;
+                    tfxData.data = new TfxData2Byte()
+                    {
+                        value = (byte)Externs.GetExtern(reader.ReadByte()),
+                        value2 = reader.ReadByte()
+                    };
                     break;
 
                 case TfxBytecode.PushTexDimensions:
-                    PushTexDimensionsData Unk52Data = new();
-                    Unk52Data.index = reader.ReadByte();
-                    Unk52Data.fields = reader.ReadByte();
-                    tfxData.data = Unk52Data;
-                    break;
-
                 case TfxBytecode.PushTexTileParams:
-                    PushTexTileParamsData Unk53Data = new();
-                    Unk53Data.index = reader.ReadByte();
-                    Unk53Data.fields = reader.ReadByte();
-                    tfxData.data = Unk53Data;
+                case TfxBytecode.PushTexTileCount:
+                    tfxData.data = new TfxData2Byte()
+                    {
+                        value = reader.ReadByte(),
+                        value2 = reader.ReadByte()
+                    };
                     break;
 
-                case TfxBytecode.PushTexTileCount:
-                    PushTexTileCountData Unk54Data = new();
-                    Unk54Data.index = reader.ReadByte();
-                    Unk54Data.fields = reader.ReadByte();
-                    tfxData.data = Unk54Data;
+                case TfxBytecode.PushObjectChannelVector:
+                    tfxData.data = new TfxDataUint()
+                    {
+                        value = Strategy.IsPreBL() ? reader.ReadByte() : Endian.SwapU32(reader.ReadUInt32())
+                    };
                     break;
             }
         }
@@ -283,19 +145,20 @@ public static class TfxBytecodeOp
     {
         string output = "";
         byte index = 0;
-        switch (tfxData.data)
+        switch (tfxData.op)
         {
-            case PermuteData:
-                output = $"{DecodePermuteParam(((PermuteData)tfxData.data).fields).ToUpper()}";
+            case TfxBytecode.Permute:
+                output = $"{DecodePermuteParam(((TfxData1Byte)tfxData.data).value).ToUpper()}";
                 break;
-            case PushConstantVec4Data:
-                output = $"{constants[((PushConstantVec4Data)tfxData.data).constant_index].Vec.ToString().Replace("Infinity", "1.#INF")}";
+            case TfxBytecode.PushConstantVec4:
+                output = $"{constants[((TfxData1Byte)tfxData.data).value].Vec.ToString().Replace("Infinity", "1.#INF")}";
                 break;
-            case LerpConstantData:
-                output = $"From: {constants[((LerpConstantData)tfxData.data).constant_start].Vec}: To: {constants[((LerpConstantData)tfxData.data).constant_start + 1].Vec}";
+            case TfxBytecode.LerpConstant:
+            case TfxBytecode.LerpConstantSaturated:
+                output = $"From: {constants[((TfxData1Byte)tfxData.data).value].Vec}: To: {constants[((TfxData1Byte)tfxData.data).value + 1].Vec}";
                 break;
-            case Spline4ConstData:
-                index = ((Spline4ConstData)tfxData.data).constant_index;
+            case TfxBytecode.Spline4Const:
+                index = ((TfxData1Byte)tfxData.data).value;
                 string C3 = $"{constants[index].Vec}";
                 string C2 = $"{constants[index + 1].Vec}";
                 string C1 = $"{constants[index + 2].Vec}";
@@ -310,8 +173,8 @@ public static class TfxBytecodeOp
                     $"\n\tThreshold: {threshold}";
                 break;
 
-            case Spline8ConstData:
-                index = ((Spline8ConstData)tfxData.data).constant_index;
+            case TfxBytecode.Spline8Const:
+                index = ((TfxData1Byte)tfxData.data).value;
                 string s8_C3 = $"{constants[index].Vec}";
                 string s8_C2 = $"{constants[index + 1].Vec}";
                 string s8_C1 = $"{constants[index + 2].Vec}";
@@ -336,8 +199,8 @@ public static class TfxBytecodeOp
                     $"\n\tD_thresholds: {D_thresholds}";
                 break;
 
-            case Spline8ConstChainData:
-                index = ((Spline8ConstChainData)tfxData.data).constant_index;
+            case TfxBytecode.Spline8ConstChain:
+                index = ((TfxData1Byte)tfxData.data).value;
                 string s8c_C3 = $"{constants[index].Vec}";
                 string s8c_C2 = $"{constants[index + 1].Vec}";
                 string s8c_C1 = $"{constants[index + 2].Vec}";
@@ -362,8 +225,8 @@ public static class TfxBytecodeOp
                     $"\n\tD_thresholds: {D1_thresholds}";
                 break;
 
-            case Gradient4ConstData: // Gradient4Const
-                index = ((Gradient4ConstData)tfxData.data).constant_index;
+            case TfxBytecode.Gradient4Const: // Gradient4Const
+                index = ((TfxData1Byte)tfxData.data).value;
                 string BaseColor = $"{constants[index].Vec}";
                 string Cred = $"{constants[index + 1].Vec}";
                 string Cgreen = $"{constants[index + 2].Vec}";
@@ -380,8 +243,8 @@ public static class TfxBytecodeOp
                     $"\n\tCthresholds: {Cthresholds}";
                 break;
 
-            case Gradient8ConstData:
-                index = ((Gradient8ConstData)tfxData.data).constant_index;
+            case TfxBytecode.Gradient8Const:
+                index = ((TfxData1Byte)tfxData.data).value;
                 BaseColor = $"{constants[index].Vec}";
                 Cred = $"{constants[index + 1].Vec}";
                 Cgreen = $"{constants[index + 2].Vec}";
@@ -408,105 +271,99 @@ public static class TfxBytecodeOp
                     $"\n\tDthresholds: {Dthresholds}";
                 break;
 
-            case PushExternInputFloatData:
-                byte pFloat = ((PushExternInputFloatData)tfxData.data).element;
-                var _extern = ((PushExternInputFloatData)tfxData.data).extern_;
+            case TfxBytecode.PushExternInputFloat:
+                byte pFloat = ((TfxData2Byte)tfxData.data).value2;
+                var _extern = (TfxExtern)((TfxData2Byte)tfxData.data).value;
                 output = $"extern {_extern}, element {pFloat} (0x{(pFloat * 4):X})";
                 if (_extern == TfxExtern.Frame && pFloat == 0)
                     output += " (Time)";
                 break;
-            case PushExternInputVec4Data:
-                byte pVec = ((PushExternInputVec4Data)tfxData.data).element;
-                output = $"extern {((PushExternInputVec4Data)tfxData.data).extern_}, element {pVec} (0x{(pVec * 16):X})";
+            case TfxBytecode.PushExternInputVec4:
+                byte pVec = ((TfxData2Byte)tfxData.data).value2;
+                output = $"extern {(TfxExtern)((TfxData2Byte)tfxData.data).value}, element {pVec} (0x{(pVec * 16):X})";
                 break;
-            case PushExternInputMat4Data:
-                byte pMat = ((PushExternInputMat4Data)tfxData.data).element;
-                output = $"extern {((PushExternInputMat4Data)tfxData.data).extern_}, element {pMat} (0x{(pMat * 16):X})";
+            case TfxBytecode.PushExternInputMat4:
+                byte pMat = ((TfxData2Byte)tfxData.data).value2;
+                output = $"extern {(TfxExtern)((TfxData2Byte)tfxData.data).value}, element {pMat} (0x{(pMat * 16):X})";
                 break;
-            case PushExternInputTextureViewData:
-                byte pTex = ((PushExternInputTextureViewData)tfxData.data).element;
-                output = $"extern {((PushExternInputTextureViewData)tfxData.data).extern_}, element {pTex} (0x{(pTex * 8):X})";
+            case TfxBytecode.PushExternInputTextureView:
+                byte pTex = ((TfxData2Byte)tfxData.data).value2;
+                output = $"extern {(TfxExtern)((TfxData2Byte)tfxData.data).value}, element {pTex} (0x{(pTex * 8):X})";
                 break;
-            case PushExternInputU32Data:
-                byte pU32 = ((PushExternInputU32Data)tfxData.data).element;
-                output = $"extern {((PushExternInputU32Data)tfxData.data).extern_}, element {pU32} (0x{(pU32 * 4):X})";
+            case TfxBytecode.PushExternInputU32:
+                byte pU32 = ((TfxData2Byte)tfxData.data).value2;
+                output = $"extern {(TfxExtern)((TfxData2Byte)tfxData.data).value}, element {pU32} (0x{(pU32 * 4):X})";
                 break;
-            case PushExternInputUavData:
-                byte pUav = ((PushExternInputUavData)tfxData.data).element;
-                output = $"extern {((PushExternInputUavData)tfxData.data).extern_}, element {pUav} (0x{(pUav * 8):X})";
+            case TfxBytecode.PushExternInputUav:
+                byte pUav = ((TfxData2Byte)tfxData.data).value2;
+                output = $"extern {(TfxExtern)((TfxData2Byte)tfxData.data).value}, element {pUav} (0x{(pUav * 8):X})";
                 break;
 
-            case PopOutputData:
-                output = $"slot {((PopOutputData)tfxData.data).slot}";
+            case TfxBytecode.PopOutput:
+                output = $"slot {((TfxData1Byte)tfxData.data).value}";
                 break;
-            case PushFromOutputData:
-                output = $"element {((PushFromOutputData)tfxData.data).element}";
+            case TfxBytecode.PushFromOutput:
+                output = $"element {((TfxData1Byte)tfxData.data).value}";
                 break;
-            case StoreToBufferData:
-                output = $"element {((StoreToBufferData)tfxData.data).element}";
+            case TfxBytecode.PushTemp:
+                output = $"index {((TfxData1Byte)tfxData.data).value}";
                 break;
-            case PushTempData:
-                output = $"index {((PushTempData)tfxData.data).slot}";
+            case TfxBytecode.PopTemp:
+                output = $"index {((TfxData1Byte)tfxData.data).value}";
                 break;
-            case PopTempData:
-                output = $"index {((PopTempData)tfxData.data).slot}";
-                break;
-            case Unk47Data:
-                output = $"unk1 {((Unk47Data)tfxData.data).unk1}";
-                break;
-            case SetShaderTextureData:
-                byte texSlot = ((SetShaderTextureData)tfxData.data).value;
+            case TfxBytecode.SetShaderTexture:
+                byte texSlot = ((TfxData1Byte)tfxData.data).value;
                 output = $"Texture Slot {texSlot & 0x1F}";
                 break;
-            case Unk49Data:
-                output = $"unk1 {((Unk49Data)tfxData.data).unk1}";
+            case TfxBytecode.Unk49:
+                output = $"unk1 {((TfxData1Byte)tfxData.data).value}";
                 break;
-            case SetShaderSamplerData:
-                byte sampSlot = ((SetShaderSamplerData)tfxData.data).value;
+            case TfxBytecode.SetShaderSampler:
+                byte sampSlot = ((TfxData1Byte)tfxData.data).value;
                 output = $"Sampler Slot {sampSlot & 0x1F}";
                 break;
-            case SetShaderUavData:
-                output = $"value {((SetShaderUavData)tfxData.data).value}";
+            case TfxBytecode.SetShaderUav:
+                output = $"value {((TfxData1Byte)tfxData.data).value}";
                 break;
-            case Unk4cData:
-                output = $"unk1 {((Unk4cData)tfxData.data).unk1}";
+            case TfxBytecode.Unk4c:
+                output = $"unk1 {((TfxData1Byte)tfxData.data).value}";
                 break;
-            case PushSamplerData:
-                output = $"index {((PushSamplerData)tfxData.data).unk1}";
+            case TfxBytecode.PushSampler:
+                output = $"index {((TfxData1Byte)tfxData.data).value}";
                 break;
-            case PushObjectChannelVectorData:
-                var hash = new StringHash(((PushObjectChannelVectorData)tfxData.data).hash);
-                output = $"hash {GlobalStrings.Get().GetString(hash)}";
+            case TfxBytecode.PushObjectChannelVector:
+                var hash = new StringHash(((TfxDataUint)tfxData.data).value);
+                output = Strategy.IsPreBL() ? $"index {hash}" : $"hash {GlobalStrings.Get().GetString(hash)}";
                 break;
-            case PushGlobalChannelVectorData:
-                index = ((PushGlobalChannelVectorData)tfxData.data).Index;
+            case TfxBytecode.PushGlobalChannelVector:
+                index = ((TfxData1Byte)tfxData.data).value;
                 output = $"index {index}, default {GlobalChannels.GetDefault(index)}";
                 break;
-            case Unk50Data:
-                output = $"unk1 {((Unk50Data)tfxData.data).unk1}";
+            case TfxBytecode.Unk50:
+                output = $"unk1 {((TfxData1Byte)tfxData.data).value}";
                 break;
 
-            case PushTexDimensionsData:
-                var ptd = ((PushTexDimensionsData)tfxData.data);
-                Texture tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[ptd.index].Hash);
+            case TfxBytecode.PushTexDimensions:
+                var ptd = ((TfxData2Byte)tfxData.data);
+                Texture tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[ptd.value].Hash);
 
-                output = $"Tex {tex.Hash} ({ptd.index}): {DecodePermuteParam(ptd.fields).ToUpper()}: " +
+                output = $"Tex {tex.Hash} ({ptd.value}): {DecodePermuteParam(ptd.value2).ToUpper()}: " +
                     $"({tex.TagData.Width}, {tex.TagData.Height}, {tex.TagData.Depth}, {tex.TagData.ArraySize})";
                 break;
 
-            case PushTexTileParamsData:
-                var ptt = ((PushTexTileParamsData)tfxData.data);
-                tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[ptt.index].Hash);
+            case TfxBytecode.PushTexTileParams:
+                var ptt = ((TfxData2Byte)tfxData.data);
+                tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[ptt.value].Hash);
 
-                output = $"Tex {tex.Hash} ({ptt.index}): {DecodePermuteParam(ptt.fields).ToUpper()}: " +
+                output = $"Tex {tex.Hash} ({ptt.value}): {DecodePermuteParam(ptt.value2).ToUpper()}: " +
                     $"{tex.TagData.TilingScaleOffset}";
                 break;
 
-            case PushTexTileCountData:
-                var pttc = ((PushTexTileCountData)tfxData.data);
-                tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[pttc.index].Hash);
+            case TfxBytecode.PushTexTileCount:
+                var pttc = ((TfxData2Byte)tfxData.data);
+                tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[pttc.value].Hash);
 
-                output = $"Tex {tex.Hash} ({pttc.index}): {DecodePermuteParam(pttc.fields).ToUpper()}: " +
+                output = $"Tex {tex.Hash} ({pttc.value}): {DecodePermuteParam(pttc.value2).ToUpper()}: " +
                     $"({tex.TagData.TileCount}, {tex.TagData.ArraySize}, 0, 0)"; break;
         }
 
@@ -934,13 +791,13 @@ public enum TfxBytecode_EoF : byte
     Unk2d = 0x34,
     TransformVec4 = 0x35,
 
-    Unk34_EoF = 0x3B, // No clue, rarely used?
-    Unk35_EoF = 0x3C,
-    Unk36_EoF = 0x3D,
-    Unk37_EoF = 0x3E,
-    Unk38_EoF = 0x3F,
-    Unk39_EoF = 0x40,
-    Unk3A_EoF = 0x41,
+    Unk34_EoF = 0x3B, //CompareLessThan
+    Unk35_EoF = 0x3C, //CompareLessEqual,
+    Unk36_EoF = 0x3D, //CompareGreaterThan,
+    Unk37_EoF = 0x3E, //CompareGreaterEqual,
+    Unk38_EoF = 0x3F, //CompareEqual,
+    Unk39_EoF = 0x40, //CompareNotEqual,
+    Unk3A_EoF = 0x41, //CompareNotZeroTernary,
 
     PushConstantVec4 = 0x42, // 0x34 => 0x3B EOF, 0x3B => 0x42 Renegades
     LerpConstant = 0x43,
@@ -981,8 +838,6 @@ public enum TfxBytecode_EoF : byte
     Unk58 = 0x66,
 }
 
-
-
 public struct TfxData
 {
     public TfxBytecode op;
@@ -990,177 +845,18 @@ public struct TfxData
     public dynamic? data;
 }
 
-public struct PermuteData
-{
-    public byte fields;
-}
-
-public struct PushConstantVec4Data
-{
-    public byte constant_index;
-}
-
-public struct LerpConstantData
-{
-    public byte constant_start;
-}
-
-public struct Spline4ConstData
-{
-    public byte constant_index;
-}
-
-public struct Spline8ConstData
-{
-    public byte constant_index;
-}
-
-public struct Spline8ConstChainData
-{
-    public byte constant_index;
-}
-
-public struct Gradient4ConstData
-{
-    public byte constant_index;
-}
-
-public struct Gradient8ConstData
-{
-    public byte constant_index;
-}
-
-public struct PushExternInputFloatData
-{
-    public TfxExtern extern_;
-    public byte element;
-}
-
-public struct PushExternInputVec4Data
-{
-    public TfxExtern extern_;
-    public byte element;
-}
-
-public struct PushExternInputMat4Data
-{
-    public TfxExtern extern_;
-    public byte element;
-}
-
-public struct PushExternInputTextureViewData
-{
-    public TfxExtern extern_;
-    public byte element;
-}
-
-public struct PushExternInputU32Data
-{
-    public TfxExtern extern_;
-    public byte element;
-}
-
-public struct PushExternInputUavData
-{
-    public TfxExtern extern_;
-    public byte element;
-}
-
-public struct PopOutputData
-{
-    public byte slot;
-}
-
-public struct StoreToBufferData
-{
-    public byte element;
-}
-
-public struct PushFromOutputData
-{
-    public byte element;
-}
-
-public struct PopOutputMat4Data
-{
-    public byte slot;
-}
-
-public struct PushTempData
-{
-    public byte slot;
-}
-
-public struct PopTempData
-{
-    public byte slot;
-}
-
-public struct Unk47Data
-{
-    public byte unk1;
-}
-
-public struct SetShaderTextureData
+public struct TfxData1Byte
 {
     public byte value;
 }
 
-public struct Unk49Data
-{
-    public byte unk1;
-}
-
-public struct SetShaderSamplerData
+public struct TfxData2Byte
 {
     public byte value;
+    public byte value2;
 }
 
-public struct SetShaderUavData
+public struct TfxDataUint
 {
-    public byte value;
+    public uint value;
 }
-
-public struct Unk4cData
-{
-    public byte unk1;
-}
-
-public struct PushSamplerData
-{
-    public byte unk1;
-}
-
-public struct PushObjectChannelVectorData
-{
-    public uint hash;
-}
-
-public struct PushGlobalChannelVectorData
-{
-    public byte Index;
-}
-
-public struct Unk50Data
-{
-    public byte unk1;
-}
-
-public struct PushTexDimensionsData // Width, Height, Depth, Mip count
-{
-    public byte index; // Index in the Samplers array
-    public byte fields; // Swizzle
-}
-
-public struct PushTexTileParamsData // Vec4 at 0x10 in texture header
-{
-    public byte index;
-    public byte fields;
-}
-
-public struct PushTexTileCountData // 0x28 (Array Size), 0x2A (Tile Count) in texture header
-{
-    public byte index;
-    public byte fields;
-}
-

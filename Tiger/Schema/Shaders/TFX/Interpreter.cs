@@ -198,7 +198,7 @@ public class TfxBytecodeInterpreterHLSL
                         StackPush($"({StackTop()}.xxxx)");
                         break;
                     case TfxBytecode.Permute:
-                        byte param = ((PermuteData)op.data).fields;
+                        byte param = ((TfxData1Byte)op.data).value;
                         string permute = StackTop();
                         StackPush($"({permute}{TfxBytecodeOp.DecodePermuteParam(param)})");
                         break;
@@ -240,31 +240,32 @@ public class TfxBytecodeInterpreterHLSL
                         StackPush($"{mul_vec4(TransformVec4)}");
                         break;
                     case TfxBytecode.PushConstantVec4:
-                        Vector4 vec = constants[((PushConstantVec4Data)op.data).constant_index].Vec;
+                        Vector4 vec = constants[((TfxData1Byte)op.data).value].Vec;
                         StackPush($"float4{vec}");
                         break;
                     case TfxBytecode.LerpConstant:
                         string t = StackTop();
-                        Vector4 a = constants[((LerpConstantData)op.data).constant_start].Vec;
-                        Vector4 b = constants[((LerpConstantData)op.data).constant_start + 1].Vec;
+                        Vector4 a = constants[((TfxData1Byte)op.data).value].Vec;
+                        Vector4 b = constants[((TfxData1Byte)op.data).value + 1].Vec;
 
                         StackPush($"(lerp(float4{a}, float4{b}, {t}))");
                         break;
                     case TfxBytecode.LerpConstantSaturated:
                         t = StackTop();
-                        a = constants[((LerpConstantData)op.data).constant_start].Vec;
-                        b = constants[((LerpConstantData)op.data).constant_start + 1].Vec;
+                        a = constants[((TfxData1Byte)op.data).value].Vec;
+                        b = constants[((TfxData1Byte)op.data).value + 1].Vec;
 
                         StackPush($"(saturate(lerp(float4{a}, float4{b}, {t})))");
                         break;
 
                     case TfxBytecode.Spline4Const:
+                        var s4c_index = ((TfxData1Byte)op.data).value;
                         string X = StackTop();
-                        string C3 = $"float4{constants[((Spline4ConstData)op.data).constant_index].Vec}";
-                        string C2 = $"float4{constants[((Spline4ConstData)op.data).constant_index + 1].Vec}";
-                        string C1 = $"float4{constants[((Spline4ConstData)op.data).constant_index + 2].Vec}";
-                        string C0 = $"float4{constants[((Spline4ConstData)op.data).constant_index + 3].Vec}";
-                        string threshold = $"float4{constants[((Spline4ConstData)op.data).constant_index + 4].Vec}";
+                        string C3 = $"float4{constants[s4c_index].Vec}";
+                        string C2 = $"float4{constants[s4c_index + 1].Vec}";
+                        string C1 = $"float4{constants[s4c_index + 2].Vec}";
+                        string C0 = $"float4{constants[s4c_index + 3].Vec}";
+                        string threshold = $"float4{constants[s4c_index + 4].Vec}";
 
                         if (bInline)
                             StackPush($"bytecode_op_spline4_const({X}, {C3}, {C2}, {C1}, {C0}, {threshold})");
@@ -273,17 +274,18 @@ public class TfxBytecodeInterpreterHLSL
                         break;
 
                     case TfxBytecode.Spline8Const:
+                        var s8c_index = ((TfxData1Byte)op.data).value;
                         string s8c_X = StackTop();
-                        string s8c_C3 = $"float4{constants[((Spline8ConstData)op.data).constant_index].Vec}";
-                        string s8c_C2 = $"float4{constants[((Spline8ConstData)op.data).constant_index + 1].Vec}";
-                        string s8c_C1 = $"float4{constants[((Spline8ConstData)op.data).constant_index + 2].Vec}";
-                        string s8c_C0 = $"float4{constants[((Spline8ConstData)op.data).constant_index + 3].Vec}";
-                        string s8c_D3 = $"float4{constants[((Spline8ConstData)op.data).constant_index + 4].Vec}";
-                        string s8c_D2 = $"float4{constants[((Spline8ConstData)op.data).constant_index + 5].Vec}";
-                        string s8c_D1 = $"float4{constants[((Spline8ConstData)op.data).constant_index + 6].Vec}";
-                        string s8c_D0 = $"float4{constants[((Spline8ConstData)op.data).constant_index + 7].Vec}";
-                        string s8c_CThresholds = $"float4{constants[((Spline8ConstData)op.data).constant_index + 8].Vec}";
-                        string s8c_DThresholds = $"float4{constants[((Spline8ConstData)op.data).constant_index + 9].Vec}";
+                        string s8c_C3 = $"float4{constants[s8c_index].Vec}";
+                        string s8c_C2 = $"float4{constants[s8c_index + 1].Vec}";
+                        string s8c_C1 = $"float4{constants[s8c_index + 2].Vec}";
+                        string s8c_C0 = $"float4{constants[s8c_index + 3].Vec}";
+                        string s8c_D3 = $"float4{constants[s8c_index + 4].Vec}";
+                        string s8c_D2 = $"float4{constants[s8c_index + 5].Vec}";
+                        string s8c_D1 = $"float4{constants[s8c_index + 6].Vec}";
+                        string s8c_D0 = $"float4{constants[s8c_index + 7].Vec}";
+                        string s8c_CThresholds = $"float4{constants[s8c_index + 8].Vec}";
+                        string s8c_DThresholds = $"float4{constants[s8c_index + 9].Vec}";
 
                         if (bInline)
                             StackPush($"bytecode_op_spline8_const({s8c_X}, {s8c_C3}, {s8c_C2}, {s8c_C1}, {s8c_C0}, {s8c_D3}, {s8c_D2}, {s8c_D1}, {s8c_D0}, {s8c_CThresholds}, {s8c_DThresholds})");
@@ -292,18 +294,19 @@ public class TfxBytecodeInterpreterHLSL
                         break;
 
                     case TfxBytecode.Spline8ConstChain:
+                        var s8cc_index = ((TfxData1Byte)op.data).value;
                         var s8cc_X = StackPop(2);
                         string s8cc_Recursion = s8cc_X[1];
-                        string s8cc_C3 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 0].Vec}";
-                        string s8cc_C2 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 1].Vec}";
-                        string s8cc_C1 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 2].Vec}";
-                        string s8cc_C0 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 3].Vec}";
-                        string s8cc_D3 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 4].Vec}";
-                        string s8cc_D2 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 5].Vec}";
-                        string s8cc_D1 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 6].Vec}";
-                        string s8cc_D0 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 7].Vec}";
-                        string s8cc_CThresholds = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 8].Vec}";
-                        string s8cc_DThresholds = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 9].Vec}";
+                        string s8cc_C3 = $"float4{constants[s8cc_index + 0].Vec}";
+                        string s8cc_C2 = $"float4{constants[s8cc_index + 1].Vec}";
+                        string s8cc_C1 = $"float4{constants[s8cc_index + 2].Vec}";
+                        string s8cc_C0 = $"float4{constants[s8cc_index + 3].Vec}";
+                        string s8cc_D3 = $"float4{constants[s8cc_index + 4].Vec}";
+                        string s8cc_D2 = $"float4{constants[s8cc_index + 5].Vec}";
+                        string s8cc_D1 = $"float4{constants[s8cc_index + 6].Vec}";
+                        string s8cc_D0 = $"float4{constants[s8cc_index + 7].Vec}";
+                        string s8cc_CThresholds = $"float4{constants[s8cc_index + 8].Vec}";
+                        string s8cc_DThresholds = $"float4{constants[s8cc_index + 9].Vec}";
 
                         if (bInline)
                             StackPush($"bytecode_op_spline8_chain_const({s8cc_X[1]}, {s8cc_X[0]}, {s8cc_C3}, {s8cc_C2}, {s8cc_C1}, {s8cc_C0}, {s8cc_D3}, {s8cc_D2}, {s8cc_D1}, {s8cc_D0}, {s8cc_CThresholds}, {s8cc_DThresholds})");
@@ -312,13 +315,14 @@ public class TfxBytecodeInterpreterHLSL
                         break;
 
                     case TfxBytecode.Gradient4Const:
+                        var g4c_index = ((TfxData1Byte)op.data).value;
                         string g4c_X = StackTop();
-                        string BaseColor = $"float4{constants[((Gradient4ConstData)op.data).constant_index].Vec}";
-                        string Cred = $"float4{constants[((Gradient4ConstData)op.data).constant_index + 1].Vec}";
-                        string Cgreen = $"float4{constants[((Gradient4ConstData)op.data).constant_index + 2].Vec}";
-                        string Cblue = $"float4{constants[((Gradient4ConstData)op.data).constant_index + 3].Vec}";
-                        string Calpha = $"float4{constants[((Gradient4ConstData)op.data).constant_index + 4].Vec}";
-                        string Cthresholds = $"float4{constants[((Gradient4ConstData)op.data).constant_index + 5].Vec}";
+                        string BaseColor = $"float4{constants[g4c_index].Vec}";
+                        string Cred = $"float4{constants[g4c_index + 1].Vec}";
+                        string Cgreen = $"float4{constants[g4c_index + 2].Vec}";
+                        string Cblue = $"float4{constants[g4c_index + 3].Vec}";
+                        string Calpha = $"float4{constants[g4c_index + 4].Vec}";
+                        string Cthresholds = $"float4{constants[g4c_index + 5].Vec}";
 
                         if (bInline)
                             StackPush($"bytecode_op_gradient4_const({g4c_X}, {BaseColor}, {Cred}, {Cgreen}, {Cblue}, {Calpha}, {Cthresholds})");
@@ -327,19 +331,19 @@ public class TfxBytecodeInterpreterHLSL
                         break;
 
                     case TfxBytecode.Gradient8Const: // A massive unknown function with a 12 inputs, maybe this is Gradient8Const? (idk if that exists)
+                        var g8c_index = ((TfxData1Byte)op.data).value;
                         string g8c_X1 = StackTop();
-                        string g8c_BaseColor = $"float4{constants[((Gradient8ConstData)op.data).constant_index].Vec}";
-                        string g8c_Cred = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 1].Vec}";
-                        string g8c_Cgreen = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 2].Vec}";
-                        string g8c_Cblue = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 3].Vec}";
-                        string g8c_Calpha = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 4].Vec}";
-                        string g8c_Dred = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 5].Vec}";
-                        string g8c_Dgreen = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 6].Vec}";
-                        string g8c_Dblue = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 7].Vec}";
-                        string g8c_Dalpha = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 8].Vec}";
-                        string g8c_Cthresholds = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 9].Vec}";
-                        string g8c_Dthresholds = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 10].Vec}";
-
+                        string g8c_BaseColor = $"float4{constants[g8c_index].Vec}";
+                        string g8c_Cred = $"float4{constants[g8c_index + 1].Vec}";
+                        string g8c_Cgreen = $"float4{constants[g8c_index + 2].Vec}";
+                        string g8c_Cblue = $"float4{constants[g8c_index + 3].Vec}";
+                        string g8c_Calpha = $"float4{constants[g8c_index + 4].Vec}";
+                        string g8c_Dred = $"float4{constants[g8c_index + 5].Vec}";
+                        string g8c_Dgreen = $"float4{constants[g8c_index + 6].Vec}";
+                        string g8c_Dblue = $"float4{constants[g8c_index + 7].Vec}";
+                        string g8c_Dalpha = $"float4{constants[g8c_index + 8].Vec}";
+                        string g8c_Cthresholds = $"float4{constants[g8c_index + 9].Vec}";
+                        string g8c_Dthresholds = $"float4{constants[g8c_index + 10].Vec}";
                         if (bInline)
                             StackPush($"bytecode_op_gradient8_const({g8c_X1}, {g8c_BaseColor}, {g8c_Cred}, {g8c_Cgreen}, {g8c_Cblue}, {g8c_Calpha}, {g8c_Dred}, {g8c_Dgreen}, {g8c_Dblue}, {g8c_Dalpha}, {g8c_Cthresholds}, {g8c_Dthresholds})");
                         else
@@ -347,11 +351,11 @@ public class TfxBytecodeInterpreterHLSL
                         break;
 
                     case TfxBytecode.PushExternInputFloat:
-                        string v = Externs.GetExternFloat(((PushExternInputFloatData)op.data).extern_, ((PushExternInputFloatData)op.data).element * 4, bInline);
+                        string v = Externs.GetExternFloat((TfxExtern)((TfxData2Byte)op.data).value, ((TfxData2Byte)op.data).value2 * 4, bInline);
                         StackPush(v);
                         break;
                     case TfxBytecode.PushExternInputVec4:
-                        string PushExternInputVec4 = Externs.GetExternVec4(((PushExternInputVec4Data)op.data).extern_, ((PushExternInputVec4Data)op.data).element * 16, bInline);
+                        string PushExternInputVec4 = Externs.GetExternVec4((TfxExtern)((TfxData2Byte)op.data).value, ((TfxData2Byte)op.data).value2 * 16, bInline);
                         StackPush(PushExternInputVec4);
                         break;
                     case TfxBytecode.PushExternInputMat4:
@@ -364,19 +368,19 @@ public class TfxBytecodeInterpreterHLSL
 
                     // Texture stuff
                     case TfxBytecode.PushTexDimensions:
-                        var ptd = ((PushTexDimensionsData)op.data);
-                        Texture tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[ptd.index].Hash);
-                        StackPush($"float4({tex.TagData.Width}, {tex.TagData.Height}, {tex.TagData.Depth}, {tex.TagData.ArraySize}){TfxBytecodeOp.DecodePermuteParam(ptd.fields)}");
+                        var ptd = ((TfxData2Byte)op.data);
+                        Texture tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[ptd.value].Hash);
+                        StackPush($"float4({tex.TagData.Width}, {tex.TagData.Height}, {tex.TagData.Depth}, {tex.TagData.ArraySize}){TfxBytecodeOp.DecodePermuteParam(ptd.value2)}");
                         break;
                     case TfxBytecode.PushTexTileParams:
-                        var ptt = ((PushTexTileParamsData)op.data);
-                        tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[ptt.index].Hash);
-                        StackPush($"float4{tex.TagData.TilingScaleOffset}{TfxBytecodeOp.DecodePermuteParam(ptt.fields)}");
+                        var ptt = ((TfxData2Byte)op.data);
+                        tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[ptt.value].Hash);
+                        StackPush($"float4{tex.TagData.TilingScaleOffset}{TfxBytecodeOp.DecodePermuteParam(ptt.value2)}");
                         break;
                     case TfxBytecode.PushTexTileCount:
-                        var pttc = ((PushTexTileCountData)op.data);
-                        tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[pttc.index].Hash);
-                        StackPush($"float4({tex.TagData.TileCount}, {tex.TagData.ArraySize}, 0, 0){TfxBytecodeOp.DecodePermuteParam(pttc.fields)}");
+                        var pttc = ((TfxData2Byte)op.data);
+                        tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[pttc.value].Hash);
+                        StackPush($"float4({tex.TagData.TileCount}, {tex.TagData.ArraySize}, 0, 0){TfxBytecodeOp.DecodePermuteParam(pttc.value2)}");
                         break;
                     /////
 
@@ -389,28 +393,29 @@ public class TfxBytecodeInterpreterHLSL
                         break;
 
                     case TfxBytecode.PushFromOutput:
-                        StackPush($"{hlsl[((PushFromOutputData)op.data).element]}");
+                        StackPush($"{hlsl[((TfxData1Byte)op.data).value]}");
                         break;
 
                     case TfxBytecode.PopOutputMat4:
+                        var pom4_index = ((TfxData1Byte)op.data).value;
                         List<string> PopOutputMat4 = StackPop(4);
                         string Mat4_1 = PopOutputMat4[0];
                         string Mat4_2 = PopOutputMat4[1];
                         string Mat4_3 = PopOutputMat4[2];
                         string Mat4_4 = PopOutputMat4[3];
 
-                        hlsl.TryAdd(((PopOutputMat4Data)op.data).slot, Mat4_1);
-                        hlsl.TryAdd(((PopOutputMat4Data)op.data).slot + 1, Mat4_2);
-                        hlsl.TryAdd(((PopOutputMat4Data)op.data).slot + 2, Mat4_3);
-                        hlsl.TryAdd(((PopOutputMat4Data)op.data).slot + 3, Mat4_4);
+                        hlsl.TryAdd(pom4_index, Mat4_1);
+                        hlsl.TryAdd(pom4_index + 1, Mat4_2);
+                        hlsl.TryAdd(pom4_index + 2, Mat4_3);
+                        hlsl.TryAdd(pom4_index + 3, Mat4_4);
                         Stack.Clear();
                         break;
                     case TfxBytecode.PushTemp:
-                        byte PushTemp = ((PushTempData)op.data).slot;
+                        byte PushTemp = ((TfxData1Byte)op.data).value;
                         StackPush(Temp[PushTemp]);
                         break;
                     case TfxBytecode.PopTemp:
-                        byte PopTemp = ((PopTempData)op.data).slot;
+                        byte PopTemp = ((TfxData1Byte)op.data).value;
                         string PopTemp_v = StackTop();
                         Temp.Insert(PopTemp, PopTemp_v);
                         break;
@@ -439,19 +444,19 @@ public class TfxBytecodeInterpreterHLSL
                     case TfxBytecode.PushGlobalChannelVector:
                         //Vector4 global_channel = GlobalChannels.GetDefault(((PushGlobalChannelVectorData)op.data).Index);
                         //StackPush($"float4{global_channel}");
-                        StackPush($"GlobalChannel{((PushGlobalChannelVectorData)op.data).Index}");
+                        StackPush($"GlobalChannel{((TfxData1Byte)op.data).value}");
                         break;
                     case TfxBytecode.PushObjectChannelVector:
                         //StackPush($"float4(1, 1, 1, 1)");
-                        var hash = new StringHash(((PushObjectChannelVectorData)op.data).hash);
+                        var hash = new StringHash(((TfxDataUint)op.data).value);
                         StackPush($"ObjectChannel_{GlobalStrings.Get().GetString(hash)}");
                         break;
 
                     case TfxBytecode.PopOutput:
                         if (Stack.Count == 0) // Shouldnt happen
-                            hlsl.TryAdd(((PopOutputData)op.data).slot, "float4(0, 0, 0, 0)");
+                            hlsl.TryAdd(((TfxData1Byte)op.data).value, "float4(0, 0, 0, 0)");
                         else
-                            hlsl.TryAdd(((PopOutputData)op.data).slot, StackTop());
+                            hlsl.TryAdd(((TfxData1Byte)op.data).value, StackTop());
 
                         Stack.Clear(); // Does this matter?
                         if (print)

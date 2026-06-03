@@ -120,10 +120,10 @@ public static class Source2Handler
             switch (op.op)
             {
                 case TfxBytecode.PushExternInputTextureView:
-                    var data = (PushExternInputTextureViewData)op.data;
-                    int slot = ((SetShaderTextureData)opcodes[i + 1].data).value & 0x1F;
-                    int index = data.element * 8;
-                    switch (data.extern_)
+                    var data = (TfxData2Byte)op.data;
+                    int slot = ((TfxData1Byte)opcodes[i + 1].data).value & 0x1F;
+                    int index = data.value2 * 8;
+                    switch ((TfxExtern)data.value)
                     {
                         case TfxExtern.Frame:
                             switch (index)

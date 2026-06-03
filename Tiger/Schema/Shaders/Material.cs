@@ -145,7 +145,7 @@ namespace Tiger.Schema.Shaders
                 var bytecode = new TfxBytecodeInterpreterHLSL(TfxBytecodeOp.ParseAll(Pixel.TFX_Bytecode));
                 foreach (var objectChannel in bytecode.Opcodes.Where(x => x.op == TfxBytecode.PushObjectChannelVector))
                 {
-                    var hash = new StringHash(((PushObjectChannelVectorData)objectChannel.data).hash);
+                    var hash = new StringHash(((TfxDataUint)objectChannel.data).value);
                     material.UsedChannelNames.TryAdd(hash, GlobalStrings.Get().GetString(hash));
                 }
 
@@ -223,7 +223,7 @@ namespace Tiger.Schema.Shaders
                 var bytecode = new TfxBytecodeInterpreterHLSL(TfxBytecodeOp.ParseAll(Vertex.TFX_Bytecode));
                 foreach (var objectChannel in bytecode.Opcodes.Where(x => x.op == TfxBytecode.PushObjectChannelVector))
                 {
-                    var hash = new StringHash(((PushObjectChannelVectorData)objectChannel.data).hash);
+                    var hash = new StringHash(((TfxDataUint)objectChannel.data).value);
                     material.UsedChannelNames.TryAdd(hash, GlobalStrings.Get().GetString(hash));
                 }
 
@@ -304,8 +304,8 @@ namespace Tiger.Schema.Shaders
             var list = new List<TfxExtern>();
             foreach (TfxData op in opcodes.Where(x => x.op.ToString().Contains("Extern")))
             {
-                if (!list.Contains(op.data.extern_))
-                    list.Add(op.data.extern_);
+                if (!list.Contains((TfxExtern)op.data.value))
+                    list.Add((TfxExtern)op.data.value);
             }
 
             return list;
