@@ -129,14 +129,16 @@ public static class TfxBytecodeOp
                 case TfxBytecode.PushObjectChannelVector:
                     tfxData.data = new TfxDataUint()
                     {
-                        value = Strategy.IsPreBL() ? reader.ReadByte() : Endian.SwapU32(reader.ReadUInt32())
+                        value = Strategy.IsPostBL()
+                        ? Endian.SwapU32(reader.ReadUInt32())
+                        : reader.ReadByte()
                     };
                     break;
             }
         }
         catch (Exception e)
         {
-            Log.Error(e.Message);
+            Log.Error($"Error reading op {tfxData.op} ({tfxData.rawOp:X}): {e.Message}");
         }
         return tfxData;
     }
@@ -333,7 +335,7 @@ public static class TfxBytecodeOp
                 break;
             case TfxBytecode.PushObjectChannelVector:
                 var hash = new StringHash(((TfxDataUint)tfxData.data).value);
-                output = Strategy.IsPreBL() ? $"index {hash}" : $"hash {GlobalStrings.Get().GetString(hash)}";
+                output = Strategy.IsPostBL() ? $"hash {GlobalStrings.Get().GetString(hash)}" : $"index {((TfxDataUint)tfxData.data).value}";
                 break;
             case TfxBytecode.PushGlobalChannelVector:
                 index = ((TfxData1Byte)tfxData.data).value;
