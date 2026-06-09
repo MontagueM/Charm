@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -114,8 +115,20 @@ public static class Helpers
 
     public static string SanitizeString(string input, string replacement = "_")
     {
-        string pattern = @"[^a-zA-Z0-9 ]";
-        return Regex.Replace(input, pattern, replacement).Trim();
+        if (string.IsNullOrEmpty(input))
+            return string.Empty;
+
+        string normalized = input.Normalize(NormalizationForm.FormD);
+
+        var sb = new StringBuilder(normalized.Length);
+        foreach (char c in normalized)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                sb.Append(c);
+        }
+
+        string cleaned = sb.ToString().Normalize(NormalizationForm.FormC);
+        return Regex.Replace(cleaned, @"[^a-zA-Z0-9 ]", replacement).Trim();
     }
 
     public static byte[] HexStringToByteArray(string hex)

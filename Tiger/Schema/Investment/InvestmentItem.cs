@@ -87,7 +87,7 @@ public class InventoryItem : Tag<S9D798080>
 
     private bool IsItemHolofoil()
     {
-        if (!Strategy.IsD1() && _tag.Unk78_EoF.GetValue(GetReader()) is S74738080 Unk && Unk.Unk20.Any(x => x.Unk00 == 0xF3))
+        if (!Strategy.IsD1() && _tag.Unk78_EoF.GetValue(GetReader()) is S74738080 Unk && Unk.Unk20.Any(x => x.Unk00 == 0xF2))
             return true;
 
         return false;
@@ -109,12 +109,12 @@ public class InventoryItem : Tag<S9D798080>
             traits.Add(Investment.Get().GetTrait(index).Value.TraitHash);
         }
 
-        // not ideal, should be done elsewhere
-        if (GetItemRarity() == DestinyTierType.Exotic && (traits.Any(x => x.ToString().Contains("item_weapon")) || traits.Any(x => x.ToString().Contains("item_armor"))))
-            Investment.Get().FeaturedItems.Add(GetItemIndex());
+        // Featured items were retired in MoT
+        //if (GetItemRarity() == DestinyTierType.Exotic && (traits.Any(x => x.ToString().Contains("item_weapon")) || traits.Any(x => x.ToString().Contains("item_armor"))))
+        //    Investment.Get().FeaturedItems.Add(GetItemIndex());
 
-        if (Investment.Get().FeaturedItems.Contains(GetItemIndex()))
-            traits.Add(DestinyTraitID.item_featured);
+        //if (Investment.Get().FeaturedItems.Contains(GetItemIndex()))
+        //    traits.Add(DestinyTraitID.item_featured);
 
         // Custom assignments
         if (_tag.TraitIndices.Count == 0)

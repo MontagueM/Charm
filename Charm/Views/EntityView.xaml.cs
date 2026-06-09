@@ -271,19 +271,19 @@ public partial class EntityView : UserControl
             {
                 foreach (S7B738080 dyeEntry in translationBlock.DefaultDyes)
                 {
-                    DyeD1 dye = Investment.Get().GetD1DyeFromIndex(dyeEntry.DyeIndex);
+                    DyeD1 dye = Investment.Get().GetD1DyeFromIndex(dyeEntry.GetDyeIndex());
                     if (dye != null)
                     {
-                        dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
+                        dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.GetChannelIndex()), dye);
                         dye.ExportTextures($"{savePath}/Textures", config.GetOutputTextureFormat());
                     }
                 }
                 foreach (S7B738080 dyeEntry in translationBlock.LockedDyes)
                 {
-                    DyeD1 dye = Investment.Get().GetD1DyeFromIndex(dyeEntry.DyeIndex);
+                    DyeD1 dye = Investment.Get().GetD1DyeFromIndex(dyeEntry.GetDyeIndex());
                     if (dye != null)
                     {
-                        dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
+                        dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.GetChannelIndex()), dye);
                         dye.ExportTextures($"{savePath}/Textures", config.GetOutputTextureFormat());
                     }
                 }
@@ -297,20 +297,20 @@ public partial class EntityView : UserControl
             {
                 foreach (S7B738080 dyeEntry in translationBlock.DefaultDyes)
                 {
-                    Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.DyeIndex);
+                    Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.GetDyeIndex());
                     if (dye is null)
                         continue;
-                    dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
+                    dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.GetChannelIndex()), dye);
 #if DEBUG
                     System.Console.WriteLine($"{item.Name}: DefaultDye {dye.Hash}");
 #endif
                 }
                 foreach (S7B738080 dyeEntry in translationBlock.LockedDyes)
                 {
-                    Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.DyeIndex);
+                    Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.GetDyeIndex());
                     if (dye is null)
                         continue;
-                    dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
+                    dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.GetChannelIndex()), dye);
 #if DEBUG
                     System.Console.WriteLine($"{item.Name}: LockedDye {dye.Hash}");
 #endif

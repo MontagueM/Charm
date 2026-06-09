@@ -511,7 +511,8 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     public int GetItemIconContainerIndex(InventoryItem item)
     {
-        return GetItemStrings(GetItemIndex(item.TagData.InventoryItemHash)).TagData.IconIndex;
+        var index = GetItemStrings(GetItemIndex(item.TagData.InventoryItemHash)).TagData.IconIndex;
+        return index;
     }
 
     public Tag<SB83E8080>? GetItemIconContainer(InventoryItem item)
@@ -545,7 +546,8 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     public Tag<SB83E8080>? GetFoundryItemIconContainer(InventoryItem item)
     {
-        int iconIndex = Strategy.IsLatest() ? GetItemStrings(GetItemIndex(item.ApiHash)).TagData.EmblemContainerIndex : GetItemStrings(GetItemIndex(item.ApiHash)).TagData.FoundryIconIndex;
+        //int iconIndex = Strategy.IsLatest() ? GetItemStrings(GetItemIndex(item.ApiHash)).TagData.EmblemContainerIndex : GetItemStrings(GetItemIndex(item.ApiHash)).TagData.FoundryIconIndex;
+        int iconIndex = GetItemStrings(GetItemIndex(item.ApiHash)).TagData.EmblemContainerIndex;
         if (iconIndex == -1)
             return null;
 
@@ -726,7 +728,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         using TigerReader reader = _collectableDefinitionMap.GetReader();
         for (int i = 0; i < _collectableDefinitionMap.TagData.CollectibleDefinitionEntries.Count; i++)
         {
-            short itemIndex = _collectableDefinitionMap.TagData.CollectibleDefinitionEntries[reader, i].InventoryItemIndex;
+            int itemIndex = _collectableDefinitionMap.TagData.CollectibleDefinitionEntries[reader, i].InventoryItemIndex;
             _collectableIndexMap.TryAdd(itemIndex, i);
         }
     }
@@ -993,12 +995,12 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     #endregion
 
     #region Dyes
-    public TigerHash GetChannelHashFromIndex(short index)
+    public TigerHash GetChannelHashFromIndex(int index)
     {
         return _dyeChannelTag.TagData.ChannelHashes[_dyeChannelTag.GetReader(), index].ChannelHash;
     }
 
-    public Dye? GetDyeFromIndex(short index)
+    public Dye? GetDyeFromIndex(int index)
     {
         SC6558080 artEntry = _artDyeReferenceTag.TagData.ArtDyeReferences.ElementAt(_artDyeReferenceTag.GetReader(), index);
 
@@ -1017,7 +1019,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         return null;
     }
 
-    public DyeD1 GetD1DyeFromIndex(short index)
+    public DyeD1 GetD1DyeFromIndex(int index)
     {
         SC6558080 artEntry = _artDyeReferenceTag.TagData.ArtDyeReferences.ElementAt(_artDyeReferenceTag.GetReader(), index);
         Optional<S0F878080> dyeEntry = _sandboxPatternAssignmentsTag.TagData.AssignmentBSL.BinarySearch(_sandboxPatternAssignmentsTag.GetReader(), artEntry.DyeManifestHash);
@@ -1040,9 +1042,9 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             {
                 foreach (S7B738080 dyeEntry in translationBlock.CustomDyes)
                 {
-                    DyeD1 dye = GetD1DyeFromIndex(dyeEntry.DyeIndex);
+                    DyeD1 dye = GetD1DyeFromIndex(dyeEntry.GetDyeIndex());
                     dye.ExportTextures(savePath + "/Textures", outputTextureFormat);
-                    dyes.Add(DyeD1.GetChannelName(GetChannelHashFromIndex(dyeEntry.ChannelIndex)), dye);
+                    dyes.Add(DyeD1.GetChannelName(GetChannelHashFromIndex(dyeEntry.GetChannelIndex())), dye);
                 }
             }
             if (!dyes.Any())
@@ -1059,9 +1061,9 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             {
                 foreach (S7B738080 dyeEntry in translationBlock.CustomDyes)
                 {
-                    Dye dye = GetDyeFromIndex(dyeEntry.DyeIndex);
+                    Dye dye = GetDyeFromIndex(dyeEntry.GetDyeIndex());
                     dye.ExportTextures(savePath + "/Textures", outputTextureFormat);
-                    dyes.Add(Dye.GetChannelName(GetChannelHashFromIndex(dyeEntry.ChannelIndex)), dye);
+                    dyes.Add(Dye.GetChannelName(GetChannelHashFromIndex(dyeEntry.GetChannelIndex())), dye);
 
                     Log.Debug($"{item.Name}: DefaultDye {dye.Hash}");
                 }

@@ -1583,6 +1583,16 @@
                             Source="{Binding Item.ItemIconOverlay}" />
 
                         <Image
+                            Width="18"
+                            Height="18"
+                            Margin="5"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+                            d:Source="https://www.bungie.net/common/destiny2_content/icons/7a793b17f8c18aaed66c6b87de9ff5f8.jpg"
+                            RenderOptions.BitmapScalingMode="NearestNeighbor"
+                            Source="{Binding Item.ItemIconOverlay2}" />
+
+                        <Image
                             Width="96"
                             Height="96"
                             Panel.ZIndex="1"

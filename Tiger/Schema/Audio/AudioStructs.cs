@@ -32,10 +32,12 @@ public struct S29978080
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "1F8D8080", 0x38)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "2F978080", 0x48)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "2F978080", 0x40)]
 public struct S2F978080
 {
     [SchemaField(0x30, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x40, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x38, TigerStrategy.DESTINY2_LATEST)]
     public ResourcePointer Unk40; // 2A978080, 2D978080
 }
 
@@ -59,6 +61,7 @@ public struct S2A978080
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "33978080", 0x8C)]
 [SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "33978080", 0x94)]
 [SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "33978080", 0xA4)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "33978080", 0xA8)]
 public struct S33978080
 {
     // Male
@@ -133,11 +136,13 @@ public struct S33978080
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "2D978080", 0x30)]
 [SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "2D978080", 0x38)]
 [SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "2D978080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "2D978080", 0x40)]
 public struct S2D978080
 {
     [SchemaField(0x18, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x20, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x28, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
+    [SchemaField(0x30, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<S30978080> Unk20;
 }
 

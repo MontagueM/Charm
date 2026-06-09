@@ -123,6 +123,15 @@
                     VerticalAlignment="Center"
                     RenderOptions.BitmapScalingMode="LowQuality"
                     Source="{Binding IconOverlay}" />
+
+                <Image
+                    Width="16"
+                    Height="16"
+                    Margin="6"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Bottom"
+                    RenderOptions.BitmapScalingMode="LowQuality"
+                    Source="{Binding IconOverlay2}" />
             </Grid>
         </DataTemplate>
 

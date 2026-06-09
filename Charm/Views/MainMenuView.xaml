@@ -26,15 +26,6 @@
     </UserControl.Resources>
 
     <Grid>
-        <Grid.Background>
-            <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0,0" Opacity="0.5" RadiusX="2" RadiusY="2">
-                <RadialGradientBrush.GradientStops>
-                    <GradientStop x:Name="Gradient" Offset="0" Color="#008081" />
-                    <GradientStop Offset="0.5" Color="#00000000" />
-                </RadialGradientBrush.GradientStops>
-            </RadialGradientBrush>
-        </Grid.Background>
-
         <Grid.Triggers>
             <EventTrigger RoutedEvent="Grid.Loaded">
                 <BeginStoryboard>
@@ -67,6 +58,7 @@
                 Margin="30"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
+                Panel.ZIndex="10"
                 Opacity="0.35">
                 <Grid.Triggers>
                     <EventTrigger RoutedEvent="MouseEnter">
@@ -102,6 +94,68 @@
                     x:Name="StrategyIcon"
                     Width="75"
                     Height="75" />
+            </Grid>
+
+            <Grid
+                x:Name="GradientGrid"
+                Panel.ZIndex="-1"
+                IsHitTestVisible="False"
+                Visibility="Visible">
+                <Grid.Background>
+                    <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0,0" Opacity="0.5" RadiusX="2" RadiusY="2">
+                        <RadialGradientBrush.GradientStops>
+                            <GradientStop x:Name="Gradient" Offset="0" Color="#008081" />
+                            <GradientStop Offset="0.5" Color="#00000000" />
+                        </RadialGradientBrush.GradientStops>
+                    </RadialGradientBrush>
+                </Grid.Background>
+            </Grid>
+
+            <Grid
+                x:Name="MotDecor"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                IsHitTestVisible="False"
+                Opacity="0.65">
+                <Image
+                    x:Name="MotDecorBackground"
+                    Width="3840"
+                    Height="1200"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Panel.ZIndex="-10"
+                    Opacity="0.75" />
+                <Image
+                    x:Name="MotDecorGradient"
+                    Width="1920"
+                    Height="1200"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Bottom"
+                    Opacity="1">
+                    <Image.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="1" ScaleY="1" />
+                            <TranslateTransform X="-960" />
+                        </TransformGroup>
+                    </Image.RenderTransform>
+                </Image>
+                <Image
+                    Width="1920"
+                    Height="1200"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Opacity="1"
+                    RenderTransformOrigin="0.5,0.5"
+                    Source="{Binding Source, ElementName=MotDecorGradient}">
+                    <Image.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="-1" ScaleY="1" />
+                            <TranslateTransform X="960" />
+                        </TransformGroup>
+                    </Image.RenderTransform>
+                </Image>
             </Grid>
         </Grid>
 

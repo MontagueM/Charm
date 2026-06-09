@@ -130,7 +130,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
         types = types.OrderBy(x => x.Content as string).ToList();
         types.Insert(0, new() { Content = "All", FontSize = 10 });
-        types.Insert(1, new() { Content = "Featured", Tag = DestinyTraitID.item_featured, FontSize = 10 });
+        //types.Insert(1, new() { Content = "Featured", Tag = DestinyTraitID.item_featured, FontSize = 10 });
         presets.Box.ItemsSource = types;
 
         if (presets.Box.SelectedIndex == -1)

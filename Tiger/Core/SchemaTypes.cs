@@ -493,7 +493,7 @@ public class ResourcePointer : RelativePointer
         }
         catch (Exception ex)
         {
-            throw new Exception($"[{reader.Hash:X2}] Failed to read at position {reader.BaseStream.Position:X}. Stream length: {reader.BaseStream.Length}", ex);
+            throw new Exception($"[{reader.Hash:X2}] Failed to read at position {reader.BaseStream.Position:X}. Stream length: {reader.BaseStream.Length}. ResourceClass: {ResourceClassHash:X2}", ex);
         }
     }
 

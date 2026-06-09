@@ -254,6 +254,7 @@ public enum DestinyTraitID : uint
     [Description("Exotic Quest")]
     item_quest_exotic = 370766376,
     item_quest_frontier_apollo = 2799343944,
+    item_quest_frontier_behemoth = 904453863,
     [Description("New Light Quest")]
     item_quest_new_light = 520867389,
     item_quest_onramp = 170945933,
@@ -372,8 +373,10 @@ public enum DestinyTraitID : uint
     releases_v420_season = 117031016,
     [Description("Opulence")]
     releases_v450_season = 1357347767,
-    [Description("Shadowkeep")]
+    [Description("Undying")]
     releases_v460_season = 1160263324,
+    [Description("Shadowkeep")]
+    releases_v460_annual = 955734042,
     [Description("Dawn")]
     releases_v470_season = 2326993577,
     [Description("Worthy")]
@@ -436,7 +439,16 @@ public enum DestinyTraitID : uint
     [Description("Renegades")]
     releases_v950_core = 2987314010,
     [Description("Renegades")]
-    releases_v950_dlc = 2773025918
+    releases_v950_dlc = 2773025918,
+
+    [Description("Monument of Triumph")]
+    releases_v960 = 703226390,
+    [Description("Monument of Triumph")]
+    releases_v960_core = 4269031329,
+    [Description("Monument of Triumph")]
+    releases_v970 = 720003977,
+    [Description("Monument of Triumph")]
+    releases_v970_core = 3515618796,
 }
 
 
@@ -458,7 +470,6 @@ public enum DestinyDamageTypeEnum : int
 }
 
 // TODO: Find where these indexes actually go?
-// Would be nice if these stopped changing EVERY UPDATE :)
 public static class DestinyDamageType
 {
     public static DestinyDamageTypeEnum GetDamageType(int index)
@@ -469,27 +480,27 @@ public static class DestinyDamageType
                 return DestinyDamageTypeEnum.None;
 
             case 1492: // TFS
-            case 1961:
+            case 2045:
                 return DestinyDamageTypeEnum.Kinetic;
 
             case 1493: // TFS
-            case 1962:
+            case 2046:
                 return DestinyDamageTypeEnum.Arc;
 
             case 1494: // TFS
-            case 1963:
+            case 2047:
                 return DestinyDamageTypeEnum.Solar;
 
             case 1495: // TFS
-            case 1964:
+            case 2048:
                 return DestinyDamageTypeEnum.Void;
 
             case 1496: // TFS
-            case 1965:
+            case 2049:
                 return DestinyDamageTypeEnum.Stasis;
 
             case 1497: // TFS
-            case 1966:
+            case 2050:
                 return DestinyDamageTypeEnum.Strand;
 
             default:

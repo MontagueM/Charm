@@ -41,15 +41,15 @@ public partial class QuestListView : UserControl, INotifyPropertyChanged
     }
 
     public List<DestinyTraitID> TraitCategories = new()
-        {
-            DestinyTraitID.item_quest_all,
-            DestinyTraitID.item_quest_new_light,
-            DestinyTraitID.item_quest_current_release,
-            DestinyTraitID.item_quest_playlists,
-            DestinyTraitID.item_quest_seasonal,
-            DestinyTraitID.item_quest_exotic,
-            DestinyTraitID.item_quest_past,
-        };
+    {
+        DestinyTraitID.item_quest_all,
+        DestinyTraitID.item_quest_new_light,
+        DestinyTraitID.item_quest_current_release,
+        DestinyTraitID.item_quest_playlists,
+        DestinyTraitID.item_quest_seasonal,
+        DestinyTraitID.item_quest_exotic,
+        DestinyTraitID.item_quest_past,
+    };
 
     public QuestListView(Category itemCategory)
     {
@@ -76,6 +76,9 @@ public partial class QuestListView : UserControl, INotifyPropertyChanged
     {
         foreach (var trait in TraitCategories)
         {
+            if (!FilteredQuests.ContainsKey(trait))
+                FilteredQuests[trait] = new();
+
             var category = new QuestCategory()
             {
                 CategoryName = $"{trait.GetEnumDescription()}s",
@@ -147,11 +150,11 @@ public partial class QuestListView : UserControl, INotifyPropertyChanged
         if (traits.Contains(DestinyTraitID.item_quest_exotic)) return DestinyTraitID.item_quest_exotic;
 
         if (traits.Contains(DestinyTraitID.item_quest_current_release)
-         || traits.Contains(DestinyTraitID.item_quest_frontier_apollo))
+         || traits.Contains(DestinyTraitID.item_quest_frontier_behemoth)
+         || traits.Contains(DestinyTraitID.item_quest_frontier_apollo)
+         || traits.Any(x => x.GetEnumDescription() == "Renegades")
+         || traits.Any(x => x.GetEnumDescription() == "Monument of Triumph"))
             return DestinyTraitID.item_quest_current_release;
-
-        if (traits.Contains(DestinyTraitID.item_quest_past))
-            return DestinyTraitID.item_quest_past;
 
         if (traits.Contains(DestinyTraitID.item_quest_playlists))
             return DestinyTraitID.item_quest_playlists;
@@ -163,6 +166,11 @@ public partial class QuestListView : UserControl, INotifyPropertyChanged
         if (traits.Contains(DestinyTraitID.item_quest_new_light))
             return DestinyTraitID.item_quest_new_light;
 
+        if (traits.Contains(DestinyTraitID.item_quest_past)
+            || (traits.Any(x => x.ToString().Contains("releases_")
+            && traits.Any(x => !x.ToString().Contains("releases_v9")))))
+            return DestinyTraitID.item_quest_past;
+
         return DestinyTraitID.item_quest_all;
     }
 
@@ -171,10 +179,12 @@ public partial class QuestListView : UserControl, INotifyPropertyChanged
         if (!FilteredQuests.ContainsKey(trait))
             FilteredQuests[trait] = new();
 
+        var index = Investment.Get().GetTrait(trait)?.IconIndex ?? -1;
+        var icon = ApiImageUtils.MakeIcon(item) ?? ApiImageUtils.MakeIcon(index, listIndex: 3);
         QuestCategoryEntry questEntry = new()
         {
             QuestItem = item,
-            QuestIcon = ApiImageUtils.MakeIcon(item) ?? ApiImageUtils.MakeIcon(Investment.Get().GetTrait(trait).Value.IconIndex, listIndex: 3),
+            QuestIcon = icon,
             QuestName = item.Name,
             QuestDescription = item.Description,
             MainTrait = trait

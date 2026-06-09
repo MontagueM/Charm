@@ -250,6 +250,8 @@ public partial class MainMenuView : UserControl
     {
         Color col = Color.FromArgb(0xFF, 0x50, 0x50, 0x50);
         ImageSource strategyIcon = null;
+        GradientGrid.Visibility = Visibility.Visible;
+        MotDecor.Visibility = Visibility.Collapsed;
         switch (strategy)
         {
             case TigerStrategy.DESTINY1_RISE_OF_IRON:
@@ -279,11 +281,11 @@ public partial class MainMenuView : UserControl
                 strategyIcon = ApiImageUtils.MakeIcon(new FileHash("2A11DC80"));
                 break;
             case TigerStrategy.DESTINY2_LATEST:
-                //col = Color.FromArgb(0xFF, 0x00, 0x80, 0x81);
-                //strategyIcon = ApiImageUtils.MakeIcon(new FileHash("D643DE80")); // EoF
-
-                col = Color.FromArgb(0xFF, 0x00, 0xB8, 0xFF);
-                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("C534C280"));
+                GradientGrid.Visibility = Visibility.Hidden;
+                MotDecor.Visibility = Visibility.Visible;
+                MotDecorGradient.Source = ApiImageUtils.MakeIcon(new FileHash("9040A080"));
+                MotDecorBackground.Source = ApiImageUtils.MakeIcon(new FileHash("8E40A080"));
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("C0672C81"));
                 break;
         }
         StrategyIcon.Source = strategyIcon;

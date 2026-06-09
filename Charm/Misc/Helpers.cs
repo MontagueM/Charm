@@ -165,9 +165,9 @@ public static class ApiImageUtils
         // Crafted overlay for patterns
         if (!Strategy.IsD1() && item.TagData.Unk10.GetValue(item.GetReader()) is S49298080)
         {
-            using UnmanagedMemoryStream overlay = Texture.GetTextureFromHash(new(Strategy.IsLatest() ? 0x80A9F577 : 0x80E55268));
-            var craftedOverlay = MakeBitmapImage(overlay, 96, 96);
-            group.Children.Add(new ImageDrawing(craftedOverlay, new Rect(0, 0, 96, 96)));
+            using UnmanagedMemoryStream overlay = Texture.GetTextureFromHash(new(0x80A9F577));
+            var craftedOverlay = MakeBitmapImage(overlay, 18, 18);
+            group.Children.Add(new ImageDrawing(craftedOverlay, new Rect(0, 96, 18, 18)));
         }
 
         var dw = new DrawingImage(group);
@@ -278,17 +278,26 @@ public static class ApiImageUtils
             }
         }
 
+        var dw = new DrawingImage(group);
+        dw.Freeze();
+
+        return dw;
+    }
+
+    public static DrawingImage MakeItemIconOverlay2(InventoryItem item)
+    {
+        var group = new DrawingGroup();
+
         // Crafted overlay for patterns
         if (!Strategy.IsD1() && item.TagData.Unk10.GetValue(item.GetReader()) is S49298080)
         {
-            using UnmanagedMemoryStream overlay = Texture.GetTextureFromHash(new(Strategy.IsLatest() ? 0x80A9F577 : 0x80E55268));
+            using UnmanagedMemoryStream overlay = Texture.GetTextureFromHash(new(0x80A9F577));
             var craftedOverlay = MakeBitmapImage(overlay, 96, 96);
             group.Children.Add(new ImageDrawing(craftedOverlay, new Rect(0, 0, 96, 96)));
         }
 
         var dw = new DrawingImage(group);
         dw.Freeze();
-
         return dw;
     }
 
@@ -1370,10 +1379,11 @@ public class Investment_IsFeaturedItem : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (Strategy.IsLatest() && value is uint hash && hash != 0)
-        {
-            return Investment.Get().FeaturedItems.Contains(Investment.Get().GetItemIndex(hash));
-        }
+        // Featured items were retired in MoT
+        //if (Strategy.IsLatest() && value is uint hash && hash != 0)
+        //{
+        //    return Investment.Get().FeaturedItems.Contains(Investment.Get().GetItemIndex(hash));
+        //}
         return false;
     }
 

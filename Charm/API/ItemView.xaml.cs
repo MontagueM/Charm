@@ -114,6 +114,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
             ItemIconBackground = ApiImageUtils.MakeItemIconBackground(_invItem),
             ItemIcon = ApiImageUtils.MakeItemIconForeground(_invItem),
             ItemIconOverlay = ApiImageUtils.MakeItemIconOverlay(_invItem),
+            ItemIconOverlay2 = ApiImageUtils.MakeItemIconOverlay2(_invItem),
             ItemWatermark = ApiImageUtils.GetPlugWatermark(_invItem),
 
             ItemBackground = new BitmapImage(new Uri($"https://www.bungie.net/common/destiny2_content/screenshots/{_invItem.ApiHash}.jpg")),
@@ -122,7 +123,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
 
         if (_invItem.IsEmblem)
         {
-            short index = _invItem.GetItemStrings().TagData.EmblemContainerIndex;
+            var index = _invItem.GetItemStrings().TagData.EmblemContainerIndex;
             var container = Investment.Get().GetItemIconContainer(index);
             if (container is null)
                 return;
@@ -807,6 +808,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
         public ImageSource ItemIconBackground { get; set; }
         public ImageSource ItemIcon { get; set; }
         public ImageSource ItemIconOverlay { get; set; }
+        public ImageSource ItemIconOverlay2 { get; set; } // mainly used for crafting icon overlay
         public ImageSource ItemWatermark { get; set; }
         public ImageSource ItemFoundryBanner { get; set; }
 
@@ -852,6 +854,10 @@ public class APIPlugItem : CharmUIElement
             () => ApiImageUtils.MakeItemIconOverlay(item),
             () => OnPropertyChanged(nameof(IconOverlay)));
 
+        _iconOverlay2Loader = new AsyncImageLoader(
+            () => ApiImageUtils.MakeItemIconOverlay2(item),
+            () => OnPropertyChanged(nameof(IconOverlay2)));
+
         _watermarkLoader = new AsyncImageLoader(
             () => ApiImageUtils.GetPlugWatermark(item),
             () => OnPropertyChanged(nameof(ItemWatermark)));
@@ -896,10 +902,12 @@ public class APIPlugItem : CharmUIElement
 
     private readonly AsyncImageLoader _iconBgLoader;
     private readonly AsyncImageLoader _iconOverlayLoader;
+    private readonly AsyncImageLoader _iconOverlay2Loader;
     private readonly AsyncImageLoader _watermarkLoader;
 
     public ImageSource IconBackground => _iconBgLoader.GetImage();
     public ImageSource IconOverlay => _iconOverlayLoader.GetImage();
+    public ImageSource IconOverlay2 => _iconOverlay2Loader.GetImage();
     public ImageSource ItemWatermark => Strategy.IsD1() ? null : _watermarkLoader.GetImage();
 
     public ImageSource Icon

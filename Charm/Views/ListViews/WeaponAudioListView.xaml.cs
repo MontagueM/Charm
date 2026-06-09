@@ -616,7 +616,7 @@ public partial class WeaponAudioListView : UserControl
     {
         await Task.Run(() =>
         {
-            Application.Current.Dispatcher.BeginInvoke(() =>
+            Dispatcher.Invoke(() =>
             {
                 Waveform.Source = null;
                 WaveformLoading.Visibility = Visibility.Visible;
@@ -641,7 +641,7 @@ public partial class WeaponAudioListView : UserControl
 
             var bitmapImage = ApiImageUtils.MakeBitmapImage(memory, wave.ImageLeft.Width, wave.ImageLeft.Height);
 
-            Application.Current.Dispatcher.Invoke(() =>
+            Dispatcher.Invoke(() =>
             {
                 Waveform.Source = bitmapImage;
                 WaveformLoading.Visibility = Visibility.Collapsed;
@@ -651,23 +651,17 @@ public partial class WeaponAudioListView : UserControl
 
     private void UpdateWaveformProgress()
     {
-        Task.Run(() =>
-        {
-            if (_currentSound is null)
-                return;
+        if (_currentSound is null)
+            return;
 
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                double width = Waveform.ActualWidth;
-                double height = Waveform.ActualHeight;
-                double progress = MusicPlayer.ProgressBar.Value;
+        double width = Waveform.ActualWidth;
+        double height = Waveform.ActualHeight;
+        double progress = MusicPlayer.ProgressBar.Value;
 
-                WaveformProgressBar.Width = width;
-                WaveformProgressBar.Height = height;
+        WaveformProgressBar.Width = width;
+        WaveformProgressBar.Height = height;
 
-                WaveformTintClip.Rect = new Rect(0, 0, width * progress, height);
-            });
-        });
+        WaveformTintClip.Rect = new Rect(0, 0, width * progress, height);
     }
 
     public class WeaponItem
