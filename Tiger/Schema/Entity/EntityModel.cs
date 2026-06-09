@@ -215,8 +215,9 @@ public class DynamicMeshPart : MeshPart
         IndexBuffer = mesh.Indices;
         VertexBuffer0 = mesh.Vertices1;
         VertexBuffer1 = mesh.Vertices2;
-        VertexBuffer2 = mesh.VertexColour;
-        VertexBuffer3 = mesh.SinglePassSkinningBuffer;
+        VertexColorBuffer = mesh.VertexColour;
+        VertexSkinningBuffer = mesh.SinglePassSkinningBuffer;
+        VertexOldWeightsBuffer = mesh.OldWeights;
 
         Indices = mesh.Indices.GetIndexData(PrimitiveType, IndexOffset, IndexCount);
 

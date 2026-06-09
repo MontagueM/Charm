@@ -55,8 +55,9 @@ public class MeshPart
     public IndexBuffer IndexBuffer;
     public VertexBuffer VertexBuffer0;
     public VertexBuffer? VertexBuffer1;
-    public VertexBuffer? VertexBuffer2;
-    public VertexBuffer? VertexBuffer3; // Skinning buffer for entities
+    public VertexBuffer? VertexColorBuffer;
+    public VertexBuffer? VertexSkinningBuffer; // Skinning buffer for entities
+    public VertexBuffer? VertexOldWeightsBuffer; // old weights buffer for entities
 
     public Vector4 MeshScale = Vector4.One;
     public Vector4 MeshTransform = new(1f, 1f, 0f, 0f);

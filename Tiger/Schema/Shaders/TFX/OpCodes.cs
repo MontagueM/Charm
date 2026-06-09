@@ -421,8 +421,8 @@ public enum TfxBytecode : byte // Not ordered by value, different versions get m
     PermuteAllX,
     Permute,
     Saturate,
-    Unk25,
-    Unk26, // Also normalize apparently
+    Unk25, // Log2
+    Unk26, // Length4?
     Triangle,
     Jitter,
     Wander,

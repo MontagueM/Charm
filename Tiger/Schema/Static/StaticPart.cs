@@ -60,7 +60,7 @@ public class StaticPart : MeshPart
         IndexBuffer = buffers.Indices;
         VertexBuffer0 = buffers.Vertices0;
         VertexBuffer1 = buffers.Vertices1;
-        VertexBuffer2 = buffers.VertexColor;
+        VertexColorBuffer = buffers.VertexColor;
 
         Indices = buffers.Indices.GetIndexData(PrimitiveType, IndexOffset, IndexCount);
         // Get unique vertex indices we need to get data for
@@ -85,7 +85,7 @@ public class StaticPart : MeshPart
         IndexBuffer = mesh.Indices;
         VertexBuffer0 = mesh.Vertices0;
         VertexBuffer1 = mesh.Vertices1;
-        VertexBuffer2 = mesh.VertexColor;
+        VertexColorBuffer = mesh.VertexColor;
 
         Indices = mesh.Indices.GetIndexData(PrimitiveType, IndexOffset, IndexCount);
         // Get unique vertex indices we need to get data for
