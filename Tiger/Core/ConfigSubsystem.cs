@@ -29,67 +29,19 @@ public class CommonSettings
     public bool SaveEquirectCubemaps { get; set; } = false;
 }
 
-// [ConfigSubsystem]
 public class UnrealSettings
 {
     public bool UnrealInteropEnabled { get; set; } = false;
     public string UnrealInteropPath { get; set; } = "";
 }
 
-// [ConfigSubsystem]
 public class Source2Settings
 {
     public bool Source2ExportsEnabled { get; set; } = false;
-    //public string Source2Path { get; set; } = "";
 }
-
-// class TypeExtensions
-// {
-//     public bool HasAttributeOfType<T>(this Type type) where T : Attribute
-//     {
-//         return type.GetCustomAttributes<T>(true).Any();
-//     }
-// }
 
 public class ConfigSubsystem : Subsystem<ConfigSubsystem>
 {
-    // private Configuration _config =
-    // ConfigurationManager.OpenExeConfiguration(System.Windows.Forms.Application.ExecutablePath);
-
-    // private Dictionary<Type, dynamic?> _settings = new();
-
-
-    // protected override bool Initialise()
-    // {
-    //     // FillSettingsCache();
-    //     return true;
-    // }
-
-    // private void FillSettingsCache()
-    // {
-    //     HashSet<Type> allSettings = AppDomain.CurrentDomain.GetAssemblies()
-    //         .SelectMany(a => a.GetTypes())
-    //         .Where(t => t.HasAttributeOfType<ConfigAttribute>())
-    //         .ToHashSet();
-    //
-    //     foreach (Type settingType in allSettings)
-    //     {
-    //         dynamic? settings = Activator.CreateInstance(settingType);
-    //         _settings.Common.Common.Add(settingType, settings);
-    //     }
-    // }
-
-    // public T? GetSettings<T>() where T : struct
-    // {
-    //     if (_settings.Common.Common.TryGetValue(typeof(T), out dynamic? settings))
-    //     {
-    //         return (T) settings;
-    //     }
-    //
-    //     return null;
-    // }
-
-
     #region packagesPath
 
     public string GetPackagesPath(TigerStrategy strategy)
@@ -182,9 +134,11 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
         Save();
     }
 
+    // TODO, havent decided if I want to continue supporting s&box
     public bool GetSBoxExportEnabled()
     {
-        return _settings.Source2.Source2ExportsEnabled;
+        return false;
+        //return _settings.Source2.Source2ExportsEnabled;
     }
 
     #endregion

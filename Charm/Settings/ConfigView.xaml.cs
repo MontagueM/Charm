@@ -21,12 +21,12 @@ public partial class ConfigView : UserControl
         controlMapping = new Dictionary<string, UIElement>
         {
             { "GENERAL", ConfigControl },
-            { "PORTING", PortingControl },
+            //{ "PORTING", PortingControl },
         };
         ButtonCollection = new ObservableCollection<ButtonData>
         {
             new() { Text = "GENERAL" },
-            new() { Text = "PORTING" },
+            //new() { Text = "PORTING" },
         };
 
         Settings.ItemsSource = ButtonCollection;
