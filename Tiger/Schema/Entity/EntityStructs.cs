@@ -783,6 +783,7 @@ public struct S0F8C8080
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "0E068080", 0x24)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "138C8080", 0x28)]
 [SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "138C8080", 0x40)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "138C8080", 0x38)]
 public struct S138C8080
 {
     public short Unk00;
