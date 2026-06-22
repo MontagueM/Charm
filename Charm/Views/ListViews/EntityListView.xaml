@@ -93,7 +93,7 @@
                             FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                             FontSize="16"
                             Foreground="{StaticResource ForegroundColour70}">
-                            <Run Text="Resources: " />
+                            <Run Text="Components: " />
                             <Run Text="{Binding ResourceCount}" />
                         </TextBlock>
 

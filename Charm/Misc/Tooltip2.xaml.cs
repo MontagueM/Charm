@@ -317,18 +317,6 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                         Action = preview.PreviewActionString.Value ?? "Details"
                     });
 
-                    if (canView3D && !item.IsShader)
-                    {
-                        inputBlocks.Add(new InputBlock
-                        {
-                            Order = 1,
-                            KeyAdditional = "+",
-                            Key = "",
-                            KeyPress = "",
-                            Action = "View in 3D"
-                        });
-                    }
-
                     if (canExport)
                     {
                         inputBlocks.Add(new InputBlock
@@ -338,6 +326,18 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                             Action = "Export"
                         });
                     }
+                }
+
+                if (canView3D && !item.IsShader)
+                {
+                    inputBlocks.Add(new InputBlock
+                    {
+                        Order = 1,
+                        KeyAdditional = "+",
+                        Key = "",
+                        KeyPress = "",
+                        Action = "View in 3D"
+                    });
                 }
             }
         });
