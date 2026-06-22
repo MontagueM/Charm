@@ -44,10 +44,10 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
         return Endian.U32ToString(GetHash32Checked(tagHash64));
     }
 
-    public string GetHash64(uint tag32)
+    public ulong GetHash64(uint tag32)
     {
         IEnumerable<KeyValuePair<ulong, uint>> x = _map.Where(x => x.Value == tag32);
-        return x.Any() ? Endian.U64ToString(x.First().Key) : "";
+        return x.Any() ? x.First().Key : FileHash.InvalidHash32;
     }
 
     // todo race condition where

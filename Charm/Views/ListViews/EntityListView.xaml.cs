@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -103,7 +103,7 @@ public partial class EntityListView : UserControl
     private async Task CleanPackageList()
     {
         ConcurrentBag<PackageItem> cleanList = new();
-        TigerHash tagClass = new(Helpers.GetClassHashForStrategy(typeof(S8A6D8080), Strategy.CurrentStrategy));
+        TigerHash tagClass = new(Helpers.GetClassHashForStrategy(typeof(S80806D8A), Strategy.CurrentStrategy));
 
         await Task.Run(() =>
         {
@@ -245,10 +245,10 @@ public partial class EntityListView : UserControl
             PackageList.PackageItems = new();
             if (Strategy.IsPreBL())
             {
-                ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S30898080>();
+                ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S80808930>();
                 Parallel.ForEach(vals, val =>
                 {
-                    Tag<S30898080> bag = FileResourcer.Get().GetSchemaTag<S30898080>(val);
+                    Tag<S80808930> bag = FileResourcer.Get().GetSchemaTag<S80808930>(val);
                     if (bag.TagData.Entries.Count == 0)
                         return;
 
@@ -265,10 +265,10 @@ public partial class EntityListView : UserControl
             }
             else
             {
-                ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S1D478080>();
+                ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S8080471D>();
                 Parallel.ForEach(vals, val =>
                 {
-                    Tag<S1D478080> dgtbParent = FileResourcer.Get().GetSchemaTag<S1D478080>(val);
+                    Tag<S8080471D> dgtbParent = FileResourcer.Get().GetSchemaTag<S8080471D>(val);
 
                     if (Strategy.IsBL())
                     {
@@ -294,7 +294,7 @@ public partial class EntityListView : UserControl
                         if (dgtbParent.TagData.DestinationGlobalTagBags.Count == 0)
                             return;
 
-                        foreach (SD3598080 bag in dgtbParent.TagData.DestinationGlobalTagBags)
+                        foreach (S808059D3 bag in dgtbParent.TagData.DestinationGlobalTagBags)
                         {
                             if (!bag.DestinationGlobalTagBag.IsValid())
                                 continue;
@@ -330,7 +330,7 @@ public partial class EntityListView : UserControl
 
             Parallel.ForEach(item.Hashes, hash =>
             {
-                var tagBag = FileResourcer.Get().GetSchemaTag<S30898080>(hash);
+                var tagBag = FileResourcer.Get().GetSchemaTag<S80808930>(hash);
                 foreach (var val in tagBag.TagData.Entries)
                 {
                     FileHash reference = val.Tag?.Hash.GetReferenceHash() ?? null;
@@ -359,10 +359,10 @@ public partial class EntityListView : UserControl
         RefreshEntityList();
     }
 
-    private void LoadBudgetSetEntities(S33898080 entry)
+    private void LoadBudgetSetEntities(S80808933 entry)
     {
-        var budgetSetHeader = FileResourcer.Get().GetSchemaTag<S7E988080>(entry.Tag.Hash);
-        var budgetSet = FileResourcer.Get().GetSchemaTag<SED9E8080>(budgetSetHeader.TagData.Bag.Hash);
+        var budgetSetHeader = FileResourcer.Get().GetSchemaTag<S8080987E>(entry.Tag.Hash);
+        var budgetSet = FileResourcer.Get().GetSchemaTag<S80809EED>(budgetSetHeader.TagData.Bag.Hash);
 
         foreach (var val in budgetSet.TagData.Unk28)
         {
@@ -777,21 +777,21 @@ public partial class EntityListView : UserControl
             if (Strategy.IsD1())
             {
                 // Name and entity is in a map data table
-                ConcurrentHashSet<FileHash> vals = await PackageResourcer.Get().GetAllHashesAsync<SD9128080>();
-                Log.Debug($"{vals.Count} SD9128080 Tags");
+                ConcurrentHashSet<FileHash> vals = await PackageResourcer.Get().GetAllHashesAsync<S808012D9>();
+                Log.Debug($"{vals.Count} S808012D9 Tags");
 
                 await Task.Run(() =>
                 {
                     Parallel.ForEach(vals, parallelOptions, val =>
                     {
-                        Tag<SD9128080> entry = FileResourcer.Get().GetSchemaTag<SD9128080>(val);
-                        foreach (SD6148080 a in entry.TagData.Unk20)
+                        Tag<S808012D9> entry = FileResourcer.Get().GetSchemaTag<S808012D9>(val);
+                        foreach (S808014D6 a in entry.TagData.Unk20)
                         {
-                            foreach (S48138080 b in a.Unk08)
+                            foreach (S80801348 b in a.Unk08)
                             {
                                 if (b.Pointer.GetValue(entry.GetReader()) is SMapDataEntry datatable)
                                 {
-                                    if (datatable.DataResource.GetValue(entry.GetReader()) is S33138080 name)
+                                    if (datatable.DataResource.GetValue(entry.GetReader()) is S80801333 name)
                                     {
                                         if (name.EntityName.IsValid())
                                         {
@@ -808,23 +808,23 @@ public partial class EntityListView : UserControl
                 });
 
                 stopwatch.Stop();
-                Log.Debug($"Stage 1: SD9128080 Entity Names took {stopwatch.Elapsed.TotalSeconds} seconds to process.");
+                Log.Debug($"Stage 1: S808012D9 Entity Names took {stopwatch.Elapsed.TotalSeconds} seconds to process.");
                 stopwatch = Stopwatch.StartNew();
 
                 // Name is in an EntityComponent, with the entity in a map data table in that EntityComponent
-                ConcurrentHashSet<FileHash> vals2 = await PackageResourcer.Get().GetAllHashesAsync<SF6038080>();
-                Log.Debug($"{vals2.Count} SF6038080 Tags");
+                ConcurrentHashSet<FileHash> vals2 = await PackageResourcer.Get().GetAllHashesAsync<S808003F6>();
+                Log.Debug($"{vals2.Count} S808003F6 Tags");
 
                 await Task.Run(() =>
                 {
                     Parallel.ForEach(vals2, parallelOptions, val =>
                     {
-                        Tag<SF6038080> entry = FileResourcer.Get().GetSchemaTag<SF6038080>(val);
+                        Tag<S808003F6> entry = FileResourcer.Get().GetSchemaTag<S808003F6>(val);
                         if (entry.TagData.EntityComponent is not null)
                         {
-                            if (entry.TagData.EntityComponent.TagData.Unk10.GetValue(entry.TagData.EntityComponent.GetReader()) is S2E098080)
+                            if (entry.TagData.EntityComponent.TagData.Unk10.GetValue(entry.TagData.EntityComponent.GetReader()) is S8080092E)
                             {
-                                var resource = (SDD078080)entry.TagData.EntityComponent.TagData.Unk18.GetValue(entry.TagData.EntityComponent.GetReader());
+                                var resource = (S808007DD)entry.TagData.EntityComponent.TagData.Unk18.GetValue(entry.TagData.EntityComponent.GetReader());
                                 foreach (SMapDataEntry dataentry in resource.DataEntries)
                                 {
                                     if (dataentry.Entity.Hash.IsValid())
@@ -840,38 +840,38 @@ public partial class EntityListView : UserControl
                 });
 
                 stopwatch.Stop();
-                Log.Debug($"Stage 2: SF6038080 Entity Names took {stopwatch.Elapsed.TotalSeconds} seconds to process.");
+                Log.Debug($"Stage 2: S808003F6 Entity Names took {stopwatch.Elapsed.TotalSeconds} seconds to process.");
             }
             else if (Strategy.IsPreBL()) // SK
             {
-                ConcurrentHashSet<FileHash> vals = await PackageResourcer.Get().GetAllHashesAsync<S149B8080>();
-                Log.Debug($"{vals.Count} S149B8080 Tags");
+                ConcurrentHashSet<FileHash> vals = await PackageResourcer.Get().GetAllHashesAsync<S80809B14>();
+                Log.Debug($"{vals.Count} S80809B14 Tags");
 
                 await Task.Run(() =>
                 {
                     Parallel.ForEach(vals, parallelOptions, val =>
                     {
                         //Console.WriteLine($"Resource {val}");
-                        Tag<S149B8080> entry = FileResourcer.Get().GetSchemaTag<S149B8080>(val);
+                        Tag<S80809B14> entry = FileResourcer.Get().GetSchemaTag<S80809B14>(val);
                         if (entry.TagData.EntityComponent is not null)
                         {
                             EntityComponent resource = entry.TagData.EntityComponent;
-                            if (resource.TagData.Unk10.GetValue(resource.GetReader()) is S3B9A8080)
+                            if (resource.TagData.Unk10.GetValue(resource.GetReader()) is S80809A3B)
                             {
-                                var D2Class8F948080 = (S8F948080)resource.TagData.Unk18.GetValue(resource.GetReader());
-                                foreach (S56838080 entry2 in D2Class8F948080.UnkA8)
+                                var D2Class8F948080 = (S8080948F)resource.TagData.Unk18.GetValue(resource.GetReader());
+                                foreach (S80808356 entry2 in D2Class8F948080.UnkA8)
                                 {
-                                    List<DynamicArray<S58838080>> tables = new() { entry2.Table1, entry2.Table2, entry2.Table3, entry2.Table4, entry2.Table5, entry2.Table6 };
+                                    List<DynamicArray<S80808358>> tables = new() { entry2.Table1, entry2.Table2, entry2.Table3, entry2.Table4, entry2.Table5, entry2.Table6 };
 
-                                    foreach (DynamicArray<S58838080> datatable in tables)
+                                    foreach (DynamicArray<S80808358> datatable in tables)
                                     {
-                                        foreach (S58838080 dataEntry in datatable)
+                                        foreach (S80808358 dataEntry in datatable)
                                         {
                                             SMapDataEntry? value = dataEntry.Datatable.Value;
                                             if (value is null)
                                                 continue;
 
-                                            if (value.Value.DataResource.GetValue(resource.GetReader()) is SB67E8080 name)
+                                            if (value.Value.DataResource.GetValue(resource.GetReader()) is S80807EB6 name)
                                             {
                                                 if (name.EntityName.IsValid())
                                                 {
@@ -888,7 +888,7 @@ public partial class EntityListView : UserControl
                     });
                 });
                 stopwatch.Stop();
-                Log.Debug($"Stage 1: S149B8080 Entity Names took {stopwatch.Elapsed.TotalSeconds} seconds to process.");
+                Log.Debug($"Stage 1: S80809B14 Entity Names took {stopwatch.Elapsed.TotalSeconds} seconds to process.");
             }
             else if (Strategy.IsBL() || Strategy.IsPostBL()) // BL+
             {
@@ -906,7 +906,7 @@ public partial class EntityListView : UserControl
                         var entry = FileResourcer.Get().GetSchemaTag<SMapDataTable>(val, shouldCache: false);
                         foreach (var dataEntry in entry.TagData.DataEntries)
                         {
-                            if (dataEntry.DataResource.GetValue(entry.GetReader()) is S19808080 name && name.EntityName.IsValid())
+                            if (dataEntry.DataResource.GetValue(entry.GetReader()) is S80808019 name && name.EntityName.IsValid())
                             {
                                 string entityName = entityNameCache.GetOrAdd(name.EntityName, key => GlobalStrings.Get().GetString(key));
                                 Ents.AddEntityName(Strategy.CurrentStrategy, dataEntry.Entity.Hash, entityName);
@@ -931,15 +931,15 @@ public partial class EntityListView : UserControl
                             return;
 
                         var resource = FileResourcer.Get().GetFile<EntityComponent>(val, shouldCache: false);
-                        var sb546 = (SB5468080)resource.TagData.Unk18.GetValue(resource.GetReader());
-                        foreach (S96468080 entry in sb546.Unk80)
+                        var sb546 = (S808046B5)resource.TagData.Unk18.GetValue(resource.GetReader());
+                        foreach (S80804696 entry in sb546.Unk80)
                         {
                             if (entry.DataTable is null)
                                 continue;
 
                             foreach (SMapDataEntry dataEntry in entry.DataTable.TagData.DataEntries)
                             {
-                                if (dataEntry.DataResource.GetValue(entry.DataTable.GetReader()) is S19808080 name)
+                                if (dataEntry.DataResource.GetValue(entry.DataTable.GetReader()) is S80808019 name)
                                 {
                                     if (entry.Name.IsValid())
                                     {
@@ -961,7 +961,7 @@ public partial class EntityListView : UserControl
             // Lastly gonna get all entities and see if their "default" name is valid and add those
             if (Ents.EntityNames.TryGetValue(Strategy.CurrentStrategy, out var namedEnts))
             {
-                TigerHash tagClass = new(Helpers.GetClassHashForStrategy(typeof(S8A6D8080), Strategy.CurrentStrategy));
+                TigerHash tagClass = new(Helpers.GetClassHashForStrategy(typeof(S80806D8A), Strategy.CurrentStrategy));
                 var hashes = await PackageResourcer.Get().GetAllHashesAsync(typeof(SEntity));
                 Log.Debug($"{hashes.Count} Entities");
 

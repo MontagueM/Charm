@@ -205,7 +205,7 @@ public static class Helpers
         return false;
     }
 
-    public static string? GetClassHashForStrategy(Type structType, TigerStrategy strategy)
+    public static uint GetClassHashForStrategy(Type structType, TigerStrategy strategy)
     {
         var attrs = structType.GetCustomAttributes(inherit: false)
             .OfType<SchemaStructAttribute>()
@@ -214,7 +214,7 @@ public static class Helpers
         // Try exact match first
         var match = attrs.FirstOrDefault(a => a.Strategy == strategy);
         if (match != null)
-            return match.ClassHash;
+            return match.ClassID;
 
         // If not found, try the highest lower strategy
         // ex: if SHADOWKEEP_2999 isnt defined, use SHADOWKEEP_2601 (or RISE_OF_IRON if 2601 isnt defined either)
@@ -224,7 +224,7 @@ public static class Helpers
             .FirstOrDefault();
 
         if (lower != null)
-            return lower?.ClassHash;
+            return lower.ClassID;
 
         // Worst case, use the next higher strategy (which will probably be the wrong class hash)
         var nextHighest = attrs
@@ -233,9 +233,9 @@ public static class Helpers
             .FirstOrDefault();
 
         if (nextHighest != null)
-            return nextHighest.ClassHash;
+            return nextHighest.ClassID;
 
-        return null;
+        return TigerHash.InvalidHash32;
     }
 
     public static uint HashCombine(params uint[] values)

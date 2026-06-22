@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -8,9 +8,9 @@ using ConcurrentCollections;
 
 namespace Tiger;
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "029D8080", 0x10)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "029D8080", 0x10)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C29E8080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80809D02, 0x10)] //029D8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80809D02, 0x10)] //029D8080
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, 0x80809EC2, 0x10)] //C29E8080
 [StructLayout(LayoutKind.Sequential, Size = 0x10)]
 public struct SHash64Definition
 {
@@ -67,8 +67,8 @@ public struct PackageActivityEntry
     public string Name;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "EC9E8080", 0x10)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C59E8080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80809EEC, 0x10)] //EC9E8080
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, 0x80809EC5, 0x10)] //C59E8080
 public struct SD2PackageActivityEntry
 {
     public FileHash TagHash;
@@ -192,7 +192,7 @@ public abstract class Package : IPackage
         List<TigerFile> tags = new();
 
         SchemaStructAttribute attribute = GetAttribute<SchemaStructAttribute>(fileType.BaseType.GenericTypeArguments[0]);
-        TigerHash referenceHash = new(attribute.ClassHash);
+        TigerHash referenceHash = new(attribute.ClassID);
 
         Parallel.For(0, FileEntries.Count, i =>
         {
@@ -800,7 +800,7 @@ public struct D2FileEntry
 };
 
 [StructLayout(LayoutKind.Sequential)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F39E8080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80809EF3, 0x10)] //F39E8080
 public struct D2FileEntryBitpacked
 {
     public uint Reference;
@@ -818,7 +818,7 @@ public struct D2FileEntryBitpacked
 }
 
 [StructLayout(LayoutKind.Sequential)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "EE9E8080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80809EEE, 0x30)] //EE9E8080
 public unsafe struct D2BlockEntry
 {
     public uint Offset;

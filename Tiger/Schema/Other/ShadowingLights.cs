@@ -1,4 +1,4 @@
-﻿using Tiger.Exporters;
+using Tiger.Exporters;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
@@ -13,7 +13,7 @@ public class ExpensiveLight : Tag<SExpensiveLight>
 
     public void LoadIntoExporter()
     {
-        Tag<SA16D8080>? data = (Strategy.CurrentStrategy < TigerStrategy.DESTINY2_BEYONDLIGHT_3402 || _tag.BufferData2 is null) ? _tag.BufferData : _tag.BufferData2;
+        Tag<S80806DA1>? data = (Strategy.CurrentStrategy < TigerStrategy.DESTINY2_BEYONDLIGHT_3402 || _tag.BufferData2 is null) ? _tag.BufferData : _tag.BufferData2;
         if (data is null)
             return;
 
@@ -51,7 +51,7 @@ public class ExpensiveLight : Tag<SExpensiveLight>
         Exporter.Get().GetGlobalScene().AddToGlobalScene(lightData);
     }
 
-    public Vector4 GetColor(Tag<SA16D8080> data)
+    public Vector4 GetColor(Tag<S80806DA1> data)
     {
         if (Strategy.IsD1() && data.TagData.Buffer2.Count != 0 && !data.TagData.Buffer2[2].Vec.IsZero())
         {
@@ -120,9 +120,9 @@ public class ExpensiveLight : Tag<SExpensiveLight>
 /// <summary>
 /// Map Shadowing Light (Casts shadows)
 /// </summary>
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "C71B8080", 0x18)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "33718080", 0x18)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "5E6C8080", 0x20)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801BC7, 0x18)] //C71B8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80807133, 0x18)] //33718080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806C5E, 0x20)] //5E6C8080
 public struct SExpensiveLightResource
 {
     [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
@@ -130,9 +130,9 @@ public struct SExpensiveLightResource
     public ExpensiveLight ShadowingLight;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "D91B8080", 0xB0)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "40718080", 0xC0)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "716C8080", 0x110)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801BD9, 0xB0)] //D91B8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80807140, 0xC0)] //40718080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806C71, 0x110)] //716C8080
 public struct SExpensiveLight
 {
     [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
@@ -159,8 +159,8 @@ public struct SExpensiveLight
     [SchemaField(0x98, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xA0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xE8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public Tag<SA16D8080> BufferData;
+    public Tag<S80806DA1> BufferData;
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0xEC, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public Tag<SA16D8080> BufferData2;
+    public Tag<S80806DA1> BufferData2;
 }

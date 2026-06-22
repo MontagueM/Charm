@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -108,14 +108,14 @@ public partial class DevView : UserControl
             case Key.L:
                 StringBuilder data = new();
                 data.AppendLine($"PKG: {PackageResourcer.Get().PackagePathsCache.GetPackagePathFromId(hash.PackageId)})");
-                data.AppendLine($"PKG ID: {hash.PackageId}");
+                data.AppendLine($"PKG ID: {hash.PackageId:X4}");
                 data.AppendLine($"Entry Index: {hash.FileIndex}");
                 data.AppendLine($"Type: {hash.GetFileMetadata().Type} | SubType: {hash.GetFileMetadata().SubType}");
-                data.AppendLine($"Reference Hash: {hash.GetReferenceHash()}");
-                string h64 = Hash64Map.Get().GetHash64(hash);
-                if (!string.IsNullOrEmpty(h64))
+                data.AppendLine($"Reference Hash: {hash.GetReferenceHash().Hash32:X2}");
+                var h64 = Hash64Map.Get().GetHash64(hash);
+                if (h64 != FileHash.InvalidHash32)
                 {
-                    data.AppendLine($"Hash64: {h64}");
+                    data.AppendLine($"Hash64: {h64:X2}");
                 }
 
                 HashLocation.Text = data.ToString();
@@ -351,7 +351,7 @@ public partial class DevView : UserControl
                 case 0x80801AF2:
                 case 0x808071DC:
                 case 0x80806DA1:
-                    Tag<SA16D8080> lightData = FileResourcer.Get().GetSchemaTag<SA16D8080>(hash);
+                    Tag<S80806DA1> lightData = FileResourcer.Get().GetSchemaTag<S80806DA1>(hash);
                     TfxBytecodeInterpreterHLSL bytecode = new(TfxBytecodeOp.ParseAll(lightData.TagData.Bytecode));
                     _ = bytecode.Evaluate(lightData.TagData.Buffer1, true);
 
@@ -372,8 +372,8 @@ public partial class DevView : UserControl
                     break;
 
                 case 0x80808AC5:
-                    Tag<SC58A8080> skyComplex = FileResourcer.Get().GetSchemaTag<SC58A8080>(hash);
-                    var a = (S438B8080)skyComplex.TagData.Pointer.GetValue(skyComplex.GetReader());
+                    Tag<S80808AC5> skyComplex = FileResourcer.Get().GetSchemaTag<S80808AC5>(hash);
+                    var a = (S80808B43)skyComplex.TagData.Pointer.GetValue(skyComplex.GetReader());
 
                     Console.WriteLine($"\n{skyComplex.Hash}: Unk00 {a.Unk00.Count}");
                     for (int i = 0; i < a.Unk00.Count; i += 3)

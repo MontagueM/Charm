@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -129,9 +129,9 @@ public partial class ActivityListView : UserControl
                 break;
 
             default:
-                Parallel.ForEach(PackageResourcer.Get().GetAllHashes<S8B8E8080>(), val =>
+                Parallel.ForEach(PackageResourcer.Get().GetAllHashes<S80808E8B>(), val =>
                 {
-                    var tag = FileResourcer.Get().GetSchemaTag<S8B8E8080>(val);
+                    var tag = FileResourcer.Get().GetSchemaTag<S80808E8B>(val);
                     nameHashes.TryAdd(tag.TagData.DestinationName, tag.TagData.LocationName);
                     globalStrings.AddStrings(tag.TagData.StringContainer);
                 });

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -39,7 +39,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
     }
     public EmblemItem Emblem { get; set; }
 
-    public SC4548080? StatGroup = null;
+    public S808054C4? StatGroup = null;
 
     private ObservableCollection<SocketCategory> _socketCategories = new();
     public ObservableCollection<SocketCategory> SocketCategories
@@ -151,23 +151,23 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
     {
         SocketCategories.Clear();
 
-        if (_invItem.TagData.Unk70.GetValue(_invItem.GetReader()) is SC0778080 sockets)
+        if (_invItem.TagData.Unk70.GetValue(_invItem.GetReader()) is S808077C0 sockets)
         {
             List<SocketCategory> socketCategories = new();
             List<SocketEntry> socketEntries = new();
 
             for (int i = 0; i < sockets.IntrinsicSockets.Count; i++)
             {
-                SC8778080 socket = sockets.IntrinsicSockets[i];
+                S808077C8 socket = sockets.IntrinsicSockets[i];
                 if (socket.SocketTypeIndex == -1)
                     continue;
 
-                SBA768080 type = Investment.Get().GetSocketType(socket.SocketTypeIndex);
+                S808076BA type = Investment.Get().GetSocketType(socket.SocketTypeIndex);
 
                 if (type.SocketVisiblity == 1)// && !type.PlugWhitelists.Any(x => x.PlugCategoryHash.Hash32 == 778194869))
                     continue;
 
-                S5D4F8080 category = Investment.Get().SocketCategoryStrings[type.SocketCategoryIndex];
+                S80804F5D category = Investment.Get().SocketCategoryStrings[type.SocketCategoryIndex];
                 SocketCategory socketCategory = new()
                 {
                     CategoryStyle = category.CategoryStyle,
@@ -201,16 +201,16 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
 
             for (int i = 0; i < sockets.SocketEntries.Count; i++)
             {
-                SC3778080 socket = sockets.SocketEntries[i];
+                S808077C3 socket = sockets.SocketEntries[i];
                 if (socket.SocketTypeIndex == -1)
                     continue;
 
-                SBA768080 type = Investment.Get().GetSocketType(socket.SocketTypeIndex);
+                S808076BA type = Investment.Get().GetSocketType(socket.SocketTypeIndex);
 
                 if (type.SocketVisiblity == 1)// && !type.PlugWhitelists.Any(x => x.PlugCategoryHash.Hash32 == 778194869))
                     continue;
 
-                S5D4F8080 category = Investment.Get().SocketCategoryStrings[type.SocketCategoryIndex];
+                S80804F5D category = Investment.Get().SocketCategoryStrings[type.SocketCategoryIndex];
                 if (category.CategoryStyle == DestinySocketCategoryStyle.EnergyMeter)
                     continue; // Dont really care about this one, its just a visual thing
 
@@ -246,7 +246,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
                     ApplyPlugStats(initialPlugItem);
                 }
 
-                foreach (SD5778080 plug in socket.PlugItems)
+                foreach (S808077D5 plug in socket.PlugItems)
                 {
                     plugItem = CreatePlugItem(plug.PlugInventoryItemIndex, category.CategoryStyle);
                     if (plugItem is not null)
@@ -261,7 +261,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
                 {
                     if (index != -1)
                     {
-                        foreach (SD5778080 randomPlugs in Investment.Get().GetRandomizedPlugSet(index))
+                        foreach (S808077D5 randomPlugs in Investment.Get().GetRandomizedPlugSet(index))
                         {
                             plugItem = CreatePlugItem(randomPlugs.PlugInventoryItemIndex, category.CategoryStyle);
                             if (plugItem is not null)
@@ -303,7 +303,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
 
 
             // Armor set bonuses
-            if (_invItem.IsArmor && _invItem.TagData.Unk18.GetValue(_invItem.GetReader()) is SE7778080 equippingBlock)
+            if (_invItem.IsArmor && _invItem.TagData.Unk18.GetValue(_invItem.GetReader()) is S808077E7 equippingBlock)
             {
                 if (equippingBlock.ItemSetIndex != -1)
                 {
@@ -384,15 +384,15 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
     private void LoadItemStats()
     {
         List<StatEntry> entries = new();
-        if (_invItem.TagData.Unk78.GetValue(_invItem.GetReader()) is S81738080 stats)
+        if (_invItem.TagData.Unk78.GetValue(_invItem.GetReader()) is S80807381 stats)
         {
-            SC4548080? statGroup = StatGroup;
+            S808054C4? statGroup = StatGroup;
 
             if (statGroup is not null)
             {
-                foreach (SC8548080 scaledStat in statGroup.Value.ScaledStats)
+                foreach (S808054C8 scaledStat in statGroup.Value.ScaledStats)
                 {
-                    S6F588080 StatEntry = Investment.Get().StatStrings[scaledStat.StatIndex];
+                    S8080586F StatEntry = Investment.Get().StatStrings[scaledStat.StatIndex];
 
                     int statValue = stats.InvestmentStats.Where(x => x.StatTypeIndex == scaledStat.StatIndex).FirstOrDefault().Value;
                     int displayValue = MakeDisplayValue(scaledStat.StatIndex, statValue);
@@ -428,7 +428,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
 
         item.ParentSocket.SelectedPlug = item;
 
-        if (item.Item?.TagData.Unk78.GetValue(item.Item.GetReader()) is not S81738080)
+        if (item.Item?.TagData.Unk78.GetValue(item.Item.GetReader()) is not S80807381)
             return;
 
         var stats = GetItemStatValues(item.Item);
@@ -444,7 +444,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
 
     private void RemovePreviousPlugStats(APIPlugItem item)
     {
-        if (item.Item?.TagData.Unk78.GetValue(item.Item.GetReader()) is not S81738080)
+        if (item.Item?.TagData.Unk78.GetValue(item.Item.GetReader()) is not S80807381)
             return;
 
         var stats = GetItemStatValues(item.Item);
@@ -461,11 +461,11 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
     public Dictionary<StatEntry, int> GetItemStatValues(InventoryItem item)
     {
         Dictionary<StatEntry, int> statValues = new();
-        if (item.TagData.Unk78.GetValue(item.GetReader()) is S81738080 stats)
+        if (item.TagData.Unk78.GetValue(item.GetReader()) is S80807381 stats)
         {
-            foreach (S86738080 stat in stats.InvestmentStats)
+            foreach (S80807386 stat in stats.InvestmentStats)
             {
-                S6F588080 StatEntry = Investment.Get().StatStrings[stat.StatTypeIndex];
+                S8080586F StatEntry = Investment.Get().StatStrings[stat.StatTypeIndex];
                 if (StatEntry.StatName.Value is not null)
                 {
                     StatEntry? _statEntry = StatEntries.Union(NumericStatEntries).FirstOrDefault(x => x.StatHash == StatEntry.StatHash);
@@ -481,13 +481,13 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
 
     private int MakeDisplayValue(int statIndex, int statValue)
     {
-        if (_invItem.TagData.Unk78.GetValue(_invItem.GetReader()) is S81738080 investmentStats)
+        if (_invItem.TagData.Unk78.GetValue(_invItem.GetReader()) is S80807381 investmentStats)
         {
-            SC4548080? statGroup = StatGroup;
+            S808054C4? statGroup = StatGroup;
             if (!statGroup.HasValue || statGroup is null)
                 return statValue;
 
-            SC8548080 stat = statGroup.Value.ScaledStats.FirstOrDefault(x => x.StatIndex == statIndex);
+            S808054C8 stat = statGroup.Value.ScaledStats.FirstOrDefault(x => x.StatIndex == statIndex);
             if (statValue < 0 || stat.DisplayInterpolation is null)
                 return statValue;
 
@@ -506,7 +506,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
     }
 
     // https://github.com/DestinyItemManager/DIM/blob/60b460587f8c22ffa170ca8b05dd59384bd1bef2/src/app/inventory/store/stats.ts#L522
-    public int InterpolateStatValue(SC8548080 statDisp, int value, int maxValue)
+    public int InterpolateStatValue(S808054C8 statDisp, int value, int maxValue)
     {
         var statStr = Investment.Get().StatStrings[statDisp.StatIndex];
 
@@ -584,7 +584,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
         if (item.IsSelected)
             return;
 
-        if (item.Item?.TagData.Unk78.GetValue(item.Item.GetReader()) is not S81738080)
+        if (item.Item?.TagData.Unk78.GetValue(item.Item.GetReader()) is not S80807381)
             return;
 
         var newStats = GetItemStatValues(item.Item);

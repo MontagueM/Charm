@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Windows.Controls;
 using Tiger;
@@ -13,13 +13,13 @@ public partial class MusicEventsControl : UserControl
         InitializeComponent();
     }
 
-    public void Load(SF5458080 res)
+    public void Load(S808045F5 res)
     {
         MusicLoopName.Text = res.WwiseMusicLoopName?.Value;
         EventList.ItemsSource = GetEventItems(res.Unk18);
     }
 
-    public void Load(SF7458080 res)
+    public void Load(S808045F7 res)
     {
         MusicLoopName.Text = res.AmbientMusicSetName?.Value;
         EventList.ItemsSource = GetEventItems(res.Unk18);
@@ -49,10 +49,10 @@ public partial class MusicEventsControl : UserControl
 
     // both of these are lists to maintain the original order
 
-    private List<EventItem> GetEventItems(List<SFB458080> array)
+    private List<EventItem> GetEventItems(List<S808045FB> array)
     {
         var items = new List<EventItem>();
-        foreach (SFB458080 entry in array)
+        foreach (S808045FB entry in array)
         {
             items.Add(new EventItem
             {
@@ -64,10 +64,10 @@ public partial class MusicEventsControl : UserControl
         return items;
     }
 
-    private List<EventItem> GetEventItems(List<SFA458080> array)
+    private List<EventItem> GetEventItems(List<S808045FA> array)
     {
         var items = new List<EventItem>();
-        foreach (SFA458080 entry in array)
+        foreach (S808045FA entry in array)
         {
             items.Add(new EventItem
             {

@@ -1,4 +1,4 @@
-﻿using Internal.Fbx;
+using Internal.Fbx;
 
 namespace Tiger.Schema.Entity;
 
@@ -19,7 +19,7 @@ public class EntitySkeleton : EntityComponent
         var nodes = new List<BoneNode>();
 
         dynamic? resource = _tag.Unk18.GetValue(reader);
-        if (resource is SDE818080 skelInfo)
+        if (resource is S808081DE skelInfo)
         {
             for (int i = 0; i < skelInfo.NodeHierarchy.Count; i++)
             {
@@ -45,7 +45,7 @@ public class EntitySkeleton : EntityComponent
                 nodes.Add(node);
             }
         }
-        else if (resource is SD6818080 weirdSkeleInfo)
+        else if (resource is S808081D6 weirdSkeleInfo)
         {
             for (int i = 0; i < weirdSkeleInfo.NodeHierarchy.Count; i++)
             {

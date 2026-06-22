@@ -223,9 +223,9 @@ public class Terrain : Tag<STerrain>
 /// <summary>
 /// Terrain data resource.
 /// </summary>
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "371C8080", 0x20)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "4B718080", 0x20)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "7D6C8080", 0x20)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801C37, 0x20)] //371C8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x8080714B, 0x20)] //4B718080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806C7D, 0x20)] //7D6C8080
 public struct SMapTerrainResource
 {
     [SchemaField(0x10)]
@@ -238,9 +238,9 @@ public struct SMapTerrainResource
 /// <summary>
 /// Terrain _tag.
 /// </summary>
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "2E1B8080", 0xB0)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "4F718080", 0xB0)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "816C8080", 0xB0)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801B2E, 0xB0)] //2E1B8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x8080714F, 0xB0)] //4F718080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806C81, 0xB0)] //816C8080
 public struct STerrain
 {
     public long FileSize;
@@ -271,9 +271,9 @@ public struct STerrain
     public Texture UnkA8; // A top down view of the terrain in-game (assuming for LOD)
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "7F1A8080", 0x60)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "54718080", 0x60)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "866C8080", 0x60)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801A7F, 0x60)] //7F1A8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80807154, 0x60)] //54718080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806C86, 0x60)] //866C8080
 public struct SMeshGroup
 {
     //Location?
@@ -293,9 +293,9 @@ public struct SMeshGroup
     public Texture Dyemap;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "481A8080", 0x0C)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "52718080", 0x0C)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "846C8080", 0x0C)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801A48, 0x0C)] //481A8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80807152, 0x0C)] //52718080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806C84, 0x0C)] //846C8080
 public struct STerrainPart
 {
     public Material Material;

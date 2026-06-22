@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using Tiger.Schema.Entity;
 
@@ -84,7 +84,7 @@ namespace Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON
         {
             for (int bubbleIndex = 0; bubbleIndex < _tag.Bubbles.Count; bubbleIndex++)
             {
-                S0A418080 bubble = _tag.Bubbles[bubbleIndex];
+                S8080410A bubble = _tag.Bubbles[bubbleIndex];
                 if (bubble.ChildMapReference is null)
                     continue;
 
@@ -100,9 +100,9 @@ namespace Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON
         public IEnumerable<ActivityEntities> EnumerateActivityEntities(FileHash UnkActivity = null)
         {
             Tag<SUnkActivity_ROI> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(UnkActivity);
-            foreach (S0C068080 entry in tag.TagData.Unk48)
+            foreach (S8080060C entry in tag.TagData.Unk48)
             {
-                foreach (SA8068080 entry2 in entry.Unk08)
+                foreach (S808006A8 entry2 in entry.Unk08)
                 {
                     yield return new ActivityEntities
                     {
@@ -119,30 +119,30 @@ namespace Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON
         {
             ConcurrentBag<FileHash> items = new();
 
-            Tag<SF0088080> entry = FileResourcer.Get().GetSchemaTag<SF0088080>(hash);
+            Tag<S808008F0> entry = FileResourcer.Get().GetSchemaTag<S808008F0>(hash);
             Tag<SF0088080_Child> entry2 = FileResourcer.Get().GetSchemaTag<SF0088080_Child>(entry.TagData.Unk1C);
-            DynamicArray<SD3408080> entries = entry2.TagData.Unk08;
+            DynamicArray<S808040D3> entries = entry2.TagData.Unk08;
             entries.AddRange(entry2.TagData.Unk18);
             entries.AddRange(entry2.TagData.Unk28);
 
-            foreach (SD3408080 resource in entries)
+            foreach (S808040D3 resource in entries)
             {
-                Tag<S6E078080> Unk00 = FileResourcer.Get().GetSchemaTag<S6E078080>(resource.Unk00);
-                foreach (SE9058080 a in Unk00.TagData.Unk30)
+                Tag<S8080076E> Unk00 = FileResourcer.Get().GetSchemaTag<S8080076E>(resource.Unk00);
+                foreach (S808005E9 a in Unk00.TagData.Unk30)
                 {
                     if (a.Unk10 is not null && a.Unk10.TagData.DataEntries.Count > 0)
                         if (!items.Contains(a.Unk10.Hash))
                             items.Add(a.Unk10.Hash);
 
-                    foreach (S22428080 b in a.Unk18)
+                    foreach (S80804222 b in a.Unk18)
                     {
                         if (!items.Contains(b.Unk00.Hash))
                             items.Add(b.Unk00.Hash);
 
                         // For NPCs, enemies and other AI (it's cool but not really worth adding)
-                        //if (b.Unk00.TagData.EntityComponent.TagData.Unk10.GetValue(b.Unk00.TagData.EntityComponent.GetReader()) is SBC078080 c)
+                        //if (b.Unk00.TagData.EntityComponent.TagData.Unk10.GetValue(b.Unk00.TagData.EntityComponent.GetReader()) is S808007BC c)
                         //{
-                        //    var d = (SA7058080)b.Unk00.TagData.EntityComponent.TagData.Unk18.GetValue(b.Unk00.TagData.EntityComponent.GetReader());
+                        //    var d = (S808005A7)b.Unk00.TagData.EntityComponent.TagData.Unk18.GetValue(b.Unk00.TagData.EntityComponent.GetReader());
                         //    if (!items.Contains(d.Unk68.Hash))
                         //        items.Add(d.Unk68.Hash);
                         //}
@@ -201,7 +201,7 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
         {
             for (int bubbleIndex = 0; bubbleIndex < _tag.Bubbles.Count; bubbleIndex++)
             {
-                S537D8080 bubble = _tag.Bubbles[bubbleIndex];
+                S80807D53 bubble = _tag.Bubbles[bubbleIndex];
                 if (bubble.MapReference is null ||
                     bubble.MapReference.TagData.ChildMapReference == null)
                 {
@@ -219,9 +219,9 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
         public IEnumerable<ActivityEntities> EnumerateActivityEntities(FileHash UnkActivity = null)
         {
             Tag<SUnkActivity_SK> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(UnkActivity);
-            foreach (S4D928080 entry in tag.TagData.Unk50)
+            foreach (S8080924D entry in tag.TagData.Unk50)
             {
-                foreach (S4F928080 entry2 in entry.Unk08)
+                foreach (S8080924F entry2 in entry.Unk08)
                 {
                     if (entry2.Unk44 is null)
                         continue;
@@ -241,21 +241,21 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
         {
             ConcurrentBag<FileHash> items = new();
 
-            Tag<S5B928080> tag = FileResourcer.Get().GetSchemaTag<DESTINY2_SHADOWKEEP_2601.S5B928080>(hash);
+            Tag<S8080925B> tag = FileResourcer.Get().GetSchemaTag<DESTINY2_SHADOWKEEP_2601.S8080925B>(hash);
             if (tag.TagData.Unk14 is null)
                 return items.ToList();
 
-            List<S60928080> tables = tag.TagData.Unk14.TagData.Unk08;
+            List<S80809260> tables = tag.TagData.Unk14.TagData.Unk08;
             tables.AddRange(tag.TagData.Unk14.TagData.Unk18);
             tables.AddRange(tag.TagData.Unk14.TagData.Unk28);
 
-            foreach (S60928080 resource in tables)
+            foreach (S80809260 resource in tables)
             {
                 if (resource.Unk00 is null)
                     continue;
-                foreach (S64948080 a in resource.Unk00.TagData.Unk38)
+                foreach (S80809464 a in resource.Unk00.TagData.Unk38)
                 {
-                    foreach (S66948080 table in a.Unk08)
+                    foreach (S80809466 table in a.Unk08)
                     {
                         if (table.Unk00 is null || table.Unk00.TagData.DataTable is null)
                             continue;
@@ -275,7 +275,7 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
             List<FileHash> entries = new();
             foreach (EntityComponent resource in GetActivityResources(UnkActivity))
             {
-                if (resource.TagData.Unk18.GetValue(resource.GetReader()) is S4C4F8080 d)
+                if (resource.TagData.Unk18.GetValue(resource.GetReader()) is S80804F4C d)
                 {
                     if (d.DialogueTable is null)
                         continue;
@@ -290,7 +290,7 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
             List<FileHash> entries = new();
             foreach (EntityComponent resource in GetActivityResources(UnkActivity))
             {
-                if (resource.TagData.Unk18.GetValue(resource.GetReader()) is S544F8080 d)
+                if (resource.TagData.Unk18.GetValue(resource.GetReader()) is S80804F54 d)
                 {
                     if (d.DirectiveTable is null)
                         continue;
@@ -305,7 +305,7 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
             List<FileHash> entries = new();
             foreach (EntityComponent resource in GetActivityResources(UnkActivity))
             {
-                if (resource.TagData.Unk18.GetValue(resource.GetReader()) is S8F4E8080 d)
+                if (resource.TagData.Unk18.GetValue(resource.GetReader()) is S80804E8F d)
                 {
                     entries.Add(resource.Hash);
                 }
@@ -317,31 +317,31 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
         {
             Tag<SUnkActivity_SK> activity = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(UnkActivity);
             List<EntityComponent> entries = new();
-            foreach (DynamicArray<S4F928080>? entry in activity.TagData.Unk50.Select(x => x.Unk08))
+            foreach (DynamicArray<S8080924F>? entry in activity.TagData.Unk50.Select(x => x.Unk08))
             {
-                foreach (S4F928080 entry2 in entry)
+                foreach (S8080924F entry2 in entry)
                 {
                     if (entry2.Unk44 is null)
                         continue;
-                    Tag<S5B928080> tag = FileResourcer.Get().GetSchemaTag<S5B928080>(entry2.Unk44.Hash);
+                    Tag<S8080925B> tag = FileResourcer.Get().GetSchemaTag<S8080925B>(entry2.Unk44.Hash);
                     if (tag.TagData.Unk14 is null)
                         continue;
 
-                    List<S60928080> tables = tag.TagData.Unk14.TagData.Unk08;
+                    List<S80809260> tables = tag.TagData.Unk14.TagData.Unk08;
                     tables.AddRange(tag.TagData.Unk14.TagData.Unk18);
                     tables.AddRange(tag.TagData.Unk14.TagData.Unk28);
 
-                    foreach (S60928080 entry3 in tables)
+                    foreach (S80809260 entry3 in tables)
                     {
                         if (entry3.Unk00 is null)
                             continue;
-                        foreach (S64948080 a in entry3.Unk00.TagData.Unk38)
+                        foreach (S80809464 a in entry3.Unk00.TagData.Unk38)
                         {
-                            foreach (S66948080 b in a.Unk08)
+                            foreach (S80809466 b in a.Unk08)
                             {
                                 if (b.Unk00 is null)
                                     continue;
-                                foreach (S139B8080 c in b.Unk00.TagData.Unk10)
+                                foreach (S80809B13 c in b.Unk00.TagData.Unk10)
                                 {
                                     EntityComponent? resource = c.Unk00.TagData.EntityComponent;
                                     if (resource is null)
@@ -387,7 +387,7 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
             var name = GlobalStrings.Get().GetString(_tag.LocationName);
             if (name == $"{_tag.LocationName}")
             {
-                var stringContainer = FileResourcer.Get().GetSchemaTag<S8B8E8080>(_tag.Destination).TagData.StringContainer;
+                var stringContainer = FileResourcer.Get().GetSchemaTag<S80808E8B>(_tag.Destination).TagData.StringContainer;
                 if (stringContainer != null && _tag.Unk50.Count != 0)
                 {
                     Debug.Assert(_tag.Unk50.Count == 1);
@@ -400,8 +400,8 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
 
         public IEnumerable<Bubble> EnumerateBubbles()
         {
-            Strings.LocalizedStrings? stringContainer = FileResourcer.Get().GetSchemaTag<S8B8E8080>(_tag.Destination).TagData.StringContainer;
-            foreach (S24898080 mapEntry in _tag.Unk50)
+            Strings.LocalizedStrings? stringContainer = FileResourcer.Get().GetSchemaTag<S80808E8B>(_tag.Destination).TagData.StringContainer;
+            foreach (S80808924 mapEntry in _tag.Unk50)
             {
                 if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
                 {
@@ -420,7 +420,7 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
                 }
                 else
                 {
-                    foreach (S1D898080 mapReference in mapEntry.MapReferences)
+                    foreach (S8080891D mapReference in mapEntry.MapReferences)
                     {
 
                         if (mapReference.MapReference is null || mapReference.MapReference.TagData.ChildMapReference == null)
@@ -443,10 +443,10 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
 
         public IEnumerable<ActivityEntities> EnumerateActivityEntities(FileHash UnkActivity = null)
         {
-            Strings.LocalizedStrings? stringContainer = FileResourcer.Get().GetSchemaTag<S8B8E8080>(_tag.Destination).TagData.StringContainer;
-            foreach (S24898080 entry in _tag.Unk50)
+            Strings.LocalizedStrings? stringContainer = FileResourcer.Get().GetSchemaTag<S80808E8B>(_tag.Destination).TagData.StringContainer;
+            foreach (S80808924 entry in _tag.Unk50)
             {
-                foreach (S48898080 resource in entry.Unk18)
+                foreach (S80808948 resource in entry.Unk18)
                 {
                     string name = stringContainer is null ? resource.BubbleName : stringContainer.GetStringFromHash(resource.BubbleName);
                     yield return new ActivityEntities
@@ -464,26 +464,26 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
         private List<FileHash> CollapseResourceParent(FileHash hash)
         {
             ConcurrentBag<FileHash> items = new();
-            Tag<S898E8080> entry = FileResourcer.Get().GetSchemaTag<S898E8080>(hash);
-            Tag<SBE8E8080> Unk18 = FileResourcer.Get().GetSchemaTag<SBE8E8080>(entry.TagData.Unk18.Hash);
+            Tag<S80808E89> entry = FileResourcer.Get().GetSchemaTag<S80808E89>(hash);
+            Tag<S80808EBE> Unk18 = FileResourcer.Get().GetSchemaTag<S80808EBE>(entry.TagData.Unk18.Hash);
 
-            foreach (S42898080 resource in Unk18.TagData.EntityComponents)
+            foreach (S80808942 resource in Unk18.TagData.EntityComponents)
             {
                 if (resource.EntityComponentParent != null)
                 {
                     dynamic? resourceValue = resource.EntityComponentParent.TagData.EntityComponent.TagData.Unk18.GetValue(resource.EntityComponentParent.TagData.EntityComponent.GetReader());
                     switch (resourceValue)
                     {
-                        case SD8928080:
-                            var tag = (SD8928080)resourceValue;
+                        case S808092D8:
+                            var tag = (S808092D8)resourceValue;
                             if (tag.Unk84 is not null && tag.Unk84.TagData.DataEntries.Count > 0)
                             {
                                 items.Add(tag.Unk84.Hash);
                             }
                             break;
 
-                        case SEF8C8080:
-                            var tag2 = (SEF8C8080)resourceValue;
+                        case S80808CEF:
+                            var tag2 = (S80808CEF)resourceValue;
                             if (tag2.Unk58 is not null && tag2.Unk58.TagData.DataEntries.Count > 0)
                             {
                                 items.Add(tag2.Unk58.Hash);
@@ -500,10 +500,10 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
         {
             Dictionary<ulong, ActivityEntity> items = new();
             Dictionary<uint, string> strings = new();
-            Tag<S898E8080> entry = FileResourcer.Get().GetSchemaTag<S898E8080>(hash);
-            Tag<SBE8E8080> Unk18 = FileResourcer.Get().GetSchemaTag<SBE8E8080>(entry.TagData.Unk18.Hash);
+            Tag<S80808E89> entry = FileResourcer.Get().GetSchemaTag<S80808E89>(hash);
+            Tag<S80808EBE> Unk18 = FileResourcer.Get().GetSchemaTag<S80808EBE>(entry.TagData.Unk18.Hash);
 
-            foreach (S42898080 resource in Unk18.TagData.EntityComponents)
+            foreach (S80808942 resource in Unk18.TagData.EntityComponents)
             {
                 if (resource.EntityComponentParent != null)
                 {
@@ -511,16 +511,16 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
                     switch (resourceValue)
                     {
                         //This is kinda dumb 
-                        case S95468080:
-                        case S26988080:
-                        case S6F418080:
-                        case SEF988080:
-                        case SF88C8080:
-                        case SFA988080:
+                        case S80804695:
+                        case S80809826:
+                        case S8080416F:
+                        case S808098EF:
+                        case S80808CF8:
+                        case S808098FA:
                             if (resource.EntityComponentParent.TagData.EntityComponent.TagData.UnkHash80 != null)
                             {
-                                Tag<S6B908080> unk80 = FileResourcer.Get().GetSchemaTag<S6B908080>(resource.EntityComponentParent.TagData.EntityComponent.TagData.UnkHash80.Hash);
-                                foreach (S029D8080 a in unk80.TagData.Unk08)
+                                Tag<S8080906B> unk80 = FileResourcer.Get().GetSchemaTag<S8080906B>(resource.EntityComponentParent.TagData.EntityComponent.TagData.UnkHash80.Hash);
+                                foreach (S80809D02 a in unk80.TagData.Unk08)
                                 {
                                     if (a.Unk00.Value?.Name.Value is not null)
                                     {

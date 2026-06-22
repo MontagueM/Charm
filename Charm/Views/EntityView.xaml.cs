@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -208,16 +208,16 @@ public partial class EntityView : UserControl
                 continue;
 
             EntityComponent resource = FileResourcer.Get().GetFile<EntityComponent>(hash);
-            if (resource.TagData.Unk18.GetValue(resource.GetReader()) is S79818080 sequencer)
+            if (resource.TagData.Unk18.GetValue(resource.GetReader()) is S80808179 sequencer)
             {
                 // only in Array2 afaik
-                foreach (SF1918080 element in sequencer.Array1)
+                foreach (S808091F1 element in sequencer.Array1)
                 {
                     Debug.Assert(element.Unk10.GetValue(resource.GetReader()) is not SSequenceParticleSystem);
                 }
 
                 List<Tag<SParticleSystem>> particles = new();
-                foreach (SF1918080 element in sequencer.Array2)
+                foreach (S808091F1 element in sequencer.Array2)
                 {
                     if (element.Unk10.GetValue(resource.GetReader()) is SSequenceParticleSystem particle)
                     {
@@ -267,9 +267,9 @@ public partial class EntityView : UserControl
         if (Strategy.IsD1())
         {
             Dictionary<TigerHash, DyeD1> dyes = new();
-            if (item.TagData.Unk90.GetValue(item.GetReader()) is S77738080 translationBlock)
+            if (item.TagData.Unk90.GetValue(item.GetReader()) is S80807377 translationBlock)
             {
-                foreach (S7B738080 dyeEntry in translationBlock.DefaultDyes)
+                foreach (S8080737B dyeEntry in translationBlock.DefaultDyes)
                 {
                     DyeD1 dye = Investment.Get().GetD1DyeFromIndex(dyeEntry.GetDyeIndex());
                     if (dye != null)
@@ -278,7 +278,7 @@ public partial class EntityView : UserControl
                         dye.ExportTextures($"{savePath}/Textures", config.GetOutputTextureFormat());
                     }
                 }
-                foreach (S7B738080 dyeEntry in translationBlock.LockedDyes)
+                foreach (S8080737B dyeEntry in translationBlock.LockedDyes)
                 {
                     DyeD1 dye = Investment.Get().GetD1DyeFromIndex(dyeEntry.GetDyeIndex());
                     if (dye != null)
@@ -293,9 +293,9 @@ public partial class EntityView : UserControl
         else
         {
             Dictionary<TigerHash, Dye> dyes = new();
-            if (item.TagData.Unk90.GetValue(item.GetReader()) is S77738080 translationBlock)
+            if (item.TagData.Unk90.GetValue(item.GetReader()) is S80807377 translationBlock)
             {
-                foreach (S7B738080 dyeEntry in translationBlock.DefaultDyes)
+                foreach (S8080737B dyeEntry in translationBlock.DefaultDyes)
                 {
                     Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.GetDyeIndex());
                     if (dye is null)
@@ -305,7 +305,7 @@ public partial class EntityView : UserControl
                     System.Console.WriteLine($"{item.Name}: DefaultDye {dye.Hash}");
 #endif
                 }
-                foreach (S7B738080 dyeEntry in translationBlock.LockedDyes)
+                foreach (S8080737B dyeEntry in translationBlock.LockedDyes)
                 {
                     Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.GetDyeIndex());
                     if (dye is null)

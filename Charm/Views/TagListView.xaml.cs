@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -635,10 +635,10 @@ public partial class TagListView : UserControl
         _allTagItems = new ConcurrentBag<TagItem>();
         if (Strategy.IsPreBL())
         {
-            ConcurrentHashSet<FileHash> vals = await PackageResourcer.Get().GetAllHashesAsync<S30898080>();
+            ConcurrentHashSet<FileHash> vals = await PackageResourcer.Get().GetAllHashesAsync<S80808930>();
             Parallel.ForEach(vals, val =>
             {
-                Tag<S30898080> bag = FileResourcer.Get().GetSchemaTag<S30898080>(val);
+                Tag<S80808930> bag = FileResourcer.Get().GetSchemaTag<S80808930>(val);
                 if (bag.TagData.Entries.Count == 0)
                     return;
 
@@ -654,13 +654,13 @@ public partial class TagListView : UserControl
         }
         else
         {
-            ConcurrentHashSet<FileHash> vals = await PackageResourcer.Get().GetAllHashesAsync<S1D478080>();
+            ConcurrentHashSet<FileHash> vals = await PackageResourcer.Get().GetAllHashesAsync<S8080471D>();
             Parallel.ForEach(vals, val =>
             {
-                Tag<S1D478080> dgtbParent = FileResourcer.Get().GetSchemaTag<S1D478080>(val);
+                Tag<S8080471D> dgtbParent = FileResourcer.Get().GetSchemaTag<S8080471D>(val);
                 if (dgtbParent.TagData.DestinationGlobalTagBags.Count == 0)
                     return;
-                foreach (SD3598080 destinationGlobalTagBag in dgtbParent.TagData.DestinationGlobalTagBags)
+                foreach (S808059D3 destinationGlobalTagBag in dgtbParent.TagData.DestinationGlobalTagBags)
                 {
                     if (!destinationGlobalTagBag.DestinationGlobalTagBag.IsValid())
                         continue;
@@ -681,7 +681,7 @@ public partial class TagListView : UserControl
 
     private void LoadDestinationGlobalTagBag(FileHash hash)
     {
-        Tag<S30898080> destinationGlobalTagBag = FileResourcer.Get().GetSchemaTag<S30898080>(hash);
+        Tag<S80808930> destinationGlobalTagBag = FileResourcer.Get().GetSchemaTag<S80808930>(hash);
 
         _allTagItems = new ConcurrentBag<TagItem>();
         Parallel.ForEach(destinationGlobalTagBag.TagData.Entries, val =>
@@ -733,8 +733,8 @@ public partial class TagListView : UserControl
 
     private void LoadBudgetSet(FileHash hash)
     {
-        Tag<S7E988080> budgetSetHeader = FileResourcer.Get().GetSchemaTag<S7E988080>(hash);
-        Tag<SED9E8080> budgetSet = FileResourcer.Get().GetSchemaTag<SED9E8080>(budgetSetHeader.TagData.Bag.Hash);
+        Tag<S8080987E> budgetSetHeader = FileResourcer.Get().GetSchemaTag<S8080987E>(hash);
+        Tag<S80809EED> budgetSet = FileResourcer.Get().GetSchemaTag<S80809EED>(budgetSetHeader.TagData.Bag.Hash);
         _allTagItems = new ConcurrentBag<TagItem>();
         Parallel.ForEach(budgetSet.TagData.Unk28, val =>
         {
@@ -863,10 +863,10 @@ public partial class TagListView : UserControl
                 break;
 
             default:
-                valsChild = await PackageResourcer.Get().GetAllHashesAsync<S8B8E8080>();
+                valsChild = await PackageResourcer.Get().GetAllHashesAsync<S80808E8B>();
                 Parallel.ForEach(valsChild, val =>
                 {
-                    Tag<S8B8E8080> tag = FileResourcer.Get().GetSchemaTag<S8B8E8080>(val);
+                    Tag<S80808E8B> tag = FileResourcer.Get().GetSchemaTag<S80808E8B>(val);
                     nameHashes.TryAdd(tag.TagData.DestinationName, tag.TagData.LocationName);
                     GlobalStrings.Get().AddStrings(tag.TagData.StringContainer);
                 });
@@ -971,7 +971,7 @@ public partial class TagListView : UserControl
         {
             ActivityWQ activity = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
             // TODO: check if wq way of music is also in beyond light
-            if (activity.TagData.Unk18.GetValue(activity.GetReader()) is S19978080 res)
+            if (activity.TagData.Unk18.GetValue(activity.GetReader()) is S80809719 res)
             {
                 if (res.Music != null)
                     musics.Add(res.Music.Hash);
@@ -982,17 +982,17 @@ public partial class TagListView : UserControl
             ActivityWQ activity = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
             Parallel.ForEach(activity.TagData.Unk50, val =>
             {
-                foreach (S48898080 d2Class48898080 in val.Unk18)
+                foreach (S80808948 d2Class48898080 in val.Unk18)
                 {
                     dynamic? resource = d2Class48898080.UnkEntityReference.TagData.Unk10.GetValue(d2Class48898080.UnkEntityReference.GetReader());
-                    if (resource is SD5908080 res)
+                    if (resource is S808090D5 res)
                     {
                         if (res.Music != null)
                         {
                             musics.Add(res.Music.Hash);
                         }
                     }
-                    else if (resource is S18978080 res2)
+                    else if (resource is S80809718 res2)
                     {
                         if (res2.Unk1C != null)
                         {
@@ -1001,7 +1001,7 @@ public partial class TagListView : UserControl
                     }
                 }
             });
-            if (activity.TagData.Unk18.GetValue(activity.GetReader()) is S6A988080 res)
+            if (activity.TagData.Unk18.GetValue(activity.GetReader()) is S8080986A res)
             {
                 if (res.Music != null)
                     musics.Add(res.Music.Hash);
@@ -1028,7 +1028,7 @@ public partial class TagListView : UserControl
                     });
                 }
             }
-            if (activity.TagData.Unk18.GetValue(activity.GetReader()) is S20978080 res2)
+            if (activity.TagData.Unk18.GetValue(activity.GetReader()) is S80809720 res2)
             {
                 if (res2.Music != null)
                     musics.Add(res2.Music.Hash);
@@ -1076,9 +1076,9 @@ public partial class TagListView : UserControl
         {
             case >= TigerStrategy.DESTINY2_WITCHQUEEN_6307:
                 ActivityWQ activity = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
-                if (activity.TagData.Unk18.GetValue(activity.GetReader()) is S6A988080 entry)
+                if (activity.TagData.Unk18.GetValue(activity.GetReader()) is S8080986A entry)
                 {
-                    foreach (SB7978080 dirtable in entry.DialogueTables)
+                    foreach (S808097B7 dirtable in entry.DialogueTables)
                     {
                         if (dirtable.DialogueTable != null)
                             dialogueTables.TryAdd(dirtable.DialogueTable.Hash, dirtable.DialogueTable.Hash);
@@ -1086,11 +1086,11 @@ public partial class TagListView : UserControl
                 }
                 Parallel.ForEach(activity.TagData.Unk50, val =>
                 {
-                    foreach (S48898080 d2Class48898080 in val.Unk18)
+                    foreach (S80808948 d2Class48898080 in val.Unk18)
                     {
                         dynamic? resource = d2Class48898080.UnkEntityReference.TagData.Unk10.GetValue(d2Class48898080.UnkEntityReference.GetReader());
-                        if (resource is SD5908080 or S44938080 or S45938080 or
-                            S18978080 or S19978080)
+                        if (resource is S808090D5 or S80809344 or S80809345 or
+                            S80809718 or S80809719)
                         {
                             if (resource.DialogueTable != null)
                                 dialogueTables.TryAdd(resource.DialogueTable.Hash, resource.DialogueTable.Hash);
@@ -1102,9 +1102,9 @@ public partial class TagListView : UserControl
             case TigerStrategy.DESTINY2_BEYONDLIGHT_3402:
                 ActivityWQ activityBL = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
                 dynamic? resource = activityBL.TagData.Unk18.GetValue(activityBL.GetReader());
-                //if (resource is SD5908080 || resource is S44938080 || resource is S45938080 ||
-                //    resource is S18978080 || resource is S19978080)
-                if (resource is S19978080)
+                //if (resource is S808090D5 || resource is S80809344 || resource is S80809345 ||
+                //    resource is S80809718 || resource is S80809719)
+                if (resource is S80809719)
                 {
                     if (resource.DialogueTableBL != null)
                         dialogueTables.TryAdd(resource.DialogueTableBL.Hash, resource.DialogueTableBL.Hash);
@@ -1184,7 +1184,7 @@ public partial class TagListView : UserControl
         {
             case >= TigerStrategy.DESTINY2_WITCHQUEEN_6307:
                 ActivityWQ activityWQ = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
-                if (activityWQ.TagData.Unk18.GetValue(activityWQ.GetReader()) is S6A988080 a988080)
+                if (activityWQ.TagData.Unk18.GetValue(activityWQ.GetReader()) is S8080986A a988080)
                 {
                     IEnumerable<FileHash> directiveTables = a988080.DirectiveTables.Select(x => x.DirectiveTable.Hash);
 
@@ -1193,7 +1193,7 @@ public partial class TagListView : UserControl
                         directiveItems.TryAdd(hash, hash);
                     });
                 }
-                else if (activityWQ.TagData.Unk18.GetValue(activityWQ.GetReader()) is S20978080 class20978080)
+                else if (activityWQ.TagData.Unk18.GetValue(activityWQ.GetReader()) is S80809720 class20978080)
                 {
                     IEnumerable<FileHash> directiveTables = class20978080.DirectiveTables.Select(x => x.DirectiveTable.Hash);
 
@@ -1206,7 +1206,7 @@ public partial class TagListView : UserControl
 
             case TigerStrategy.DESTINY2_BEYONDLIGHT_3402:
                 ActivityWQ activityBL = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
-                if (activityBL.TagData.Unk18.GetValue(activityBL.GetReader()) is S19978080 resource)
+                if (activityBL.TagData.Unk18.GetValue(activityBL.GetReader()) is S80809719 resource)
                 {
                     IEnumerable<FileHash?> directiveTables = resource.DirectiveTables.Where(x => x.DirectiveTable is not null).Select(x => x.DirectiveTable?.Hash);
 

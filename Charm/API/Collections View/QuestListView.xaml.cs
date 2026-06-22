@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -124,7 +124,7 @@ public partial class QuestListView : UserControl, INotifyPropertyChanged
         List<InventoryItem> sortedQuests = new();
         foreach (var quest in inventoryItems.Where(x => x.ItemTraits.Any(k => k == DestinyTraitID.inventory_filtering_quest || k == DestinyTraitID.inventory_filtering_quest_featured)))
         {
-            if (quest is null || quest.TagData.Unk58.GetValue(quest.GetReader()) is not S88738080 quests)
+            if (quest is null || quest.TagData.Unk58.GetValue(quest.GetReader()) is not S80807388 quests)
                 continue;
 
             var questSteps = quests.ItemList ?? new();
@@ -235,7 +235,7 @@ public partial class QuestListView : UserControl, INotifyPropertyChanged
     private void QuestItem_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         QuestCategoryEntry quest = (sender as FrameworkElement).DataContext as QuestCategoryEntry;
-        if (quest is null || quest.QuestItem.TagData.Unk58.GetValue(quest.QuestItem.GetReader()) is not S88738080 quests)
+        if (quest is null || quest.QuestItem.TagData.Unk58.GetValue(quest.QuestItem.GetReader()) is not S80807388 quests)
             return;
 
         var userControl = new QuestView(quest.QuestItem, quest.MainTrait);

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Tiger.Exporters;
 
@@ -155,7 +155,7 @@ public struct DyeInfo
 }
 
 
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "BA6D8080", 0x378)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, 0x80806DBA, 0x378)] //BA6D8080
 public struct SScope
 {
     public long FileSize;
@@ -274,7 +274,7 @@ public class DyeD1 : Tag<SDye_D1>
     }
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F41A8080", 0xD0)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801AF4, 0xD0)] //F41A8080
 public struct SDye_D1
 {
     public long FileSize;

@@ -1,8 +1,8 @@
-﻿using Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
+using Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
 
 namespace Tiger.Schema.Entity;
 
-public class EntityComponent : Tag<S069B8080>
+public class EntityComponent : Tag<S80809B06>
 {
     public EntityComponent(FileHash hash) : base(hash)
     {
@@ -26,8 +26,8 @@ public class EntityComponent : Tag<S069B8080>
         if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
             return entries;
 
-        if (GetUnk10() is S2E098080)
-            entries.AddRange(((SDD078080)GetUnk18()).DataEntries);
+        if (GetUnk10() is S8080092E)
+            entries.AddRange(((S808007DD)GetUnk18()).DataEntries);
 
         return entries;
     }

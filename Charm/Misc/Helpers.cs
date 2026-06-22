@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -163,7 +163,7 @@ public static class ApiImageUtils
         }
 
         // Crafted overlay for patterns
-        if (!Strategy.IsD1() && item.TagData.Unk10.GetValue(item.GetReader()) is S49298080)
+        if (!Strategy.IsD1() && item.TagData.Unk10.GetValue(item.GetReader()) is S80802949)
         {
             using UnmanagedMemoryStream overlay = Texture.GetTextureFromHash(new(0x80A9F577));
             var craftedOverlay = MakeBitmapImage(overlay, 18, 18);
@@ -289,7 +289,7 @@ public static class ApiImageUtils
         var group = new DrawingGroup();
 
         // Crafted overlay for patterns
-        if (!Strategy.IsD1() && item.TagData.Unk10.GetValue(item.GetReader()) is S49298080)
+        if (!Strategy.IsD1() && item.TagData.Unk10.GetValue(item.GetReader()) is S80802949)
         {
             using UnmanagedMemoryStream overlay = Texture.GetTextureFromHash(new(0x80A9F577));
             var craftedOverlay = MakeBitmapImage(overlay, 96, 96);
@@ -350,7 +350,7 @@ public static class ApiImageUtils
 
     public static ImageSource MakeIcon(int index, int containerIndex = 0, int iconIndex = 0, int listIndex = 0)
     {
-        Tag<SB83E8080>? container = Investment.Get().GetItemIconContainer(index);
+        Tag<S80803EB8>? container = Investment.Get().GetItemIconContainer(index);
         //Console.WriteLine($"container {container.Hash}");
         if (container == null)
             return null;
@@ -358,12 +358,12 @@ public static class ApiImageUtils
         return MakeIcon(container, containerIndex, iconIndex, listIndex);
     }
 
-    public static ImageSource MakeIcon(Tag<SB83E8080> container, int containerIndex = 0, int iconIndex = 0, int listIndex = 0)
+    public static ImageSource MakeIcon(Tag<S80803EB8> container, int containerIndex = 0, int iconIndex = 0, int listIndex = 0)
     {
         if (container == null)
             return null;
 
-        List<Tag<SCF3E8080>> containers = new()
+        List<Tag<S80803ECF>> containers = new()
         {
             container.TagData.IconPrimaryContainer,
             container.TagData.IconAdContainer,
@@ -385,18 +385,18 @@ public static class ApiImageUtils
         return dw.ImageSource;
     }
 
-    public static Texture? GetTexture(Tag<SCF3E8080> iconContainer, int texIndex = 0, int listIndex = 0)
+    public static Texture? GetTexture(Tag<S80803ECF> iconContainer, int texIndex = 0, int listIndex = 0)
     {
         using TigerReader reader = iconContainer.GetReader();
         dynamic? prim = iconContainer.TagData.Unk10.GetValue(reader);
-        if (prim is SCD3E8080 structCD3E8080)
+        if (prim is S80803ECD structCD3E8080)
         {
             // TextureList[0] is default, others are for colourblind modes
             if (listIndex >= structCD3E8080.Unk00.Count || texIndex >= structCD3E8080.Unk00[reader, listIndex].TextureList.Count)
                 return null;
             return structCD3E8080.Unk00[reader, listIndex].TextureList[reader, texIndex].IconTexture;
         }
-        if (prim is SCB3E8080 structCB3E8080)
+        if (prim is S80803ECB structCB3E8080)
         {
             if (listIndex >= structCB3E8080.Unk00.Count || texIndex >= structCB3E8080.Unk00[reader, listIndex].TextureList.Count)
                 return null;
@@ -407,11 +407,11 @@ public static class ApiImageUtils
 
     public static BitmapImage MakeDyedIcon(InventoryItem item)
     {
-        Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(item);
+        Tag<S80803EB8>? iconContainer = Investment.Get().GetItemIconContainer(item);
         return MakeDyedIcon(iconContainer);
     }
 
-    public static BitmapImage MakeDyedIcon(Tag<SB83E8080>? iconContainer)
+    public static BitmapImage MakeDyedIcon(Tag<S80803EB8>? iconContainer)
     {
         Texture? primary = null;
         Texture? mask = null;

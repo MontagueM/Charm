@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -15,11 +15,11 @@ public partial class TriumphView : UserControl
 {
     private static MainWindow _mainWindow = null;
 
-    private DynamicArray<SDB788080> PresentationNodes = Investment.Get()._presentationNodeDefinitionMap.TagData.PresentationNodeDefinitions;
-    private DynamicArray<S07588080> PresentationNodeStrings = Investment.Get()._presentationNodeDefinitionStringMap.TagData.PresentationNodeDefinitionStrings;
+    private DynamicArray<S808078DB> PresentationNodes = Investment.Get()._presentationNodeDefinitionMap.TagData.PresentationNodeDefinitions;
+    private DynamicArray<S80805807> PresentationNodeStrings = Investment.Get()._presentationNodeDefinitionStringMap.TagData.PresentationNodeDefinitionStrings;
 
-    private DynamicArray<SC16F8080> Records = Investment.Get()._recordNodeDefinitionMap.TagData.RecordDefinitions;
-    private DynamicArray<S8B588080> RecordStrings = Investment.Get()._recordNodeDefinitionStringMap.TagData.RecordDefinitionStrings;
+    private DynamicArray<S80806FC1> Records = Investment.Get()._recordNodeDefinitionMap.TagData.RecordDefinitions;
+    private DynamicArray<S8080588B> RecordStrings = Investment.Get()._recordNodeDefinitionStringMap.TagData.RecordDefinitionStrings;
 
     private DestinyPresentationDisplayStyle DisplayStyle;
 
@@ -65,9 +65,9 @@ public partial class TriumphView : UserControl
 
         for (int i = 0; i < PresentationNodes[itemCategory.ItemCategoryIndex].PresentationNodes.Count; i++)
         {
-            SED788080 node = PresentationNodes[itemCategory.ItemCategoryIndex].PresentationNodes[i];
-            SDB788080 curNode = PresentationNodes[node.PresentationNodeIndex];
-            S07588080 curNodeStrings = PresentationNodeStrings[node.PresentationNodeIndex];
+            S808078ED node = PresentationNodes[itemCategory.ItemCategoryIndex].PresentationNodes[i];
+            S808078DB curNode = PresentationNodes[node.PresentationNodeIndex];
+            S80805807 curNodeStrings = PresentationNodeStrings[node.PresentationNodeIndex];
             Category subcategory = new()
             {
                 ItemCategoryIndex = node.PresentationNodeIndex,
@@ -115,8 +115,8 @@ public partial class TriumphView : UserControl
             var legacyTriumphNodes = PresentationNodes.Find(x => x.Hash.Hash32 == 3215903653).PresentationNodes;
             foreach (var legacyTriumph in legacyTriumphNodes)
             {
-                SDB788080 curNode = PresentationNodes[legacyTriumph.PresentationNodeIndex];
-                S07588080 curNodeStrings = PresentationNodeStrings[legacyTriumph.PresentationNodeIndex];
+                S808078DB curNode = PresentationNodes[legacyTriumph.PresentationNodeIndex];
+                S80805807 curNodeStrings = PresentationNodeStrings[legacyTriumph.PresentationNodeIndex];
                 Category subcategory = new()
                 {
                     ItemCategoryName = curNodeStrings.Name.Value.ToString().ToUpper(),
@@ -139,8 +139,8 @@ public partial class TriumphView : UserControl
             var legacyTitleNodes = PresentationNodes.Find(x => x.Hash.Hash32 == 1881970629).PresentationNodes;
             foreach (var legacyTitle in legacyTitleNodes)
             {
-                SDB788080 curNode = PresentationNodes[legacyTitle.PresentationNodeIndex];
-                S07588080 curNodeStrings = PresentationNodeStrings[legacyTitle.PresentationNodeIndex];
+                S808078DB curNode = PresentationNodes[legacyTitle.PresentationNodeIndex];
+                S80805807 curNodeStrings = PresentationNodeStrings[legacyTitle.PresentationNodeIndex];
                 Category subcategory = new()
                 {
                     ItemCategoryName = curNodeStrings.Name.Value.ToString().ToUpper(),
@@ -173,7 +173,7 @@ public partial class TriumphView : UserControl
 
     public int GetItemCategoryAmount(int index)
     {
-        SDB788080 node = PresentationNodes[index];
+        S808078DB node = PresentationNodes[index];
         int count = 0;
 
         for (int i = 0; i < node.PresentationNodes.Count; i++)

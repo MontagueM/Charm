@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
 using Tiger;
@@ -22,12 +22,12 @@ public partial class DirectiveView : UserControl
         }
         else
         {
-            Tag<SC78E8080> directive = FileResourcer.Get().GetSchemaTag<SC78E8080>(hash);
+            Tag<S80808EC7> directive = FileResourcer.Get().GetSchemaTag<S80808EC7>(hash);
             ListView.ItemsSource = GetDirectiveItems(directive);
         }
     }
 
-    public List<DirectiveItem> GetDirectiveItems(Tag<SC78E8080> directiveTag)
+    public List<DirectiveItem> GetDirectiveItems(Tag<S80808EC7> directiveTag)
     {
         // List to maintain order of directives
         var items = new List<DirectiveItem>();
@@ -35,9 +35,9 @@ public partial class DirectiveView : UserControl
 
         if (Strategy.IsPreBL())
         {
-            foreach (S744F8080 directives in directiveTag.TagData.DirectiveTableSK)
+            foreach (S80804F74 directives in directiveTag.TagData.DirectiveTableSK)
             {
-                foreach (SC98E8080 directive in directives.Directives)
+                foreach (S80808EC9 directive in directives.Directives)
                 {
                     items.Add(new DirectiveItem
                     {
@@ -52,7 +52,7 @@ public partial class DirectiveView : UserControl
         }
         else
         {
-            foreach (SC98E8080 directive in directiveTag.TagData.DirectiveTable)
+            foreach (S80808EC9 directive in directiveTag.TagData.DirectiveTable)
             {
                 // TODO: this looks ugly, but eh?
                 string nameString = Strategy.IsBL() ? directive.NameStringBL.Value.ToString() : directive.NameString.Value.ToString();
@@ -78,35 +78,35 @@ public partial class DirectiveView : UserControl
         var items = new List<DirectiveItem>();
         Tag<SUnkActivity_ROI> Activity = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(hash);
 
-        foreach (S0C068080 a in Activity.TagData.Unk48)
+        foreach (S8080060C a in Activity.TagData.Unk48)
         {
-            foreach (SA8068080 b in a.Unk08)
+            foreach (S808006A8 b in a.Unk08)
             {
                 if (b.Unk34.Hash.IsInvalid())
                     continue;
 
-                Tag<SF0088080> c = FileResourcer.Get().GetSchemaTag<SF0088080>(b.Unk34.Hash);
+                Tag<S808008F0> c = FileResourcer.Get().GetSchemaTag<S808008F0>(b.Unk34.Hash);
                 Tag<SF0088080_Child> c1 = FileResourcer.Get().GetSchemaTag<SF0088080_Child>(c.TagData.Unk1C);
-                List<SD3408080> c2 = c1.TagData.Unk08;
+                List<S808040D3> c2 = c1.TagData.Unk08;
                 c2.AddRange(c1.TagData.Unk18);
                 c2.AddRange(c1.TagData.Unk28);
-                foreach (SD3408080 d in c2)
+                foreach (S808040D3 d in c2)
                 {
-                    Tag<S6E078080> d1 = FileResourcer.Get().GetSchemaTag<S6E078080>(d.Unk00);
+                    Tag<S8080076E> d1 = FileResourcer.Get().GetSchemaTag<S8080076E>(d.Unk00);
                     if (d1.TagData.Strings is not null)
                         GlobalStrings.Get().AddStrings(d1.TagData.Strings);
 
-                    foreach (SE9058080 e in d1.TagData.Unk30)
+                    foreach (S808005E9 e in d1.TagData.Unk30)
                     {
-                        foreach (S22428080 f in e.Unk18)
+                        foreach (S80804222 f in e.Unk18)
                         {
                             if (f.Unk00.TagData.EntityComponent is null)
                                 continue;
 
-                            if (f.Unk00.TagData.EntityComponent.TagData.Unk10.GetValue(f.Unk00.TagData.EntityComponent.GetReader()) is S90258080)
+                            if (f.Unk00.TagData.EntityComponent.TagData.Unk10.GetValue(f.Unk00.TagData.EntityComponent.GetReader()) is S80802590)
                             {
-                                var g = ((S93298080)f.Unk00.TagData.EntityComponent.TagData.Unk18.GetValue(f.Unk00.TagData.EntityComponent.GetReader()));
-                                foreach (SD7318080 directive in g.Directives)
+                                var g = ((S80802993)f.Unk00.TagData.EntityComponent.TagData.Unk18.GetValue(f.Unk00.TagData.EntityComponent.GetReader()));
+                                foreach (S808031D7 directive in g.Directives)
                                 {
                                     // Need to filter out duplicates
                                     if (!items.Any(item => item.Hash == f.Unk00.TagData.EntityComponent.Hash))

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Numerics;
 using Arithmic;
 using Tiger.Exporters;
@@ -55,67 +55,67 @@ public class Entity : Tag<SEntity>
             EntityComponent resource = FileResourcer.Get().GetFile<EntityComponent>(resourceHash);
             switch (resource.TagData.Unk10.GetValue(resource.GetReader(), false))
             {
-                case S8A6D8080:  // Entity model
+                case S80806D8A:  // Entity model
                     ModelParent = FileResourcer.Get().GetFile<EntityModelParent>(resource.Hash);
                     break;
 
-                case S5B6D8080:  // Entity physics model
+                case S80806D5B:  // Entity physics model
                     PhysicsModelParent = FileResourcer.Get().GetFile<EntityPhysicsModelParent>(resource.Hash);
                     break;
 
-                case SD5818080:
-                case SDD818080:  // Entity skeleton FK
+                case S808081D5:
+                case S808081DD:  // Entity skeleton FK
                     Skeleton = FileResourcer.Get().GetFile<EntitySkeleton>(resource.Hash);
                     break;
 
-                //case S668B8080:  // Entity skeleton IK 
+                //case S80808B66:  // Entity skeleton IK 
                 //    ControlRig = FileResourcer.Get().GetFile<EntityControlRig>(resource.Hash);
                 //    break;
 
-                case S97318080: // todo? shadowkeep
+                case S80803197: // todo? shadowkeep
                     PatternAudio = resource;
                     break;
 
-                case SF62C8080: // todo? shadowkeep
+                case S80802CF6: // todo? shadowkeep
                     PatternAudioUnnamed = resource;
                     break;
 
-                case S357C8080: // Generic name
+                case S80807C35: // Generic name
                     // we care more about the specific name so if the entity name is already assigned, dont assign this one
                     if (EntityName == null)
                     {
-                        StringHash genericName = ((S18808080)resource.TagData.Unk18.GetValue(resource.GetReader())).Unk3C0.TagData.EntityName;
+                        StringHash genericName = ((S80808018)resource.TagData.Unk18.GetValue(resource.GetReader())).Unk3C0.TagData.EntityName;
                         if (GlobalStrings.Get().GetString(genericName) != genericName)
                             EntityName = GlobalStrings.Get().GetString(genericName);
                     }
                     break;
 
-                case SDA5E8080: // Specific name
+                case S80805EDA: // Specific name
                     StringHash specificName = Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON ?
-                        ((SDB5E8080)resource.TagData.Unk18.GetValue(resource.GetReader())).Unk108.TagData.EntityName :
-                        ((SDB5E8080)resource.TagData.Unk18.GetValue(resource.GetReader())).EntityName;
+                        ((S80805EDB)resource.TagData.Unk18.GetValue(resource.GetReader())).Unk108.TagData.EntityName :
+                        ((S80805EDB)resource.TagData.Unk18.GetValue(resource.GetReader())).EntityName;
 
                     // Don't assign a name if the name hash doesnt return an actual string (returns the name hash instead)
                     if (GlobalStrings.Get().GetString(specificName) != specificName)
                         EntityName = GlobalStrings.Get().GetString(specificName);
                     break;
 
-                case S79948080:
+                case S80809479:
                     if (Sequences is null)
                         Sequences = new();
 
                     Sequences.Add(new(resource.Hash));
                     break;
 
-                case S12848080:
+                case S80808412:
                     EntityChildren = resource;
                     break;
 
-                case SE9318080:
+                case S808031E9:
                     CarriedWeapon = resource;
                     break;
 
-                case S742E8080:
+                case S80802E74:
                     Attachments = resource;
                     break;
 
@@ -199,7 +199,7 @@ public class Entity : Tag<SEntity>
             return;
 
         Directory.CreateDirectory($"{saveDirectory}/Textures/");
-        var parentResource = (S8F6D8080)ModelParent.TagData.Unk18.GetValue(ModelParent.GetReader());
+        var parentResource = (S80806D8F)ModelParent.TagData.Unk18.GetValue(ModelParent.GetReader());
 
         if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_SHADOWKEEP_2601 && parentResource.TexturePlates is null)
             return;
@@ -207,7 +207,7 @@ public class Entity : Tag<SEntity>
         if (Strategy.IsD1() && (parentResource.TexturePlatesROI.Count == 0 || parentResource.TexturePlatesROI[0].TexturePlates is null))
             return;
 
-        S1C6E8080 rsrc = Strategy.IsD1() ? parentResource.TexturePlatesROI[0].TexturePlates.TagData : parentResource.TexturePlates.TagData;
+        S80806E1C rsrc = Strategy.IsD1() ? parentResource.TexturePlatesROI[0].TexturePlates.TagData : parentResource.TexturePlates.TagData;
 
         rsrc.AlbedoPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_albedo");
         rsrc.NormalPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_normal");
@@ -240,7 +240,7 @@ public class Entity : Tag<SEntity>
         List<Entity> entities = new();
         if (CarriedWeapon is not null)
         {
-            var weaponEntry = (SEA318080)CarriedWeapon.GetUnk18();
+            var weaponEntry = (S808031EA)CarriedWeapon.GetUnk18();
             Log.Debug($"CarriedWeapon {CarriedWeapon.Hash} ({weaponEntry.Unk1C0.Count} entries)");
 
             var offsetTrans = Vector4.Zero;
@@ -312,7 +312,7 @@ public class Entity : Tag<SEntity>
 
         if (Attachments is not null)
         {
-            var attachmentEntry = (S282C8080)Attachments.GetUnk18();
+            var attachmentEntry = (S80802C28)Attachments.GetUnk18();
             Log.Debug($"Attachments {Attachments.Hash} ({attachmentEntry.Unk1D8.Count} entries)");
 
             foreach (var entry in attachmentEntry.Unk1D8)
@@ -369,11 +369,11 @@ public class Entity : Tag<SEntity>
         if (EntityChildren is null)
             return entities;
 
-        if (EntityChildren.GetUnk18() is S0E848080 children)
+        if (EntityChildren.GetUnk18() is S8080840E children)
         {
-            foreach (S1B848080 entry in children.Unk88)
+            foreach (S8080841B entry in children.Unk88)
             {
-                foreach (S1D848080 entry2 in entry.Unk08)
+                foreach (S8080841D entry2 in entry.Unk08)
                 {
                     if (entry2.Entity is null)
                         continue;

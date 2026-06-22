@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -265,7 +265,7 @@ public partial class ActivityMapEntityView : UserControl
         {
             List<SMapDataEntry> dataEntries = new();
             if (Strategy.IsD1() && data.GetReferenceHash().Hash32 == 0x808003F6) //F6038080
-                dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SF6038080>(data).TagData.EntityComponent.CollapseIntoDataEntry());
+                dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<S808003F6>(data).TagData.EntityComponent.CollapseIntoDataEntry());
             else
                 dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SMapDataTable>(data).TagData.DataEntries);
 
@@ -414,7 +414,7 @@ public partial class ActivityMapEntityView : UserControl
         {
             if (Strategy.IsD1() && data.GetReferenceHash().Hash32 == 0x808003F6)
             {
-                List<SMapDataEntry> dataEntries = FileResourcer.Get().GetSchemaTag<SF6038080>(data).TagData.EntityComponent.CollapseIntoDataEntry();
+                List<SMapDataEntry> dataEntries = FileResourcer.Get().GetSchemaTag<S808003F6>(data).TagData.EntityComponent.CollapseIntoDataEntry();
                 foreach (SMapDataEntry entry in dataEntries)
                 {
                     Entity entity = FileResourcer.Get().GetFile<Entity>(entry.Entity.Hash);
@@ -445,14 +445,14 @@ public partial class ActivityMapEntityView : UserControl
                             EntityComponent resource = FileResourcer.Get().GetFile<EntityComponent>(resourceHash);
                             switch (resource.TagData.Unk10.GetValue(resource.GetReader()))
                             {
-                                case S79948080:
-                                    var a = ((S79818080)resource.TagData.Unk18.GetValue(resource.GetReader()));
-                                    DynamicArray<SF1918080> b = a.Array1;
+                                case S80809479:
+                                    var a = ((S80808179)resource.TagData.Unk18.GetValue(resource.GetReader()));
+                                    DynamicArray<S808091F1> b = a.Array1;
                                     b.AddRange(a.Array2);
 
-                                    foreach (SF1918080 c in b)
+                                    foreach (S808091F1 c in b)
                                     {
-                                        if (c.Unk10.GetValue(resource.GetReader()) is SD1918080)
+                                        if (c.Unk10.GetValue(resource.GetReader()) is S808091D1)
                                         {
                                             // I dont like adding the whole resource here, but its the only way to get the data out of it
                                             globalScene.AddToGlobalScene(resource);
@@ -539,8 +539,8 @@ public partial class ActivityMapEntityView : UserControl
                             roadDecals.RoadDecals.LoadIntoExporter(roadDecalsScene);
                             break;
 
-                        case S716A8080 dayCycle:
-                            if (!globalScene.Any<S716A8080>())
+                        case S80806A71 dayCycle:
+                            if (!globalScene.Any<S80806A71>())
                                 globalScene.AddToGlobalScene(dayCycle, true);
                             break;
 
@@ -691,7 +691,7 @@ public partial class ActivityMapEntityView : UserControl
                 {
                     List<SMapDataEntry> dataEntries = new();
                     if (Strategy.IsD1() && datatable.GetReferenceHash().Hash32 == 0x808003F6) //F6038080
-                        dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SF6038080>(datatable).TagData.EntityComponent.CollapseIntoDataEntry());
+                        dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<S808003F6>(datatable).TagData.EntityComponent.CollapseIntoDataEntry());
                     else
                         dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SMapDataTable>(datatable).TagData.DataEntries);
 

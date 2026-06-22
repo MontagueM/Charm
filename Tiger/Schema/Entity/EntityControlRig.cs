@@ -1,4 +1,4 @@
-﻿namespace Tiger.Schema.Entity;
+namespace Tiger.Schema.Entity;
 
 /// <summary>
 /// EntityControlRig stores the control rig (IK) skeletal data.
@@ -20,7 +20,7 @@ public class EntityControlRig : EntityComponent
     //    using TigerReader reader = GetReader();
 
     //    StringBuilder sb = new StringBuilder();
-    //    S5F8B8080 skelInfo = (S5F8B8080)_tag.Unk18.GetValue(reader);
+    //    S80808B5F skelInfo = (S80808B5F)_tag.Unk18.GetValue(reader);
     //    var ikTransforms = skelInfo.UnkC8;
     //    var ikDescriptors = skelInfo.UnkB8;
     //    for (int i = 0; i < ikDescriptors.Count; i++)

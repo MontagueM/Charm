@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,11 +19,11 @@ public partial class LoreView : UserControl
 {
     private static MainWindow _mainWindow = null;
 
-    private DynamicArray<SDB788080> PresentationNodes = Investment.Get()._presentationNodeDefinitionMap.TagData.PresentationNodeDefinitions;
-    private DynamicArray<S07588080> PresentationNodeStrings = Investment.Get()._presentationNodeDefinitionStringMap.TagData.PresentationNodeDefinitionStrings;
+    private DynamicArray<S808078DB> PresentationNodes = Investment.Get()._presentationNodeDefinitionMap.TagData.PresentationNodeDefinitions;
+    private DynamicArray<S80805807> PresentationNodeStrings = Investment.Get()._presentationNodeDefinitionStringMap.TagData.PresentationNodeDefinitionStrings;
 
-    private DynamicArray<SC16F8080> Records = Investment.Get()._recordNodeDefinitionMap.TagData.RecordDefinitions;
-    private DynamicArray<S8B588080> RecordStrings = Investment.Get()._recordNodeDefinitionStringMap.TagData.RecordDefinitionStrings;
+    private DynamicArray<S80806FC1> Records = Investment.Get()._recordNodeDefinitionMap.TagData.RecordDefinitions;
+    private DynamicArray<S8080588B> RecordStrings = Investment.Get()._recordNodeDefinitionStringMap.TagData.RecordDefinitionStrings;
 
     public LoreView(Category itemCategory)
     {
@@ -55,9 +55,9 @@ public partial class LoreView : UserControl
         List<Category> items = new();
         for (int i = 0; i < PresentationNodes[itemCategory.ItemCategoryIndex].PresentationNodes.Count; i++)
         {
-            SED788080 node = PresentationNodes[itemCategory.ItemCategoryIndex].PresentationNodes[i];
-            SDB788080 curNode = PresentationNodes[node.PresentationNodeIndex];
-            S07588080 curNodeStrings = PresentationNodeStrings[node.PresentationNodeIndex];
+            S808078ED node = PresentationNodes[itemCategory.ItemCategoryIndex].PresentationNodes[i];
+            S808078DB curNode = PresentationNodes[node.PresentationNodeIndex];
+            S80805807 curNodeStrings = PresentationNodeStrings[node.PresentationNodeIndex];
 
             Category subcategory = new()
             {
@@ -87,9 +87,9 @@ public partial class LoreView : UserControl
 
             for (int i = 0; i < PresentationNodes[item.ItemCategoryIndex].PresentationNodes.Count; i++)
             {
-                SED788080 node = PresentationNodes[item.ItemCategoryIndex].PresentationNodes[i];
-                SDB788080 curNode = PresentationNodes[node.PresentationNodeIndex];
-                S07588080 curNodeStrings = PresentationNodeStrings[node.PresentationNodeIndex];
+                S808078ED node = PresentationNodes[item.ItemCategoryIndex].PresentationNodes[i];
+                S808078DB curNode = PresentationNodes[node.PresentationNodeIndex];
+                S80805807 curNodeStrings = PresentationNodeStrings[node.PresentationNodeIndex];
 
                 Category subcategory = new()
                 {

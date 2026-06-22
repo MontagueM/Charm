@@ -1,4 +1,4 @@
-﻿namespace Tiger.Schema.Entity;
+namespace Tiger.Schema.Entity;
 
 public class EntityPhysicsModelParent : EntityComponent
 {
@@ -19,7 +19,7 @@ public class EntityPhysicsModelParent : EntityComponent
     {
     }
 
-    public S6C6D8080 Reader => ((S6C6D8080)TagData.Unk18.GetValue(GetReader()));
+    public S80806D6C Reader => ((S80806D6C)TagData.Unk18.GetValue(GetReader()));
 
     public EntityModel GetModel()
     {

@@ -1,10 +1,10 @@
-﻿
+
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Static;
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "A7718080", 0x90)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "446D8080", 0x70)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808071A7, 0x90)] //A7718080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806D44, 0x70)] //446D8080
 public struct SStaticMesh
 {
     public long FileSize;
@@ -25,15 +25,8 @@ public struct SStaticMesh
     public Vector2 TexcoordTranslation;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "14008080", 0x4)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "14008080", 0x4)]
-public struct SMaterialHash
-{
-    public Material Material;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "93718080", 0x20)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "2F6D8080", 0x24)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80807193, 0x20)] //93718080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806D2F, 0x24)] //2F6D8080
 public struct SStaticMeshDecal
 {
     // ugh this is ugly
@@ -84,7 +77,7 @@ public struct SStaticMeshDecal
     }
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "94718080", 0x40)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80807194, 0x40)] //94718080
 public struct SStaticMeshData_SK
 {
     public long FileSize;
@@ -93,8 +86,8 @@ public struct SStaticMeshData_SK
     public DynamicArray<SStaticMeshBuffers> Buffers;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "306D8080", 0x70)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "306D8080", 0x60)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806D30, 0x70)] //306D8080
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, 0x80806D30, 0x60)] //306D8080
 public struct SStaticMeshData_BL
 {
     public long FileSize;
@@ -109,7 +102,7 @@ public struct SStaticMeshData_BL
     public uint MaxVertexColorIndex;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "9B718080", 0x8)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x8080719B, 0x8)] //9B718080
 public struct SStaticMeshMaterialAssignment_SK
 {
     public ushort PartIndex;
@@ -118,7 +111,7 @@ public struct SStaticMeshMaterialAssignment_SK
     public ushort Unk06;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "386D8080", 0x6)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, 0x80806D38, 0x6)] //386D8080
 public struct SStaticMeshMaterialAssignment_WQ
 {
     public ushort PartIndex;
@@ -127,8 +120,8 @@ public struct SStaticMeshMaterialAssignment_WQ
     public ushort Unk04;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "9A718080", 0xC)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "376D8080", 0xC)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x8080719A, 0xC)] //9A718080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806D37, 0xC)] //376D8080
 public struct SStaticMeshPart
 {
     public uint IndexOffset;
@@ -138,8 +131,8 @@ public struct SStaticMeshPart
     public sbyte PrimitiveType;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "99718080", 0x10)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "366D8080", 0x14)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80807199, 0x10)] //99718080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806D36, 0x14)] //366D8080
 public struct SStaticMeshBuffers
 {
     public IndexBuffer Indices;
@@ -150,7 +143,7 @@ public struct SStaticMeshBuffers
     public uint UnkOffset;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "D61B8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801BD6, 0x18)] //D61B8080
 public struct SStaticMeshData_D1
 {
     public VertexBuffer Vertices0;

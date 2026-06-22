@@ -1,4 +1,4 @@
-﻿using System.Buffers;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO.Compression;
@@ -125,10 +125,10 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
 
         if (Strategy.IsD1())
         {
-            ConcurrentCollections.ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S50058080>();
+            ConcurrentCollections.ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S80800550>();
             Parallel.ForEach(vals, val =>
             {
-                Tag<S50058080> tag = FileResourcer.Get().GetSchemaTag<S50058080>(val);
+                Tag<S80800550> tag = FileResourcer.Get().GetSchemaTag<S80800550>(val);
                 AddStrings(tag.TagData.CharacterNames);
                 AddStrings(tag.TagData.ActivityGlobalStrings);
             });
@@ -136,11 +136,11 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
         // surely this is fine..
         else
         {
-            ConcurrentCollections.ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S02218080>(); //TODO: Beyond Light
+            ConcurrentCollections.ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S80802102>(); //TODO: Beyond Light
             Parallel.ForEach(vals, val =>
             {
-                Tag<S02218080> tag = FileResourcer.Get().GetSchemaTag<S02218080>(val);
-                foreach (S0E3C8080 entry in tag.TagData.Unk28)
+                Tag<S80802102> tag = FileResourcer.Get().GetSchemaTag<S80802102>(val);
+                foreach (S80803C0E entry in tag.TagData.Unk28)
                 {
                     if (Strategy.IsPostBL() && entry.Unk10 is not null && entry.Unk10.Hash.GetReferenceHash() == 0x808099EF) // EF998080
                     {

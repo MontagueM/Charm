@@ -1,8 +1,8 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 
 namespace Tiger.Schema.Investment;
 
-public class InventoryItem : Tag<S9D798080>
+public class InventoryItem : Tag<S8080799D>
 {
     public InventoryItem(FileHash hash, bool shouldParse) : base(hash, shouldParse)
     {
@@ -87,7 +87,7 @@ public class InventoryItem : Tag<S9D798080>
 
     private bool IsItemHolofoil()
     {
-        if (!Strategy.IsD1() && _tag.Unk78_EoF.GetValue(GetReader()) is S74738080 Unk && Unk.Unk20.Any(x => x.Unk00 == 0xF2))
+        if (!Strategy.IsD1() && _tag.Unk78_EoF.GetValue(GetReader()) is S80807374 Unk && Unk.Unk20.Any(x => x.Unk00 == 0xF2))
             return true;
 
         return false;
@@ -136,7 +136,7 @@ public class InventoryItem : Tag<S9D798080>
     [Obsolete("Power cap? Never heard of it.")]
     public int GetItemPowerCap()
     {
-        if (_tag.Unk50.GetValue(GetReader()) is SDC778080 quality)
+        if (_tag.Unk50.GetValue(GetReader()) is S808077DC quality)
         {
             if (quality.Versions.Count == 0 || quality.Versions[0].PowerCapIndex == -1)
                 return 0;
@@ -151,7 +151,7 @@ public class InventoryItem : Tag<S9D798080>
         return Investment.Get().GetItemLore(this)?.LoreDescription?.Value.ToString() ?? string.Empty;
     }
 
-    public Tag<S9F548080> GetItemStrings()
+    public Tag<S8080549F> GetItemStrings()
     {
         return Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(_tag.InventoryItemHash));
     }
@@ -196,9 +196,9 @@ public class InventoryItem : Tag<S9D798080>
     public int GetItemDamageTypeIndex()
     {
         var index = -1;
-        if (_tag.Unk78.GetValue(GetReader()) is S81738080 perks)
+        if (_tag.Unk78.GetValue(GetReader()) is S80807381 perks)
         {
-            foreach (S87738080 perk in perks.Perks)
+            foreach (S80807387 perk in perks.Perks)
             {
                 if (Investment.Get().SandboxPerkMap2[perk.PerkIndex].UnkIndex != -1)
                 {
@@ -209,15 +209,15 @@ public class InventoryItem : Tag<S9D798080>
         }
 
         // if the damage type wasnt found in perks
-        if (index == -1 && _tag.Unk70.GetValue(GetReader()) is SC0778080 sockets)
+        if (index == -1 && _tag.Unk70.GetValue(GetReader()) is S808077C0 sockets)
         {
             sockets.SocketEntries.ForEach(entry =>
             {
                 if (entry.SocketTypeIndex == -1 || entry.SingleInitialItemIndex == -1)
                     return;
 
-                SBA768080 socket = Investment.Get().GetSocketType(entry.SocketTypeIndex);
-                foreach (SC5768080 a in socket.PlugWhitelists)
+                S808076BA socket = Investment.Get().GetSocketType(entry.SocketTypeIndex);
+                foreach (S808076C5 a in socket.PlugWhitelists)
                 {
                     if (a.PlugCategoryHash.Hash32 == 1466776700) // 'v300.weapon.damage_type.energy', Y1 weapon that uses a damage type mod from ye olden days
                     {
@@ -235,7 +235,7 @@ public class InventoryItem : Tag<S9D798080>
     public int GetArtArrangementIndex()
     {
         if (_tag.Unk90 is null) return -1;
-        if (_tag.Unk90.GetValue(GetReader()) is S77738080 entry && entry.Arrangements.Count > 0)
+        if (_tag.Unk90.GetValue(GetReader()) is S80807377 entry && entry.Arrangements.Count > 0)
             return entry.Arrangements[GetReader(), 0].ArtArrangementHash;
 
         return -1;
@@ -243,7 +243,7 @@ public class InventoryItem : Tag<S9D798080>
 
     public int GetWeaponPatternIndex()
     {
-        if (_tag.Unk90.GetValue(GetReader()) is S77738080 entry && entry.WeaponPatternIndex > 0)
+        if (_tag.Unk90.GetValue(GetReader()) is S80807377 entry && entry.WeaponPatternIndex > 0)
             return entry.WeaponPatternIndex;
 
         return -1;
@@ -252,14 +252,14 @@ public class InventoryItem : Tag<S9D798080>
     public ConcurrentBag<InventoryItem> GetItemOrnaments()
     {
         ConcurrentBag<InventoryItem> ornaments = new();
-        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307 && _tag.Unk70.GetValue(GetReader()) is SC0778080 sockets)
+        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307 && _tag.Unk70.GetValue(GetReader()) is S808077C0 sockets)
         {
-            foreach (SC3778080 socket in sockets.SocketEntries)
+            foreach (S808077C3 socket in sockets.SocketEntries)
             {
                 if (socket.SocketTypeIndex == -1)
                     continue;
 
-                SBA768080 socketType = Investment.Get().GetSocketType(socket.SocketTypeIndex);
+                S808076BA socketType = Investment.Get().GetSocketType(socket.SocketTypeIndex);
                 if (!socketType.PlugWhitelists.Any(x => // hopefully this is better than just checking the sockets name
                    x.PlugCategoryHash.Hash32 != 3940152116 // exotic_all_skins
                 || x.PlugCategoryHash.Hash32 != 3356843615)) // armor_skins_empty
@@ -267,7 +267,7 @@ public class InventoryItem : Tag<S9D798080>
 
                 if (socket.ReusablePlugSetIndex1 != -1) // huh?
                 {
-                    foreach (SD5778080 randomPlugs in Investment.Get().GetRandomizedPlugSet(socket.ReusablePlugSetIndex1))
+                    foreach (S808077D5 randomPlugs in Investment.Get().GetRandomizedPlugSet(socket.ReusablePlugSetIndex1))
                     {
                         if (randomPlugs.PlugInventoryItemIndex == -1)
                             continue;
@@ -285,7 +285,7 @@ public class InventoryItem : Tag<S9D798080>
                     }
                 }
 
-                foreach (SD5778080 plug in socket.PlugItems)
+                foreach (S808077D5 plug in socket.PlugItems)
                 {
                     if (plug.PlugInventoryItemIndex == -1)
                         continue;
@@ -303,14 +303,14 @@ public class InventoryItem : Tag<S9D798080>
                 }
             }
         }
-        else if (Strategy.IsD1() && _tag.Unk78.GetValue(GetReader()) is SBD178080 a)
+        else if (Strategy.IsD1() && _tag.Unk78.GetValue(GetReader()) is S808017BD a)
         {
-            Tag<S63198080> talentGrid = Investment.Get().GetTalentGrid(a.TalenGridIndex);
-            foreach (S28178080 node in talentGrid.TagData.Nodes)
+            Tag<S80801963> talentGrid = Investment.Get().GetTalentGrid(a.TalenGridIndex);
+            foreach (S80801728 node in talentGrid.TagData.Nodes)
             {
-                foreach (S58178080 entry in node.Unk18)
+                foreach (S80801758 entry in node.Unk18)
                 {
-                    foreach (S940F8080 entry2 in entry.Unk70)
+                    foreach (S80800F94 entry2 in entry.Unk70)
                     {
                         if (entry2.PlugItemIndex == -1)
                             continue;
@@ -328,7 +328,7 @@ public class InventoryItem : Tag<S9D798080>
     #region Icon Background
     public UnmanagedMemoryStream? GetIconBackgroundStream()
     {
-        Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
+        Tag<S80803EB8>? iconContainer = Investment.Get().GetItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconBackgroundContainer == null)
             return null;
         Texture? backgroundIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconBackgroundContainer);
@@ -343,7 +343,7 @@ public class InventoryItem : Tag<S9D798080>
 
     public Texture? GetIconBackgroundOverlayTexture()
     {
-        Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
+        Tag<S80803EB8>? iconContainer = Investment.Get().GetItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconBGOverlayContainer == null)
             return null;
         Texture? backgroundIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconBGOverlayContainer);
@@ -360,7 +360,7 @@ public class InventoryItem : Tag<S9D798080>
 
     public Texture? GetIconPrimaryTexture()
     {
-        Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
+        Tag<S80803EB8>? iconContainer = Investment.Get().GetItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconPrimaryContainer == null)
             return null;
         Texture? primaryIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconPrimaryContainer);
@@ -369,7 +369,7 @@ public class InventoryItem : Tag<S9D798080>
 
     public Texture? GetIconPrimaryTexture(int index, int listIndex = 0)
     {
-        Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
+        Tag<S80803EB8>? iconContainer = Investment.Get().GetItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconPrimaryContainer == null)
             return null;
         Texture? primaryIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconPrimaryContainer, index, listIndex);
@@ -386,7 +386,7 @@ public class InventoryItem : Tag<S9D798080>
 
     public Texture? GetIconOverlayTexture(int index = 0)
     {
-        Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
+        Tag<S80803EB8>? iconContainer = Investment.Get().GetItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconOverlayContainer == null)
             return null;
         Texture? overlayIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconOverlayContainer, index);
@@ -402,7 +402,7 @@ public class InventoryItem : Tag<S9D798080>
 
     public Texture? GetFoundryIconTexture()
     {
-        Tag<SB83E8080>? iconContainer = Investment.Get().GetFoundryItemIconContainer(this);
+        Tag<S80803EB8>? iconContainer = Investment.Get().GetFoundryItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconPrimaryContainer == null)
             return null;
         Texture? foundryIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconPrimaryContainer);

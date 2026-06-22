@@ -1,9 +1,9 @@
-﻿namespace Tiger.Schema;
+namespace Tiger.Schema;
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "D71A8080", 0x488)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "E8718080", 0x400)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "AA6D8080", 0x3B0)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "AA6D8080", 0x3D0)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801AD7, 0x488)] //D71A8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808071E8, 0x400)] //E8718080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806DAA, 0x3B0)] //AA6D8080
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, 0x80806DAA, 0x3D0)] //AA6D8080
 public struct SMaterial // Errm Ackchyually its called "technique" 🤓
 {
     public long FileSize;
@@ -139,9 +139,9 @@ public struct SMaterialShader
     }
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "281B8080", 0x8)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "11728080", 0x8)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "CF6D8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801B28, 0x8)] //281B8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80807211, 0x8)] //11728080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806DCF, 0x18)] //CF6D8080
 public struct STextureTag
 {
     public uint TextureIndex;
@@ -150,9 +150,9 @@ public struct STextureTag
     public Texture Texture;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "CC1A8080", 0x10)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F3738080", 0x10)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "3F018080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801ACC, 0x10)] //CC1A8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808073F3, 0x10)] //F3738080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x8080013F, 0x10)] //3F018080
 public struct SDirectXSamplerTag
 {
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
@@ -174,14 +174,7 @@ public struct SDirectXSamplerTag
     }
 }
 
-[SchemaStruct("90008080", 0x10)]
-public struct Vec4
-{
-    public Vector4 Vec;
-}
-
-
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "80806927", 0x158)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80806927, 0x158)] //80806927
 public struct S80806927 // temp, particle system
 {
     [SchemaField(0x8)]

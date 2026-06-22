@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -179,7 +179,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
             LabelColor = rarity.GetLabelColor()
         };
 
-        if (item.TagData.Unk10.GetValue(item.GetReader()) is S49298080)
+        if (item.TagData.Unk10.GetValue(item.GetReader()) is S80802949)
             Header.Type = $"{Header.Type} Pattern";
 
         if (Keyboard.IsKeyDown(Key.LeftShift))
@@ -243,11 +243,11 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
                 if (strings.TagData.DisplayStyle == DestinyUIDisplayStyle.EnergyMod)
                 {
-                    if (item.TagData.Unk78.GetValue(item.GetReader()) is S81738080 stats2)
+                    if (item.TagData.Unk78.GetValue(item.GetReader()) is S80807381 stats2)
                     {
-                        foreach (S86738080 stat in stats2.InvestmentStats)
+                        foreach (S80807386 stat in stats2.InvestmentStats)
                         {
-                            S6F588080 statItem = Investment.Get().StatStrings[stat.StatTypeIndex];
+                            S8080586F statItem = Investment.Get().StatStrings[stat.StatTypeIndex];
                             if (statItem.StatHash.Hash32 is 3578062600 or 514071887)
                             {
                                 blocks.Add(new EnergyModBlock
@@ -269,11 +269,11 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
                 if (overrideStyle != DestinySocketCategoryStyle.Reusable)
                 {
-                    if (item.TagData.Unk78.GetValue(item.GetReader()) is S81738080 stats)
+                    if (item.TagData.Unk78.GetValue(item.GetReader()) is S80807381 stats)
                     {
-                        foreach (S87738080 perk in stats.Perks)
+                        foreach (S80807387 perk in stats.Perks)
                         {
-                            S33548080 perkStrings = Investment.Get().SandboxPerkStrings[perk.PerkIndex];
+                            S80805433 perkStrings = Investment.Get().SandboxPerkStrings[perk.PerkIndex];
                             if (perkStrings.IconIndex == -1)
                                 continue;
 
@@ -291,7 +291,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                     {
                         blocks.Add(new SpacerBlock { Order = 8, ShowBar = true, BarOpacity = 0.1f });
 
-                        foreach (SB2548080 notif in strings.TagData.TooltipNotifications)
+                        foreach (S808054B2 notif in strings.TagData.TooltipNotifications)
                         {
                             string? message = notif.DisplayString.Value;
                             if (string.IsNullOrWhiteSpace(message)) continue;
@@ -307,7 +307,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                     }
                 }
 
-                if (strings.TagData.Unk40.GetValue(strings.GetReader()) is SD7548080 preview)
+                if (strings.TagData.Unk40.GetValue(strings.GetReader()) is S808054D7 preview)
                 {
                     inputBlocks.Add(new InputBlock
                     {
@@ -535,7 +535,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
     public ObjectiveBlock AddObjective(int index)
     {
-        S50588080? obj = Investment.Get().GetObjective(index);
+        S80805850? obj = Investment.Get().GetObjective(index);
         if (obj is null || obj.Value.ProgressDescription.Value is null)
             return null;
 

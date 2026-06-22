@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -373,7 +373,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         if (Keyboard.IsKeyDown(Key.LeftCtrl) && IRenderer.CanUseRenderer())
         {
             var item = apiItem.Item;
-            if ((apiItem.Item.Type is "Artifact" or "Seasonal Artifact"))// && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is SC5738080 gearSet)
+            if ((apiItem.Item.Type is "Artifact" or "Seasonal Artifact"))// && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is S808073C5 gearSet)
             {
                 item = Investment.Get().GetInventoryItem(apiItem.Item.GetItemIndex() + 1);
                 item.Name = apiItem.Item.Name;
@@ -429,7 +429,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         foreach (var item in SelectedItems.Select(x => x.Item))
         {
             var curItem = item;
-            if ((item.Type is "Artifact" or "Seasonal Artifact"))// && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is SC5738080 gearSet)
+            if ((item.Type is "Artifact" or "Seasonal Artifact"))// && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is S808073C5 gearSet)
             {
                 curItem = Investment.Get().GetInventoryItem(item.GetItemIndex() + 1);
                 curItem.Name = item.Name;
@@ -479,7 +479,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                 var curItem = item.Item;
                 // GearSet was removed from artifacts in EoF, for some reason?
                 // THIS IS A VERY HACK SOLUTION, just get the next item in the inventory items list lol
-                if ((curItem.Type is "Artifact" or "Seasonal Artifact"))// && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is SC5738080 gearSet)
+                if ((curItem.Type is "Artifact" or "Seasonal Artifact"))// && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is S808073C5 gearSet)
                 {
                     curItem = Investment.Get().GetInventoryItem(curItem.GetItemIndex() + 1);
                     curItem.Name = item.Item.Name;
@@ -713,7 +713,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         // 1: Check if the items InventoryBucket is the Seasonal Artifacts bucket
         // 2: Get the item next to it in the inventory items list and check if it has a model
         // 3: Profit?
-        bool canAdd = (!Strategy.IsD1() && (item.TagData.BucketTypeIndex == 42 && Investment.Get().GetInventoryItem(item.GetItemIndex() + 1).ArtArrangementIndex != -1)) // && item.TagData.Unk28.GetValue(item.GetReader()) is SC5738080)
+        bool canAdd = (!Strategy.IsD1() && (item.TagData.BucketTypeIndex == 42 && Investment.Get().GetInventoryItem(item.GetItemIndex() + 1).ArtArrangementIndex != -1)) // && item.TagData.Unk28.GetValue(item.GetReader()) is S808073C5)
             || item.ArtArrangementIndex != -1
             || item.ItemTraits.Any(trait => whitelist.Contains(trait));
 

@@ -1,4 +1,4 @@
-﻿using Tiger.Schema.Audio;
+using Tiger.Schema.Audio;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Entity;
@@ -14,11 +14,11 @@ public class EntitySequencer : EntityComponent
     public List<Entity> GetSequencerEntities()
     {
         List<Entity> entities = new();
-        if (GetUnk18() is S79818080 sequencer)
+        if (GetUnk18() is S80808179 sequencer)
         {
-            foreach (SF1918080 entry in sequencer.Array2)
+            foreach (S808091F1 entry in sequencer.Array2)
             {
-                if (entry.Unk10.GetValue(Reader) is S81888080 entry2)
+                if (entry.Unk10.GetValue(Reader) is S80808881 entry2)
                 {
                     if (entry2.Entity is null)
                         continue;
@@ -58,9 +58,9 @@ public struct SSequenceNodeBase
     public float Duration;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "001F8080", 0x54)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "386B8080", 0x7C)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "40668080", 0x6C)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801F00, 0x54)] //001F8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80806B38, 0x7C)] //386B8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806640, 0x6C)] //40668080
 public struct SSequenceAudioEvent
 {
     public DynamicStruct<SSequenceNodeBase> Base;
@@ -72,9 +72,9 @@ public struct SSequenceAudioEvent
     public WwiseSound Sound;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "6D1A8080", 0x50)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "496F8080", 0x150)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "526A8080", 0x130)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801A6D, 0x50)] //6D1A8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80806F49, 0x150)] //496F8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806A52, 0x130)] //526A8080
 public struct SSequenceLight
 {
     public DynamicStruct<SSequenceNodeBase> Base;
@@ -91,24 +91,24 @@ public struct SSequenceLight
 }
 
 
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "B9678080", 0x110)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x808067B9, 0x110)] //B9678080
 public struct SSequenceParticleSystem
 {
     public DynamicStruct<SSequenceNodeBase> Base;
 
     [SchemaField(0x28)]
-    public DynamicArray<SBB678080> Unk28;
+    public DynamicArray<S808067BB> Unk28;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "BB678080", 0x18)]
-public struct SBB678080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x808067BB, 0x18)] //BB678080
+public struct S808067BB
 {
     [SchemaField(0x10)]
     public Tag<SParticleSystem> ParticleSystem;
 }
 
 // Particle system
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "20698080", 0x40)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806920, 0x40)] //20698080
 public struct SParticleSystem
 {
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)] // TODO
@@ -119,18 +119,18 @@ public struct SParticleSystem
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x18, TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Tag64 = true)]
     [SchemaField(0x20, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
-    public Tag<S29698080> ModelContainer;
+    public Tag<S80806929> ModelContainer;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "29698080", 0x18)]
-public struct S29698080
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, 0x80806929, 0x18)] //29698080
+public struct S80806929
 {
     [SchemaField(0x10)]
-    public DynamicArrayUnloaded<S066F8080> Models;
+    public DynamicArrayUnloaded<S80806F06> Models;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "066F8080", 4)]
-public struct S066F8080
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, 0x80806F06, 4)] //066F8080
+public struct S80806F06
 {
     public EntityModel Model;
 }

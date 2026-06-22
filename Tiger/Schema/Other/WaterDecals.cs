@@ -39,9 +39,9 @@ public class WaterDecals
 /// <summary>
 /// Usually a flat plane for screen-space reflected water
 /// </summary>
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "7E1A8080", 0x60)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "E06D8080", 0x50)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "D4688080", 0x70)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801A7E, 0x60)] //7E1A8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80806DE0, 0x50)] //E06D8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x808068D4, 0x70)] //D4688080
 public struct SMapWaterDecal
 {
     [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON)]

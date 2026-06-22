@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Tiger.Schema;
 using Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
 
@@ -248,7 +248,7 @@ public static class FileHashExtensions
         if (Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON)
             return fileHash.GetReferenceHash();
 
-        Tag<S48018080> temp = FileResourcer.Get().GetSchemaTag<S48018080>(fileHash.GetReferenceHash());
+        Tag<S80800148> temp = FileResourcer.Get().GetSchemaTag<S80800148>(fileHash.GetReferenceHash());
         return new FileHash(temp.TagData.Reference.Hash32);
     }
 

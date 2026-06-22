@@ -15,7 +15,7 @@ public class RoadDecals : Tag<SMapRoadDecals>
 
     public void LoadIntoExporter(ExporterScene scene)
     {
-        foreach (SE3688080 a in _tag.Entries)
+        foreach (S808068E3 a in _tag.Entries)
         {
             Transform transform = new()
             {
@@ -43,28 +43,28 @@ public class RoadDecals : Tag<SMapRoadDecals>
     }
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F16D8080", 0x18)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "E8688080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80806DF1, 0x18)] //F16D8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x808068E8, 0x18)] //E8688080
 public struct SMapRoadDecalsResource
 {
     [SchemaField(0x10), NoLoad]
     public RoadDecals RoadDecals; // Contrary to the name, it is more than just decals on roads
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F36D8080", 0x58)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "EA688080", 0x58)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80806DF3, 0x58)] //F36D8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x808068EA, 0x58)] //EA688080
 public struct SMapRoadDecals
 {
     public ulong FileSize;
-    public DynamicArray<SE3688080> Entries;
+    public DynamicArray<S808068E3> Entries;
     public FileHash OcclusionBounds;
     [SchemaField(0x20)]
     public AABB UnkBounds;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "EC6D8080", 0x60)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "E3688080", 0x60)]
-public struct SE3688080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80806DEC, 0x60)] //EC6D8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x808068E3, 0x60)] //E3688080
+public struct S808068E3
 {
     public Material Material;
     public IndexBuffer IndexBuffer;

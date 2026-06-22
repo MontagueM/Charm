@@ -113,7 +113,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
 
     private void FillSchemaTypeCaches()
     {
-        IEnumerable<Type> types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes());
+        var types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes());
 
         Parallel.ForEach(types, type =>
         {
@@ -130,9 +130,9 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                 Type schemaType = type.BaseType.GenericTypeArguments.First();
 
                 SchemaStructAttribute? schemaStructAttr = GetAttribute<SchemaStructAttribute>(schemaType);
-                if (schemaStructAttr != null && !string.IsNullOrEmpty(schemaStructAttr.ClassHash))
+                if (schemaStructAttr != null && schemaStructAttr.ClassID != TigerHash.InvalidHash32)
                 {
-                    _schemaTypeHashMap.TryAdd(type, new FileHash(schemaStructAttr.ClassHash).Hash32);
+                    _schemaTypeHashMap.TryAdd(type, schemaStructAttr.ClassID);
                 }
 
                 NonSchemaStructAttribute? nonSchemaStructAttr = GetAttribute<NonSchemaStructAttribute>(schemaType);
@@ -147,8 +147,8 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             if (schemaStructAttribute != null)
             {
                 _schemaSerializedSizeMap.TryAdd(type, schemaStructAttribute.SerializedSize);
-                _schemaHashTypeMap.TryAdd(new FileHash(schemaStructAttribute.ClassHash).Hash32, type);
-                _schemaTypeHashMap.TryAdd(type, new FileHash(schemaStructAttribute.ClassHash).Hash32);
+                _schemaHashTypeMap.TryAdd(schemaStructAttribute.ClassID, type);
+                _schemaTypeHashMap.TryAdd(type, schemaStructAttribute.ClassID);
                 _schemaTypeFieldsMap.TryAdd(type, GetStrategyFields(type.GetFields()));
                 return;
             }
@@ -195,7 +195,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                     // interfaceMap.TryAdd(strategy, interfaceType);
 
                     SchemaStructAttribute? intSchemaStructAttribute = GetAttribute<SchemaStructAttribute>(interfaceType.BaseType.GenericTypeArguments.First());
-                    _schemaTypeHashMap.TryAdd(type, new FileHash(intSchemaStructAttribute.ClassHash).Hash32);
+                    _schemaTypeHashMap.TryAdd(type, intSchemaStructAttribute.ClassID);
                     _interfaceImplementingTypeMap.TryAdd(type, interfaceType);
                 }
             }

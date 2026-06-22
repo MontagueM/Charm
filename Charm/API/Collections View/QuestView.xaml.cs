@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Controls;
@@ -70,7 +70,7 @@ public partial class QuestView : UserControl
         if (CurrentQuest.QuestType is null && overrideTrait is not null)
             SetQuestDetails(overrideTrait.Value);
 
-        if (questItem.TagData.Unk58.GetValue(questItem.GetReader()) is not S88738080 questSteps)
+        if (questItem.TagData.Unk58.GetValue(questItem.GetReader()) is not S80807388 questSteps)
             return;
 
         foreach (var questStep in questSteps.ItemList)
@@ -85,16 +85,16 @@ public partial class QuestView : UserControl
                 QuestStepItem = item,
                 QuestStepDescription = strings.TagData.ItemDescription.Value,
                 QuestStepFlavorText = strings.TagData.ItemDisplaySource.Value,
-                QuestStepSummary = ((SD0548080)strings.TagData.Unk58.GetValue(strings.GetReader())).QuestStepSummary.Value,
+                QuestStepSummary = ((S808054D0)strings.TagData.Unk58.GetValue(strings.GetReader())).QuestStepSummary.Value,
                 QuestObjectives = new(),
                 QuestRewards = new(),
             };
 
-            if (item.TagData.Unk38.GetValue(item.GetReader()) is SB0738080 objectives)
+            if (item.TagData.Unk38.GetValue(item.GetReader()) is S808073B0 objectives)
             {
                 foreach (var objective in objectives.Objectives)
                 {
-                    S50588080? obj = Investment.Get().GetObjective(objective.ObjectiveIndex);
+                    S80805850? obj = Investment.Get().GetObjective(objective.ObjectiveIndex);
                     if (obj is not null && obj.Value.ProgressDescription.Value is not null)
                     {
                         QuestObjective questObj = new()
@@ -116,7 +116,7 @@ public partial class QuestView : UserControl
                 }
             }
 
-            if (item.TagData.Unk80_EoF.GetValue(item.GetReader()) is S7C758080 questRewards)
+            if (item.TagData.Unk80_EoF.GetValue(item.GetReader()) is S8080757C questRewards)
             {
                 foreach (var reward in new List<DynamicStruct<SQuestStepReward>> { questRewards.Reward1, questRewards.Reward2, questRewards.Reward3, questRewards.Reward4, questRewards.Reward5, questRewards.Reward6 })
                 {

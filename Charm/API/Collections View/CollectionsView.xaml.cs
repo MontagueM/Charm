@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,8 +19,8 @@ public partial class CollectionsView : UserControl
 {
     private static MainWindow _mainWindow = null;
 
-    private DynamicArray<SDB788080> PresentationNodes = Investment.Get()._presentationNodeDefinitionMap.TagData.PresentationNodeDefinitions;
-    private DynamicArray<S07588080> PresentationNodeStrings = Investment.Get()._presentationNodeDefinitionStringMap.TagData.PresentationNodeDefinitionStrings;
+    private DynamicArray<S808078DB> PresentationNodes = Investment.Get()._presentationNodeDefinitionMap.TagData.PresentationNodeDefinitions;
+    private DynamicArray<S80805807> PresentationNodeStrings = Investment.Get()._presentationNodeDefinitionStringMap.TagData.PresentationNodeDefinitionStrings;
 
     public CollectionsView()
     {
@@ -95,7 +95,7 @@ public partial class CollectionsView : UserControl
         {
             var curNode = nodes[node.PresentationNodeIndex];
             var curNodeStrings = strings[node.PresentationNodeIndex];
-            Tag<SB83E8080>? container = Investment.Get().GetItemIconContainer(curNodeStrings.IconIndex);
+            Tag<S80803EB8>? container = Investment.Get().GetItemIconContainer(curNodeStrings.IconIndex);
 
             Category itemCategory = new()
             {
@@ -314,7 +314,7 @@ public partial class CollectionsView : UserControl
         var nodes = PresentationNodes[presNodeIndex].PresentationNodes;
         foreach (var title in nodes)
         {
-            Tag<SB83E8080>? container = Investment.Get().GetItemIconContainer(PresentationNodeStrings[title.PresentationNodeIndex].IconIndex);
+            Tag<S80803EB8>? container = Investment.Get().GetItemIconContainer(PresentationNodeStrings[title.PresentationNodeIndex].IconIndex);
             Texture? texture = ApiImageUtils.GetTexture(container.TagData.IconPrimaryContainer, 1, 0);
             UnmanagedMemoryStream? primaryStream = texture?.GetTexture();
             BitmapImage? primary = primaryStream != null ? ApiImageUtils.MakeBitmapImage(primaryStream, 200, 200) : null;
@@ -345,7 +345,7 @@ public partial class CollectionsView : UserControl
 
         foreach (var trait in TraitCategories)
         {
-            Tag<SB83E8080>? container = Investment.Get().GetItemIconContainer(Investment.Get().GetTrait(trait).Value.IconIndex);
+            Tag<S80803EB8>? container = Investment.Get().GetItemIconContainer(Investment.Get().GetTrait(trait).Value.IconIndex);
             Texture? texture = ApiImageUtils.GetTexture(container.TagData.IconPrimaryContainer, 0, 4);
             UnmanagedMemoryStream? primaryStream = texture?.GetTexture();
             BitmapImage? primary = primaryStream != null ? ApiImageUtils.MakeBitmapImage(primaryStream, 128, 128) : null;
@@ -401,7 +401,7 @@ public partial class CollectionsView : UserControl
 
     public int GetItemCategoryAmount(int index)
     {
-        SDB788080 node = PresentationNodes[index];
+        S808078DB node = PresentationNodes[index];
         int count = node.Collectibles.Count;
 
         for (int j = 0; j < node.PresentationNodes.Count; j++)

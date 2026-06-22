@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -61,7 +61,7 @@ public partial class MusicWemsControl : UserControl
         return _currentWem;
     }
 
-    public void Load(SF5458080 res)
+    public void Load(S808045F5 res)
     {
         WwiseSound loop = res.MusicLoopSound;
         WemList.ItemsSource = GetWemItems(loop).OrderByDescending(x => x.Wem.GetDuration());
@@ -91,7 +91,7 @@ public partial class MusicWemsControl : UserControl
         WemList.ItemsSource = sounds.OrderByDescending(x => x.Wem.GetDuration());
     }
 
-    public async void Load(SF7458080 res)
+    public async void Load(S808045F7 res)
     {
         if (res.AmbientMusicSet == null)
             return;

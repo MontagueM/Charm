@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,11 +12,11 @@ namespace Charm.Collections;
 
 public partial class LoreBookView : UserControl
 {
-    private DynamicArray<SDB788080> Nodes = Investment.Get()._presentationNodeDefinitionMap.TagData.PresentationNodeDefinitions;
-    private DynamicArray<S07588080> NodeStrings = Investment.Get()._presentationNodeDefinitionStringMap.TagData.PresentationNodeDefinitionStrings;
+    private DynamicArray<S808078DB> Nodes = Investment.Get()._presentationNodeDefinitionMap.TagData.PresentationNodeDefinitions;
+    private DynamicArray<S80805807> NodeStrings = Investment.Get()._presentationNodeDefinitionStringMap.TagData.PresentationNodeDefinitionStrings;
 
-    private DynamicArray<SC16F8080> Records = Investment.Get()._recordNodeDefinitionMap.TagData.RecordDefinitions;
-    private DynamicArray<S8B588080> RecordStrings = Investment.Get()._recordNodeDefinitionStringMap.TagData.RecordDefinitionStrings;
+    private DynamicArray<S80806FC1> Records = Investment.Get()._recordNodeDefinitionMap.TagData.RecordDefinitions;
+    private DynamicArray<S8080588B> RecordStrings = Investment.Get()._recordNodeDefinitionStringMap.TagData.RecordDefinitionStrings;
 
     public LoreBookView()
     {
@@ -31,8 +31,8 @@ public partial class LoreBookView : UserControl
     public void LoadLoreBook(int index)
     {
         List<CategoryEntry> items = new();
-        SDB788080 curNode = Nodes[index];
-        S07588080 curNodeStrings = NodeStrings[index];
+        S808078DB curNode = Nodes[index];
+        S80805807 curNodeStrings = NodeStrings[index];
 
         LoreBook loreBook = new LoreBook()
         {

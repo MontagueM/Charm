@@ -1,4 +1,4 @@
-﻿using Tiger.Exporters;
+using Tiger.Exporters;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
 
@@ -18,7 +18,7 @@ public class Lights : Tag<SMapLights>
         {
             SMapLightCollection data = _tag.LightData.ElementAt(reader, i);
 
-            Tag<SA16D8080>? bufferData = (Strategy.CurrentStrategy < TigerStrategy.DESTINY2_BEYONDLIGHT_3402 || data.BufferData2 is null) ? data.BufferData : data.BufferData2;
+            Tag<S80806DA1>? bufferData = (Strategy.CurrentStrategy < TigerStrategy.DESTINY2_BEYONDLIGHT_3402 || data.BufferData2 is null) ? data.BufferData : data.BufferData2;
             if (bufferData is null)
                 continue;
 
@@ -44,7 +44,7 @@ public class Lights : Tag<SMapLights>
 
             Vector3 size = GetSize(data.LightToWorld, lightType, $"{lightType}_{data.BufferData.Hash}_{i}");
             SMeshInstanceOcclusionBounds bounds = _tag.Bounds.TagData.InstanceBounds.ElementAt(_tag.Bounds.GetReader(), i);
-            S4F9F8080 transforms = _tag.Transforms.ElementAt(reader, i);
+            S80809F4F transforms = _tag.Transforms.ElementAt(reader, i);
             LightData lightData = new()
             {
                 Hash = bufferData.Hash,
@@ -67,7 +67,7 @@ public class Lights : Tag<SMapLights>
         }
     }
 
-    public Vector4 GetColor(Tag<SA16D8080> data)
+    public Vector4 GetColor(Tag<S80806DA1> data)
     {
         //Console.WriteLine($"{data.TagData.Buffer2[0].Vec} : {data.TagData.Buffer2[1].Vec} : {data.TagData.Buffer2.Count(x => x.Vec.Magnitude != 0)}");
         if ((Strategy.IsD1() || Strategy.IsPreBL()) && data.TagData.Buffer2.Count != 0 && !data.TagData.Buffer2[2].Vec.IsZero())
@@ -189,9 +189,9 @@ public class Lights : Tag<SMapLights>
 /// <summary>
 /// Map Light
 /// </summary>
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "EA1B8080", 0x10)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "5A6F8080", 0x18)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "636A8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801BEA, 0x10)] //EA1B8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80806F5A, 0x18)] //5A6F8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806A63, 0x18)] //636A8080
 public struct SMapLightResource
 {
     [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
@@ -199,24 +199,24 @@ public struct SMapLightResource
     public Lights Lights;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "5B1A8080", 0x60)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "3A718080", 0x60)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "656C8080", 0x60)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801A5B, 0x60)] //5B1A8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x8080713A, 0x60)] //3A718080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806C65, 0x60)] //656C8080
 public struct SMapLights
 {
     [SchemaField(0x10)]
     public Vector4 Unk10;
     public Vector4 Unk20;
     public DynamicArrayUnloaded<SMapLightCollection> LightData;
-    public DynamicArrayUnloaded<S4F9F8080> Transforms;
+    public DynamicArrayUnloaded<S80809F4F> Transforms;
     [SchemaField(0x54, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Tag<SOcclusionBounds> Bounds;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "2F1C8080", 0x90)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "3E718080", 0xA0)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "706C8080", 0xF0)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801C2F, 0x90)] //2F1C8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x8080713E, 0xA0)] //3E718080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806C70, 0xF0)] //706C8080
 public struct SMapLightCollection
 {
     [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
@@ -233,10 +233,10 @@ public struct SMapLightCollection
     [SchemaField(0x88, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xCC, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0xD0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
-    public Tag<SA16D8080> BufferData;
+    public Tag<S80806DA1> BufferData;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0xD0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0xD4, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
-    public Tag<SA16D8080> BufferData2;
+    public Tag<S80806DA1> BufferData2;
 }

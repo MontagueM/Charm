@@ -29,10 +29,10 @@ public class Cubemap
     }
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "7F6B8080", 0x1C0)] // Map cubemaps dont exist in D1 but this needs to exist
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "7F6B8080", 0x1C0)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "95668080", 0x1E0)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "95668080", 0x1D0)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80806B7F, 0x1C0)] //7F6B8080 // Map cubemaps dont exist in D1 but this needs to exist
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80806B7F, 0x1C0)] //7F6B8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806695, 0x1E0)] //95668080
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, 0x80806695, 0x1D0)] //95668080
 public struct SMapCubemapResource // Dataresource for cubemaps
 {
     // Theres a lot more data in here thats used for determining fade, relighting, parallax, etc but its not important in this context

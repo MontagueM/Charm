@@ -1,4 +1,4 @@
-﻿using Tiger.Exporters;
+using Tiger.Exporters;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
@@ -32,24 +32,24 @@ public class LensFlare : Tag<SLensFlare>
 /// <summary>
 /// Light Lens Flares
 /// </summary>
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "BF6C8080", 0x18)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "B5678080", 0x1C)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80806CBF, 0x18)] //BF6C8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x808067B5, 0x1C)] //B5678080
 public struct SMapLensFlareResource
 {
     [SchemaField(0x10)]
-    public LensFlare LensFlare; // S786A8080
+    public LensFlare LensFlare; // S80806A78
 }
 
 /// <summary>
 /// Unk data resource.
 /// </summary>
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "686F8080", 0x38)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "786A8080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80806F68, 0x38)] //686F8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806A78, 0x38)] //786A8080
 public struct SLensFlare
 {
     public ulong FileSize;
     [SchemaField(0x18)]
-    public Tag<SA16D8080> Unk18;
+    public Tag<S80806DA1> Unk18;
     [SchemaField(0x20)]
     public DynamicArrayUnloaded<SLensFlareEntry> Entries;
     public TigerHash Unk30;
@@ -58,11 +58,11 @@ public struct SLensFlare
 /// <summary>
 /// Unk data resource.
 /// </summary>
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6D6F8080", 0xC)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "7D6A8080", 0xC)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80806F6D, 0xC)] //6D6F8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806A7D, 0xC)] //7D6A8080
 public struct SLensFlareEntry
 {
     public Material Material;
-    public Tag<SA16D8080> Unk04;
+    public Tag<S80806DA1> Unk04;
     public int Unk08;
 }

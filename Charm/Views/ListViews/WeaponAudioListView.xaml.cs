@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -355,8 +355,8 @@ public partial class WeaponAudioListView : UserControl
         if (val == null || (val.PatternAudio == null && val.PatternAudioUnnamed == null))
             return;
 
-        var resourceUnnamed = (SF42C8080)val.PatternAudioUnnamed.GetUnk18();
-        var resource = (S6E358080)val.PatternAudio.GetUnk18();
+        var resourceUnnamed = (S80802CF4)val.PatternAudioUnnamed.GetUnk18();
+        var resource = (S8080356E)val.PatternAudio.GetUnk18();
 
         InventoryItem item = Investment.Get().GetInventoryItem(apiHash);
         TigerHash weaponContentGroupHash = Investment.Get().GetWeaponContentGroupHash(item);
@@ -364,22 +364,22 @@ public partial class WeaponAudioListView : UserControl
         Log.Verbose($"Loading weapon entity audio {val.Hash}, ContentGroupHash {weaponContentGroupHash}");
 
         // Named
-        Tag<S0D8C8080>? audioGroup = null;
+        Tag<S80808C0D>? audioGroup = null;
         if (!resource.PatternAudioGroups.Where(x => x.WeaponContentGroup1Hash == weaponContentGroupHash).Any())
         {
             Log.Verbose($"No PatterAudioGroups with matching Content Group Hash {weaponContentGroupHash}, trying fallback audio");
             if (resource.FallbackAudioGroup != null)
             {
-                audioGroup = FileResourcer.Get().GetSchemaTag<S0D8C8080>(resource.FallbackAudioGroup.TagData.EntityData);
+                audioGroup = FileResourcer.Get().GetSchemaTag<S80808C0D>(resource.FallbackAudioGroup.TagData.EntityData);
             }
         }
         else
         {
-            foreach (S9B318080 entry in resource.PatternAudioGroups)
+            foreach (S8080319B entry in resource.PatternAudioGroups)
             {
                 if (entry.WeaponContentGroup1Hash.Equals(weaponContentGroupHash) && entry.AudioGroup != null)
                 {
-                    audioGroup = FileResourcer.Get().GetSchemaTag<S0D8C8080>(entry.AudioGroup.TagData.EntityData);
+                    audioGroup = FileResourcer.Get().GetSchemaTag<S80808C0D>(entry.AudioGroup.TagData.EntityData);
                 }
             }
         }
@@ -388,7 +388,7 @@ public partial class WeaponAudioListView : UserControl
         {
             foreach (var audio in audioGroup.TagData.Audio)
             {
-                foreach (S138C8080 s in audio.Sounds)
+                foreach (S80808C13 s in audio.Sounds)
                 {
                     WwiseSound categorySounds = FileResourcer.Get().GetFile<WwiseSound>(s.Data);
                     if (categorySounds == null)
@@ -458,7 +458,7 @@ public partial class WeaponAudioListView : UserControl
         RefreshSoundList();
     }
 
-    public List<WwiseSound> GetWeaponUnnamedSounds(SF42C8080 resource, TigerHash weaponContentGroupHash, TigerReader reader)
+    public List<WwiseSound> GetWeaponUnnamedSounds(S80802CF4 resource, TigerHash weaponContentGroupHash, TigerReader reader)
     {
         List<WwiseSound> sounds = new();
         List<Entity> entities = new();
@@ -482,9 +482,9 @@ public partial class WeaponAudioListView : UserControl
 
                 List<TigerFile> entitiesParents = new() { entry.Unk60, entry.Unk78, entry.Unk90, entry.UnkA8, entry.UnkC0, entry.UnkD8, entry.AudioEntityParent, entry.Unk130, entry.Unk148, entry.Unk1C0, entry.Unk1D8, entry.Unk248 };
 
-                if (entry.Unk118.GetValue(reader) is S0A2D8080 or S40238080)
+                if (entry.Unk118.GetValue(reader) is S80802D0A or S80802340)
                 {
-                    dynamic resourceUnk118 = Strategy.IsD1() ? (S40238080)entry.Unk118.GetValue(reader) : (S0A2D8080)entry.Unk118.GetValue(reader);
+                    dynamic resourceUnk118 = Strategy.IsD1() ? (S80802340)entry.Unk118.GetValue(reader) : (S80802D0A)entry.Unk118.GetValue(reader);
                     if (resourceUnk118.Unk08 != null)
                         entities.Add(resourceUnk118.Unk08);
                     if (resourceUnk118.Unk20 != null)
@@ -501,13 +501,13 @@ public partial class WeaponAudioListView : UserControl
                     FileHash? reference = Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON ? tag.Hash.GetReferenceHash() : tag.Hash.GetReferenceFromManifest();
                     if (reference == 0x80806fa3 || reference == 0x80803463)
                     {
-                        FileHash entityData = FileResourcer.Get().GetSchemaTag<SA36F8080>(tag.Hash).TagData.EntityData;
+                        FileHash entityData = FileResourcer.Get().GetSchemaTag<S80806FA3>(tag.Hash).TagData.EntityData;
                         FileHash reference2 = entityData.GetReferenceHash();
                         if (reference2 == 0x80802d09 || reference2 == 0x80803165)
                         {
                             if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
                             {
-                                Tag<S092D8080> tagInner = FileResourcer.Get().GetSchemaTag<S092D8080>(entityData);
+                                Tag<S80802D09> tagInner = FileResourcer.Get().GetSchemaTag<S80802D09>(entityData);
                                 if (tagInner.TagData.Unk18 != null)
                                     entities.Add(tagInner.TagData.Unk18);
                                 if (tagInner.TagData.Unk30 != null)
@@ -524,7 +524,7 @@ public partial class WeaponAudioListView : UserControl
                             else
                             {
                                 // These have tag paths but getting the names from the soundbank is better (93% of the time)
-                                Tag<S65318080> tagInner = FileResourcer.Get().GetSchemaTag<S65318080>(entityData);
+                                Tag<S80803165> tagInner = FileResourcer.Get().GetSchemaTag<S80803165>(entityData);
                                 if (tagInner.TagData.Entity1 != null)
                                     entities.Add(tagInner.TagData.Entity1);
                                 if (tagInner.TagData.Entity2 != null)
@@ -560,14 +560,14 @@ public partial class WeaponAudioListView : UserControl
                     continue;
 
                 EntityComponent e = FileResourcer.Get().GetFile<EntityComponent>(resourceHash);
-                if (e.TagData.Unk18.GetValue(e.GetReader()) is S79818080 a)
+                if (e.TagData.Unk18.GetValue(e.GetReader()) is S80808179 a)
                 {
                     var arrays = a.Array1;
                     arrays.AddRange(a.Array2);
                     if (Strategy.IsD1())
                         arrays.AddRange(a.D1Array3);
 
-                    foreach (SF1918080 d2ClassF1918080 in arrays)
+                    foreach (S808091F1 d2ClassF1918080 in arrays)
                     {
                         if (d2ClassF1918080.Unk10.GetValue(e.GetReader()) is SSequenceAudioEvent b)
                         {

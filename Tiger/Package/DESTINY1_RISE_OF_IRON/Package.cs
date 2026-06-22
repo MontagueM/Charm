@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace Tiger.DESTINY1_RISE_OF_IRON;
 
@@ -200,7 +200,7 @@ public struct D1FileEntry
 };
 
 [StructLayout(LayoutKind.Sequential)]
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F39E8080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80809EF3, 0x10)] //F39E8080
 public struct D1FileEntryBitpacked
 {
     public uint Reference;
@@ -216,7 +216,7 @@ public struct D1FileEntryBitpacked
 }
 
 [StructLayout(LayoutKind.Sequential)]
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "EE9E8080", 0x20)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80809EEE, 0x20)] //EE9E8080
 public unsafe struct D1BlockEntry
 {
     public uint Offset;

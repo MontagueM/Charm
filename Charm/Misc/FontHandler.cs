@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -47,8 +47,8 @@ public class FontHandler : Strategy.StrategistSingleton<FontHandler>
             return;
         }
 
-        ConcurrentCollections.ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S0F3C8080>();
-        Tag<S0F3C8080> fontsContainer = FileResourcer.Get().GetSchemaTag<S0F3C8080>(vals.First());
+        ConcurrentCollections.ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S80803C0F>();
+        Tag<S80803C0F> fontsContainer = FileResourcer.Get().GetSchemaTag<S80803C0F>(vals.First());
         Log.Verbose($"Saving {fontsContainer.TagData.FontParents.Count} Fonts.");
 
         if (!Directory.Exists("fonts/"))

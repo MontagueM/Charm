@@ -1,4 +1,4 @@
-﻿using Tiger.Schema;
+using Tiger.Schema;
 
 namespace Tiger;
 
@@ -152,10 +152,10 @@ public static class GlobalChannels
     };
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "07058080", 0x68)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "C4938080", 0x78)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "D1918080", 0x68)]
-public struct SD1918080
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80800507, 0x68)] //07058080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808093C4, 0x78)] //C4938080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x808091D1, 0x68)] //D1918080
+public struct S808091D1
 {
     [SchemaField(0x0, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
@@ -184,18 +184,18 @@ public struct SD1918080
     public DynamicArray<Vec4> Values;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "88078080", 0x30)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "DF848080", 0x30)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "6F818080", 0x38)]
-public struct S6F818080
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80800788, 0x30)] //88078080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808084DF, 0x30)] //DF848080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x8080816F, 0x38)] //6F818080
+public struct S8080816F
 {
     [SchemaField(0x28, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x30, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public TigerHash ID;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "CF918080", 0xF8)]
-public struct SCF918080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x808091CF, 0xF8)] //CF918080
+public struct S808091CF
 {
     [SchemaField(0x28, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Tag<S80806BB7> Unk28;
@@ -203,7 +203,7 @@ public struct SCF918080
     // Theres bytecode here also but idk what its used for
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "80806BB7", 0x50)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806BB7, 0x50)] //80806BB7
 public struct S80806BB7
 {
     [SchemaField(0x28, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
@@ -212,10 +212,10 @@ public struct S80806BB7
     public Texture Unk30;
 }
 
-//[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "D3938080", 0x50)]
-//[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "DF918080", 0x38)]
-//[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "DD918080", 0x38)]
-//public struct SDD918080
+//[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808093D3, 0x50)] //D3938080
+//[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x808091DF, 0x38)] //DF918080
+//[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, 0x808091DD, 0x38)] //DD918080
+//public struct S808091DD
 //{
 //    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
 //    [SchemaField(0x0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
@@ -223,12 +223,12 @@ public struct S80806BB7
 
 //    [SchemaField(0x38, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
 //    [SchemaField(0x20, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-//    public DynamicArray<SE9948080> Unk20;
+//    public DynamicArray<S808094E9> Unk20;
 //}
 
-//[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "FB938080", 0x4)]
-//[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "E9948080", 0x4)]
-//public struct SE9948080
+//[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808093FB, 0x4)] //FB938080
+//[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, 0x808094E9, 0x4)] //E9948080
+//public struct S808094E9
 //{
 //    public short Unk00;
 //    public short Unk02;

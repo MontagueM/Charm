@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Tiger.Schema;
@@ -76,7 +76,7 @@ public class GlobalExporter : AbstractExporter
                 Unk108 = atmosphere.Unk108,
             };
 
-            if (Exporter.Get().GetOrCreateGlobalScene().TryGetItem<S716A8080>(out S716A8080 dayCycle))
+            if (Exporter.Get().GetOrCreateGlobalScene().TryGetItem<S80806A71>(out S80806A71 dayCycle))
             {
                 data.DayCycle = new()
                 {
@@ -259,7 +259,7 @@ public class GlobalExporter : AbstractExporter
             foreach (Decals decal in GlobalScene.GetAllOfType<Decals>())
             {
                 List<Transform> transforms = decal.GetTransforms();
-                foreach (S63698080 instance in decal.TagData.DecalResources.Enumerate(decal.GetReader()))
+                foreach (S80806963 instance in decal.TagData.DecalResources.Enumerate(decal.GetReader()))
                 {
                     for (int i = instance.StartIndex; i < instance.StartIndex + instance.Count; i++)
                     {
@@ -313,14 +313,14 @@ public class GlobalExporter : AbstractExporter
             {
                 switch (resource.TagData.Unk10.GetValue(resource.GetReader()))
                 {
-                    case S79948080:
-                        var globals = ((S79818080)resource.TagData.Unk18.GetValue(resource.GetReader()));
-                        DynamicArray<SF1918080> map = globals.Array1;
+                    case S80809479:
+                        var globals = ((S80808179)resource.TagData.Unk18.GetValue(resource.GetReader()));
+                        DynamicArray<S808091F1> map = globals.Array1;
                         map.AddRange(globals.Array2);
 
-                        foreach (SF1918080 entry in map)
+                        foreach (S808091F1 entry in map)
                         {
-                            if (entry.Unk10.GetValue(resource.GetReader()) is SD1918080 global)
+                            if (entry.Unk10.GetValue(resource.GetReader()) is S808091D1 global)
                             {
                                 var id = globals.Array3[global.ChannelIndex].ID;
 
@@ -339,7 +339,7 @@ public class GlobalExporter : AbstractExporter
                                     // Idk what to do with these, so just gonna skip for now
                                 }
                             }
-                            else if (entry.Unk10.GetValue(resource.GetReader()) is SCF918080 lut)
+                            else if (entry.Unk10.GetValue(resource.GetReader()) is S808091CF lut)
                             {
                                 if (lut.Unk28 is null || lut.Unk28.TagData.LUT is null || channels.ContainsKey("LUT"))
                                     continue;

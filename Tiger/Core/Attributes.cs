@@ -64,44 +64,81 @@ public class SchemaStructAttribute : StrategyAttribute
 {
     public int SerializedSize { get; }
 
-    private string _classHash;
-    public string ClassHash
+    private uint _classID;
+    public uint ClassID
     {
-        get { return _classHash; }
-        set
-        {
-            if (value.StartsWith("8080") && !value.EndsWith("8080"))
-            {
-                byte[] bytes = Helpers.HexStringToByteArray(value);
-                Array.Reverse(bytes);
-                _classHash = Endian.U32ToString(BitConverter.ToUInt32(bytes));
-            }
-            else
-                _classHash = value;
-        }
-    }
-    public SchemaStructAttribute(int serializedSize)
-    {
-        ClassHash = "";
-        SerializedSize = serializedSize;
+        get => _classID;
+        set { _classID = value; }
     }
 
-    public SchemaStructAttribute(string classHash, int serializedSize)
-    {
-        ClassHash = classHash;
-        SerializedSize = serializedSize;
-    }
-
+    /// <summary>
+    /// Initializes a new instance of the SchemaStructAttribute class with the specified strategy and size.
+    /// </summary>
+    /// <param name="strategy">The strategy to use.</param>
+    /// <param name="serializedSize">The size, in bytes, of the serialized structure.</param>
     public SchemaStructAttribute(TigerStrategy strategy, int serializedSize) : base(strategy)
     {
-        ClassHash = "FFFFFFFF";
+        ClassID = TigerHash.InvalidHash32;
         SerializedSize = serializedSize;
     }
 
-    public SchemaStructAttribute(TigerStrategy strategy, string classHash, int serializedSize) : base(strategy)
+    /// <summary>
+    /// Initializes a new instance of the SchemaStructAttribute class with the specified size.
+    /// </summary>
+    /// <param name="serializedSize">The size, in bytes, of the serialized structure.</param>
+    public SchemaStructAttribute(int serializedSize)
     {
-        ClassHash = classHash;
+        ClassID = TigerHash.InvalidHash32;
         SerializedSize = serializedSize;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the SchemaStructAttribute class with the specified class ID and size.
+    /// This version should only be used for primitive types such as Vectors
+    /// </summary>
+    /// <param name="classID">The ID, as a uint, identifying the class.</param>
+    /// <param name="serializedSize">The size, in bytes, of the serialized structure.</param>
+    public SchemaStructAttribute(uint classID, int serializedSize)
+    {
+        ClassID = classID;
+        SerializedSize = serializedSize;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the SchemaStructAttribute class with the specified strategy, class ID, and size.
+    /// serialized size.
+    /// </summary>
+    /// <param name="strategy">The strategy to use.</param>
+    /// <param name="classID">The ID, as a uint, identifying the class.</param>
+    /// <param name="serializedSize">The size, in bytes, of the serialized structure.</param>
+    public SchemaStructAttribute(TigerStrategy strategy, uint classID, int serializedSize) : base(strategy)
+    {
+        ClassID = classID;
+        SerializedSize = serializedSize;
+    }
+
+
+    [Obsolete("Class IDs should now be defined as a uint (Ex: 0x8080ABCD")]
+    public SchemaStructAttribute(string classID, int serializedSize)
+    {
+        ClassID = LegacyStringIDToUInt(classID);
+        SerializedSize = serializedSize;
+    }
+
+    [Obsolete("Class IDs should now be defined as a uint (Ex: 0x8080ABCD)")]
+    public SchemaStructAttribute(TigerStrategy strategy, string classID, int serializedSize) : base(strategy)
+    {
+        ClassID = LegacyStringIDToUInt(classID);
+        SerializedSize = serializedSize;
+    }
+
+    private uint LegacyStringIDToUInt(string classID)
+    {
+        byte[] bytes = Helpers.HexStringToByteArray(classID);
+        if (classID.StartsWith("8080") && !classID.EndsWith("8080"))
+            Array.Reverse(bytes);
+
+        return BitConverter.ToUInt32(bytes);
     }
 }
 

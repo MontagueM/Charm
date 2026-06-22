@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -81,7 +81,7 @@ public partial class DialogueView : UserControl
             {
                 if (Strategy.IsD1())
                 {
-                    SAA078080 a = dyn;
+                    S808007AA a = dyn;
 
                     if (a.Dialogue is null || !a.Dialogue.TagData.Wems.Any())
                         continue;
@@ -133,7 +133,7 @@ public partial class DialogueView : UserControl
                 }
                 else
                 {
-                    S33978080 entry = dyn;
+                    S80809733 entry = dyn;
                     if (entry.SoundM is null || !entry.SoundM.TagData.Wems.Any())
                         continue;
 
