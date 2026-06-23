@@ -155,7 +155,7 @@ public partial class AudioListView : UserControl
                     Name = group.Key,
                     Count = group.Value.Count,
                     Content = PackageItemContents.Dialogue,
-                    DynamicItems = new ConcurrentBag<dynamic>(group.Value),
+                    DynamicItems = new ConcurrentBag<dynamic>(group.Value.DistinctBy(x => x.WemHash)),
                 });
             });
 
@@ -484,7 +484,7 @@ public partial class AudioListView : UserControl
             return;
 
         //string pkgName = PackageResourcer.Get().GetPackage(items.First().Hash.PackageId).GetPackageMetadata().Name.Split(".")[0];
-        string pkgName = _currentPkg.Name;
+        string pkgName = Helpers.SanitizeString(_currentPkg.Name);
         string savePath = Config.GetExportSavePath() + $"/Sound/{pkgName}";
         Directory.CreateDirectory(savePath);
 
@@ -517,8 +517,7 @@ public partial class AudioListView : UserControl
 
         Wem wem = _currentSound;
 
-        string pkgName = _currentPkg.Name;
-
+        string pkgName = Helpers.SanitizeString(_currentPkg.Name);
         string savePath = Config.GetExportSavePath() + $"/Sound/{pkgName}";
         Directory.CreateDirectory(savePath);
 
