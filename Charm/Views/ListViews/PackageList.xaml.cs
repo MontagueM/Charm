@@ -183,6 +183,7 @@ public partial class PackageList : UserControl
         public bool IsSelected { get; set; } = false;
         public PackageItemContents Content { get; set; }
         public string DisplayHash { get; set; }
+        public int Order = 0; // Currently used for ordering named soundbanks
     }
 
     /// <summary>

@@ -256,36 +256,36 @@ public partial class MainMenuView : UserControl
         {
             case TigerStrategy.DESTINY1_RISE_OF_IRON:
                 col = Color.FromArgb(0xFF, 0xEA, 0xC9, 0x60);
-                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("29ECA580"));
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash(0x80A5EC29));
                 break;
             case TigerStrategy.DESTINY2_SHADOWKEEP_2601:
             case TigerStrategy.DESTINY2_SHADOWKEEP_2999:
                 col = Color.FromArgb(0xFF, 0xA0, 0x00, 0x00);
-                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("2EE03281"));
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash(0x8132E02E));
                 break;
             case TigerStrategy.DESTINY2_BEYONDLIGHT_3402:
                 col = Color.FromArgb(0xFF, 0x4D, 0x7F, 0xF2);
-                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("B0B1CF80"));
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash(0x80CFB1B0));
                 break;
             case TigerStrategy.DESTINY2_WITCHQUEEN_6307:
                 col = Color.FromArgb(0xFF, 0x73, 0xE3, 0xBE);
-                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("E357CE80"));
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash(0x80CE57E3));
                 break;
             case TigerStrategy.DESTINY2_LIGHTFALL_7366:
                 //col = Color.FromArgb(0xFF, 0xFC, 0x00, 0xFF);
                 col = Color.FromArgb(0xFF, 0x6D, 0x2C, 0xE0);
-                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("FEBEA780"));
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash(0x80A7BEFE));
                 break;
             case TigerStrategy.DESTINY2_FINAL_SHAPE_8264:
                 col = Color.FromArgb(0xFF, 0xFF, 0x36, 0xD1);
-                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("2A11DC80"));
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash(0x80DC112A));
                 break;
             case TigerStrategy.DESTINY2_LATEST:
                 GradientGrid.Visibility = Visibility.Hidden;
                 MotDecor.Visibility = Visibility.Visible;
-                MotDecorGradient.Source = ApiImageUtils.MakeIcon(new FileHash("9040A080"));
-                MotDecorBackground.Source = ApiImageUtils.MakeIcon(new FileHash("8E40A080"));
-                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("C0672C81"));
+                MotDecorGradient.Source = ApiImageUtils.MakeIcon(new FileHash(0x80A04090));
+                MotDecorBackground.Source = ApiImageUtils.MakeIcon(new FileHash(0x80A0408E));
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash(0x812C67C0));
                 break;
         }
         StrategyIcon.Source = strategyIcon;

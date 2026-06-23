@@ -451,8 +451,8 @@ public partial class EntityListView : UserControl
 
         items = SortByIndex switch
         {
-            4 => items.OrderByDescending(x => x.Hash).ToList(),
-            3 => items.OrderBy(x => x.Hash).ToList(),
+            4 => items.OrderByDescending(x => x.Hash.Hash32).ToList(),
+            3 => items.OrderBy(x => x.Hash.Hash32).ToList(),
             2 => items.OrderByDescending(x => x.DisplayName).ToList(),
             1 => items.OrderBy(x => x.DisplayName).ToList(),
             _ => items

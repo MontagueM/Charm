@@ -30,6 +30,7 @@ public class EntitySkeleton : EntityComponent
                 node.NextSiblingNodeIndex = skelInfo.NodeHierarchy[reader, i].NextSiblingNodeIndex;
 
                 node.Hash = skelInfo.NodeHierarchy[reader, i].NodeHash;
+                node.HashString = node.Hash.Reverse();
                 node.DefaultObjectSpaceTransform = new ObjectSpaceTransform
                 {
                     QuaternionRotation = skelInfo.DefaultObjectSpaceTransforms[reader, i].Rotation,
@@ -56,6 +57,7 @@ public class EntitySkeleton : EntityComponent
                 node.NextSiblingNodeIndex = weirdSkeleInfo.NodeHierarchy[reader, i].NextSiblingNodeIndex;
 
                 node.Hash = weirdSkeleInfo.NodeHierarchy[reader, i].NodeHash;
+                node.HashString = node.Hash.Reverse();
                 node.DefaultInverseObjectSpaceTransform = new ObjectSpaceTransform
                 {
                     QuaternionRotation = weirdSkeleInfo.DefaultInverseObjectSpaceTransforms[reader, i].Rotation,
@@ -99,6 +101,7 @@ public struct BoneNode
     public int FirstChildNodeIndex;
     public int NextSiblingNodeIndex;
     public TigerHash Hash;
+    public string HashString; // Gets set as flipped hash for compatibility with the blender importers rename bones function
     public FbxNode Node;
 }
 

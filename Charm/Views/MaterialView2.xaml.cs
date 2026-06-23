@@ -126,7 +126,7 @@ public partial class MaterialView2 : UserControl, INotifyPropertyChanged
 
                 items.Add(new MaterialViewer_TextureDetail
                 {
-                    Hash = $"{tex.Texture.Hash}",
+                    Hash = tex.Texture.Hash,
                     Index = $"Index: {tex.TextureIndex}",
                     Type = $"Colorspace: {(tex.Texture.IsSrgb() ? "Srgb" : "Non-Color")}",
                     Dimension = $"Dimension: {EnumExtensions.GetEnumDescription(tex.Texture.GetDimension())}",
@@ -329,7 +329,7 @@ public partial class MaterialView2 : UserControl, INotifyPropertyChanged
 
     public class MaterialViewer_TextureDetail
     {
-        public string Hash { get; set; }
+        public FileHash Hash { get; set; }
         public string Index { get; set; }
         public string Type { get; set; }
         public string Dimension { get; set; }

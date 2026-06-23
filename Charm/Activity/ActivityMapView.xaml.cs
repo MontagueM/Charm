@@ -73,7 +73,7 @@ public partial class ActivityMapView : UserControl
     {
         var bubble = (sender as ToggleButton).DataContext as DisplayBubble;
         _currentBubble = bubble;
-        FileHash hash = new(bubble.Hash);
+        FileHash hash = bubble.Hash;
 
         Dispatcher.Invoke(() => MapControl.Visibility = Visibility.Hidden);
         MainWindow.Progress.SetProgressStages(new() { $"Loading Map Parts for {bubble.Name}" });
@@ -436,7 +436,7 @@ public partial class ActivityMapView : UserControl
         }
         else
         {
-            var fileHash = new FileHash(dc.Hash);
+            var fileHash = dc.Hash;
             MainWindow.Progress.SetProgressStages(new List<string> { fileHash });
             // cant do this rn bc of lod problems with dupes
             // MapControl.ModelView.SetModelFunction(() => MapControl.LoadMap(fileHash, MapControl.ModelView.GetSelectedLod()));
@@ -458,13 +458,13 @@ public partial class ActivityMapView : UserControl
 public class DisplayBubble
 {
     public string Name { get; set; }
-    public string Hash { get; set; }
+    public FileHash Hash { get; set; }
 }
 
 public class DisplayStaticMap
 {
     public string Name { get; set; }
-    public string Hash { get; set; }
+    public FileHash Hash { get; set; }
     public int Instances { get; set; }
 
     public bool Selected { get; set; }

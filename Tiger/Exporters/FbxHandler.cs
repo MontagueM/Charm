@@ -335,8 +335,8 @@ public class FbxHandler
             FbxNode node;
             lock (_fbxLock)
             {
-                skeleton = FbxSkeleton.Create(_manager, boneNode.Hash.ToString());
-                node = FbxNode.Create(_manager, boneNode.Hash.ToString());
+                skeleton = FbxSkeleton.Create(_manager, boneNode.HashString);
+                node = FbxNode.Create(_manager, boneNode.HashString);
             }
             skeleton.SetSkeletonType(FbxSkeleton.EType.eLimbNode);
             node.SetNodeAttribute(skeleton);

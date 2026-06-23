@@ -97,7 +97,7 @@ public partial class ExportControl : UserControl
         _routedFunction(info);
     }
 
-    public void SetExportInfo(string name, TigerHash hash, string subPath = "")
+    public void SetExportInfo(string name, FileHash hash, string subPath = "")
     {
         if (_bExportFunctionSet && DisabledOverlay.Visibility == Visibility.Visible)
             DisabledOverlay.Visibility = Visibility.Hidden;
@@ -105,7 +105,7 @@ public partial class ExportControl : UserControl
         ExportButton.Tag = info;
     }
 
-    public void SetExportInfo(TigerHash hash)
+    public void SetExportInfo(FileHash hash)
     {
         SetExportInfo(hash, hash);
     }
@@ -122,11 +122,11 @@ public struct ExportInfo
     }
 
     public string SubPath = string.Empty;
-    public TigerHash Hash;
+    public FileHash Hash;
     public ExportTypeFlag ExportType = ExportTypeFlag.Full;
 
     public ExportInfo()
     {
-        Hash = new TigerHash();
+        Hash = new FileHash();
     }
 }

@@ -141,7 +141,7 @@ public partial class TextureListView : UserControl
             });
         }));
 
-        TextureList.ItemsSource = Textures.OrderBy(x => x.Hash);
+        TextureList.ItemsSource = Textures.OrderBy(x => x.Hash.Hash32);
         RefreshTextureList();
         Dispatcher.Invoke(() => TextureListLoading.Visibility = Visibility.Collapsed);
     }
@@ -179,8 +179,8 @@ public partial class TextureListView : UserControl
 
         items = SortByIndex switch
         {
-            4 => items.OrderBy(x => x.Hash).ToList(),
-            3 => items.OrderByDescending(x => x.Hash).ToList(),
+            4 => items.OrderBy(x => x.Hash.Hash32).ToList(),
+            3 => items.OrderByDescending(x => x.Hash.Hash32).ToList(),
             2 => items.OrderBy(x => x.Width * x.Height).ToList(),
             1 => items.OrderByDescending(x => x.Width * x.Height).ToList(),
             _ => items

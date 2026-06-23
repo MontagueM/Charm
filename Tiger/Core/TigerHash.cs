@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using Tiger.Schema;
 using Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
@@ -36,7 +37,12 @@ public class StringHash : TigerHash
 
     public override bool IsValid()
     {
-        return Hash32 is not InvalidHash32 and not 0;
+        return Hash32 != InvalidHash32 && Hash32 != 0;
+    }
+
+    public string GetString()
+    {
+        return GlobalStrings.Get().GetString(new(Hash32));
     }
 }
 
@@ -63,13 +69,15 @@ public class TigerHash : IHash, ITigerDeserialize, IComparable<TigerHash>, IEqua
         Hash32 = hash32;
     }
 
+    [Obsolete("Tags should be referenced by their uint handle, not as a string")]
     public TigerHash(string hash, bool bBigEndianString = true)
     {
         bool parsed = uint.TryParse(hash, NumberStyles.HexNumber, null, out Hash32);
-        if (parsed && (hash.EndsWith("80") || hash.EndsWith("81") || bBigEndianString))
-        {
+        if (parsed && (hash.EndsWith("80") || hash.EndsWith("81")))
             Hash32 = Endian.SwapU32(Hash32);
-        }
+
+        if (!parsed)
+            throw new ArgumentException($"Invalid Hash String: {hash}");
     }
 
     public int CompareTo(TigerHash? other)
@@ -94,7 +102,7 @@ public class TigerHash : IHash, ITigerDeserialize, IComparable<TigerHash>, IEqua
 
     public virtual bool IsValid()
     {
-        return Hash32 is not InvalidHash32 and not 0;
+        return Hash32 != InvalidHash32 && Hash32 != 0;
     }
 
     public bool IsInvalid()
@@ -102,9 +110,21 @@ public class TigerHash : IHash, ITigerDeserialize, IComparable<TigerHash>, IEqua
         return !IsValid();
     }
 
+    /// <summary>
+    /// Returns the hash as a hexadecimal string.
+    /// </summary>
     public override string ToString()
     {
-        return Endian.U32ToString(Hash32);
+        return Hash32.ToString("X2");
+    }
+
+    /// <summary>
+    /// Returns the hash as a reversed hexadecimal string.
+    /// Example: ABCD12380
+    /// </summary>
+    public string Reverse()
+    {
+        return Endian.SwapU32(Hash32).ToString("X8");
     }
 
     public static implicit operator string(TigerHash hash) => hash.ToString();
@@ -195,6 +215,7 @@ public class FileHash : TigerHash
     {
     }
 
+    [Obsolete("Tags should be referenced by their uint handle, not as a string")]
     public FileHash(string hash) : base(hash)
     {
     }
@@ -296,7 +317,10 @@ public class FileHash64 : FileHash
     {
         FallbackHash32 = reader.ReadUInt32();
         uint _isHash32 = reader.ReadUInt32();
-        IsHash32 = _isHash32 is 1 or 2;
+        IsHash32 = _isHash32 == 1 || _isHash32 == 2;
+        if (_isHash32 == 2) // 32 bit shouldn't actually be 2, what was i thinking?
+            Debug.Assert(false, $"IsHash32 value of 2 in {reader.Hash} at {reader.Position - -0x4:X}");
+
         Hash64 = reader.ReadUInt64();
         Hash32 = IsHash32 ? FallbackHash32 : GetHash32(Hash64);
     }

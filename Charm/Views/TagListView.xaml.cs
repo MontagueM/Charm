@@ -1564,7 +1564,7 @@ public class TagItem : INotifyPropertyChanged
                 return "";
             if (TagType == ETagListType.Package)
                 return $"[{(Hash as FileHash).PackageId:X4}]";
-            return $"[{Hash:X8}]";
+            return $"[{Hash.Hash32:X8}]";
         }
     }
 

@@ -155,7 +155,7 @@ public partial class DialogueView : UserControl
         }
 
         // Filter out duplicates
-        return new ObservableCollection<VoicelineItem>(result.GroupBy(x => x.WemHash)
+        return new ObservableCollection<VoicelineItem>(result.GroupBy(x => x.WemHash.Hash32)
                                                       .Select(group => group.First()));
     }
 

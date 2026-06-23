@@ -201,8 +201,8 @@ public class FbxExporter : AbstractExporter
         foreach (BoneNode boneNode in boneNodes)
         {
             BoneNode newNode = boneNode;
-            FbxSkeleton skeleton = FbxSkeleton.Create(_manager, boneNode.Hash.ToString());
-            newNode.Node = FbxNode.Create(_manager, boneNode.Hash.ToString());
+            FbxSkeleton skeleton = FbxSkeleton.Create(_manager, boneNode.HashString);
+            newNode.Node = FbxNode.Create(_manager, boneNode.HashString);
             skeleton.SetSkeletonType(FbxSkeleton.EType.eLimbNode);
             newNode.Node.SetNodeAttribute(skeleton);
             Vector3 location = boneNode.DefaultObjectSpaceTransform.Translation;
@@ -220,7 +220,7 @@ public class FbxExporter : AbstractExporter
                 nodes[node.ParentNodeIndex].Node.AddChild(node.Node);
             else
             {
-                FbxSkeleton nodeatt = FbxSkeleton.Create(_manager, node.Hash);
+                FbxSkeleton nodeatt = FbxSkeleton.Create(_manager, node.HashString);
                 nodeatt.SetSkeletonType(FbxSkeleton.EType.eRoot);
                 rootNode = FbxNode.Create(_manager, "Armature");
                 rootNode.AddChild(node.Node);

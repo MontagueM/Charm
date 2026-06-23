@@ -231,7 +231,7 @@ public partial class WeaponAudioListView : UserControl
                 Parallel.ForEach(category.Sounds, item =>
                 {
                     Wem wem = FileResourcer.Get().GetFile<Wem>(item.Hash, false, false);
-                    wem.SaveToFile($"{savePath}/{wem.GetReferenceHash()}_{wem.Hash}.wav");
+                    wem.SaveToFile($"{savePath}/{wem.GetReferenceHash().Hash32:X8}_{wem.Hash}.wav");
                     MainWindow.Progress.CompleteStage();
                 });
             }
@@ -265,7 +265,7 @@ public partial class WeaponAudioListView : UserControl
             Parallel.ForEach(items, item =>
             {
                 Wem wem = FileResourcer.Get().GetFile<Wem>(item.Hash, false, false);
-                wem.SaveToFile($"{savePath}/{wem.GetReferenceHash()}_{wem.Hash}.wav");
+                wem.SaveToFile($"{savePath}/{wem.GetReferenceHash().Hash32:X8}_{wem.Hash}.wav");
                 MainWindow.Progress.CompleteStage();
             });
         });
@@ -291,7 +291,7 @@ public partial class WeaponAudioListView : UserControl
         string savePath = Config.GetExportSavePath() + $"/Sound/{wepName}/{_currentSound.ParentCategory}/";
         Directory.CreateDirectory(savePath);
 
-        wem.SaveToFile($"{savePath}/{wem.GetReferenceHash()}_{wem.Hash}.wav");
+        wem.SaveToFile($"{savePath}/{wem.GetReferenceHash().Hash32:X8}_{wem.Hash}.wav");
 
         NotificationBanner notify = new()
         {

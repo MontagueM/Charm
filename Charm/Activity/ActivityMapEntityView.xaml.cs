@@ -64,7 +64,7 @@ public partial class ActivityMapEntityView : UserControl
             case >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402:
                 DisplayEntBubble displayActivity = new();
                 displayActivity.Name = $"{PackageResourcer.Get().GetActivityName(activity.FileHash)}";
-                displayActivity.Hash = $"{activity.FileHash}";
+                displayActivity.Hash = activity.FileHash;
                 displayActivity.LoadType = DisplayEntBubble.Type.Activity;
                 displayActivity.Data = displayActivity;
                 maps.Add(displayActivity);
@@ -74,7 +74,7 @@ public partial class ActivityMapEntityView : UserControl
                 {
                     DisplayEntBubble ambientActivity = new();
                     ambientActivity.Name = $"{PackageResourcer.Get().GetActivityName(ambient.Hash)}";
-                    ambientActivity.Hash = $"{ambient.Hash}";
+                    ambientActivity.Hash = ambient.Hash;
                     ambientActivity.LoadType = DisplayEntBubble.Type.Activity;
                     ambientActivity.Data = ambientActivity;
                     maps.Add(ambientActivity);
@@ -93,8 +93,8 @@ public partial class ActivityMapEntityView : UserControl
                     {
                         DisplayEntBubble displayActivitySK = new();
                         displayActivitySK.Name = $"{PackageResourcer.Get().GetActivityName(val)}";
-                        displayActivitySK.Hash = $"{tag.Hash}";
-                        displayActivitySK.ParentHash = $"{activity.FileHash}";
+                        displayActivitySK.Hash = tag.Hash;
+                        displayActivitySK.ParentHash = activity.FileHash;
                         displayActivitySK.LoadType = DisplayEntBubble.Type.Activity;
                         displayActivitySK.Data = displayActivitySK;
                         maps.Add(displayActivitySK);
@@ -116,8 +116,8 @@ public partial class ActivityMapEntityView : UserControl
                         {
                             DisplayEntBubble displayActivityROI = new();
                             displayActivityROI.Name = $"{PackageResourcer.Get().GetActivityName(val.Key).Split(":").First()}";
-                            displayActivityROI.Hash = $"{tag.Hash}";
-                            displayActivityROI.ParentHash = $"{activity.FileHash}";
+                            displayActivityROI.Hash = tag.Hash;
+                            displayActivityROI.ParentHash = activity.FileHash;
                             displayActivityROI.LoadType = DisplayEntBubble.Type.Activity;
                             displayActivityROI.Data = displayActivityROI;
                             maps.Add(displayActivityROI);
@@ -140,7 +140,7 @@ public partial class ActivityMapEntityView : UserControl
         if (tagData.LoadType == DisplayEntBubble.Type.Bubble)
         {
             MainWindow.Progress.SetProgressStages(new() { $"Loading Resources for {tagData.Name}" });
-            FileHash hash = new(tagData.Hash);
+            FileHash hash = tagData.Hash;
             _currentBubble = tagData;
 
             Tag<SBubbleDefinition> bubbleMaps = FileResourcer.Get().GetSchemaTag<SBubbleDefinition>(hash);
@@ -149,10 +149,10 @@ public partial class ActivityMapEntityView : UserControl
         else
         {
             MainWindow.Progress.SetProgressStages(new() { $"Loading Activity Entities for {tagData.Name}" });
-            FileHash hash = new(tagData.Hash);
+            FileHash hash = tagData.Hash;
             if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
             {
-                FileHash parentHash = new(tagData.ParentHash);
+                FileHash parentHash = tagData.ParentHash;
                 IActivity activity = FileResourcer.Get().GetFileInterface<IActivity>(parentHash);
                 await Task.Run(() => PopulateActivityEntityContainerList(activity, hash));
             }
@@ -579,7 +579,7 @@ public partial class ActivityMapEntityView : UserControl
                 {
                     if (item.EntityType == DisplayEntityMap.Type.Map)
                     {
-                        Tag<SMapContainer> tag = FileResourcer.Get().GetSchemaTag<SMapContainer>(new FileHash(item.Hash));
+                        Tag<SMapContainer> tag = FileResourcer.Get().GetSchemaTag<SMapContainer>(item.Hash);
                         foreach (SMapDataTableEntry datatable in tag.TagData.MapDataTables)
                         {
                             MapControl.LoadMap(datatable.MapDataTable.Hash, lod, true);
@@ -604,7 +604,7 @@ public partial class ActivityMapEntityView : UserControl
             {
                 if (dc.EntityType == DisplayEntityMap.Type.Map)
                 {
-                    Tag<SMapContainer> tag = FileResourcer.Get().GetSchemaTag<SMapContainer>(new FileHash(dc.Hash));
+                    Tag<SMapContainer> tag = FileResourcer.Get().GetSchemaTag<SMapContainer>(dc.Hash);
                     foreach (SMapDataTableEntry datatable in tag.TagData.MapDataTables)
                     {
                         MapControl.LoadMap(datatable.MapDataTable.Hash, lod, true);
@@ -659,7 +659,7 @@ public partial class ActivityMapEntityView : UserControl
             MainWindow.Progress.SetProgressStages(new List<string> { $"Loading Entity to UI: {dc.Hash}" });
             await Task.Run(() =>
             {
-                MapControl.LoadEntity(new(dc.Hash));
+                MapControl.LoadEntity(dc.Hash);
                 MainWindow.Progress.CompleteStage();
             });
         }
@@ -712,7 +712,7 @@ public partial class ActivityMapEntityView : UserControl
         }
         else
         {
-            FileHash tagHash = new(dc.Hash);
+            FileHash tagHash = dc.Hash;
             MainWindow.Progress.SetProgressStages(new List<string> { $"Exporting Entity: {tagHash}" });
             await Task.Run(() =>
             {
@@ -735,8 +735,8 @@ public partial class ActivityMapEntityView : UserControl
 public class DisplayEntBubble
 {
     public string Name { get; set; }
-    public string Hash { get; set; }
-    public string ParentHash { get; set; }
+    public FileHash Hash { get; set; }
+    public FileHash ParentHash { get; set; }
     public Type LoadType { get; set; } //this kinda sucks but dont want to have 2 seperate tabs for map and activity entities
     public DisplayEntBubble Data { get; set; }
 
@@ -750,7 +750,7 @@ public class DisplayEntBubble
 public class DisplayEntityMap
 {
     public string Name { get; set; }
-    public string Hash { get; set; }
+    public FileHash Hash { get; set; }
     public int Count { get; set; }
 
     public bool Selected { get; set; }
@@ -771,7 +771,7 @@ public class DisplayEntityList
     public string DisplayName { get; set; }
     public string SubName { get; set; }
     public string Name { get; set; }
-    public string Hash { get; set; }
+    public FileHash Hash { get; set; }
     public List<FileHash> Parent { get; set; }
     public int Instances { get; set; }
 

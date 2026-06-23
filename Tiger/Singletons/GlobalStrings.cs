@@ -196,6 +196,7 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
             return value;
 
         return hash;
+        //return hash.Reverse();
     }
 
     /// <summary>

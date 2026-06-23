@@ -138,13 +138,13 @@ public partial class EntityView : UserControl
         EntitySkeleton overrideSkeleton = null;
         if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
         {
-            var skeleHash = item.IsGhost ? "0000603046D31C68" : "0000670F342E9595";
+            var skeleHash = item.IsGhost ? 0x681CD34630600000 : 0x95952E340F670000;
             Entity skele = FileResourcer.Get().GetFile<Entity>(new FileHash(Hash64Map.Get().GetHash32Checked(skeleHash))); // 64 bit more permanent
             overrideSkeleton = new EntitySkeleton(skele.Skeleton.Hash);
         }
         else if (Strategy.IsD1())
         {
-            Entity playerBase = FileResourcer.Get().GetFile<Entity>(new FileHash("0AE18481"));
+            Entity playerBase = FileResourcer.Get().GetFile<Entity>(new FileHash(0x8184E10A));
             overrideSkeleton = new EntitySkeleton(playerBase.Skeleton.Hash);
         }
 

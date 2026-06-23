@@ -186,21 +186,21 @@ public static class Helpers
 
     public static bool ParseHash(in string searchStr, out uint parsedHash)
     {
-        bool isValidHash = Helpers.IsValidHexHash(searchStr);
+        bool isValidHash = IsValidHexHash(searchStr);
+
         if (isValidHash &&
             (searchStr.StartsWith("80") || searchStr.StartsWith("81")) &&
             (!searchStr.EndsWith("80") && !searchStr.EndsWith("81")))
         {
-            byte[] bytes = Helpers.HexStringToByteArray(searchStr);
-            Array.Reverse(bytes);
-            parsedHash = new TigerHash(BitConverter.ToUInt32(bytes)).Hash32;
-            return true;
+            return uint.TryParse(searchStr, System.Globalization.NumberStyles.HexNumber, null, out parsedHash);
         }
         else if (isValidHash && (searchStr.EndsWith("80") || searchStr.EndsWith("81")))
         {
-            parsedHash = new TigerHash(searchStr).Hash32;
+            byte[] bytes = HexStringToByteArray(searchStr);
+            parsedHash = BitConverter.ToUInt32(bytes);
             return true;
         }
+
         parsedHash = 0;
         return false;
     }

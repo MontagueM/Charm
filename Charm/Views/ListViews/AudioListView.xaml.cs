@@ -201,7 +201,8 @@ public partial class AudioListView : UserControl
                         ID = bank.Hash.PackageId,
                         Count = bank.TagData.Wems.Count,
                         Hashes = new ConcurrentHashSet<FileHash>(bank.TagData.Wems.Where(x => x != null).Select(x => x.Hash)),
-                        Content = PackageItemContents.Sounds
+                        Content = PackageItemContents.Sounds,
+                        Order = name == $"{bank.TagData.SoundbankName.Reverse()}" ? 1 : 0
                     });
                 }
             });
@@ -268,7 +269,7 @@ public partial class AudioListView : UserControl
                 Hash = hash,
                 Index = hash.FileIndex,
                 DisplayHash = $"[{hash}]",
-                DisplayID = hash.GetReferenceHash(),
+                DisplayID = $"{hash.GetReferenceHash().Hash32:X8}",
             };
             await item.LoadWEMAsync();
 
@@ -295,7 +296,7 @@ public partial class AudioListView : UserControl
                 Hash = voiceline.WemHash,
                 Index = voiceline.WemHash.FileIndex,
                 DisplayHash = $"{voiceline.Voiceline}",
-                DisplayID = voiceline.WemHash.GetReferenceHash(),
+                DisplayID = $"{voiceline.WemHash.GetReferenceHash().Hash32:X8}",
             };
             await item.LoadWEMAsync(AudioListViewType.Dialogue);
 
@@ -339,8 +340,8 @@ public partial class AudioListView : UserControl
                 7 => items.OrderByDescending(x => x.DisplayHash).ToList(),
                 6 => items.OrderBy(x => x.DisplayHash).ToList(),
 
-                5 => (isDialogue ? items.OrderByDescending(x => x.Index) : items.OrderByDescending(x => x.Hash)).ToList(),
-                4 => (isDialogue ? items.OrderBy(x => x.Index) : items.OrderBy(x => x.Hash)).ToList(),
+                5 => (isDialogue ? items.OrderByDescending(x => x.Index) : items.OrderByDescending(x => x.Hash.Hash32)).ToList(),
+                4 => (isDialogue ? items.OrderBy(x => x.Index) : items.OrderBy(x => x.Hash.Hash32)).ToList(),
                 3 => items.OrderByDescending(x => x.Seconds).ToList(),
                 2 => items.OrderBy(x => x.Seconds).ToList(),
                 1 => items.OrderByDescending(x => x.Channels).ToList(),
@@ -370,7 +371,7 @@ public partial class AudioListView : UserControl
             }
         });
 
-        List<PackageItem> items = displayItems.OrderBy(x => x.Name).ToList();
+        List<PackageItem> items = displayItems.OrderBy(x => x.Order).ThenBy(x => x.Name).ToList();
         Dispatcher.Invoke(() =>
         {
             PackageList.PackageListView.ItemsSource = items;
@@ -494,7 +495,7 @@ public partial class AudioListView : UserControl
             Parallel.ForEach(items, item =>
             {
                 Wem wem = FileResourcer.Get().GetFile<Wem>(item.Hash, false, false);
-                wem.SaveToFile($"{savePath}/{wem.GetReferenceHash()}_{wem.Hash}.wav");
+                wem.SaveToFile($"{savePath}/{wem.GetReferenceHash().Hash32:X8}_{wem.Hash}.wav");
                 MainWindow.Progress.CompleteStage();
             });
         });
@@ -521,7 +522,7 @@ public partial class AudioListView : UserControl
         string savePath = Config.GetExportSavePath() + $"/Sound/{pkgName}";
         Directory.CreateDirectory(savePath);
 
-        wem.SaveToFile($"{savePath}/{wem.GetReferenceHash()}_{wem.Hash}.wav");
+        wem.SaveToFile($"{savePath}/{wem.GetReferenceHash().Hash32:X8}_{wem.Hash}.wav");
 
         NotificationBanner notify = new()
         {
@@ -765,7 +766,7 @@ public partial class AudioListView : UserControl
             {
                 DisplayHash = type == AudioListViewType.Dialogue
                 ? $"{DisplayHash}" : $"[{Hash}] {(wem.Channels > 2 ? "⚠" : "")}";
-                DisplayID = Hash.GetReferenceHash();
+                DisplayID = $"{Hash.GetReferenceHash().Hash32:X8}";
                 Duration = wem.Duration;
                 Seconds = wem.Seconds;
                 Channels = wem.Channels;

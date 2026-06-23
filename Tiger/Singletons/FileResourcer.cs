@@ -19,6 +19,7 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
         _fileCache.Clear();
     }
 
+    [Obsolete("Passing a string hash is deprecated. Use FileHash instead.")]
     public T GetFile<T>(string fileHash, bool shouldLoad = true, bool shouldCache = true) where T : TigerFile
     {
         return GetFile<T>(new FileHash(fileHash), shouldLoad, shouldCache);
@@ -29,29 +30,14 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
         return GetFile(typeof(T), fileHash, shouldLoad, shouldCache);
     }
 
-    public T GetFileInterface<T>(string fileHash, bool shouldLoad = true, bool shouldCache = true) where T : ISchema
-    {
-        return GetFileInterface<T>(new FileHash(fileHash), shouldLoad, shouldCache);
-    }
-
     public T GetFileInterface<T>(FileHash fileHash, bool shouldLoad = true, bool shouldCache = true) where T : ISchema
     {
         return GetFile(SchemaDeserializer.Get().GetSchemaInterfaceType(typeof(T)), fileHash, shouldLoad, shouldCache);
     }
 
-    public Tag<T> GetSchemaTag<T>(string fileHash, bool shouldLoad = true, bool shouldCache = true) where T : struct
-    {
-        return GetSchemaTag<T>(new FileHash(fileHash), shouldLoad, shouldCache);
-    }
-
     public Tag<T> GetSchemaTag<T>(FileHash fileHash, bool shouldLoad = true, bool shouldCache = true) where T : struct
     {
         return GetFile(typeof(T), fileHash, shouldLoad, shouldCache);
-    }
-
-    public TigerFile GetFile(string fileHash, bool shouldLoad = true, bool shouldCache = true)
-    {
-        return GetFile(new FileHash(fileHash), shouldLoad, shouldCache);
     }
 
     public TigerFile GetFile(FileHash fileHash, bool shouldLoad = true, bool shouldCache = true)
@@ -112,8 +98,13 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
         return file;
     }
 
-    public async Task<T> GetFileAsync<T>(TigerHash hash, bool shouldLoad = true, bool shouldCache = true) where T : TigerFile
+    public async Task<T> GetFileAsync<T>(FileHash hash, bool shouldLoad = true, bool shouldCache = true) where T : TigerFile
     {
         return await Task.Run(() => GetFile<T>(hash, shouldLoad, shouldCache));
+    }
+
+    public async Task<T> GetFileAsync<T>(TigerHash hash, bool shouldLoad = true, bool shouldCache = true) where T : TigerFile
+    {
+        return await Task.Run(() => GetFile<T>(new FileHash(hash.Hash32), shouldLoad, shouldCache));
     }
 }

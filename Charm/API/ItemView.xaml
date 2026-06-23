@@ -325,7 +325,7 @@
                     </Rectangle.Fill>
 
                     <Rectangle.OpacityMask>
-                        <ImageBrush ImageSource="{Binding Item.Type, Converter={StaticResource TextureFromHashConverter}, ConverterParameter=4645C280}" />
+                        <ImageBrush ImageSource="{Binding Item.Type, Converter={StaticResource TextureFromHashConverter}, ConverterParameter=80C24546}" />
                     </Rectangle.OpacityMask>
                 </Rectangle>
 
@@ -1597,7 +1597,7 @@
                             Height="96"
                             Panel.ZIndex="1"
                             d:Source="https://www.bungie.net/common/destiny2_content/icons/7a793b17f8c18aaed66c6b87de9ff5f8.jpg"
-                            Source="{Binding Item.ItemIcon, Converter={StaticResource TextureFromHashConverter}, ConverterParameter=3C45C280}" />
+                            Source="{Binding Item.ItemIcon, Converter={StaticResource TextureFromHashConverter}, ConverterParameter=80C2453C}" />
 
                         <StackPanel
                             Grid.Column="1"

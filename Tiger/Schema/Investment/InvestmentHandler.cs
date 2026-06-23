@@ -250,22 +250,22 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         }
         else // No need to loop hashes when D1 will never change
         {
-            _localizedStringsIndexTag = FileResourcer.Get().GetSchemaTag<S80805A09>(new FileHash("1AE2A580"));
+            _localizedStringsIndexTag = FileResourcer.Get().GetSchemaTag<S80805A09>(new FileHash(0x80A5E21A));
             GetLocalizedStringsIndexDict();
 
-            _inventoryItemMap = FileResourcer.Get().GetSchemaTag<S80807997>(new FileHash("BEFFA580"));
-            _entityAssignmentTag = FileResourcer.Get().GetSchemaTag<S808055CE>(new FileHash("A7FFA580"));
-            _inventoryItemStringThing = FileResourcer.Get().GetSchemaTag<S80805499>(new FileHash("9CFFA580"));
-            _sandboxPatternAssignmentsTag = FileResourcer.Get().GetSchemaTag<S8080978C>(new FileHash("DCE1A780")); // also art dye refs
-            _entityAssignmentsMap = FileResourcer.Get().GetSchemaTag<S80804F43>(new FileHash("DDE1A780"));
+            _inventoryItemMap = FileResourcer.Get().GetSchemaTag<S80807997>(new FileHash(0x80A5FFBE));
+            _entityAssignmentTag = FileResourcer.Get().GetSchemaTag<S808055CE>(new FileHash(0x80A5FFA7));
+            _inventoryItemStringThing = FileResourcer.Get().GetSchemaTag<S80805499>(new FileHash(0x80A5FF9C));
+            _sandboxPatternAssignmentsTag = FileResourcer.Get().GetSchemaTag<S8080978C>(new FileHash(0x80A7E1DC)); // also art dye refs
+            _entityAssignmentsMap = FileResourcer.Get().GetSchemaTag<S80804F43>(new FileHash(0x80A7E1DD));
 
             // inventory item -> sandbox pattern index -> pattern global tag id -> entity assignment
-            _sandboxPatternGlobalTagIdTag = FileResourcer.Get().GetSchemaTag<S808052AA>(new FileHash("A9FFA580"));
+            _sandboxPatternGlobalTagIdTag = FileResourcer.Get().GetSchemaTag<S808052AA>(new FileHash(0xDDE1A780));
 
-            _artDyeReferenceTag = FileResourcer.Get().GetSchemaTag<S808055C2>(new FileHash("A8FFA580"));
-            _dyeChannelTag = FileResourcer.Get().GetSchemaTag<SDyeChannels>(new FileHash("49E2A580"));
+            _artDyeReferenceTag = FileResourcer.Get().GetSchemaTag<S808055C2>(new FileHash(0x80A5FFA8));
+            _dyeChannelTag = FileResourcer.Get().GetSchemaTag<SDyeChannels>(new FileHash(0x80A5E249));
 
-            _talentGridMap = FileResourcer.Get().GetSchemaTag<S808018C2>(new FileHash("27E2A580"));
+            _talentGridMap = FileResourcer.Get().GetSchemaTag<S808018C2>(new FileHash(0x80A5E227));
         }
 
 

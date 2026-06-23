@@ -155,8 +155,8 @@ public partial class StaticListView : UserControl
 
         items = SortByIndex switch
         {
-            2 => items.OrderByDescending(x => x.Hash).ToList(),
-            1 => items.OrderBy(x => x.Hash).ToList(),
+            2 => items.OrderByDescending(x => x.Hash.Hash32).ToList(),
+            1 => items.OrderBy(x => x.Hash.Hash32).ToList(),
             _ => items
         };
 
