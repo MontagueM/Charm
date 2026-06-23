@@ -500,15 +500,17 @@ public static class FbxMeshExtensions
     public static void AddSlotColours(this FbxMesh fbxMesh, DynamicMeshPart meshPart)
     {
         if (!meshPart.VertexColourSlots.Any())
-        {
             return;
-        }
 
         FbxLayerElementVertexColor colLayer = FbxLayerElementVertexColor.Create(fbxMesh, "slots");
         colLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
         colLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
-        if (meshPart.PrimitiveType == PrimitiveType.Triangles)
+        if (meshPart.PrimitiveType == PrimitiveType.Triangles && meshPart.GearDyeChangeColorIndex != 0xFF)
         {
+            // uuuuh
+            if (meshPart.IsPhysics)
+                meshPart.VertexColourSlots.Clear();
+
             DynamicMeshPart.AddVertexColourSlotInfo(meshPart, meshPart.GearDyeChangeColorIndex);
             for (int i = 0; i < meshPart.VertexPositions.Count; i++)
             {

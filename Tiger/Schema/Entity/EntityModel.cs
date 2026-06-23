@@ -193,12 +193,15 @@ public class DynamicMeshPart : MeshPart
     public bool HasSkeleton;
     public byte GearDyeChangeColorIndex = 0xFF;
 
+    public bool IsPhysics = false;
+
     public DynamicMeshPart(S80806ECB part, EntityComponent parentResource) : base()
     {
         IndexOffset = part.IndexOffset;
         IndexCount = part.IndexCount;
         PrimitiveType = (PrimitiveType)part.PrimitiveType;
         VariantShaderIndex = part.VariantShaderIndex;
+        IsPhysics = parentResource is EntityPhysicsModelParent;
 
         if (VariantShaderIndex == -1)
             Material = part.Material;
