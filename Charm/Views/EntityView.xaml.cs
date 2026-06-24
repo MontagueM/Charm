@@ -302,7 +302,7 @@ public partial class EntityView : UserControl
                         continue;
                     dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.GetChannelIndex()), dye);
 #if DEBUG
-                    System.Console.WriteLine($"{item.Name}: DefaultDye {dye.Hash}");
+                    System.Console.WriteLine($"{item.Name}: DefaultDye {dye.Hash} - {Dye.GetChannelName(Investment.Get().GetChannelHashFromIndex(dyeEntry.GetChannelIndex()))}");
 #endif
                 }
                 foreach (S8080737B dyeEntry in translationBlock.LockedDyes)
@@ -312,7 +312,7 @@ public partial class EntityView : UserControl
                         continue;
                     dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.GetChannelIndex()), dye);
 #if DEBUG
-                    System.Console.WriteLine($"{item.Name}: LockedDye {dye.Hash}");
+                    System.Console.WriteLine($"{item.Name}: LockedDye {dye.Hash} - {Dye.GetChannelName(Investment.Get().GetChannelHashFromIndex(dyeEntry.GetChannelIndex()))}");
 #endif
                 }
             }

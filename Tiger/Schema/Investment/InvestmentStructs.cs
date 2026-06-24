@@ -272,6 +272,12 @@ public struct S80809026
     public short ItemIndex;
 }
 
+[SchemaStruct(0x8080B5C5, 0x2)] //C5B58080
+public struct S8080B5C5
+{
+    public int ItemIndex;
+}
+
 /// <summary>
 /// "translationBlock" from API, "equippingBlock" in D1
 /// </summary>
@@ -1667,7 +1673,7 @@ public struct S8080B3C1 // DestinyItemFilterDefinitions, currently only Featured
 {
     public TigerHash FilterHash;
     [SchemaField(0x8)]
-    public DynamicArray<S80809026> FilterList;
+    public DynamicArray<S8080B5C5> FilterList;
 }
 #endregion
 
