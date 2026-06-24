@@ -1,5 +1,31 @@
 [
     {
+        "version": "3.3.3",
+        "date": "06-21-2026",
+        "changes": [
+            {
+                "title": "Fixes",
+                "notes": [
+                    "Gear: Fixed vertex color slots on physics mesh.",
+                    "Dialogue: Fixed crashes when bulk exporting duplicate sounds.",
+                ]
+            },
+            {
+                "title": "Changes",
+                "notes": [
+                    "Hashes are now reversed to match the technically correct format.\nFor example, ABCD1280 now becomes 8012CDAB for display, searching and exporting purposes. Search bars will still accept the old format."
+                ]
+            },
+            {
+                "title": "Renderer",
+                "notes": [
+                    "Decouple FXAA from post processing. Can be toggled under the Debug menu, enabled by default.",
+                    "Small rendering optimizations."
+                ]
+            }
+        ]
+    },
+    {
         "version": "3.3.0",
         "date": "06-09-2026",
         "changes": [

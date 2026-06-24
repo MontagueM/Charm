@@ -260,7 +260,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             _entityAssignmentsMap = FileResourcer.Get().GetSchemaTag<S80804F43>(new FileHash(0x80A7E1DD));
 
             // inventory item -> sandbox pattern index -> pattern global tag id -> entity assignment
-            _sandboxPatternGlobalTagIdTag = FileResourcer.Get().GetSchemaTag<S808052AA>(new FileHash(0xDDE1A780));
+            _sandboxPatternGlobalTagIdTag = FileResourcer.Get().GetSchemaTag<S808052AA>(new FileHash(0x80A7E1DD));
 
             _artDyeReferenceTag = FileResourcer.Get().GetSchemaTag<S808055C2>(new FileHash(0x80A5FFA8));
             _dyeChannelTag = FileResourcer.Get().GetSchemaTag<SDyeChannels>(new FileHash(0x80A5E249));
