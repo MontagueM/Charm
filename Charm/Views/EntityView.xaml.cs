@@ -157,7 +157,7 @@ public partial class EntityView : UserControl
             overrideSkeleton = val.Skeleton;
         }
 
-        List<Entity> entities = Investment.Get().GetEntitiesFromHash(item.TagData.InventoryItemHash);
+        List<Entity> entities = Investment.Get().GetEntitiesFromHash(item);
 
         Log.Info($"Exporting entity model name: {name}");
 

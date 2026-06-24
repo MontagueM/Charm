@@ -241,6 +241,25 @@ public class InventoryItem : Tag<S8080799D>
         return -1;
     }
 
+    public int GetArtArrangementCount()
+    {
+        if (_tag.Unk90 is null) return 0;
+        if (_tag.Unk90.GetValue(GetReader()) is S80807377 entry)
+            return entry.Arrangements.Count;
+
+        return 0;
+    }
+
+    // very few items (practically only the Lightguard sets for example) have multiple art arrangements, this returns them all
+    public List<int> GetArtArrangementIndices()
+    {
+        if (_tag.Unk90 is null) return new();
+        if (_tag.Unk90.GetValue(GetReader()) is S80807377 entry && entry.Arrangements.Count > 0)
+            return entry.Arrangements.Enumerate(GetReader()).Select(x => (int)x.ArtArrangementHash).ToList();
+
+        return new();
+    }
+
     public int GetWeaponPatternIndex()
     {
         if (_tag.Unk90.GetValue(GetReader()) is S80807377 entry && entry.WeaponPatternIndex > 0)

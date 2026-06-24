@@ -897,15 +897,17 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             return entities;
         }
 
-        entities = GetEntitiesFromArrangementIndex(index);
-        return entities;
-    }
+        if (item.GetArtArrangementCount() > 1)
+        {
+            Log.Info($"Item has multiple Art Arrangements, exporting all.");
+            foreach (var i in item.GetArtArrangementIndices())
+            {
+                entities.AddRange(GetEntitiesFromArrangementIndex(i));
+            }
+        }
+        else
+            entities = GetEntitiesFromArrangementIndex(index);
 
-    public List<Entity.Entity> GetEntitiesFromHash(TigerHash hash)
-    {
-        InventoryItem item = GetInventoryItem(hash);
-        int index = item.ArtArrangementIndex;
-        List<Entity.Entity> entities = GetEntitiesFromArrangementIndex(index);
         return entities;
     }
 
