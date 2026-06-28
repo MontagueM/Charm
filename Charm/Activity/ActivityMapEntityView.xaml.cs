@@ -107,7 +107,7 @@ public partial class ActivityMapEntityView : UserControl
                 Dictionary<FileHash, TagClassHash> valsROI = PackageResourcer.Get().GetD1Activities();
                 foreach (KeyValuePair<FileHash, TagClassHash> val in valsROI)
                 {
-                    if (val.Value == "16068080")
+                    if (val.Value == 0x80800616)
                     {
                         Tag<SUnkActivity_ROI> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(val.Key);
 

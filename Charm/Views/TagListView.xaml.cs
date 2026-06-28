@@ -841,7 +841,7 @@ public partial class TagListView : UserControl
                 Dictionary<FileHash, TagClassHash> activities = PackageResourcer.Get().GetD1Activities();
                 Parallel.ForEach(activities, activity =>
                 {
-                    if (activity.Value == "16068080")
+                    if (activity.Value == 0x80800616)
                     {
                         Tag<SUnkActivity_ROI> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(activity.Key);
                         //tag.TagData.LocationName works but some entries dont have a string for it
@@ -884,7 +884,7 @@ public partial class TagListView : UserControl
 
             Parallel.ForEach(activities, val =>
             {
-                if (val.Value == "2E058080")
+                if (val.Value == 0x8080052E)
                 {
                     string activityName = PackageResourcer.Get().GetActivityName(val.Key);
                     string first = activityName.Split(":")[1];
@@ -1135,7 +1135,7 @@ public partial class TagListView : UserControl
                 Dictionary<FileHash, TagClassHash> valsROI = PackageResourcer.Get().GetD1Activities();
                 foreach (KeyValuePair<FileHash, TagClassHash> val in valsROI)
                 {
-                    if (val.Value == "16068080")
+                    if (val.Value == 0x80800616)
                     {
                         Tag<SUnkActivity_ROI> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(val.Key);
 
@@ -1242,7 +1242,7 @@ public partial class TagListView : UserControl
                 Dictionary<FileHash, TagClassHash> valsROI = PackageResourcer.Get().GetD1Activities();
                 foreach (KeyValuePair<FileHash, TagClassHash> val in valsROI)
                 {
-                    if (val.Value == "16068080")
+                    if (val.Value == 0x80800616)
                     {
                         Tag<SUnkActivity_ROI> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(val.Key);
                         string activityName = PackageResourcer.Get().GetActivityName(activityROI.FileHash).Split(':')[1];

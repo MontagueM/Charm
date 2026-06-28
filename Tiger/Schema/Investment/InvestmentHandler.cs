@@ -1026,7 +1026,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         S808055C6 artEntry = _artDyeReferenceTag.TagData.ArtDyeReferences.ElementAt(_artDyeReferenceTag.GetReader(), index);
         Optional<S8080870F> dyeEntry = _sandboxPatternAssignmentsTag.TagData.AssignmentBSL.BinarySearch(_sandboxPatternAssignmentsTag.GetReader(), artEntry.DyeManifestHash);
 
-        if (dyeEntry.HasValue && dyeEntry.Value.EntityRelationHash.GetReferenceFromManifest() == "63348080")
+        if (dyeEntry.HasValue && dyeEntry.Value.EntityRelationHash.GetReferenceFromManifest() == 0x80803463)
         {
             return FileResourcer.Get().GetFile<DyeD1>(FileResourcer.Get().GetSchemaTag<S80806FA3>(dyeEntry.Value.EntityRelationHash).TagData.EntityData);
         }

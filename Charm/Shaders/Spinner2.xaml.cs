@@ -259,6 +259,9 @@ public partial class Spinner2 : UserControl, IDisposable
             Context.OutputMerger.SetTargets(_renderView);
             Context.ClearRenderTargetView(_renderView, new RawColor4(0f, 0f, 0f, 1f));
 
+            if (_constantBuffer == null)
+                return;
+
             // Update the cbuffer with the inverse rez and time
             Vector4 invTime = new Vector4(_invResolution.X, _invResolution.Y, clock.ElapsedMilliseconds / 1000f, 0);
             Context.UpdateSubresource(ref invTime, _constantBuffer);
@@ -289,8 +292,13 @@ public partial class Spinner2 : UserControl, IDisposable
     public void DisposeRenderingResources()
     {
         _constantBuffer?.Dispose();
+        _constantBuffer = null;
+
         _vertexShader?.Dispose();
+        _vertexShader = null;
+
         _pixelShader?.Dispose();
+        _pixelShader = null;
 
         _renderView?.Dispose();
         _renderView = null;

@@ -66,7 +66,7 @@ namespace Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON
             Dictionary<FileHash, TagClassHash> activities = PackageResourcer.Get().GetD1Activities();
             foreach (KeyValuePair<FileHash, TagClassHash> activity in activities)
             {
-                if (activity.Value == "16068080")
+                if (activity.Value == 0x80800616)
                 {
                     Tag<SUnkActivity_ROI> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(activity.Key);
                     if (tag.TagData.ActivityDevName == first)

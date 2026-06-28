@@ -9,7 +9,9 @@ public class InventoryItem : Tag<S8080799D>
     }
 
     public int CollectibleIndex => Investment.Get().GetCollectibleIndexFromItemIndex(GetItemIndex());
-    public string Source => CollectibleIndex != -1 ? Investment.Get().GetCollectibleStrings(CollectibleIndex)?.SourceString.Value : "";
+
+    private string _source = null;
+    public string Source => _source ??= CollectibleIndex != -1 ? Investment.Get().GetCollectibleStrings(CollectibleIndex)?.SourceString.Value : "";
 
     public uint ApiHash => _tag.InventoryItemHash.Hash32;
 

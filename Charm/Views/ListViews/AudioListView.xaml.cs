@@ -124,7 +124,7 @@ public partial class AudioListView : UserControl
             {
                 foreach (var val in PackageResourcer.Get().GetD1Activities())
                 {
-                    if (val.Value == "16068080")
+                    if (val.Value == 0x80800616)
                         hashes.Add(val.Key);
                 }
             }

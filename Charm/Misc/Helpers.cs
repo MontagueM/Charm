@@ -1169,7 +1169,7 @@ public class ItemTemplateSelector : DataTemplateSelector
         {
             case CategoryEntry itemObj:
                 var invItem = Investment.Get().GetInventoryItem(itemObj.ItemIndex);
-                if (invItem.GetItemStrings().TagData.ItemType.Value != "Emblem")
+                if (invItem.Type != "Emblem")
                     return Template1;
                 else
                     return Template2;

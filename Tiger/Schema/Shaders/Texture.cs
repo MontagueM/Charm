@@ -47,7 +47,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
             return TextureDimension.D2;
     }
 
-    public byte[] GetRawBytes(bool loadMips = true)
+    public byte[] GetRawBytes(bool loadMips = false)
     {
         byte[] data;
         if (Strategy.IsD1())
@@ -80,7 +80,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
 
     public byte[] GetDDSBytes(DXGI_FORMAT format)
     {
-        byte[] data = GetRawBytes(false);
+        byte[] data = GetRawBytes();
 
         DirectXTexUtility.TexMetadata metadata = DirectXTexUtility.GenerateMetaData(_tag.Width, _tag.Height, _tag.Depth, 1, (DirectXTexUtility.DXGIFormat)format, _tag.ArraySize == 6);
         DirectXTexUtility.DDSHeader ddsHeader;

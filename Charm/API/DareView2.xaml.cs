@@ -773,7 +773,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         {
             DarkenBackground = true,
             //Icon = "❓",
-            Title = $"Charm Gear Viewer",
+            Title = $"CHARM GEAR VIEWER",
             Subtitle = "View and Export Player Gear!",
             Description = "You may already be familar with the old DARE, but if you're not, DARE used to be a program used to rip gear models/shaders from the Bungie API." +
             "\n\nThis is it's spiritual successor. Charm rips player gear directly from the game files, which means you can rip even if the API is down or you are offline." +

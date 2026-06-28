@@ -148,7 +148,7 @@ public partial class ActivityListView : UserControl
     {
         foreach (var activity in PackageResourcer.Get().GetD1Activities())
         {
-            if (activity.Value != "2E058080") continue;
+            if (activity.Value != 0x8080052E) continue;
 
             string activityName = PackageResourcer.Get().GetActivityName(activity.Key);
             var splitName = activityName.Split(":");
