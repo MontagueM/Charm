@@ -531,7 +531,7 @@ public partial class EntityListView : UserControl
                 if (exportChildren)
                     entities.AddRange(_currentEntity.GetEntityChildren());
 
-                EntityView.Export(entities, _currentEntity.Hash, savePath);
+                Entity.Export(entities, _currentEntity.Hash, savePath);
                 MainWindow.Progress.CompleteStage();
             }
         });
@@ -571,7 +571,7 @@ public partial class EntityListView : UserControl
 
         await Task.Run(() =>
         {
-            EntityView.Export(entities, _currentEntity.Hash);
+            Entity.Export(entities, _currentEntity.Hash);
             MainWindow.Progress.CompleteStage();
         });
 

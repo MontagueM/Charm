@@ -169,7 +169,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                     case 0x808055c2:
                         _artDyeReferenceTag = FileResourcer.Get().GetSchemaTag<S808055C2>(val);
                         break;
-                    case 0x808051f2:  // shadowkeep is 0x80805bde
+                    case 0x808051f2:
                         _dyeChannelTag = FileResourcer.Get().GetSchemaTag<SDyeChannels>(val);
                         break;
 

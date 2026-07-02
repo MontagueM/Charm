@@ -392,4 +392,44 @@ public class Entity : Tag<SEntity>
 
         return entities;
     }
+
+    public static void Export(List<Entity> entities, string name, string? overridePath = null, EntitySkeleton overrideSkeleton = null)
+    {
+        ConfigSubsystem config = ConfigSubsystem.Get();
+        string sanitizedName = Helpers.SanitizeString(name);
+        string savePath = (overridePath is null ? config.GetExportSavePath() : overridePath) + $"/{sanitizedName}";
+
+        Log.Verbose($"Exporting entity model name: {sanitizedName}");
+
+        foreach (Entity entity in entities)
+        {
+            var scene = Tiger.Exporters.Exporter.Get().CreateScene(entity.Hash, ExportType.Entities);
+
+            if (entity.Skeleton == null && overrideSkeleton != null)
+                entity.Skeleton = overrideSkeleton;
+
+            List<DynamicMeshPart> dynamicParts = entity.Load(ExportDetailLevel.MostDetailed);
+            List<BoneNode> boneNodes = overrideSkeleton != null ? overrideSkeleton.GetBoneNodes() : new List<BoneNode>();
+            if (entity.Skeleton != null && overrideSkeleton == null)
+            {
+                boneNodes = entity.Skeleton.GetBoneNodes();
+            }
+            scene.AddEntity(entity, dynamicParts, boneNodes);
+            entity.SaveMaterialsFromParts(scene, dynamicParts);
+            entity.SaveTexturePlates(savePath);
+
+            Tiger.Exporters.Exporter.Get().Export(savePath ?? null); // 'temp' fix for file in-use crash
+        }
+
+        //if (exportType == ExportTypeFlag.Full)
+        //{
+        //    if (config.GetUnrealInteropEnabled())
+        //    {
+        //        AutomatedExporter.SaveInteropUnrealPythonFile(savePath, name, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
+        //    }
+        //}
+
+        //Tiger.Exporters.Exporter.Get().Export(savePath ?? null);
+        Log.Info($"Exported entity model {sanitizedName} to {savePath.Replace('\\', '/')}/");
+    }
 }

@@ -4,8 +4,6 @@ using System.Windows;
 using System.Windows.Controls;
 using Arithmic;
 using Tiger;
-using Tiger.Exporters;
-using Tiger.Schema;
 using Tiger.Schema.Entity;
 
 namespace Charm;
@@ -65,49 +63,6 @@ public partial class EntityView : UserControl
         HelixMV.SubTitle = $"{displayParts.Sum(p => p.BasePart.Indices.Count)} triangles";
 
         return true;
-    }
-
-    public static void Export(List<Entity> entities, string name, string overridePath = null, ExportTypeFlag exportType = ExportTypeFlag.Full, EntitySkeleton overrideSkeleton = null)
-    {
-        ConfigSubsystem config = ConfigSubsystem.Get();
-        name = Helpers.SanitizeString(name);
-        string savePath = (overridePath is null ? config.GetExportSavePath() : overridePath) + $"/{name}";
-
-        Log.Verbose($"Exporting entity model name: {name}");
-
-        foreach (Entity entity in entities)
-        {
-            var scene = Tiger.Exporters.Exporter.Get().CreateScene(entity.Hash, ExportType.Entities);
-
-            if (entity.Skeleton == null && overrideSkeleton != null)
-                entity.Skeleton = overrideSkeleton;
-
-            List<DynamicMeshPart> dynamicParts = entity.Load(ExportDetailLevel.MostDetailed);
-            List<BoneNode> boneNodes = overrideSkeleton != null ? overrideSkeleton.GetBoneNodes() : new List<BoneNode>();
-            if (entity.Skeleton != null && overrideSkeleton == null)
-            {
-                boneNodes = entity.Skeleton.GetBoneNodes();
-            }
-            scene.AddEntity(entity, dynamicParts, boneNodes);
-            if (exportType == ExportTypeFlag.Full)
-            {
-                entity.SaveMaterialsFromParts(scene, dynamicParts);
-                entity.SaveTexturePlates(savePath);
-            }
-
-            Tiger.Exporters.Exporter.Get().Export(savePath ?? null); // 'temp' fix for file in-use crash
-        }
-
-        if (exportType == ExportTypeFlag.Full)
-        {
-            if (config.GetUnrealInteropEnabled())
-            {
-                AutomatedExporter.SaveInteropUnrealPythonFile(savePath, name, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
-            }
-        }
-
-        //Tiger.Exporters.Exporter.Get().Export(savePath ?? null);
-        Log.Info($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
     }
 
     private void SetupCheckboxHandlers()

@@ -804,7 +804,7 @@ public partial class TagListView : UserControl
                 entities.AddRange(entity.GetEntityChildren());
             viewer.EntityControl.ModelView.Visibility = Visibility.Hidden;
         });
-        EntityView.Export(entities, info.Name, exportType: info.ExportType);
+        Entity.Export(entities, info.Name);
 
         Dispatcher.Invoke(() =>
         {

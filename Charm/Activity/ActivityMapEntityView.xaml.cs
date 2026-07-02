@@ -702,7 +702,7 @@ public partial class ActivityMapEntityView : UserControl
                         {
                             List<Entity> entities = new() { entity };
                             entities.AddRange(entity.GetEntityChildren());
-                            EntityView.Export(entities, entity.Hash);
+                            Entity.Export(entities, entity.Hash);
                         }
                     }
 
@@ -719,7 +719,7 @@ public partial class ActivityMapEntityView : UserControl
                 Entity entity = FileResourcer.Get().GetFile<Entity>(tagHash);
                 List<Entity> entities = new() { entity };
                 entities.AddRange(entity.GetEntityChildren());
-                EntityView.Export(entities, entity.Hash);
+                Entity.Export(entities, entity.Hash);
                 MainWindow.Progress.CompleteStage();
             });
         }

@@ -265,7 +265,7 @@ public partial class DevView : UserControl
                         }
                     }
 
-                    EntityView.Export(entities, hash);
+                    Entity.Export(entities, hash);
                     _mainWindow.MakeNewTab(hash, entityView);
                     _mainWindow.SetNewestTabSelected();
                     break;
