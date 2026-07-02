@@ -496,7 +496,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                 if (curItem.ArtArrangementIndex != -1)
                 {
                     // if has a model
-                    EntityView.ExportInventoryItem(curItem, savePath, aggregateOutput);
+                    Investment.Get().ExportInventoryItem(curItem, savePath, aggregateOutput);
                 }
                 else if (curItem.IsShader)
                 {

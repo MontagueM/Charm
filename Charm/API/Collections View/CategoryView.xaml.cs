@@ -426,7 +426,7 @@ public partial class CategoryView : UserControl
 
                 if (item.Collectible.Item.ArtArrangementIndex != -1)
                 {
-                    EntityView.ExportInventoryItem(item.Collectible.Item, ConfigSubsystem.Get().GetExportSavePath());
+                    Investment.Get().ExportInventoryItem(item.Collectible.Item, ConfigSubsystem.Get().GetExportSavePath());
                 }
                 else
                 {
