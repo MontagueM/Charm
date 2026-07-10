@@ -233,7 +233,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
             if (!Strategy.IsD1())
             {
-                if (item.ItemTraits.Contains(DestinyTraitID.item_emblem))
+                if (item.IsEmblem)
                 {
                     blocks.Add(new EmblemBlock
                     {

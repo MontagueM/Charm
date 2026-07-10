@@ -1369,7 +1369,7 @@
             Grid.RowSpan="3"
             Width="1920"
             Height="990"
-            Panel.ZIndex="5"
+            Panel.ZIndex="0"
             Background="Transparent"
             ClipToBounds="True"
             RenderTransformOrigin="0.5,0.5"
