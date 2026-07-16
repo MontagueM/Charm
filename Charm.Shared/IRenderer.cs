@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Arithmic;
 using Tiger;
+using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
 
 namespace Charm.Shared;
@@ -19,7 +20,7 @@ public interface IRenderer
     void Destroy(bool fullyDestroy = false);
 
     void LoadStatic(FileHash hash);
-    void LoadEntity(FileHash hash);
+    void LoadEntity(Entity entity);
     void LoadInvestmentItem(InventoryItem item);
     void LoadInvestmentItems(IEnumerable<InventoryItem> items);
 

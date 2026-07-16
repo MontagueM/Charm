@@ -374,6 +374,9 @@ public class DynamicMeshPart : MeshPart
         {
             permutationIndex = parent.MaterialPermutations.OverrideIndex != -1
                 ? parent.MaterialPermutations.OverrideIndex : parent.MaterialPermutations.CalculatePermutationIndex() ?? 0;
+
+            if (permutationIndex != 0)
+                Log.Debug($"Using Permutation Index of {permutationIndex}");
         }
 
         return mats[reader, mapEntry.MaterialStartIndex + (permutationIndex % mapEntry.MaterialCount)].Material;

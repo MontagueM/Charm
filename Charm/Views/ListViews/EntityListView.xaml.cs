@@ -475,6 +475,7 @@ public partial class EntityListView : UserControl
     private void LoadEntity(FileHash hash)
     {
         Log.Info($"Loading entity {hash}");
+        _currentEntity = FileResourcer.Get().GetFile<Entity>(hash);
 
         ExportButton.IsEnabled = true;
         if (RendererBasic is not null)
@@ -485,10 +486,8 @@ public partial class EntityListView : UserControl
         }
         else if (Renderer is not null)
         {
-            Renderer.LoadEntity(hash);
+            Renderer.LoadEntity(_currentEntity);
         }
-
-        _currentEntity = FileResourcer.Get().GetFile<Entity>(hash);
     }
 
     private void EntitySearchBox_TextChanged(object sender, TextChangedEventArgs e)
