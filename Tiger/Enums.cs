@@ -373,10 +373,12 @@ public enum DestinyTraitID : uint
     releases_v420_season = 117031016,
     [Description("Opulence")]
     releases_v450_season = 1357347767,
-    [Description("Undying")]
+
+    [Description("Shadowkeep")] // Undying, but there dont seem to be any gear items with releases_v460_annual so just gonna name this one SK also
     releases_v460_season = 1160263324,
     [Description("Shadowkeep")]
     releases_v460_annual = 955734042,
+
     [Description("Dawn")]
     releases_v470_season = 2326993577,
     [Description("Worthy")]

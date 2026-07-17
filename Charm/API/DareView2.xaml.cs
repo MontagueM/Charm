@@ -204,13 +204,14 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         FilterOptions.Children.Add(release_presets);
     }
 
+    private readonly object _sortLock = new();
     private async Task LoadApiList(bool loadAll = false)
     {
         ItemCategories.Clear();
-        IEnumerable<InventoryItem> inventoryItems = await Investment.Get().GetInventoryItems();
+        List<InventoryItem> inventoryItems = (await Investment.Get().GetInventoryItems()).ToList();
         MainWindow.Progress.CompleteStage();
 
-        List<string> mapStages = inventoryItems.Select((_, i) => $"Loading {i + 1}/{inventoryItems.Count()}").ToList();
+        List<string> mapStages = Enumerable.Range(1, inventoryItems.Count).Select(i => $"Loading {i}/{inventoryItems.Count}").ToList();
         MainWindow.Progress.SetProgressStages(mapStages, false, true);
 
         await Parallel.ForEachAsync(inventoryItems, async (item, ct) =>
@@ -218,30 +219,30 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             string name = item.Name;
             string? type_string = item.Type;
             type_string ??= "";
-
             if ((ShouldAddToList(item) && item.Name != string.Empty) || loadAll)
             {
-                if (!item.ItemTraits.Any() || item.ItemTraits.Contains(DestinyTraitID.item_other))
+                lock (_sortLock)
                 {
-                    if (!SortedItems.ContainsKey(DestinyTraitID.item_other))
-                        SortedItems[DestinyTraitID.item_other] = new List<InventoryItem>();
+                    if (!item.ItemTraits.Any() || item.ItemTraits.Contains(DestinyTraitID.item_other))
+                    {
+                        if (!SortedItems.ContainsKey(DestinyTraitID.item_other))
+                            SortedItems[DestinyTraitID.item_other] = new List<InventoryItem>();
+                        SortedItems[DestinyTraitID.item_other].Add(item);
+                    }
 
-                    SortedItems[DestinyTraitID.item_other].Add(item);
-                }
+                    foreach (var trait in item.ItemTraits)
+                    {
+                        if (trait == DestinyTraitID.item_engram)
+                            continue;
+                        var _trait = trait;
+                        if (item.Type == "Trace Rifle" && _trait == DestinyTraitID.item_weapon_auto_rifle) // bungo pls fix
+                            _trait = DestinyTraitID.item_weapon_trace_rifle;
 
-                foreach (var trait in item.ItemTraits)
-                {
-                    if (trait is DestinyTraitID.item_engram)
-                        continue;
+                        if (!SortedItems.ContainsKey(_trait))
+                            SortedItems[_trait] = new List<InventoryItem>();
 
-                    var _trait = trait;
-                    if (item.Type == "Trace Rifle" && _trait == DestinyTraitID.item_weapon_auto_rifle) // bungo pls fix
-                        _trait = DestinyTraitID.item_weapon_trace_rifle;
-
-                    if (!SortedItems.ContainsKey(_trait))
-                        SortedItems[_trait] = new List<InventoryItem>();
-
-                    SortedItems[_trait].Add(item);
+                        SortedItems[_trait].Add(item);
+                    }
                 }
             }
             MainWindow.Progress.CompleteStage();
