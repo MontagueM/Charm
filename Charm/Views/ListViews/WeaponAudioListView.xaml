@@ -388,11 +388,10 @@
                     <RowDefinition Height="10*" />
                 </Grid.RowDefinitions>
 
-                <ContentControl
+                <local:LoadingSpinner
                     x:Name="WaveformLoading"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Template="{StaticResource SpinningCircleTemplate}"
                     Visibility="Collapsed" />
 
                 <Grid

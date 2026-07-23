@@ -103,8 +103,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     public async void LoadContent()
     {
-        List<string> loading = new() { "Loading Investment Items" };
-        MainWindow.Progress.SetProgressStages(loading, false, true);
+        MainWindow.Progress.SetProgressStage("Loading Investment Items", bHideBar: true);
 
         await LoadApiList();
         CreateFilterOptions();
@@ -212,7 +211,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         MainWindow.Progress.CompleteStage();
 
         List<string> mapStages = Enumerable.Range(1, inventoryItems.Count).Select(i => $"Loading {i}/{inventoryItems.Count}").ToList();
-        MainWindow.Progress.SetProgressStages(mapStages, false, true);
+        MainWindow.Progress.SetProgressStages(mapStages, false);
 
         await Parallel.ForEachAsync(inventoryItems, async (item, ct) =>
         {

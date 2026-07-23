@@ -224,7 +224,7 @@ public partial class MainMenuView : UserControl
 
     private async Task LoadInvestment()
     {
-        MainWindow.Progress.SetProgressStages(new() { "Loading Investment System" });
+        MainWindow.Progress.SetProgressStage("Loading Investment System", bHideBar: true);
         await Task.Run(() => Investment.LazyInit());
         MainWindow.Progress.CompleteStage();
     }

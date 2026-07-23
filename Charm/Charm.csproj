@@ -25,6 +25,12 @@
     <None Remove="Assets\icons\gambit.svg" />
     <None Remove="Assets\icons\globe.png" />
     <None Remove="Assets\icons\iron-banner.svg" />
+    <None Remove="Assets\icons\loading\load0.png" />
+    <None Remove="Assets\icons\loading\load1.png" />
+    <None Remove="Assets\icons\loading\load2.png" />
+    <None Remove="Assets\icons\loading\load3.png" />
+    <None Remove="Assets\icons\loading\load4.png" />
+    <None Remove="Assets\icons\loading\load5.png" />
     <None Remove="Assets\icons\lost-sector.svg" />
     <None Remove="Assets\icons\osiris.svg" />
     <None Remove="Assets\icons\patrol.svg" />
@@ -192,6 +198,12 @@
     <Resource Include="Assets\icons\quest.svg" />
     <Resource Include="Assets\icons\raid.svg" />
     <Resource Include="Assets\icons\strike.svg" />
+    <Resource Include="Assets\icons\loading\load0.png" />
+    <Resource Include="Assets\icons\loading\load1.png" />
+    <Resource Include="Assets\icons\loading\load2.png" />
+    <Resource Include="Assets\icons\loading\load3.png" />
+    <Resource Include="Assets\icons\loading\load4.png" />
+    <Resource Include="Assets\icons\loading\load5.png" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

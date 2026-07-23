@@ -1,0 +1,22 @@
+﻿<UserControl
+    x:Class="Charm.LoadingSpinner"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Width="96"
+    Height="96"
+    mc:Ignorable="d">
+
+    <Grid>
+        <Image
+            x:Name="ImageA"
+            Opacity="1"
+            Stretch="Uniform" />
+        <Image
+            x:Name="ImageB"
+            Opacity="0"
+            Stretch="Uniform" />
+    </Grid>
+</UserControl>

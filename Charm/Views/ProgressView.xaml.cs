@@ -9,7 +9,8 @@ public partial class ProgressView : UserControl
 {
     private Queue<string> _progressStages;
     private int TotalStageCount;
-    private bool bLogProgress = true;
+    private bool LogProgress { get; set; } = true;
+    private bool HideBar { get; set; } = false;
 
     public ProgressView()
     {
@@ -24,7 +25,7 @@ public partial class ProgressView : UserControl
 
     public void Show()
     {
-        // Grid.Background = new SolidColorBrush(new Color {A = 0, B = 0, G = 0, R = 0});
+        ProgressBarPanel.Visibility = HideBar ? Visibility.Collapsed : Visibility.Visible;
         Visibility = Visibility.Visible;
     }
 
@@ -34,18 +35,19 @@ public partial class ProgressView : UserControl
         ProgressText.Text = GetCurrentStageName();
     }
 
-    public void SetProgressStage(string stage)
+    public void SetProgressStage(string stage, bool bLogProgress = true, bool bHideBar = false)
     {
-        SetProgressStages(new List<string> { stage });
+        SetProgressStages(new List<string> { stage }, bLogProgress, bHideBar);
     }
 
-    public void SetProgressStages(List<string> progressStages, bool bLogProgress = true, bool bUseFullBar = false)
+    public void SetProgressStages(List<string> progressStages, bool bLogProgress = true, bool bHideBar = false)
     {
-        this.bLogProgress = bLogProgress;
-        //this.bUseFullBar = bUseFullBar;
         Dispatcher.Invoke(() =>
         {
+            LogProgress = bLogProgress;
             TotalStageCount = progressStages.Count;
+            HideBar = bHideBar || TotalStageCount == 1;
+
             _progressStages = new Queue<string>();
             foreach (string progressStage in progressStages)
             {
@@ -67,7 +69,7 @@ public partial class ProgressView : UserControl
                 return;
             }
             string removed = _progressStages.Dequeue();
-            if (bLogProgress)
+            if (LogProgress)
                 Log.Verbose($"Completed loading stage: {removed}");
 
             UpdateProgress();
@@ -83,7 +85,7 @@ public partial class ProgressView : UserControl
         if (_progressStages.Count > 0)
         {
             string stage = _progressStages.Peek();
-            if (bLogProgress)
+            if (LogProgress)
                 Log.Verbose($"Starting loading stage: {stage}");
             return stage;
         }

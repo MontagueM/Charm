@@ -120,13 +120,12 @@
 
                 </StackPanel>
 
-                <ContentControl
+                <local:LoadingSpinner
                     x:Name="TextureListLoading"
                     Grid.Row="1"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Panel.ZIndex="10"
-                    Template="{StaticResource SpinningCircleTemplate}"
                     Visibility="Collapsed" />
 
                 <ListView
