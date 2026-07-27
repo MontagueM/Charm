@@ -1,5 +1,15 @@
 namespace Tiger.Schema;
 
+public enum ShaderBindMode : uint
+{
+    VertexPixel = 1,
+    VertexOnly = 2,
+    VertexGeometryPixel = 3,
+    VertexPixelTesselated = 4,
+    VertexOnlyTesselated = 5,
+    Compute = 6,
+}
+
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801AD7, 0x488)] //D71A8080
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808071E8, 0x400)] //E8718080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806DAA, 0x3B0)] //AA6D8080
@@ -7,7 +17,7 @@ namespace Tiger.Schema;
 public struct SMaterial // Errm Ackchyually its called "technique" 🤓
 {
     public long FileSize;
-    public uint Unk08;
+    public ShaderBindMode BindMode;
     public uint Unk0C;
     public uint Unk10;
 

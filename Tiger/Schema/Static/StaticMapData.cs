@@ -43,7 +43,7 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
                 {
                     S80801AAF materialEntry = entry.TagData.MaterialTable[infoEntry.MaterialIndex];
                     // Material is (probably) used for depth pass, so ignore this mesh
-                    if (materialEntry.Material.TagData.Unk08 != 1)
+                    if (materialEntry.Material.TagData.BindMode != ShaderBindMode.VertexPixel)
                         continue;
 
                     if (!statics.ContainsKey(staticEntry.Vertices0.Hash))
