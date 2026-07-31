@@ -421,6 +421,7 @@ public enum TfxBytecode : byte // Not ordered by value, different versions get m
     PermuteAllX,
     Permute,
     Saturate,
+    Unk24,
     Unk25, // Log2
     Unk26, // Length4?
     Triangle,
@@ -604,6 +605,7 @@ public enum TfxBytecode_BL : byte
     PermuteAllX = 0x21,
     Permute = 0x22,
     Saturate = 0x23,
+    Unk24 = 0x24,
     Unk25 = 0x25,
     Unk26 = 0x26,
     Triangle = 0x27,
@@ -690,6 +692,7 @@ public enum TfxBytecode_TFS : byte
     PermuteAllX = 0x21,
     Permute = 0x22,
     Saturate = 0x23,
+    Unk24 = 0x24,
     Unk25 = 0x25,
     Unk26 = 0x26,
     Triangle = 0x27,
@@ -782,6 +785,7 @@ public enum TfxBytecode_EoF : byte
     PermuteAllX = 0x28,
     Permute = 0x29,
     Saturate = 0x2A,
+    Unk24 = 0x2B,
     Unk25 = 0x2C,
     Unk26 = 0x2D,
     Triangle = 0x2E,
