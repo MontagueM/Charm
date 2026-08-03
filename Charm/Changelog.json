@@ -1,5 +1,37 @@
 [
     {
+        "version": "3.3.6",
+        "date": "08-03-2026",
+        "changes": [
+            {
+                "title": "Fixes",
+                "notes": [
+                    "Gear Viewer: Fixed some items sometimes not appearing when searching."
+                ]
+            },
+            {
+                "title": "Changes",
+                "notes": [
+                    "Updated the Loading Screen visual."
+                ]
+            },
+            {
+                "title": "Renderer",
+                "notes": [
+                    "Changed Entity material permutations will now apply to the exported entity.",
+                    "Improved lighting and atmosphere rendering.",
+                    "Improved Auto Exposure.",
+                    "Improved free pivot (left mouse) camera mode.",
+                    "Added HDAO.",
+                    "Added God Rays.",
+                    "Added Bloom.",
+                    "Added a search bar for gear shaders.",
+                    "Misc fixes."
+                ]
+            }
+        ]
+    },
+    {
         "version": "3.3.3",
         "date": "06-21-2026",
         "changes": [
