@@ -129,7 +129,7 @@ public static class TfxBytecodeOp
                 case TfxBytecode.PushObjectChannelVector:
                     tfxData.data = new TfxDataUint()
                     {
-                        value = Strategy.IsPostBL()
+                        value = Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402
                         ? Endian.SwapU32(reader.ReadUInt32())
                         : reader.ReadByte()
                     };
@@ -546,7 +546,7 @@ public enum TfxBytecode_D1 : byte
     PushExternInputMat4 = 0x3e,
     PushExternInputTextureView = 0x3f,
     PushExternInputU32 = 0x40,
-    PushExternInputUav = 0x41, // idk if this is in D1, F3487E81 uses this but doesnt seem right
+    //PushExternInputUav = 0x41, // idk if this is in D1, F3487E81 uses this but doesnt seem right
     PushFromOutput = 0x41,
     PopOutput = 0x42,
     PopOutputMat4 = 0x43,

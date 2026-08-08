@@ -323,6 +323,7 @@ public static class Externs
         UiHdrTransform = 94,
         PlayerCenteredCascadedGrid = 95,
         SoftDeform = 96,
+        ParticleMeshEmissionCompute = 97
     }
 
     private enum TfxExternD1 : byte
