@@ -10,8 +10,6 @@ It supports many versions of Destiny 2 and it's main focus is on the games 3D mo
 > * Before you go any further, understand that Charm ***IS NOT a datamining tool!!***
 > * While it can access many things in the game files, it's main purpose is focused towards **3D artists, content preservation and learning how the game works**!
 > * Please ***DO NOT*** use this tool to spread leaks and spoilers or anything that may break Bungie's TOS. Don't ruin the experience for yourself and others. Uncover things the way they were intended!
-> * Seeing this tool used for such acts WILL result in fewer public updates and the removal of certain features (this unfortunately has already happened).
-> * I enjoy maintaining and updating this for others, don't be the one to ruin it.
 
 ## How do I install and use it?
 
@@ -27,7 +25,7 @@ Charm currently supports:
 | 6.3.0.7 | Witch Queen last update  | DepotDownloader | 6051526863119423207 | 1078048403901153652  |
 | 7.3.6.6 | Lightfall last update    | DepotDownloader | 7707143404100984016 | 5226038440689554798  |
 | 8.2.6.4 | The Final Shape last update | DepotDownloader | 3593201409625956155 | 6975584800172104419 |
-| 9.5.0.1+     | Monument of Triumph (Latest)      | Steam           | N/A                 | N/A                  |
+| 9.5.0.4+     | Monument of Triumph (Latest)      | Steam           | N/A                 | N/A                  |
 
 If you just want to look at the latest release, you only need Destiny 2 downloaded on Steam, Epic Games, or the Windows Store
 
@@ -51,8 +49,6 @@ After you've downloaded the version(s) you want:
 - You will be prompted to set the games packages path and Charm's export path before you can continue.
     - For example: `C:\Program Files\Steam\steamapps\common\Destiny 2\packages` for the game, `G:\Charm Output` for the output
 
-~~Also take a look at the [Charm wiki](https://github.com/MontagueM/DestinyDocs/blob/main/Charm/Home.md) for more info.~~ (Outdated)
-
 > [!TIP]
 > ## Some tips and tricks
 > * Middle click tabs to close them.
@@ -70,10 +66,15 @@ It would help greatly if you provide the latest crash log (`/Logs` folder) and s
 - Package Path Cache creation may get stuck in rare instances, simply restart the program.
 - Steam updates can sometimes fail to remove old package files which can/will cause crashes.
     - A complete uninstall/reinstall of the game is the easiest solution.
+- The custom renderer does not work when using Wine.
+
+## Custom Renderer
+- Charm comes included with a custom renderer for viewing statics, entities, and player gear with game 'accurate' shaders and lighting. Maps are not supported as [Alkahest](https://github.com/cohaereo/alkahest) does a much better job at this.
+- The renderer is not enabled by default and is only available when using the Latest version of Destiny 2. You can enable it in the settings menu but it is still considered experimental.
 
 ## Screenshots
 <p float="left">
-    <img width="400" src="https://github.com/user-attachments/assets/3487d37f-5750-4715-9d5e-affbb53a87c0" />
+    <img width="400" src="https://github.com/user-attachments/assets/355d58b5-69f6-43bc-b127-cb130b6eb84f" />
     <img width="400" src="https://github.com/user-attachments/assets/31538576-8d63-4cc4-8f89-6ae50d0266a0" />
     <img width="400" src="https://github.com/user-attachments/assets/abfea0e5-71ad-4bec-813b-0b9095a25f25" />
     <img width="400" src="https://github.com/user-attachments/assets/0a48f0ea-0474-41e8-b465-9bf51d764705" />
@@ -81,16 +82,14 @@ It would help greatly if you provide the latest crash log (`/Logs` folder) and s
     <img width="400" src="https://github.com/user-attachments/assets/082ccc15-4684-4954-b3f1-b2b8cc4b1ee2" />
     <img width="400" src="https://github.com/user-attachments/assets/14705aee-c857-4cb4-b21a-add89b86c9b2" />
     <img width="400" src="https://github.com/user-attachments/assets/794bbffb-6c14-4b44-a63a-6f74a15092b0" />
+    <img width="400" src="https://github.com/user-attachments/assets/066db66a-7f70-4974-b081-d56d24db1ae0" />
+    <img width="400" src="https://github.com/user-attachments/assets/d0fdc39b-77d7-4019-8266-8ae5e853cc0c" />
+    <img width="400" src="https://github.com/user-attachments/assets/81760006-640f-4e83-af4c-81c2b185585c" />
+    <img width="400" src="https://github.com/user-attachments/assets/1e211912-a04a-475f-902d-2409e24efbf6" />
 </p>
 
 ## Blender
 - Use the [Blender Importer addon](https://github.com/DeltaDesigns/d2-map-importer-addon) to simplify and automate importing maps and models into Blender.
-
-## S&Box
- - [Import guide](https://github.com/DeltaDesigns/Charm/wiki/S&Box-Importing)
-
-## Unreal Engine
-- Unreal Engine importing is no longer supported at this current moment. All the discoveries with maps (skyboxes, lights, etc) and rendering and what not have made things a little complicated. Anyone is more than welcome to contribute on this front.
 
 ## Sponsor
 
