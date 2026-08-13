@@ -144,9 +144,6 @@ public struct S808077E7
 
     [SchemaField(0x10)]
     public short ItemSetIndex; // 'equipableItemSetHash'
-
-    [SchemaField(0x18)]
-    public DynamicArray<S80807A38> Unk00;
 }
 
 [SchemaStruct(0x80807A38, 0x10)] //387A8080
