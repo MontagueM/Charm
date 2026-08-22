@@ -18,7 +18,7 @@ Charm currently supports:
 
 | Version | Description              | Where           |  Main manifest id   | Language manifest id |
 |---------|--------------------------|-----------------|---------------------|----------------------|
-| D1 2.6.0.2 | Rise Of Iron last update | Ask in [DMR](https://discord.gg/DestinyModelRips)      |                     |                      |
+| D1 2.6.0.2 | Rise Of Iron last update | Ask in [DMR](https://discord.gg/AYFfp4aKZ4)      |                     |                      |
 | D2 2.6.0.1 | Shadowkeep first update  | DepotDownloader | 7002268313830901797 | 2399965969279284756  |
 | 2.9.9.9 | Shadowkeep last update   | DepotDownloader | 4160053308690659072 | 4651412338057797072  |
 | 3.4.0.2 | Beyond Light last update | DepotDownloader | 5631185797932644936 | 3832609057880895101  |
@@ -56,7 +56,7 @@ After you've downloaded the version(s) you want:
 > * If you already have the hash of an Entity (Dynamic), you can press CTRL+D while on the Main Menu to enter 'Dev' view. Paste the hash into the box and press enter. It will open in a viewer and be exported.
 
 ## Reporting issues
-If you experience any issues, bugs, or crashes, feel free to create an issue in this repository or in the Destiny Model Rips [Discord](https://discord.gg/DestinyModelRips) `#charm-tool-help` channel.
+If you experience any issues, bugs, or crashes, feel free to create an issue in this repository or in the Destiny Model Rips [Discord](https://discord.gg/AYFfp4aKZ4) `#charm-tool-help` channel.
 It would help greatly if you provide the latest crash log (`/Logs` folder) and steps to reproduce the issue.
 
 ## Known issues
