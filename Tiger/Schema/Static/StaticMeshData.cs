@@ -23,7 +23,7 @@ namespace Tiger.Schema.Static
 
     public interface IStaticMeshData : ISchema
     {
-        public List<StaticPart> Load(ExportDetailLevel detailLevel, SStaticMesh parent);
+        public List<StaticPart> Load(ExportDetailLevel detailLevel, SStaticMesh parent, bool bLoadAll = false);
         public List<BufferGroup> GetBuffers();
         List<int> GetStrides();
         Blob GetTransformsBlob();
@@ -38,9 +38,9 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
         {
         }
 
-        public List<StaticPart> Load(ExportDetailLevel detailLevel, SStaticMesh parent)
+        public List<StaticPart> Load(ExportDetailLevel detailLevel, SStaticMesh parent, bool bLoadAll = false)
         {
-            Dictionary<int, SStaticMeshPart> staticPartEntries = GetPartsOfDetailLevel(detailLevel);
+            Dictionary<int, SStaticMeshPart> staticPartEntries = GetPartsOfDetailLevel(detailLevel, bLoadAll);
             List<StaticPart> parts = GenerateParts(staticPartEntries, parent);
             return parts;
         }
@@ -73,7 +73,7 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
             return parts;
         }
 
-        public Dictionary<int, SStaticMeshPart> GetPartsOfDetailLevel(ExportDetailLevel detailLevel)
+        public Dictionary<int, SStaticMeshPart> GetPartsOfDetailLevel(ExportDetailLevel detailLevel, bool bLoadAll = false)
         {
             Dictionary<int, SStaticMeshPart> staticPartEntries = new();
 
@@ -82,7 +82,7 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
                 SStaticMeshMaterialAssignment_SK mat = _tag.MaterialAssignments[i];
                 SStaticMeshPart part = _tag.Parts[mat.PartIndex];
 
-                if (!Globals.Get().GetExportStages().Contains((TfxRenderStage)mat.RenderStage))
+                if (!Globals.Get().GetExportStages().Contains((TfxRenderStage)mat.RenderStage) && !bLoadAll)
                     continue;
 
                 switch (detailLevel)
@@ -118,10 +118,10 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
         {
         }
 
-        public List<StaticPart> Load(ExportDetailLevel detailLevel, SStaticMesh parent)
+        public List<StaticPart> Load(ExportDetailLevel detailLevel, SStaticMesh parent, bool bLoadAll = false)
         {
             Debug.Assert(_tag.MaterialAssignments.Count == parent.Materials.Count);
-            Dictionary<int, SStaticMeshPart> staticPartEntries = GetPartsOfDetailLevel(detailLevel);
+            Dictionary<int, SStaticMeshPart> staticPartEntries = GetPartsOfDetailLevel(detailLevel, bLoadAll);
             List<StaticPart> parts = GenerateParts(staticPartEntries, parent);
             return parts;
         }
@@ -192,7 +192,7 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
             return parts;
         }
 
-        public Dictionary<int, SStaticMeshPart> GetPartsOfDetailLevel(ExportDetailLevel detailLevel)
+        public Dictionary<int, SStaticMeshPart> GetPartsOfDetailLevel(ExportDetailLevel detailLevel, bool bLoadAll = false)
         {
             Dictionary<int, SStaticMeshPart> staticPartEntries = new();
 
@@ -201,7 +201,7 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
                 SStaticMeshMaterialAssignment_WQ mat = _tag.MaterialAssignments[i];
                 SStaticMeshPart part = _tag.Parts[mat.PartIndex];
 
-                if (!Globals.Get().GetExportStages().Contains((TfxRenderStage)mat.RenderStage))
+                if (!Globals.Get().GetExportStages().Contains((TfxRenderStage)mat.RenderStage) && !bLoadAll)
                     continue;
 
                 Debug.Assert(part.BufferIndex == 0, $"{Hash} has part with buffer index {part.BufferIndex}");

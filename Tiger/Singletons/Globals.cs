@@ -4713,7 +4713,7 @@ public static class RenderStates
         },
     };
 
-    private static readonly (int, int)[] DEPTH_STENCIL_COMBOS = new (int, int)[]
+    public static readonly (int, int)[] DEPTH_STENCIL_COMBOS = new (int, int)[]
     {
         (0, 0), // 0
         (1, 1),

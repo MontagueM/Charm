@@ -39,14 +39,14 @@ public class StaticMesh : Tag<SStaticMesh>
     }
 
     /// <summary>
-    /// Loads just the main parts of the static mesh (excludes decals).
+    /// Loads all parts of the static mesh for the custom renderer
     /// </summary>
     /// <param name="detailLevel"></param>
     /// <returns></returns>
-    public List<StaticPart> LoadMainParts(ExportDetailLevel detailLevel)
+    public List<StaticPart> LoadAllParts(ExportDetailLevel detailLevel)
     {
-        List<StaticPart> decalParts = LoadDecals(detailLevel);
-        List<StaticPart> mainParts = _tag.StaticData.Load(detailLevel, _tag);
+        List<StaticPart> decalParts = LoadDecals(detailLevel, true);
+        List<StaticPart> mainParts = _tag.StaticData.Load(detailLevel, _tag, true);
         mainParts.AddRange(decalParts);
         return mainParts;
     }
@@ -56,12 +56,12 @@ public class StaticMesh : Tag<SStaticMesh>
     /// </summary>
     /// <param name="detailLevel"></param>
     /// <returns></returns>
-    public List<StaticPart> LoadDecals(ExportDetailLevel detailLevel)
+    public List<StaticPart> LoadDecals(ExportDetailLevel detailLevel, bool bLoadAll = false)
     {
         List<StaticPart> parts = new();
         foreach (SStaticMeshDecal decalPartEntry in _tag.Decals)
         {
-            if (!Globals.Get().GetExportStages().Contains((TfxRenderStage)decalPartEntry.GetRenderStage()))
+            if (!Globals.Get().GetExportStages().Contains((TfxRenderStage)decalPartEntry.GetRenderStage()) && !bLoadAll)
                 continue;
 
             if (detailLevel == ExportDetailLevel.MostDetailed)

@@ -18,7 +18,7 @@ public class EntityModel : Tag<SEntityModel>
     /*
      * We need the parent resource to get access to the external materials
      */
-    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, EntityComponent parentResource, bool transparentsOnly = false, bool hasSkeleton = false, LoadLevel loadLevel = LoadLevel.Full)
+    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, EntityComponent parentResource, bool transparentsOnly = false, bool hasSkeleton = false, LoadLevel loadLevel = LoadLevel.Default)
     {
         Dictionary<int, Dictionary<int, S80806ECB>> dynamicParts = GetPartsOfDetailLevel(detailLevel);
         List<DynamicMeshPart> parts = GenerateParts(dynamicParts, parentResource, hasSkeleton, loadLevel);
@@ -79,7 +79,7 @@ public class EntityModel : Tag<SEntityModel>
         return parts;
     }
 
-    private List<DynamicMeshPart> GenerateParts(Dictionary<int, Dictionary<int, S80806ECB>> dynamicParts, EntityComponent parentResource, bool hasSkeleton = false, LoadLevel loadLevel = LoadLevel.Full)
+    private List<DynamicMeshPart> GenerateParts(Dictionary<int, Dictionary<int, S80806ECB>> dynamicParts, EntityComponent parentResource, bool hasSkeleton = false, LoadLevel loadLevel = LoadLevel.Default)
     {
         List<DynamicMeshPart> parts = new();
         List<int> exportPartRange = new();
@@ -91,7 +91,7 @@ public class EntityModel : Tag<SEntityModel>
             exportPartRange = GetExportRanges(mesh);
             foreach ((int i, S80806ECB part) in dynamicParts[meshIndex])
             {
-                if (!exportPartRange.Contains(i))
+                if (!exportPartRange.Contains(i) && loadLevel != LoadLevel.Full)
                     continue;
 
                 var renderStage = GetStageForPart(mesh, i);
@@ -129,13 +129,16 @@ public class EntityModel : Tag<SEntityModel>
 
                 //We only care about the vertex shader for now for mesh data
                 //But if theres also no pixel shader then theres no point in adding it
-                if (dynamicMeshPart.Material is null ||
-                dynamicMeshPart.Material.Vertex.Shader is null ||
-                dynamicMeshPart.Material.Pixel.Shader is null) // || dynamicMeshPart.Material.Unk08 != 1)
+
+                if (dynamicMeshPart.Material is null)
+                    continue;
+
+                if (loadLevel != LoadLevel.Full && (dynamicMeshPart.Material.Vertex.Shader is null ||
+                dynamicMeshPart.Material.Pixel.Shader is null))
                     continue;
 
                 dynamicMeshPart.Material.RenderStage = dynamicMeshPart.RenderStage;
-                if (loadLevel == LoadLevel.Full)
+                if (loadLevel != LoadLevel.Minimal)
                     dynamicMeshPart.GetAllData(mesh, _tag);
 
                 parts.Add(dynamicMeshPart);

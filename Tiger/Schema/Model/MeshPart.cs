@@ -12,8 +12,9 @@ public enum ExportDetailLevel
 
 public enum LoadLevel
 {
-    Full,
-    Minimal
+    Full, // Loads all render stage meshes
+    Default, // Loads only the 'main' render stage meshes
+    Minimal // Doesnt process any mesh data, only information
 }
 
 /// <summary>

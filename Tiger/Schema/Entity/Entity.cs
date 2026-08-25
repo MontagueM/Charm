@@ -133,7 +133,7 @@ public class Entity : Tag<SEntity>
     /// <param name="detailLevel"></param>
     /// <param name="loadLevel"></param>
     /// <returns></returns>
-    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, LoadLevel loadLevel = LoadLevel.Full)
+    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, LoadLevel loadLevel = LoadLevel.Default)
     {
         if (!_loaded)
             Load();
@@ -154,7 +154,7 @@ public class Entity : Tag<SEntity>
     /// <param name="detailLevel"></param>
     /// <param name="loadLevel"></param>
     /// <returns></returns>
-    public List<DynamicMeshPart> LoadModel(ExportDetailLevel detailLevel, LoadLevel loadLevel = LoadLevel.Full)
+    public List<DynamicMeshPart> LoadModel(ExportDetailLevel detailLevel, LoadLevel loadLevel = LoadLevel.Default)
     {
         if (!_loaded)
             Load();
@@ -172,7 +172,7 @@ public class Entity : Tag<SEntity>
     /// <param name="detailLevel"></param>
     /// <param name="loadLevel"></param>
     /// <returns></returns>
-    public List<DynamicMeshPart> LoadPhysicsModel(ExportDetailLevel detailLevel, LoadLevel loadLevel = LoadLevel.Full)
+    public List<DynamicMeshPart> LoadPhysicsModel(ExportDetailLevel detailLevel, LoadLevel loadLevel = LoadLevel.Default)
     {
         if (!_loaded)
             Load();
