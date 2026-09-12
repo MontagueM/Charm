@@ -12,6 +12,13 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
+        <ItemsPanelTemplate x:Key="ThumbnailPanelTemplate">
+            <wrap:VirtualizingWrapPanel HorizontalAlignment="Left" Orientation="Horizontal" />
+        </ItemsPanelTemplate>
+        <ItemsPanelTemplate x:Key="ListPanelTemplate">
+            <VirtualizingStackPanel HorizontalAlignment="Left" Orientation="Vertical" />
+        </ItemsPanelTemplate>
+
         <!--  this is stupid  -->
         <local:GenericTooltip
             x:Key="ExportTooltip"
@@ -43,7 +50,7 @@
 
         <DataTemplate x:Key="EntityTemplate">
             <RadioButton
-                Width="500"
+                Width="275"
                 MinHeight="110"
                 Margin="0,0,0,0"
                 HorizontalAlignment="Left"
@@ -53,8 +60,164 @@
                 Loaded="Tag_Loaded"
                 Style="{DynamicResource D2StyleRadioButton}"
                 Unloaded="Tag_Unloaded">
-                <Border VerticalAlignment="Center" Background="{StaticResource BackgroundColour14a}">
-                    <Grid Margin="5">
+                <Border VerticalAlignment="Stretch" Background="{StaticResource BackgroundColour14a}">
+                    <Grid Margin="5" VerticalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid>
+                            <local:LoadingSpinner
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Panel.ZIndex="10"
+                                Visibility="{Binding Thumbnail, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=True}" />
+
+                            <Border BorderBrush="{StaticResource BackgroundColour30}" BorderThickness="1">
+                                <Image
+                                    Width="256"
+                                    Height="256"
+                                    HorizontalAlignment="Center"
+                                    Source="{Binding Thumbnail}" />
+                            </Border>
+                        </Grid>
+
+                        <Viewbox
+                            Grid.Row="1"
+                            HorizontalAlignment="Left"
+                            StretchDirection="DownOnly">
+                            <TextBlock
+                                Margin="0,5,20,0"
+                                HorizontalAlignment="Left"
+                                d:FontFamily="Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="18"
+                                Foreground="{StaticResource ForegroundColour70}"
+                                Text="{Binding DisplayName}"
+                                TextWrapping="Wrap" />
+                        </Viewbox>
+
+                        <TextBlock
+                            Grid.Row="2"
+                            Margin="0,5,0,0"
+                            HorizontalAlignment="Left"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="14"
+                            Foreground="{StaticResource ForegroundColour70}"
+                            Text="{Binding Hash}" />
+
+                        <TextBlock
+                            Grid.Row="3"
+                            Margin="0"
+                            HorizontalAlignment="Left"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="14"
+                            Foreground="{StaticResource ForegroundColour70}">
+                            <Run Text="Components: " />
+                            <Run Text="{Binding ResourceCount}" />
+                        </TextBlock>
+
+                        <TextBlock
+                            Grid.Row="4"
+                            Margin="0"
+                            HorizontalAlignment="Left"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="14"
+                            Foreground="{StaticResource ForegroundColour70}">
+                            <Run Text="Has Skeleton: " />
+                            <Run Text="{Binding HasSkeleton}" />
+                        </TextBlock>
+
+                        <TextBlock
+                            Grid.Row="5"
+                            Margin="0,5,0,5"
+                            HorizontalAlignment="Left"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="12"
+                            Foreground="{StaticResource ForegroundColour50}"
+                            Text="{Binding TagPath}"
+                            TextWrapping="WrapWithOverflow">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding TagPath}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <TextBlock
+                            Grid.Row="6"
+                            Margin="0,0,10,0"
+                            HorizontalAlignment="Left"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="14"
+                            Foreground="{StaticResource ForegroundColour50}"
+                            Text="{Binding TagNote}"
+                            TextWrapping="WrapWithOverflow">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding TagNote}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <TextBlock
+                            Grid.Row="7"
+                            Margin="0,5,0,0"
+                            HorizontalAlignment="Right"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="12"
+                            Foreground="{StaticResource ForegroundColour50}"
+                            Text="{Binding BudgetSetName}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding BudgetSetName}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </Border>
+            </RadioButton>
+        </DataTemplate>
+
+        <DataTemplate x:Key="EntityTemplateNoThumb">
+            <RadioButton
+                Width="550"
+                MinHeight="110"
+                Margin="0,0,0,0"
+                HorizontalAlignment="Left"
+                local:StyleHelper.BorderThickness="1"
+                Checked="Entity_OnClick"
+                GroupName="EntityItem"
+                Loaded="Tag_Loaded"
+                Style="{DynamicResource D2StyleRadioButton}"
+                Unloaded="Tag_Unloaded">
+                <Border VerticalAlignment="Stretch" Background="{StaticResource BackgroundColour14a}">
+                    <Grid Margin="5" VerticalAlignment="Center">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto" />
                             <RowDefinition Height="auto" />
@@ -230,35 +393,46 @@
                 Grid.Column="1"
                 Margin="0,10,0,10"
                 Background="Transparent">
-
                 <Grid.RowDefinitions>
                     <RowDefinition Height="5*" />
+                    <RowDefinition Height="auto" />
                     <RowDefinition Height="95*" />
                 </Grid.RowDefinitions>
 
                 <StackPanel
                     x:Name="FilterOptions"
                     Grid.Row="0"
-                    Margin="0,0,0,0"
+                    Margin="10,0,0,0"
                     HorizontalAlignment="Left"
                     Orientation="Horizontal">
                     <TextBox
                         x:Name="EntitySearchBox"
                         Grid.Row="0"
                         Width="250"
-                        Margin="10,0,10,0"
+                        Margin="0,0,10,0"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Center"
                         FontSize="30"
                         TextChanged="EntitySearchBox_TextChanged"
                         TextWrapping="Wrap" />
-
                 </StackPanel>
 
+                <CheckBox
+                    x:Name="UseThumbnailsCheckBox"
+                    Grid.Row="1"
+                    Margin="10,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    local:StyleHelper.Scale="0.75"
+                    Click="UseThumbnailsCheckBox_Changed"
+                    Content="Show Thumbnails"
+                    FontSize="18"
+                    IsChecked="True"
+                    Style="{StaticResource D2StyleToggleBoxButton}" />
 
                 <ListView
                     x:Name="EntityList"
-                    Grid.Row="1"
+                    Grid.Row="2"
                     Margin="0,10,0,5"
                     Background="Transparent"
                     BorderBrush="{StaticResource ForegroundColour70}"
@@ -271,7 +445,7 @@
 
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <VirtualizingStackPanel HorizontalAlignment="Left" Orientation="Vertical" />
+                            <wrap:VirtualizingWrapPanel HorizontalAlignment="Left" Orientation="Horizontal" />
                         </ItemsPanelTemplate>
                     </ListView.ItemsPanel>
                 </ListView>

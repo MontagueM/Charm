@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Windows.Media.Imaging;
 using Arithmic;
 using Tiger;
 using Tiger.Schema.Entity;
@@ -23,6 +24,7 @@ public interface IRenderer
     void LoadEntity(Entity entity);
     void LoadInvestmentItem(InventoryItem item);
     void LoadInvestmentItems(IEnumerable<InventoryItem> items);
+    void RequestThumbnail(FileHash hash, TfxFeatureRenderer type, CancellationToken token, Action<BitmapSource> onComplete);
 
     private static readonly object _lock = new();
     static HashSet<IRenderer> ActiveRenderers { get; } = new HashSet<IRenderer>();
@@ -73,8 +75,8 @@ public interface IRenderer
 
     public static bool CanUseRenderer()
     {
-        return CharmRenderer is not null
+        return Strategy.IsLatest()
             && ConfigSubsystem.Get().GetCustomRenderer()
-            && Strategy.IsLatest();
+            && CharmRenderer is not null;
     }
 }

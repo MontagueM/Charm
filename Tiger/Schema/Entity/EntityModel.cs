@@ -133,8 +133,7 @@ public class EntityModel : Tag<SEntityModel>
                 if (dynamicMeshPart.Material is null)
                     continue;
 
-                if (loadLevel != LoadLevel.Full && (dynamicMeshPart.Material.Vertex.Shader is null ||
-                dynamicMeshPart.Material.Pixel.Shader is null))
+                if (loadLevel != LoadLevel.Full && (dynamicMeshPart.Material.Vertex.Shader is null || dynamicMeshPart.Material.Pixel.Shader is null))
                     continue;
 
                 dynamicMeshPart.Material.RenderStage = dynamicMeshPart.RenderStage;
