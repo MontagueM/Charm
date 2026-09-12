@@ -17,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Arithmic;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Investment;
@@ -74,6 +75,34 @@ public class CharmUIElement : INotifyPropertyChanged
 
 public static class ApiImageUtils
 {
+    public static string ThumbnailCacheDirectory =>
+       Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Charm", "ThumbnailCache");
+
+    public static string GetThumbnailCachePath(FileHash hash) =>
+       Path.Combine(ThumbnailCacheDirectory, $"{Strategy.CurrentStrategy}_{hash}.png");
+
+    public static BitmapImage LoadBitmap(string path)
+    {
+        if (!File.Exists(path))
+            throw new FileNotFoundException();
+
+        try
+        {
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.UriSource = new Uri(path);
+            bitmap.EndInit();
+            bitmap.Freeze();
+            return bitmap;
+        }
+        catch
+        {
+            Log.Error($"Failed to load image from {path}");
+            return null;
+        }
+    }
+
     public static BitmapImage MakeBitmapImage(UnmanagedMemoryStream ms, int width, int height)
     {
         BitmapImage bitmapImage = new();
@@ -341,7 +370,6 @@ public static class ApiImageUtils
 
         return dw.ImageSource;
     }
-
 
     public static ImageSource MakeIcon(InventoryItem item, int containerIndex = 0, int iconIndex = 0, int listIndex = 0)
     {

@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 using Arithmic;
 using Charm.Shared;
 using Tiger;
@@ -55,6 +56,10 @@ public partial class StaticListView : UserControl
             StaticRendererBasic = new StaticView();
             RendererGrid.Children.Add(StaticRendererBasic);
             HideBasicRenderer();
+
+            StaticList.ItemTemplate = (DataTemplate)FindResource("StaticTemplateNoThumb");
+            StaticList.ItemsPanel = (ItemsPanelTemplate)FindResource("ListPanelTemplate");
+            UseThumbnailsCheckBox.Visibility = Visibility.Collapsed;
         }
     }
 
@@ -324,6 +329,83 @@ public partial class StaticListView : UserControl
         }
     }
 
+    private void UseThumbnailsCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        bool b = UseThumbnailsCheckBox.IsChecked.Value;
+        StaticList.ItemTemplate = b
+            ? (DataTemplate)FindResource("StaticTemplate")
+            : (DataTemplate)FindResource("StaticTemplateNoThumb");
+
+        StaticList.ItemsPanel = b
+            ? (ItemsPanelTemplate)FindResource("ThumbnailPanelTemplate")
+            : (ItemsPanelTemplate)FindResource("ListPanelTemplate");
+    }
+
+
+    private readonly Dictionary<FileHash, CancellationTokenSource> _pendingThumbnailTokens = new();
+    private readonly Dictionary<FileHash, BitmapSource> _thumbnailCache = new();
+    private void Tag_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (!IRenderer.CanUseRenderer())
+            return;
+
+        if (sender is RadioButton btn && btn.DataContext is StaticItem tag)
+        {
+            btn.Tag = tag.Hash;
+            if (tag.Thumbnail == null && !_pendingThumbnailTokens.ContainsKey(tag.Hash))
+            {
+                var cachePath = ApiImageUtils.GetThumbnailCachePath(tag.Hash);
+                if (File.Exists(cachePath))
+                {
+                    Task.Run(() => ApiImageUtils.LoadBitmap(cachePath)).ContinueWith(t =>
+                    {
+                        if (t.Result != null)
+                            tag.Thumbnail = t.Result;
+                        else
+                            Dispatcher.Invoke(() => Tag_Loaded(sender, e));
+                    }, TaskScheduler.FromCurrentSynchronizationContext());
+                    return;
+                }
+
+                var cts = new CancellationTokenSource();
+                _pendingThumbnailTokens[tag.Hash] = cts;
+                if (_thumbnailCache.TryGetValue(tag.Hash, out BitmapSource thumb))
+                {
+                    tag.Thumbnail = thumb;
+                    return;
+                }
+
+                StaticRenderer.RequestThumbnail(
+                    tag.Hash,
+                    TfxFeatureRenderer.StaticObjects,
+                    cts.Token,
+                    bitmap =>
+                    {
+                        tag.Thumbnail = bitmap;
+                        _pendingThumbnailTokens.Remove(tag.Hash);
+                        _thumbnailCache.TryAdd(tag.Hash, bitmap);
+                        cts.Dispose();
+                    });
+            }
+        }
+    }
+
+    private void Tag_Unloaded(object sender, RoutedEventArgs e)
+    {
+        if (!IRenderer.CanUseRenderer())
+            return;
+
+        if (sender is RadioButton btn && btn.Tag is FileHash hash)
+        {
+            if (_pendingThumbnailTokens.TryGetValue(hash, out var cts))
+            {
+                cts.Cancel();
+                cts.Dispose();
+                _pendingThumbnailTokens.Remove(hash);
+            }
+        }
+    }
+
     private class StaticItem : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -331,6 +413,17 @@ public partial class StaticListView : UserControl
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
 
         public FileHash Hash { get; set; }
+
+        private BitmapSource _thumbnail;
+        public BitmapSource Thumbnail
+        {
+            get => _thumbnail;
+            set
+            {
+                _thumbnail = value;
+                OnPropertyChanged(nameof(Thumbnail));
+            }
+        }
     }
 
     public void Dispose()

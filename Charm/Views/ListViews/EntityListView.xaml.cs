@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 using Arithmic;
 using Charm.Shared;
 using ConcurrentCollections;
@@ -63,6 +64,10 @@ public partial class EntityListView : UserControl
             RendererBasic = new EntityView();
             RendererGrid.Children.Add(RendererBasic);
             HideBasicRenderer();
+
+            EntityList.ItemTemplate = (DataTemplate)FindResource("EntityTemplateNoThumb");
+            EntityList.ItemsPanel = (ItemsPanelTemplate)FindResource("ListPanelTemplate");
+            UseThumbnailsCheckBox.Visibility = Visibility.Collapsed;
         }
     }
 
@@ -693,22 +698,81 @@ public partial class EntityListView : UserControl
         });
     }
 
-
-    private async void Tag_Loaded(object sender, RoutedEventArgs e)
+    private void UseThumbnailsCheckBox_Changed(object sender, RoutedEventArgs e)
     {
-        //if (sender is Button btn && btn.DataContext is EntityItem tag)
-        //{
-        //    await tag.DrawWaveform();
-        //    btn.Tag = tag;
-        //}
+        bool b = UseThumbnailsCheckBox.IsChecked.Value;
+        EntityList.ItemTemplate = b
+            ? (DataTemplate)FindResource("EntityTemplate")
+            : (DataTemplate)FindResource("EntityTemplateNoThumb");
+
+        EntityList.ItemsPanel = b
+            ? (ItemsPanelTemplate)FindResource("ThumbnailPanelTemplate")
+            : (ItemsPanelTemplate)FindResource("ListPanelTemplate");
+    }
+
+
+    private readonly Dictionary<EntityItem, CancellationTokenSource> _pendingThumbnailTokens = new();
+    private readonly Dictionary<FileHash, BitmapSource> _thumbnailCache = new();
+    private void Tag_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (!IRenderer.CanUseRenderer())
+            return;
+
+        if (sender is RadioButton btn && btn.DataContext is EntityItem tag)
+        {
+            btn.Tag = tag;
+            if (tag.Thumbnail == null && !_pendingThumbnailTokens.ContainsKey(tag))
+            {
+                var cachePath = ApiImageUtils.GetThumbnailCachePath(tag.Hash);
+                if (File.Exists(cachePath))
+                {
+                    Task.Run(() => ApiImageUtils.LoadBitmap(cachePath)).ContinueWith(t =>
+                    {
+                        if (t.Result != null)
+                            tag.Thumbnail = t.Result;
+                        else
+                            Dispatcher.Invoke(() => Tag_Loaded(sender, e));
+                    }, TaskScheduler.FromCurrentSynchronizationContext());
+                    return;
+                }
+
+                var cts = new CancellationTokenSource();
+                _pendingThumbnailTokens[tag] = cts;
+                if (_thumbnailCache.TryGetValue(tag.Hash, out BitmapSource thumb))
+                {
+                    tag.Thumbnail = thumb;
+                    return;
+                }
+
+                Renderer.RequestThumbnail(
+                    tag.Hash,
+                    TfxFeatureRenderer.DynamicObjects,
+                    cts.Token,
+                    bitmap =>
+                    {
+                        tag.Thumbnail = bitmap;
+                        _pendingThumbnailTokens.Remove(tag);
+                        _thumbnailCache.TryAdd(tag.Hash, bitmap);
+                        cts.Dispose();
+                    });
+            }
+        }
     }
 
     private void Tag_Unloaded(object sender, RoutedEventArgs e)
     {
-        //if (sender is Button btn && btn.DataContext is EntityItem tag)
-        //{
-        //    tag.ClearWaveform();
-        //}
+        if (!IRenderer.CanUseRenderer())
+            return;
+
+        if (sender is RadioButton btn && btn.Tag is EntityItem tag)
+        {
+            if (_pendingThumbnailTokens.TryGetValue(tag, out var cts))
+            {
+                cts.Cancel();
+                cts.Dispose();
+                _pendingThumbnailTokens.Remove(tag);
+            }
+        }
     }
 
     private class EntityItem : INotifyPropertyChanged
@@ -738,6 +802,17 @@ public partial class EntityListView : UserControl
         public string BudgetSetName { get; set; } = "";
         public string TagPath { get; set; } = "";
         public string TagNote { get; set; } = "";
+
+        private BitmapSource _thumbnail;
+        public BitmapSource Thumbnail
+        {
+            get => _thumbnail;
+            set
+            {
+                _thumbnail = value;
+                OnPropertyChanged(nameof(Thumbnail));
+            }
+        }
     }
 
     private async Task<ConcurrentDictionary<string, List<string>>> TryGetEntityNames()
