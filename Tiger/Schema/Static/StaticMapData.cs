@@ -550,17 +550,6 @@ public struct S808093B3
     public Vector4 Unk10;
 }
 
-// /// <summary>
-// /// Boss entity data resource?
-// /// </summary>
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808019, 0x50)] //19808080
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, 0x80808019, 0x54)] //19808080
-public struct S80808019
-{
-    [SchemaField(0x24)]
-    public StringHash EntityName;
-}
-
 // 501A8080 in D1, uses 16 2D textures instead of the 16-depth 3D texture D2 uses
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801A50, 0x98)] //501A8080
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80807086, 0xF0)] //86708080
@@ -686,6 +675,40 @@ public struct SStaticAmbientOcclusionMappings
 {
     public ulong Identifier;
     public uint Offset;
+}
+
+/// <summary>
+/// Entity overrides
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808019, 0x50)] //19808080
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, 0x80808019, 0x54)] //19808080
+public struct S80808019
+{
+    public ResourcePointer Unk00;
+    [SchemaField(0x24)]
+    public StringHash EntityName;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80803FFD, 0x28)] //FD3F8080
+public struct S80803FFD
+{
+    public ResourcePointer Unk00;
+    [SchemaField(0x20)]
+    public float Unk20; // health?
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80802AB2, 0x28)] //B22A8080
+public struct S80802AB2
+{
+    [SchemaField(0x10)]
+    public DynamicArray<SMapEntityOverride> Overrides;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80802AB1, 0x8)] //B12A8080
+public struct SMapEntityOverride
+{
+    public TigerHash SwitchKey;
+    public TigerHash Value;
 }
 #endregion
 
