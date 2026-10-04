@@ -493,24 +493,6 @@ public partial class EntityListView : UserControl
         {
             Renderer.LoadEntity(_currentEntity);
         }
-
-        _currentEntity.ModelParent.PermutationTest();
-        //foreach (var comb in _currentEntity.ModelParent.GetAllCombinations())
-        //{
-        //    // damage, none
-        //    if (comb.State.TryGetValue(0x6A807A1A, out uint value) && value != 0x2CA33BDB)
-        //        continue;
-
-        //    foreach (var state in comb.State)
-        //    {
-        //        Console.WriteLine($"{GlobalStrings.Get().GetString(state.Key)} : {GlobalStrings.Get().GetString(state.Value)}");
-        //    }
-        //    foreach (var group in comb.Groups)
-        //    {
-        //        Console.WriteLine($"\tMesh Group: {group}");
-        //    }
-        //    Console.WriteLine();
-        //}
     }
 
     private void EntitySearchBox_TextChanged(object sender, TextChangedEventArgs e)

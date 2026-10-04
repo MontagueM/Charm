@@ -2,8 +2,8 @@ namespace Tiger.Schema.Entity;
 
 public class EntityPhysicsModelParent : EntityComponent
 {
-    private ModelPermutation _materialPermutations;
-    public ModelPermutation MaterialPermutations
+    private MaterialPermutation _materialPermutations;
+    public MaterialPermutation MaterialPermutations
     {
         get
         {
@@ -31,7 +31,7 @@ public class EntityPhysicsModelParent : EntityComponent
         return Reader.BoundingBox;
     }
 
-    public ModelPermutation? GetModelPermutations()
+    public MaterialPermutation? GetModelPermutations()
     {
         if (!Strategy.IsLatest())
             return null;
@@ -39,7 +39,7 @@ public class EntityPhysicsModelParent : EntityComponent
         if (Reader.Unk400.Count == 0 || Reader.Unk410.Count == 0)
             return null;
 
-        var config = new ModelPermutation();
+        var config = new MaterialPermutation();
 
         //foreach (var keys1 in tag.Unk38)
         //{

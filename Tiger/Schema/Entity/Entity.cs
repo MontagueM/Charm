@@ -248,7 +248,7 @@ public class Entity : Tag<SEntity>
 
             if (weaponEntry.Unk220.Any())
             {
-                Debug.Assert(weaponEntry.Unk220.Count == 1);
+                //Debug.Assert(weaponEntry.Unk220.Count == 1);
 
                 var offset = weaponEntry.Unk220[0];
                 var parentBone = offset.ParentBoneIndex;
@@ -409,6 +409,9 @@ public class Entity : Tag<SEntity>
                 entity.Skeleton = overrideSkeleton;
 
             List<DynamicMeshPart> dynamicParts = entity.Load(ExportDetailLevel.MostDetailed);
+            if (entity.ModelParent.AppliedMeshGroups.Count != 0)
+                dynamicParts = dynamicParts.Where(x => entity.ModelParent.AppliedMeshGroups.Contains(x.GroupIndex)).ToList();
+
             List<BoneNode> boneNodes = overrideSkeleton != null ? overrideSkeleton.GetBoneNodes() : new List<BoneNode>();
             if (entity.Skeleton != null && overrideSkeleton == null)
             {

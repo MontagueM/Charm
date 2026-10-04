@@ -209,7 +209,7 @@ public partial class DevView : UserControl
 
                     if (entity.ModelParent is not null)
                     {
-                        var permutations = entity.ModelParent.GetModelPermutations();
+                        var permutations = entity.ModelParent.GetMaterialPermutations();
                         if (permutations is not null)
                         {
                             //Console.WriteLine($"Configuration:");
@@ -252,7 +252,7 @@ public partial class DevView : UserControl
                                 { 2995982517, 2256756024 } // invert, enable
                             };
 
-                            ModelPermutation.UpdateConfiguration(permutations, newConfig);
+                            MaterialPermutation.UpdateConfiguration(permutations, newConfig);
 
                             Console.WriteLine($"\nUpdated Configuration:");
                             Console.WriteLine($"Permutation Index: {permutations.CalculatePermutationIndex()}");

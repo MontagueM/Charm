@@ -374,8 +374,8 @@ public class DynamicMeshPart : MeshPart
         int permutationIndex = 0;
         if (parentResource is EntityModelParent parent && parent.MaterialPermutations is not null)
         {
-            permutationIndex = parent.MaterialPermutations.OverrideIndex != -1
-                ? parent.MaterialPermutations.OverrideIndex : parent.MaterialPermutations.CalculatePermutationIndex() ?? 0;
+            permutationIndex = parent.AppliedMaterialIndex != -1
+                ? parent.AppliedMaterialIndex : parent.MaterialPermutations.CalculatePermutationIndex() ?? 0;
 
             if (permutationIndex != 0)
                 Log.Debug($"Using Permutation Index of {permutationIndex}");
