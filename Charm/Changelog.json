@@ -1,5 +1,24 @@
 [
     {
+        "version": "3.3.8",
+        "date": "10-07-2026",
+        "changes": [
+            {
+                "title": "Fixes",
+                "notes": [
+                    "Fixed startup crash caused by update 9.7.0.5\n- \"My death was greatly exaggerated.\""
+                ]
+            },
+            {
+                "title": "Renderer",
+                "notes": [
+                    "Added toggleable thumbnail rendering for statics and entities.\n- To help with performance, thumbnails are cached to \"%localappdata%/Charm/ThumbnailCache\"",
+                    "(WIP) Added entity mesh permutation selecting, with region overriding for more modularity.\n- Entities with a permutation applied will export with only those specific mesh groups."
+                ]
+            }
+        ]
+    },
+    {
         "version": "3.3.6",
         "date": "08-03-2026",
         "changes": [
@@ -39,7 +58,7 @@
                 "title": "Fixes",
                 "notes": [
                     "Gear: Fixed vertex color slots on physics mesh.",
-                    "Dialogue: Fixed crashes when bulk exporting duplicate sounds.",
+                    "Dialogue: Fixed crashes when bulk exporting duplicate sounds."
                 ]
             },
             {

@@ -81,21 +81,30 @@ public partial class PageIndicator : UserControl, INotifyPropertyChanged
     }
 
     public static readonly DependencyProperty HostWidthProperty =
-        DependencyProperty.Register(nameof(HostWidth), typeof(double), typeof(PageIndicator));
+        DependencyProperty.Register(
+            nameof(HostWidth),
+            typeof(double),
+            typeof(PageIndicator),
+            new PropertyMetadata(0.0, OnHostWidthChanged));
 
-    private bool _displayAsNumbers = false;
+    private static void OnHostWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var control = (PageIndicator)d;
+        control.UpdateDisplayMode();
+    }
+
     public bool DisplayAsNumbers
     {
-        get => _displayAsNumbers;
-        set
-        {
-            if (_displayAsNumbers != value)
-            {
-                _displayAsNumbers = value;
-                OnPropertyChanged(nameof(DisplayAsNumbers));
-            }
-        }
+        get => (bool)GetValue(DisplayAsNumbersProperty);
+        set => SetValue(DisplayAsNumbersProperty, value);
     }
+
+    public static readonly DependencyProperty DisplayAsNumbersProperty =
+        DependencyProperty.Register(
+            nameof(DisplayAsNumbers),
+            typeof(bool),
+            typeof(PageIndicator),
+            new PropertyMetadata(false));
 
     public PageIndicator()
     {
@@ -122,6 +131,17 @@ public partial class PageIndicator : UserControl, INotifyPropertyChanged
 
     private void StackPanel_SizeChanged(object sender, SizeChangedEventArgs e)
     {
+        UpdateDisplayMode();
+    }
+
+    private void UpdateDisplayMode()
+    {
+        if (HostWidth <= 0 || ActualWidth <= 0)
+        {
+            DisplayAsNumbers = false;
+            return;
+        }
+
         DisplayAsNumbers = ActualWidth >= HostWidth;
     }
 }
