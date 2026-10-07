@@ -283,8 +283,8 @@ public partial class MainMenuView : UserControl
             case TigerStrategy.DESTINY2_LATEST:
                 GradientGrid.Visibility = Visibility.Hidden;
                 MotDecor.Visibility = Visibility.Visible;
-                MotDecorGradient.Source = ApiImageUtils.MakeIcon(new FileHash(0x80A04090));
-                MotDecorBackground.Source = ApiImageUtils.MakeIcon(new FileHash(0x80A0408E));
+                MotDecorGradient.Source = ApiImageUtils.MakeIcon(new FileHash(0x80A04094));
+                MotDecorBackground.Source = ApiImageUtils.MakeIcon(new FileHash(0x80A04092));
                 strategyIcon = ApiImageUtils.MakeIcon(new FileHash(0x812C67C0));
                 break;
         }
