@@ -119,16 +119,17 @@ public struct S80808AC5
     public ResourcePointer Pointer; // 438B8080
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80800432, 0x80)] //32048080
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F72, 0x80)] //728F8080
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808B43, 0x80)] //438B8080
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, 0x80808B43, 0x70)] //438B8080
-public struct S80808B43
-{
-    [SchemaField(0x10)]
-    public DynamicArray<SInt16> Unk00;
-    public DynamicArray<SInt16> Unk10;
-}
+// In AnimationStructs
+//[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80800432, 0x80)] //32048080
+//[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F72, 0x80)] //728F8080
+//[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808B43, 0x80)] //438B8080
+//[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, 0x80808B43, 0x70)] //438B8080
+//public struct S80808B43
+//{
+//    [SchemaField(0x10)]
+//    public DynamicArray<SInt16> Unk00;
+//    public DynamicArray<SInt16> Unk10;
+//}
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801B3A, 0x10)] //3A1B8080
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80806F9B, 0x10)] //9B6F8080

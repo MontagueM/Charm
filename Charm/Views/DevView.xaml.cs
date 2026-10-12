@@ -372,15 +372,15 @@ public partial class DevView : UserControl
                     break;
 
                 case 0x80808AC5:
-                    Tag<S80808AC5> skyComplex = FileResourcer.Get().GetSchemaTag<S80808AC5>(hash);
-                    var a = (S80808B43)skyComplex.TagData.Pointer.GetValue(skyComplex.GetReader());
+                    //Tag<S80808AC5> skyComplex = FileResourcer.Get().GetSchemaTag<S80808AC5>(hash);
+                    //var a = (S80808B43)skyComplex.TagData.Pointer.GetValue(skyComplex.GetReader());
 
-                    Console.WriteLine($"\n{skyComplex.Hash}: Unk00 {a.Unk00.Count}");
-                    for (int i = 0; i < a.Unk00.Count; i += 3)
-                    {
-                        Vector3 half = new(a.Unk00[i].Value, a.Unk00[i + 1].Value, a.Unk00[i + 2].Value);
-                        Console.WriteLine(half);
-                    }
+                    //Console.WriteLine($"\n{skyComplex.Hash}: Unk00 {a.Unk00.Count}");
+                    //for (int i = 0; i < a.Unk00.Count; i += 3)
+                    //{
+                    //    Vector3 half = new(a.Unk00[i].Value, a.Unk00[i + 1].Value, a.Unk00[i + 2].Value);
+                    //    Console.WriteLine(half);
+                    //}
                     break;
 
                 case 0x8080695B: // decal tag 5B698080, 5BF3AC80

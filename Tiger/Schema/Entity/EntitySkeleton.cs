@@ -5,6 +5,7 @@ namespace Tiger.Schema.Entity;
 public class EntitySkeleton : EntityComponent
 {
     private List<BoneNode>? _cachedBoneNodes;
+    public List<BoneNode> BoneNodes => GetBoneNodes();
 
     public EntitySkeleton(FileHash resource) : base(resource)
     {

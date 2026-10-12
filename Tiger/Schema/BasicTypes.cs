@@ -1,4 +1,6 @@
-﻿using Tiger.Schema.Shaders;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
 
@@ -74,4 +76,33 @@ public struct SMaterialHash
 public struct Vec4
 {
     public Vector4 Vec;
+}
+
+public static class PrimitiveArrays
+{
+    public static ushort[] ReadUInt16(TigerReader reader, DynamicArray<SUInt16> array) => Read<ushort, SUInt16>(reader, array);
+    public static short[] ReadInt16(TigerReader reader, DynamicArray<SInt16> array) => Read<short, SInt16>(reader, array);
+    public static byte[] ReadByte(TigerReader reader, DynamicArray<SUInt8> array) => Read<byte, SUInt8>(reader, array);
+    public static float[] ReadSingle(TigerReader reader, DynamicArray<SReal32> array) => Read<float, SReal32>(reader, array);
+
+    private static T[] Read<T, TSchema>(TigerReader reader, DynamicArray<TSchema> array) where T : unmanaged
+    {
+        int count = array.Count;
+        if (count <= 0)
+        {
+            return Array.Empty<T>();
+        }
+
+        long offset = array.Offset.AbsoluteOffset;
+        long byteLength = (long)count * Unsafe.SizeOf<T>();
+        if (offset < 0 || offset + byteLength > reader.BaseStream.Length)
+        {
+            throw new InvalidDataException($"Array of {count} elements at 0x{offset:X} does not fit in the tag ({reader.BaseStream.Length} bytes)");
+        }
+
+        var result = new T[count];
+        reader.Seek(offset, SeekOrigin.Begin);
+        reader.BaseStream.ReadExactly(MemoryMarshal.AsBytes(result.AsSpan()));
+        return result;
+    }
 }

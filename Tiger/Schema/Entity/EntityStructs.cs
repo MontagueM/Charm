@@ -85,6 +85,7 @@ public struct S80806D8F
     [SchemaField(0x224, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     [SchemaField(0x264, TigerStrategy.DESTINY2_LATEST)]
     public EntityModel Model;
+    public byte UnkFlag; // skinning type?
 
     [SchemaField(0x1A8, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
@@ -782,24 +783,6 @@ public struct S80808C0F
     public TigerHash WwiseEventHash;
     [SchemaField(0x8)]
     public DynamicArray<S80808C13> Sounds;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x8080060E, 0x24)] //0E068080
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, 0x80808C13, 0x28)] //138C8080
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, 0x80808C13, 0x40)] //138C8080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808C13, 0x38)] //138C8080
-public struct S80808C13
-{
-    public short Unk00;
-    public short Unk02;
-    [SchemaField(0x8)]
-    public TigerHash Unk08;
-    [SchemaField(0x10)]
-    public StringPointer WwiseEventName;
-
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Tag64 = true)]
-    public FileHash Data; // Can be WwiseSound or pattern entity
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80802719, 0x530)] //19278080

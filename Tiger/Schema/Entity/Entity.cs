@@ -10,7 +10,7 @@ public class Entity : Tag<SEntity>
     public TfxFeatureRenderer FeatureType = TfxFeatureRenderer.DynamicObjects;
     // Entity features, todo clean this up
     public EntitySkeleton? Skeleton { get; set; }
-    public EntityControlRig? ControlRig { get; private set; }
+    public EntityRuntimeRig? RuntimeRig { get; private set; }
     public EntityModelParent? ModelParent { get; private set; }
     public EntityPhysicsModelParent? PhysicsModelParent { get; private set; }
 
@@ -21,6 +21,7 @@ public class Entity : Tag<SEntity>
     public EntityComponent? EntityChildren { get; private set; }
 
     public List<EntitySequencer>? Sequences { get; private set; } // The Sequencer (tm) ?
+    public List<EntityAnimations> Animations { get; private set; }
 
     public EntityModel? Model => ModelParent?.GetModel();
     public EntityModel? PhysicsModel => PhysicsModelParent?.GetModel();
@@ -68,9 +69,9 @@ public class Entity : Tag<SEntity>
                     Skeleton = FileResourcer.Get().GetFile<EntitySkeleton>(resource.Hash);
                     break;
 
-                //case S80808B66:  // Entity skeleton IK 
-                //    ControlRig = FileResourcer.Get().GetFile<EntityControlRig>(resource.Hash);
-                //    break;
+                case S80808B66:
+                    RuntimeRig = FileResourcer.Get().GetFile<EntityRuntimeRig>(resource.Hash);
+                    break;
 
                 case S80803197: // todo? shadowkeep
                     PatternAudio = resource;
@@ -117,6 +118,13 @@ public class Entity : Tag<SEntity>
 
                 case S80802E74:
                     Attachments = resource;
+                    break;
+
+                case S80802613:
+                    if (Animations is null)
+                        Animations = new();
+
+                    Animations.Add(new(resource.Hash));
                     break;
 
                 default:
@@ -245,7 +253,7 @@ public class Entity : Tag<SEntity>
 
             var offsetTrans = Vector4.Zero;
             var offsetRot = Vector4.Quaternion;
-
+            int boneAttachIndex = -1;
             if (weaponEntry.Unk220.Any())
             {
                 //Debug.Assert(weaponEntry.Unk220.Count == 1);
@@ -259,6 +267,7 @@ public class Entity : Tag<SEntity>
                     {
                         offsetTrans = new(nodes[parentBone].DefaultObjectSpaceTransform.Translation);
                         offsetRot = nodes[parentBone].DefaultObjectSpaceTransform.QuaternionRotation;
+                        boneAttachIndex = parentBone;
 
                         Quaternion newRot = offsetRot.ToQuat() * offset.Rotation.ToQuat();
 
@@ -284,6 +293,7 @@ public class Entity : Tag<SEntity>
                         entity.Load();
                         if (entity.ModelParent is not null && entity.Model is not null)
                         {
+                            entity.Model.BoneAttachIndex = boneAttachIndex;
                             entity.Model.TranslationOffset = offsetTrans;
                             entity.Model.RotationOffset = offsetRot;
                         }
@@ -303,6 +313,7 @@ public class Entity : Tag<SEntity>
                     entry.Entity.Load();
                     if (entry.Entity.ModelParent is not null && entry.Entity.Model is not null)
                     {
+                        entry.Entity.Model.BoneAttachIndex = boneAttachIndex;
                         entry.Entity.Model.TranslationOffset = offsetTrans;
                         entry.Entity.Model.RotationOffset = offsetRot;
                     }
@@ -350,6 +361,7 @@ public class Entity : Tag<SEntity>
                 entry.Entity.Load();
                 if (entry.Entity.ModelParent is not null && entry.Entity.Model is not null)
                 {
+                    entry.Entity.Model.BoneAttachIndex = parentBone;
                     entry.Entity.Model.TranslationOffset = offsetTrans;
                     entry.Entity.Model.RotationOffset = offsetRot;
                 }

@@ -390,13 +390,13 @@ public partial class WeaponAudioListView : UserControl
             {
                 foreach (S80808C13 s in audio.Sounds)
                 {
-                    WwiseSound categorySounds = FileResourcer.Get().GetFile<WwiseSound>(s.Data);
+                    WwiseSound categorySounds = FileResourcer.Get().GetFile<WwiseSound>(s.EventTag);
                     if (categorySounds == null)
                         continue;
 
                     WeaponAudioCategory category = new()
                     {
-                        Name = s.WwiseEventName.Value?.Split("\\").Last().Split(".")[0] ?? "",
+                        Name = s.TagPath.Value?.Split("\\").Last().Split(".")[0] ?? "",
                         Sounds = new()
                     };
                     foreach (var sound in categorySounds.TagData.Wems)

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Arithmic;
 using Internal.Fbx;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
@@ -189,6 +190,45 @@ public class FbxExporter : AbstractExporter
             {
                 Debug.Assert(dynamicMeshPart.VertexWeights.Count == dynamicMeshPart.VertexPositions.Count);
                 AddWeightsToMesh(fbxMesh, dynamicMeshPart, skeletonNodes);
+            }
+        }
+
+        if (skeletonNodes.Count > 0)
+            AddAnimations(fbxScene, entity, skeletonNodes);
+    }
+
+    // todo, maybe add Entity directly to ExporterEntity so it doesnt get recreated here? Idk how that would effect memory usage tho
+    private void AddAnimations(FbxScene fbxScene, ExporterEntity exporterEntity, List<FbxNode> skeletonNodes)
+    {
+        if (exporterEntity.EntityHash == null)
+            return;
+
+        Entity? entity = FileResourcer.Get().GetFile<Entity>(exporterEntity.EntityHash);
+        if (entity?.Skeleton == null || entity.RuntimeRig == null || entity.Animations == null)
+            return;
+
+        if (entity.Skeleton.BoneNodes.Count != skeletonNodes.Count)
+            return;
+
+        HashSet<FileHash> seen = new();
+        foreach (EntityAnimations animations in entity.Animations)
+        {
+            animations.GetAllAnimations();
+            foreach (var animation in animations.AnimationTags)
+            {
+                if (animation == null || !seen.Add(animation.Hash))
+                    continue;
+
+                try
+                {
+                    animation.LoadAnimation();
+                    var data = animation.EvaluateForFbx(entity.RuntimeRig, entity.Skeleton, animation.Hash.ToString(), animation.LayerType);
+                    FbxAnimationWriter.Write(_manager, fbxScene, skeletonNodes, data);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Skipping animation {animation.Hash}: {e.Message}");
+                }
             }
         }
     }

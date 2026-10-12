@@ -283,6 +283,7 @@ public class ExporterScene
         }
         var exporterEntity = new ExporterEntity
         {
+            EntityHash = entity.Hash,
             Mesh = mesh,
             BoneNodes = boneNodes,
         };
@@ -317,6 +318,7 @@ public class ExporterScene
                 }
                 Entities.Add(new ExporterEntity
                 {
+                    EntityHash = ent.Hash,
                     Mesh = mesh,
                     BoneNodes = ent.Skeleton?.GetBoneNodes(),
                     TranslationOffset = ent.Model.TranslationOffset,
@@ -430,6 +432,7 @@ public class ExporterScene
 
 public class ExporterEntity
 {
+    public FileHash EntityHash = null;
     public ExporterMesh Mesh { get; set; }
     public List<BoneNode> BoneNodes { get; set; } = new();
     public Vector4 TranslationOffset = Vector4.Zero;
