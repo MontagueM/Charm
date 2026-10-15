@@ -6,11 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using ConcurrentCollections;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
@@ -206,64 +204,6 @@ public partial class DevView : UserControl
                     Entity entity = FileResourcer.Get().GetFile<Entity>(hash);
                     List<Entity> entities = new() { entity };
                     entities.AddRange(entity.GetEntityChildren());
-
-                    if (entity.ModelParent is not null)
-                    {
-                        var permutations = entity.ModelParent.GetMaterialPermutations();
-                        if (permutations is not null)
-                        {
-                            //Console.WriteLine($"Configuration:");
-                            //Console.WriteLine($"Permutation Index: {permutations.CalculatePermutationIndex()}");
-                            //foreach (var kvp in permutations.Configuration)
-                            //{
-                            //    var k = GlobalStrings.Get().GetString(kvp.Key);
-                            //    var v = GlobalStrings.Get().GetString(kvp.Value);
-                            //    Console.WriteLine($"Key: {k}, Value: {v}");
-                            //}
-
-                            Console.WriteLine($"\nKeys:");
-                            foreach (var kvp in permutations.Keys)
-                            {
-                                var k = GlobalStrings.Get().GetString(kvp.Key);
-                                Console.WriteLine($"Key: {k} ({kvp.Key})");
-                                foreach (var v in kvp.Value)
-                                {
-                                    var vn = GlobalStrings.Get().GetString(v);
-                                    Console.WriteLine($"Value: {vn} ({v})");
-                                }
-                            }
-
-                            Console.WriteLine($"\nPairsToPermutation:");
-                            foreach (var kvp in permutations.PairsToPermutation)
-                            {
-                                Console.WriteLine($"Keys for permutation {kvp.Value}:");
-                                foreach (var key in kvp.Key)
-                                {
-                                    var item1 = GlobalStrings.Get().GetString(key.Item1);
-                                    var item2 = GlobalStrings.Get().GetString(key.Item2);
-                                    Console.WriteLine($"{item1} : {item2}");
-                                }
-                            }
-
-                            var newConfig = new Dictionary<uint, uint>
-                            {
-                                { 2954315994, 980603538 }, // color, red
-                                { 4164757166, 84696443 }, // grate, c
-                                { 2995982517, 2256756024 } // invert, enable
-                            };
-
-                            MaterialPermutation.UpdateConfiguration(permutations, newConfig);
-
-                            Console.WriteLine($"\nUpdated Configuration:");
-                            Console.WriteLine($"Permutation Index: {permutations.CalculatePermutationIndex()}");
-                            foreach (var kvp in permutations.Configuration)
-                            {
-                                var k = GlobalStrings.Get().GetString(kvp.Key);
-                                var v = GlobalStrings.Get().GetString(kvp.Value);
-                                Console.WriteLine($"Key: {k}, Value: {v}");
-                            }
-                        }
-                    }
 
                     Entity.Export(entities, hash);
                     _mainWindow.MakeNewTab(hash, entityView);
@@ -480,23 +420,65 @@ public partial class DevView : UserControl
     // Get back where you belong and forget about all this...Until we meet again.
     public void RipAndTear()
     {
-        bool PackageFilterFunc(string packagePath) => packagePath.Contains("investment") || packagePath.Contains("client_startup");
-        ConcurrentHashSet<FileHash> allHashes = PackageResourcer.Get().GetAllHashes(PackageFilterFunc);
-        Parallel.ForEach(allHashes, (val, state, i) =>
+        var entities = PackageResourcer.Get().GetAllFiles<Entity>();
+        foreach (var entity in entities)
         {
-            if (val.GetReferenceHash().IsValid() && val.GetReferenceHash().ToString().EndsWith("8080"))
+            if (entity.RuntimeRig == null || entity.Skeleton == null)
+                continue;
+
+            var animations = new List<Tiger.Schema.Animation.Animation>();
+            if (entity?.Animations != null)
             {
-                string path = $"C:\\Users\\Michael\\Desktop\\out\\D2\\{val.GetReferenceHash()}_{val}.bin";
-                using (var fileStream = new FileStream(path, FileMode.Create))
+                HashSet<FileHash> seen = new();
+                foreach (EntityAnimations entityAnimations in entity.Animations)
+                {
+                    entityAnimations.GetAllAnimations();
+                    foreach (var animation in entityAnimations.AnimationTags)
+                    {
+                        if (seen.Add(animation.Hash))
+                            animations.Add(animation);
+                    }
+                }
+            }
+
+            string animPath = $"G:\\Charm Output\\temp\\Test\\{entity.Hash}\\anims";
+            Directory.CreateDirectory(animPath);
+            foreach (var anim in animations)
+            {
+                var animFile = System.IO.Path.Combine(animPath, $"{anim.Hash}.bin");
+                using (var fileStream = new FileStream(animFile, FileMode.Create))
                 {
                     using (var writer = new BinaryWriter(fileStream))
                     {
-                        byte[] data = FileResourcer.Get().GetFile(val).GetData();
+                        byte[] data = anim.GetData();
                         writer.Write(data);
                     }
                 }
             }
-        });
+
+            string path = $"G:\\Charm Output\\temp\\Test\\{entity.Hash}";
+            Directory.CreateDirectory(path);
+            var rigFile = System.IO.Path.Combine(path, $"runtime_rig_{entity.RuntimeRig.Hash}.bin");
+            using (var fileStream = new FileStream(rigFile, FileMode.Create))
+            {
+                using (var writer = new BinaryWriter(fileStream))
+                {
+                    byte[] data = entity.RuntimeRig.GetData();
+                    writer.Write(data);
+                }
+            }
+
+            var skeleFile = System.IO.Path.Combine(path, $"skele_{entity.Skeleton.Hash}.bin");
+            using (var fileStream = new FileStream(skeleFile, FileMode.Create))
+            {
+                using (var writer = new BinaryWriter(fileStream))
+                {
+                    byte[] data = entity.Skeleton.GetData();
+                    writer.Write(data);
+                }
+            }
+
+        }
     }
 #endif
 }

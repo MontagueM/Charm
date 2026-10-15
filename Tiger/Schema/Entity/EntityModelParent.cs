@@ -3,22 +3,19 @@ namespace Tiger.Schema.Entity;
 public class EntityModelParent : EntityComponent
 {
     public HashSet<int> AppliedMeshGroups = new();
-    public int AppliedMaterialIndex => MaterialPermutations.OverrideIndex;
+    public int UpdateMeshGroups; // upped when a state is applied so the renderer knows to redo materials
 
-    private MaterialPermutation _materialPermutations;
-    public MaterialPermutation MaterialPermutations
+    private EntityMaterialVariants _materialVariants;
+    public EntityMaterialVariants MaterialVariants
     {
         get
         {
-            if (_materialPermutations is not null)
-                return _materialPermutations;
+            if (_materialVariants is not null)
+                return _materialVariants;
 
-            _materialPermutations = GetMaterialPermutations();
-            return _materialPermutations;
-        }
-        set
-        {
-            _materialPermutations = value;
+            using TigerReader reader = GetReader();
+            _materialVariants = new EntityMaterialVariants(reader, Reader);
+            return _materialVariants;
         }
     }
 
@@ -38,6 +35,11 @@ public class EntityModelParent : EntityComponent
         return Reader.BoundingBox;
     }
 
+    public bool IsPartEnabled(int part)
+    {
+        return AppliedMeshGroups.Count == 0 || AppliedMeshGroups.Contains(part);
+    }
+
     public static uint DamageKey = Helpers.Fnv1a32("damage");
     public static uint PermutationKey = Helpers.Fnv1a32("permutation");
     public static uint RegionKey = Helpers.Fnv1a32("region");
@@ -45,141 +47,102 @@ public class EntityModelParent : EntityComponent
     public static uint TypeKey = Helpers.Fnv1a32("type");
     public static uint NoneValue = Helpers.Fnv1a32("none");
 
-    public MaterialPermutation GetMaterialPermutations()
-    {
-        if (!Strategy.IsLatest())
-            return null;
-
-        if (Reader.Unk400.Count == 0 || Reader.Unk410.Count == 0)
-            return null;
-
-        var config = new MaterialPermutation();
-
-        var referencedIndices = new HashSet<int>();
-        for (int i = 0; i < Reader.Unk400.Count; i++)
-            referencedIndices.Add((int)Reader.Unk400[GetReader(), i].Value);
-
-        foreach (int u0idx in referencedIndices)
-        {
-            var entry = Reader.Unk38[u0idx];
-            if (entry.Unk8 == null || entry.Unk8.Count == 0)
-                continue;
-
-            var pair = entry.Unk8[0];
-            if (!config.Keys.ContainsKey(pair.SwitchKey))
-                config.Keys[pair.SwitchKey] = new HashSet<uint>();
-            config.Keys[pair.SwitchKey].Add(pair.Value);
-        }
-
-        for (int i = 0; i < Reader.Unk410.Count; i++)
-        {
-            var u = Reader.Unk410[GetReader(), i];
-            if (u.Unk02 < 0)
-                continue;
-
-            int start = (int)u.Unk02;
-            int end = start + (int)u.Unk00;
-
-            if (end > Reader.Unk400.Count)
-                continue;
-
-            var keysMap = new Dictionary<uint, uint>();
-            for (int j = start; j < end; j++)
-            {
-                var m = Reader.Unk38[Reader.Unk400[GetReader(), j].Value];
-                if (m.Unk8 == null || m.Unk8.Count == 0)
-                    continue;
-                keysMap[m.Unk8[0].SwitchKey] = m.Unk8[0].Value;
-            }
-
-            var pairList = keysMap.OrderBy(kv => kv.Key).Select(kv => (kv.Key, kv.Value)).ToList();
-            config.PairsToPermutation.TryAdd(pairList, i);
-            //if (!config.PairsToPermutation.TryAdd(pairList, i))
-            //    Debug.Assert(false, $"Duplicate at index {i} already mapped to {config.PairsToPermutation[pairList]}");
-        }
-
-        return config;
-    }
-
     public EntityPermutationResult GetMeshGroupsForState(Dictionary<uint, uint> state)
     {
-        var matches = new HashSet<int>();
-
-        for (int i = 0; i < Reader.Unk38.Count; i++)
-        {
-            var pairs = Reader.Unk38[i].Unk8;
-            if (pairs == null)
-                continue;
-
-            var conditionsByKey = new Dictionary<uint, List<uint>>();
-            foreach (var pair in pairs)
-            {
-                var key = pair.SwitchKey.Hash32;
-                var value = pair.Value.Hash32;
-
-                if (!conditionsByKey.TryGetValue(key, out var values))
-                    conditionsByKey[key] = values = new List<uint>();
-
-                values.Add(value);
-            }
-
-            bool isMatch = true;
-            foreach (var (keyHash, allowedValues) in conditionsByKey)
-            {
-                if (!state.TryGetValue(keyHash, out uint hash))
-                    continue;
-
-                if (!allowedValues.Contains(hash))
-                {
-                    isMatch = false;
-                    break;
-                }
-            }
-
-            if (isMatch)
-                matches.Add(i);
-        }
-
-        AppliedMeshGroups = matches;
-        return new EntityPermutationResult(state, matches, -1);
+        var conditions = state.Select(x => new PartCondition(x.Key, x.Value)).ToList();
+        return new EntityPermutationResult(state, ApplyConditions(conditions), -1);
     }
 
-    public EntityPermutationResult GetMeshGroupsWithOverrides(Dictionary<uint, uint> baseState, uint? defaultPermutation, Dictionary<uint, uint> overrides)
+    public EntityPermutationResult GetMeshGroupsWithOverrides(Dictionary<uint, uint> baseState, Dictionary<uint, uint> overrides, EntityVariant? variant = null)
     {
-        var entries = GetStateEntries();
-        var result = new HashSet<int>();
+        var conditions = baseState.Select(x => new PartCondition(x.Key, x.Value)).ToList();
 
-        for (int i = 0; i < entries.Length; i++)
+        if (variant is not null)
+            conditions.AddRange(variant.Labels.Select(x => new PartCondition(x.Item1, x.Item2)));
+
+        if (GetDistinctKeyValues().TryGetValue(RegionKey, out var regions))
         {
-            var entry = entries[i];
-
-            uint? entryRegion = entry.TryGetValue(RegionKey, out var regionVals) && regionVals.Count > 0 ? regionVals[0] : null;
-
-            uint? effectivePermutation = entryRegion.HasValue
-                ? (overrides.TryGetValue(entryRegion.Value, out uint overridePerm) ? overridePerm : defaultPermutation)
-                : defaultPermutation;
-
-            bool isMatch = true;
-            foreach (var (keyHash, allowedValues) in entry)
+            foreach (uint region in regions)
             {
-                uint? desired = keyHash == PermutationKey ? effectivePermutation : baseState.TryGetValue(keyHash, out uint v) ? v : (uint?)null;
-
-                if (!desired.HasValue)
+                uint permutation;
+                if (overrides.TryGetValue(region, out uint overridePermutation))
+                    permutation = overridePermutation;
+                else if (variant is null || !variant.RegionPermutations.TryGetValue(region, out permutation))
                     continue;
 
-                if (!allowedValues.Contains(desired.Value))
-                {
-                    isMatch = false;
-                    break;
-                }
+                var condition = new PartCondition(PermutationKey, permutation);
+                condition.Required.Add((RegionKey, region));
+                conditions.Add(condition);
             }
+        }
 
-            if (isMatch)
+        return new EntityPermutationResult(baseState, ApplyConditions(conditions), -1);
+    }
+
+    public HashSet<int> ApplyConditions(List<PartCondition> conditions)
+    {
+        var labels = GetPartLabels();
+        var result = new HashSet<int>();
+        for (int i = 0; i < labels.Length; i++)
+        {
+            if (!conditions.Any(x => x.Disables(labels[i])))
                 result.Add(i);
         }
 
         AppliedMeshGroups = result;
-        return new EntityPermutationResult(baseState, result, -1);
+        UpdateMeshGroups++;
+        return result;
+    }
+
+    private HashSet<(uint, uint)>[] _cachedPartLabels;
+    public HashSet<(uint, uint)>[] GetPartLabels()
+    {
+        if (_cachedPartLabels != null)
+            return _cachedPartLabels;
+
+        var unk38 = Reader.Unk38;
+        var result = new HashSet<(uint, uint)>[unk38.Count];
+        for (int i = 0; i < unk38.Count; i++)
+        {
+            result[i] = new HashSet<(uint, uint)>();
+            var pairs = unk38[i].Unk8;
+            if (pairs == null)
+                continue;
+
+            foreach (var pair in pairs)
+            {
+                result[i].Add((pair.SwitchKey.Hash32, pair.Value.Hash32));
+            }
+        }
+        return _cachedPartLabels = result;
+    }
+
+    // permutations used by the parts in each region, region -> permutations
+    private Dictionary<uint, List<uint>> _cachedRegionPermutations;
+    public Dictionary<uint, List<uint>> GetRegionPermutations()
+    {
+        if (_cachedRegionPermutations != null)
+            return _cachedRegionPermutations;
+
+        var dict = new Dictionary<uint, HashSet<uint>>();
+        foreach (var labels in GetPartLabels())
+        {
+            var permutations = labels.Where(x => x.Item1 == PermutationKey).Select(x => x.Item2).ToList();
+            if (permutations.Count == 0)
+                continue;
+
+            foreach (var (key, region) in labels)
+            {
+                if (key != RegionKey)
+                    continue;
+
+                if (!dict.TryGetValue(region, out var set))
+                    dict[region] = set = new HashSet<uint>();
+                set.UnionWith(permutations);
+            }
+        }
+
+        return _cachedRegionPermutations = dict.ToDictionary(kv => kv.Key, kv => kv.Value.ToList());
     }
 
     private Dictionary<uint, List<uint>> _cachedDistinctKeyValues;
@@ -189,52 +152,27 @@ public class EntityModelParent : EntityComponent
             return _cachedDistinctKeyValues;
 
         var dict = new Dictionary<uint, HashSet<uint>>();
-        foreach (var entries in GetStateEntries())
+        foreach (var labels in GetPartLabels())
         {
-            foreach (var (key, values) in entries)
+            foreach (var (key, value) in labels)
             {
                 if (!dict.TryGetValue(key, out var set))
                     dict[key] = set = new HashSet<uint>();
-                foreach (var v in values) set.Add(v);
+                set.Add(value);
             }
         }
-
 
         return _cachedDistinctKeyValues = dict.ToDictionary(kv => kv.Key, kv => kv.Value.ToList());
-    }
-
-    private Dictionary<uint, List<uint>>[] _cachedEntries;
-    private Dictionary<uint, List<uint>>[] GetStateEntries()
-    {
-        if (_cachedEntries != null)
-            return _cachedEntries;
-
-        var unk38 = Reader.Unk38;
-        var result = new Dictionary<uint, List<uint>>[unk38.Count];
-        for (int i = 0; i < unk38.Count; i++)
-        {
-            var conditionsByKey = new Dictionary<uint, List<uint>>();
-            var pairs = unk38[i].Unk8;
-            if (pairs != null)
-            {
-                foreach (var pair in pairs)
-                {
-                    uint key = pair.SwitchKey.Hash32, value = pair.Value.Hash32;
-                    if (!conditionsByKey.TryGetValue(key, out var values))
-                        conditionsByKey[key] = values = new List<uint>();
-                    values.Add(value);
-                }
-            }
-            result[i] = conditionsByKey;
-        }
-        return _cachedEntries = result;
     }
 
     public static Dictionary<uint, uint> LoadOverrideState(List<(uint, uint)> pairs)
     {
         var state = new Dictionary<uint, uint>(pairs.Count);
         foreach (var (key, value) in pairs)
+        {
             state[key] = value;
+        }
+
         return state;
     }
 
@@ -257,6 +195,29 @@ public class EntityModelParent : EntityComponent
                 state[pair.SwitchKey] = pair.Value;
         }
         return state;
+    }
+}
+
+public class PartCondition
+{
+    public List<(uint, uint)> Required = new();
+    public List<(uint, uint)> Excluded = new();
+
+    public PartCondition()
+    {
+    }
+
+    public PartCondition(uint key, uint value)
+    {
+        Excluded.Add((key, value));
+    }
+
+    public bool Disables(HashSet<(uint, uint)> labels)
+    {
+        if (!Required.All(labels.Contains))
+            return false;
+
+        return Excluded.Any(pair => labels.Any(x => x.Item1 == pair.Item1) && !labels.Contains(pair));
     }
 }
 
@@ -286,128 +247,5 @@ public sealed class EntityPermutationResult
         State = state;
         MeshGroups = meshGroups;
         MaterialPermutationIndex = materialPermutationIndex;
-    }
-}
-
-public class MaterialPermutation
-{
-    public Dictionary<uint, uint> Configuration { get; set; }
-    public SortedDictionary<uint, HashSet<uint>> Keys { get; set; } = new();
-    public Dictionary<List<(uint, uint)>, int> PairsToPermutation = new(new ListTupleComparer());
-    public int OverrideIndex { get; set; } = -1;
-
-    public IEnumerable<(uint Key, HashSet<uint> Values)> IterateKeys()
-    {
-        foreach (var kv in Keys)
-            yield return (kv.Key, kv.Value);
-    }
-
-    public static void UpdateConfiguration(MaterialPermutation permutations, Dictionary<uint, uint> desiredValues)
-    {
-        permutations.Configuration ??= new Dictionary<uint, uint>();
-
-        bool changed = false;
-
-        foreach (var kv in permutations.Keys)
-        {
-            if (!desiredValues.TryGetValue(kv.Key, out uint desiredValue))
-                continue;
-
-            if (!kv.Value.Contains(desiredValue))
-                continue;
-
-            if (!permutations.Configuration.TryGetValue(kv.Key, out uint oldVal) || oldVal != desiredValue)
-            {
-                permutations.Configuration[kv.Key] = desiredValue;
-                changed = true;
-            }
-        }
-
-        if (changed)
-            permutations._dirty = true;
-    }
-
-    public int? CalculatePermutationIndex()
-    {
-        if (Configuration is null || Configuration.Count == 0)
-            return null;
-
-        var all = Configuration.OrderBy(kv => kv.Key).Select(kv => (kv.Key, kv.Value)).ToList();
-
-        for (int size = all.Count; size >= 1; size--)
-        {
-            foreach (var subset in Combinations(all, size))
-            {
-                if (PairsToPermutation.TryGetValue(subset, out var index))
-                    return index;
-            }
-        }
-
-        return null;
-    }
-
-    private List<(uint, uint)> _cachedKeyVals;
-    private int? _cachedResult;
-    public bool _dirty = true;
-    public int? CalculatePermutationIndexFast()
-    {
-        if (Configuration == null)
-            return null;
-
-        if (_dirty)
-        {
-            _cachedResult = CalculatePermutationIndex();
-            _dirty = false;
-        }
-
-        return _cachedResult;
-    }
-
-    private static IEnumerable<List<(uint, uint)>> Combinations(List<(uint, uint)> items, int size)
-    {
-        int n = items.Count;
-        if (size > n) yield break;
-
-        var idx = Enumerable.Range(0, size).ToArray();
-        while (true)
-        {
-            yield return idx.Select(i => items[i]).ToList();
-
-            int i = size - 1;
-            while (i >= 0 && idx[i] == i + n - size)
-                i--;
-
-            if (i < 0) yield break;
-
-            idx[i]++;
-            for (int j = i + 1; j < size; j++)
-                idx[j] = idx[j - 1] + 1;
-        }
-    }
-}
-
-public class ListTupleComparer : IEqualityComparer<List<(uint, uint)>>
-{
-    public bool Equals(List<(uint, uint)> x, List<(uint, uint)> y)
-    {
-        if (x == null || y == null || x.Count != y.Count)
-            return false;
-
-        for (int i = 0; i < x.Count; i++)
-            if (x[i] != y[i])
-                return false;
-
-        return true;
-    }
-
-    public int GetHashCode(List<(uint, uint)> obj)
-    {
-        int hash = 17;
-        foreach (var (k, v) in obj)
-        {
-            hash = hash * 31 + k.GetHashCode();
-            hash = hash * 31 + v.GetHashCode();
-        }
-        return hash;
     }
 }

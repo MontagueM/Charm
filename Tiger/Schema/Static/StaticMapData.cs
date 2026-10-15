@@ -702,6 +702,7 @@ public struct S80802AB2
 {
     [SchemaField(0x10)]
     public DynamicArray<SMapEntityOverride> Overrides;
+    public TigerHash Unk20;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80802AB1, 0x8)] //B12A8080

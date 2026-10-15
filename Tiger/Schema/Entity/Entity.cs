@@ -13,6 +13,7 @@ public class Entity : Tag<SEntity>
     public EntityRuntimeRig? RuntimeRig { get; private set; }
     public EntityModelParent? ModelParent { get; private set; }
     public EntityPhysicsModelParent? PhysicsModelParent { get; private set; }
+    public EntityVariants? VariantMap { get; private set; }
 
     public EntityComponent? PatternAudio { get; private set; }
     public EntityComponent? PatternAudioUnnamed { get; private set; }
@@ -125,6 +126,10 @@ public class Entity : Tag<SEntity>
                         Animations = new();
 
                     Animations.Add(new(resource.Hash));
+                    break;
+
+                case S80802AB4: // todo other versions
+                    VariantMap = FileResourcer.Get().GetFile<EntityVariants>(resource.Hash);
                     break;
 
                 default:

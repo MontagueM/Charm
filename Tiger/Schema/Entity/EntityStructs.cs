@@ -1,5 +1,6 @@
 using Tiger.Schema.Investment;
 using Tiger.Schema.Shaders;
+using Tiger.Schema.Strings;
 
 namespace Tiger.Schema.Entity;
 
@@ -47,6 +48,7 @@ public struct S80809AED
 public struct S80809B06  // Entity resource
 {
     public long FileSize;
+    //public ResourcePointer Unk08; // unsure if needed
 
     [SchemaField(0x10)]
     public ResourcePointer Unk10;
@@ -113,7 +115,7 @@ public struct S80806D8F
     [SchemaField(0x380, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x3E0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x420, TigerStrategy.DESTINY2_LATEST)]
-    public DynamicArrayUnloaded<SInt16> Unk400;
+    public DynamicArrayUnloaded<SInt16> MaterialConditionParts;
 
     [SchemaField(0x260, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x300, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
@@ -121,7 +123,7 @@ public struct S80806D8F
     [SchemaField(0x3F0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x3F0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     [SchemaField(0x430, TigerStrategy.DESTINY2_LATEST)]
-    public DynamicArrayUnloaded<S80806D98> Unk410;
+    public DynamicArrayUnloaded<S80806D98> MaterialConditions;
 
     [SchemaField(0x270, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x310, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
@@ -165,7 +167,7 @@ public struct S80806D6C
     [SchemaField(0x380, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x3E0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x420, TigerStrategy.DESTINY2_LATEST)]
-    public DynamicArrayUnloaded<SInt16> Unk400;
+    public DynamicArrayUnloaded<SInt16> MaterialConditionParts;
 
     [SchemaField(0x260, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x300, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
@@ -173,7 +175,7 @@ public struct S80806D6C
     [SchemaField(0x3F0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x3F0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     [SchemaField(0x430, TigerStrategy.DESTINY2_LATEST)]
-    public DynamicArrayUnloaded<S80806D98> Unk410;
+    public DynamicArrayUnloaded<S80806D98> MaterialConditions;
 
     [SchemaField(0x270, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x310, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
@@ -247,10 +249,10 @@ public struct S80809E93
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806D98, 0x8)] //986D8080
 public struct S80806D98
 {
-    public ushort Unk00;
-    public short Unk02;
-    public ushort Unk04;
-    public short Unk06;
+    public short RequiredCount;
+    public short RequiredIndex;
+    public short ExcludedCount;
+    public short ExcludedIndex;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801A84, 0xC)] //841A8080
@@ -260,7 +262,8 @@ public struct SExternalMaterialMapEntry
 {
     public int MaterialCount;
     public int MaterialStartIndex;
-    public int Unk08;
+    public short FirstCondition;
+    public short Unk0A;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801A80, 0x1D0)] //801A8080
@@ -1352,3 +1355,41 @@ public struct S808036FD
     public StringHash UnkName;
 }
 
+// todo Other versions
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80802AB4, 0x50)] // B42A8080 // Component 0x10
+public struct S80802AB4
+{
+    [SchemaField(0x38)]
+    public DynamicArray<SStringHash> Unk38;
+}
+
+// todo Other versions
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80802AB8, 0x120)] // B82A8080 // Component 0x18
+public struct S80802AB8
+{
+    [SchemaField(0xE8)]
+    public DynamicArray<S80806CF6> Parameters;
+    public DynamicArray<SStringHash> Regions;
+    public DynamicArray<S80802AB7> Variants;
+}
+
+// todo Other versions
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80806CF6, 0x18)] // F66C8080
+public struct S80806CF6
+{
+    [SchemaField(0x4)]
+    public StringHash Key;
+    public DynamicArray<SStringHash> Values;
+}
+
+// todo Other versions
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80802AB7, 0x30)] // B72A8080
+public struct S80802AB7
+{
+    public float Weight;
+    public StringHash Name;
+    public int Unk08;
+    [SchemaField(0x10)]
+    public DynamicArray<S80809AFB> SwitchTable;
+    public DynamicArray<SStringHash> RegionPermutations; // one per S80802AB8.Regions
+}

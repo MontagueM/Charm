@@ -2,16 +2,17 @@ namespace Tiger.Schema.Entity;
 
 public class EntityPhysicsModelParent : EntityComponent
 {
-    private MaterialPermutation _materialPermutations;
-    public MaterialPermutation MaterialPermutations
+    private EntityMaterialVariants _materialVariants;
+    public EntityMaterialVariants MaterialVariants
     {
         get
         {
-            if (_materialPermutations is not null)
-                return _materialPermutations;
+            if (_materialVariants is not null)
+                return _materialVariants;
 
-            _materialPermutations = GetModelPermutations();
-            return _materialPermutations;
+            using TigerReader reader = GetReader();
+            _materialVariants = new EntityMaterialVariants(reader, Reader);
+            return _materialVariants;
         }
     }
 
@@ -30,63 +31,4 @@ public class EntityPhysicsModelParent : EntityComponent
     {
         return Reader.BoundingBox;
     }
-
-    public MaterialPermutation? GetModelPermutations()
-    {
-        if (!Strategy.IsLatest())
-            return null;
-
-        if (Reader.Unk400.Count == 0 || Reader.Unk410.Count == 0)
-            return null;
-
-        var config = new MaterialPermutation();
-
-        //foreach (var keys1 in tag.Unk38)
-        //{
-        //    foreach (var keys in keys1.Unk8)
-        //    {
-        //        if (keys.Value.Hash32 == 0x871AC0EA)
-        //            continue;
-
-        //        config.Configuration.TryAdd(keys.SwitchKey, keys.Value);
-        //    }
-        //}
-
-        foreach (var u0 in Reader.Unk38)
-        {
-            foreach (var pair in u0.Unk8)
-            {
-                if (!config.Keys.ContainsKey(pair.SwitchKey))
-                    config.Keys[pair.SwitchKey] = new HashSet<uint>();
-
-                config.Keys[pair.SwitchKey].Add(pair.Value);
-            }
-        }
-
-        for (int i = 0; i < Reader.Unk410.Count; i++)
-        {
-            var u = Reader.Unk410[GetReader(), i];
-            if (u.Unk02 < 0)
-                continue;
-
-            int start = (int)u.Unk02;
-            int end = start + (int)u.Unk00;
-            var keysMap = new Dictionary<uint, uint>();
-
-            if (end >= Reader.Unk400.Count)
-                continue;
-
-            for (int j = start; j < end; j++)
-            {
-                var m = Reader.Unk38[Reader.Unk400[GetReader(), j].Value];
-                keysMap[m.Unk8[0].SwitchKey] = m.Unk8[0].Value;
-            }
-
-            var pairList = keysMap.OrderBy(kv => kv.Key).Select(kv => (kv.Key, kv.Value)).ToList();
-            config.PairsToPermutation[pairList] = i;
-        }
-
-        return config;
-    }
 }
-

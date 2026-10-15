@@ -355,34 +355,13 @@ public class DynamicMeshPart : MeshPart
 
     public static Material? GetMaterialFromExternalMaterial(int variantShaderIndex, EntityComponent parentResource)
     {
-        using TigerReader reader = parentResource.GetReader();
+        if (parentResource is EntityModelParent parent)
+            return parent.MaterialVariants.GetMaterial(variantShaderIndex, parent.IsPartEnabled);
 
-        DynamicArrayUnloaded<SExternalMaterialMapEntry> map = parentResource is EntityPhysicsModelParent ?
-            ((S80806D6C)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMap :
-            ((S80806D8F)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMap;
+        if (parentResource is EntityPhysicsModelParent physicsParent)
+            return physicsParent.MaterialVariants.GetMaterial(variantShaderIndex, null);
 
-        DynamicArrayUnloaded<SMaterialHash> mats = parentResource is EntityPhysicsModelParent ?
-            ((S80806D6C)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterials :
-            ((S80806D8F)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterials;
-
-        if (map.Count == 0 || mats.Count == 0)
-            return null;
-
-        if (variantShaderIndex >= map.Count)
-            return null; // todo this is actually wrong ig...
-
-        SExternalMaterialMapEntry mapEntry = map[reader, variantShaderIndex];
-        int permutationIndex = 0;
-        if (parentResource is EntityModelParent parent && parent.MaterialPermutations is not null)
-        {
-            permutationIndex = parent.AppliedMaterialIndex != -1
-                ? parent.AppliedMaterialIndex : parent.MaterialPermutations.CalculatePermutationIndex() ?? 0;
-
-            if (permutationIndex != 0)
-                Log.Debug($"Using Permutation Index of {permutationIndex}");
-        }
-
-        return mats[reader, mapEntry.MaterialStartIndex + (permutationIndex % mapEntry.MaterialCount)].Material;
+        return null;
     }
 
     public static void AddVertexColourSlotInfo(DynamicMeshPart dynamicPart, short w)
