@@ -48,7 +48,7 @@ public enum LayerType : byte
 
 #region Animation Tag
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F49, 0x190)] // 498F8080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808BE0, 0x190)] // E08B8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808BE0, 0x190)] // E08B8080
 public struct SAnimationClip
 {
     public long FileSize;
@@ -85,7 +85,7 @@ public struct SAnimationClip
     public TigerHash AnimationHash;
 
     [SchemaField(0x13C, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x140, TigerStrategy.DESTINY2_LATEST)]
+    [SchemaField(0x140, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public short FrameCount;
     public short NodeCount;
     public short RigControlCount;
@@ -104,7 +104,7 @@ public struct SAnimationClip
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F6F, 0x48)] // 6F8F8080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808B40, 0x48)] // 408B8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808B40, 0x48)] // 408B8080
 public struct S80808B40
 {
     public AnimationCodecType CodecType;
@@ -122,7 +122,7 @@ public struct S80808B40
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F71, 0x48)] // 718F8080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808B42, 0x48)] // 428B8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808B42, 0x48)] // 428B8080
 public struct S80808B42
 {
     public AnimationCodecType CodecType;
@@ -162,7 +162,7 @@ public struct S80808B43
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F7E, 0x60)] // 7E8F8080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808B4E, 0x60)] // 4E8B8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808B4E, 0x60)] // 4E8B8080
 public struct S80808B4E
 {
     public short Unk00;
@@ -179,14 +179,14 @@ public struct S80808B4E
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F59, 0x10)] // 598F8080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808B2A, 0x10)] // 2A8B8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808B2A, 0x10)] // 2A8B8080
 public struct S80808B2A
 {
     public DynamicArray<S80808B2D> Unk00;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F5C, 0x40)] // 5C8F8080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808B2D, 0x40)] // 2D8B8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808B2D, 0x40)] // 2D8B8080
 public struct S80808B2D
 {
     public short Unk00;
@@ -203,7 +203,7 @@ public struct S80808B2D
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F7C, 0x50)] // 7C8F8080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808B4C, 0x50)] // 4C8B8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808B4C, 0x50)] // 4C8B8080
 public struct S80808B4C
 {
     public short Unk00;
@@ -217,20 +217,20 @@ public struct S80808B4C
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F82, 0x2)] // 828F8080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808B52, 0x2)] // 528B8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808B52, 0x2)] // 528B8080
 public struct S80808B52
 {
     public ushort Unk00;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x8080902B, 0x8)] // 2B908080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808C08, 0x8)] // 088C8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808C08, 0x8)] // 088C8080
 public struct S80808C08
 {
     public ResourcePointer Pointer; // 0A/11/12/13/1A8C8080
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808C11, 0x10)] // 118C8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808C11, 0x10)] // 118C8080
 public struct S80808C11
 {
     public short Unk00;
@@ -239,7 +239,7 @@ public struct S80808C11
     public TigerHash Unk08;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808C12, 0x10)] // 128C8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808C12, 0x10)] // 128C8080
 public struct S80808C12
 {
     public short Unk00;
@@ -248,7 +248,7 @@ public struct S80808C12
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80809033, 0x20)] // 33908080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808C13, 0x38)] // 138C8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808C13, 0x38)] // 138C8080
 public struct S80808C13 // 'tag frame event'?
 {
     public short StartFrame;
@@ -262,12 +262,12 @@ public struct S80808C13 // 'tag frame event'?
     public StringPointer TagPath;
 
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(TigerStrategy.DESTINY2_LATEST, Tag64 = true)]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Tag64 = true)]
     public FileHash EventTag;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x8080893A, 0x8)] // 3A908080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808C1A, 0x8)] // 1A8C8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808C1A, 0x8)] // 1A8C8080
 public struct S80808C1A
 {
     public short Unk00;
@@ -308,38 +308,38 @@ public struct CycleTransform
 
 #region Runtime Rig
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F96, 0x70)] // 968F8080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808B66, 0x70)] // 668B8080, component 0x8
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808B66, 0x70)] // 668B8080, component 0x8
 public struct S80808B66
 {
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F8F, 0x130)] // 8F8F8080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808B5F, 0x140)] // 5F8B8080, component 0x10
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808B5F, 0x140)] // 5F8B8080, component 0x10
 public struct S80808B5F
 {
     [SchemaField(0x90, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0xA8, TigerStrategy.DESTINY2_LATEST)]
+    [SchemaField(0xA8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArray<S80808C5F> RigComponents;
     public DynamicArray<S80808C56> ControlsRelations;
     public DynamicArray<S80809F4F> ControlsTransforms;
     public DynamicArray<SInt16> IKControls;
 
     [SchemaField(0xD0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0xE8, TigerStrategy.DESTINY2_LATEST)]
+    [SchemaField(0xE8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Tag<S80808C51> Profiles;
 
     [SchemaField(0xD8, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0xF0, TigerStrategy.DESTINY2_LATEST)]
+    [SchemaField(0xF0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArray<SInt16> BoneToControl;
     public DynamicArray<SInt16> ControlToBone;
 
     [SchemaField(0x110, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x128, TigerStrategy.DESTINY2_LATEST)]
+    [SchemaField(0x128, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArray<S80808BDA> ControlNameToBoneIndex;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80809071, 0x18)] // 71908080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808C51, 0x18)] // 518C8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808C51, 0x18)] // 518C8080
 public struct S80808C51
 {
     [SchemaField(0x8)]
@@ -347,7 +347,7 @@ public struct S80808C51
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80809073, 0x38)] // 73908080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808C53, 0x38)] // 538C8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808C53, 0x38)] // 538C8080
 public struct S80808C53
 {
     public DynamicArray<SStringHash> Names;
@@ -357,14 +357,14 @@ public struct S80808C53
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x8080907F, 0x8)] // 7F908080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808C5F, 0x8)] // 5F8C8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808C5F, 0x8)] // 5F8C8080
 public struct S80808C5F
 {
     public TigerHash Unk00;
     public int Unk04;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808BDA, 0x8)] // DA8B8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808BDA, 0x8)] // DA8B8080
 public struct S80808BDA
 {
     public TigerHash Hash;
@@ -372,7 +372,7 @@ public struct S80808BDA
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80809076, 0x34)] // 76908080
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808C56, 0x34)] // 568C8080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808C56, 0x34)] // 568C8080
 public struct S80808C56
 {
     public TigerHash Unk00;

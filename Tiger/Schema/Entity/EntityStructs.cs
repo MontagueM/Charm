@@ -472,14 +472,13 @@ public struct SEntityModelMesh
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801AEF, 0x24)] //EF1A8080
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x8080737E, 0x20)] //7E738080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806ECB, 0x24)] //CB6E8080
-public struct S80806ECB  // TODO use DCG to figure out what this is
+public struct S80806ECB
 {
     public Material Material;  // AA6D8080
     public short VariantShaderIndex;  // variant_shader_index
     public short PrimitiveType;
     public uint IndexOffset;
     public uint IndexCount;
-    public uint Unk10;  // might be number of strips?
 
     [SchemaField(0x18, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x14, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
@@ -487,29 +486,26 @@ public struct S80806ECB  // TODO use DCG to figure out what this is
     public byte Unk16;
     public byte Unk17;
 
-    // need to check this on WQ, theres no way its an int
+    // dont know if actually an int on WQ+, dont wanna touch it
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public int FlagsD2;
 
     [SchemaField(0x1C, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
-    public short FlagsD1; //??
+    [SchemaField(0x18, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public short FlagsPreWQ; // ??
 
     [SchemaField(0x1E, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x1A, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x1C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public byte GearDyeChangeColorIndex;   // sbyte gear_dye_change_color_index
+    [SchemaField(0x1A, TigerStrategy.DESTINY2_SHADOWKEEP_2601)] // and BL
+    [SchemaField(0x1C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public byte GearDyeChangeColorIndex;
     public ELodCategory LodCategory;
-    public byte Unk1E;
-    public byte LodRun;  // lod_run
-    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public int Unk20; // variant_shader_index?
 
     public int GetFlags()
     {
-        if (Strategy.IsD1())
-            return FlagsD1;
+        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
+            return FlagsPreWQ;
         else
             return FlagsD2;
     }
