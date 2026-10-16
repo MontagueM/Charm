@@ -623,7 +623,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             map.GetFullStrategyMap();
             if (!map.TryGetValue(_strategy, out result))
             {
-                Log.Error($"Failed to get schema struct size for type {var} as it has multiple schema struct attributes but none match the current strategy {_strategy}");
+                Log.Debug($"Failed to get schema struct size for type {var} as it has multiple schema struct attributes but none match the current strategy {_strategy}");
             }
         }
 

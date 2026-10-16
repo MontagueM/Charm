@@ -51,56 +51,71 @@ public class EntityAnimations : EntityComponent
     }
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80802613, 0x830)] //13268080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80803466, 0x700)] //66348080
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80802613, 0x830)] //13268080, component 0x8
 public struct S80802613
 {
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x8080344B, 0x120)] //4B348080
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x808025F8, 0x130)] //F8258080
 public struct S808025F8
 {
-    [SchemaField(0xA8)]
+    [SchemaField(0x90, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0xA8, TigerStrategy.DESTINY2_LATEST)]
     public Tag<S8080289F> Container;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808036F6, 0x90)] //F6368080
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x8080289F, 0x80)] //9F288080
 public struct S8080289F
 {
     [SchemaField(0x8)]
     public DynamicArray<S80808BDF> Clips;
 
-    [SchemaField(0x48)]
+    [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x48, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<S80808AEA> ClipNames; // unsure
     public DynamicArray<S80808BDE> Clips2;
-    [SchemaField(0x74)]
+
+    [SchemaField(0x8C, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x74, TigerStrategy.DESTINY2_LATEST)]
     public Tag<S80802889> UnkExtraClips;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808BDF, 0x4)] //488F8080
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808BDF, 0x10)] //DF8B8080
 public struct S80808BDF
 {
-    [SchemaField(Tag64 = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(TigerStrategy.DESTINY2_LATEST, Tag64 = true)]
     public Animation.Animation Animation;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F1C, 0x4)] //1C8F8080
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808AEA, 0x4)] //EA8A8080
 public struct S80808AEA
 {
     public StringHash ClipName;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808BDE, 0x20)] //02908080
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80808BDE, 0x30)] //DE8B8080
 public struct S80808BDE
 {
     [SchemaField(0x10)]
     public TigerHash Unk10;
     public float Unk14;
-    [SchemaField(Tag64 = true)]
+
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_LATEST, Tag64 = true)]
     public Animation.Animation Animation;
-    public TigerHash Unk24;
-    public int Unk28;
+
+    //public TigerHash Unk24;
+    //public int Unk28;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808036BD, 0x18)] //BD368080
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80802889, 0x18)] //89288080
 public struct S80802889
 {
@@ -108,6 +123,7 @@ public struct S80802889
     public DynamicArray<S808023DF> Unk08;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x8080323C, 0x40)] //3C328080
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x808023DF, 0x40)] //DF238080
 public struct S808023DF
 {
@@ -117,19 +133,25 @@ public struct S808023DF
     public DynamicArray<S8080255D> Unk20;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808033B1, 0xC)] //B1338080
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x8080255E, 0x18)] //5E258080
 public struct S8080255E
 {
     public TigerHash Unk00;
     public float Unk04;
-    [SchemaField(Tag64 = true)]
+
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_LATEST, Tag64 = true)]
     public Animation.Animation Animation;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808033B0, 0x10)] //B0338080
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x8080255D, 0x38)] //5D258080
 public struct S8080255D
 {
-    [SchemaField(0x8, Tag64 = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_LATEST, Tag64 = true)]
     public Animation.Animation Animation;
+
     public TigerHash Unk18;
 }
