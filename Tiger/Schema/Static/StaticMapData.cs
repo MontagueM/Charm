@@ -680,20 +680,24 @@ public struct SStaticAmbientOcclusionMappings
 /// <summary>
 /// Entity overrides
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80807EB6, 0x34)] //B67E8080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808019, 0x50)] //19808080
 [SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, 0x80808019, 0x54)] //19808080
 public struct S80808019
 {
     public ResourcePointer Unk00;
-    [SchemaField(0x24)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x24, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public StringHash EntityName;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80804B8B, 0x1C)] //8B4B8080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80803FFD, 0x28)] //FD3F8080
 public struct S80803FFD
 {
     public ResourcePointer Unk00;
-    [SchemaField(0x20)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public float Unk20; // health?
 }
 

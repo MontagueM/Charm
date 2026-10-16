@@ -128,7 +128,7 @@ public class Entity : Tag<SEntity>
                     Animations.Add(new(resource.Hash));
                     break;
 
-                case S80802AB4: // todo other versions
+                case S80802AB4:
                     VariantMap = FileResourcer.Get().GetFile<EntityVariants>(resource.Hash);
                     break;
 

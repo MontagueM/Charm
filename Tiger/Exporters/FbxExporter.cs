@@ -228,6 +228,9 @@ public class FbxExporter : AbstractExporter
                 }
                 catch (Exception e)
                 {
+#if DEBUG
+                    throw e;
+#endif
                     Log.Error($"Skipping animation {animation.Hash}: {e.Message}");
                 }
             }

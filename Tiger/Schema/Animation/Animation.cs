@@ -1,4 +1,5 @@
-﻿using Tiger.Schema.Entity;
+﻿using Arithmic;
+using Tiger.Schema.Entity;
 
 namespace Tiger.Schema.Animation;
 
@@ -12,8 +13,8 @@ public class Animation : Tag<SAnimationClip>
     {
         AnimationHash = _tag.AnimationHash;
         FrameCount = _tag.FrameCount;
-        NodeCount = _tag.NodeCount;
-        RigControlCount = _tag.RigControlCount;
+        NodeCount = _tag.GetNodeCount();
+        RigControlCount = _tag.GetRigControlCount();
         RigComponents = _tag.RigComponents;
 
         RetargetKeys = _tag.Unk150.Select(x => x.StringHash.Hash32).ToArray();
@@ -24,15 +25,34 @@ public class Animation : Tag<SAnimationClip>
         IsPoseLayer = _tag.PoseSpace != 0; // unsure
 
         using TigerReader reader = GetReader();
-        Maps = new ControlMaps
+
+        if (Strategy.IsD1())
         {
-            StaticScale = PrimitiveArrays.ReadUInt16(reader, _tag.StaticScaleControlMap),
-            StaticRotation = PrimitiveArrays.ReadUInt16(reader, _tag.StaticRotationControlMap),
-            StaticTranslation = PrimitiveArrays.ReadUInt16(reader, _tag.StaticTranslationControlMap),
-            AnimatedScale = PrimitiveArrays.ReadUInt16(reader, _tag.AnimatedScaleControlMap),
-            AnimatedRotation = PrimitiveArrays.ReadUInt16(reader, _tag.AnimatedRotationControlMap),
-            AnimatedTranslation = PrimitiveArrays.ReadUInt16(reader, _tag.AnimatedTranslationControlMap),
-        };
+            var controlMaps = _tag.ControlMapsD1.Value;
+            Maps = new ControlMaps
+            {
+                StaticScale = PrimitiveArrays.ReadByte(reader, controlMaps.StaticScaleControlMap).Select(value => (ushort)value).ToArray(),
+                StaticRotation = PrimitiveArrays.ReadByte(reader, controlMaps.StaticRotationControlMap).Select(value => (ushort)value).ToArray(),
+                StaticTranslation = PrimitiveArrays.ReadByte(reader, controlMaps.StaticTranslationControlMap).Select(value => (ushort)value).ToArray(),
+                AnimatedScale = PrimitiveArrays.ReadByte(reader, controlMaps.AnimatedScaleControlMap).Select(value => (ushort)value).ToArray(),
+                AnimatedRotation = PrimitiveArrays.ReadByte(reader, controlMaps.AnimatedRotationControlMap).Select(value => (ushort)value).ToArray(),
+                AnimatedTranslation = PrimitiveArrays.ReadByte(reader, controlMaps.AnimatedTranslationControlMap).Select(value => (ushort)value).ToArray(),
+            };
+        }
+        else
+        {
+            var controlMaps = _tag.ControlMapsD2.Value;
+            Maps = new ControlMaps
+            {
+                StaticScale = PrimitiveArrays.ReadUInt16(reader, controlMaps.StaticScaleControlMap),
+                StaticRotation = PrimitiveArrays.ReadUInt16(reader, controlMaps.StaticRotationControlMap),
+                StaticTranslation = PrimitiveArrays.ReadUInt16(reader, controlMaps.StaticTranslationControlMap),
+                AnimatedScale = PrimitiveArrays.ReadUInt16(reader, controlMaps.AnimatedScaleControlMap),
+                AnimatedRotation = PrimitiveArrays.ReadUInt16(reader, controlMaps.AnimatedRotationControlMap),
+                AnimatedTranslation = PrimitiveArrays.ReadUInt16(reader, controlMaps.AnimatedTranslationControlMap),
+            };
+        }
+
 
         Static = ReadStatic(reader);
         Animated = ReadAnimated(reader);
@@ -59,7 +79,10 @@ public class Animation : Tag<SAnimationClip>
         if (_tag.StaticBoneData.GetValue(reader) is S80808B40 staticBoneData)
             return FromPoseQuantized(staticBoneData, reader);
         else if (_tag.StaticBoneData.ResourceClassHash != TigerHash.InvalidHash32)
-            throw new Exception($"{Hash}: Should be 0x80808B40 but is {_tag.StaticBoneData.ResourceClassHash:X8}");
+        {
+            var classId = Helpers.GetClassHashForStrategy(typeof(S80808B40), Strategy.CurrentStrategy);
+            throw new Exception($"{Hash}: Should be 0x{classId:X8} but is {_tag.StaticBoneData.ResourceClassHash:X8}");
+        }
 
         return null;
     }
@@ -72,6 +95,8 @@ public class Animation : Tag<SAnimationClip>
             return FromUncompressed(uncompressed, reader);
         else if (_tag.AnimatedBoneData.GetValue(reader) is S80808B40 poseQuantized)
             return FromPoseQuantized(poseQuantized, reader);
+        else if (_tag.AnimatedBoneData.GetValue(reader) is S80808B44 raw)
+            return FromRaw(raw, reader);
         else if (_tag.AnimatedBoneData.ResourceClassHash != TigerHash.InvalidHash32)
             throw new NotImplementedException($"Unknown {_tag.AnimatedBoneData.ResourceClassHash:X8}");
 
@@ -136,6 +161,22 @@ public class Animation : Tag<SAnimationClip>
         };
     }
 
+    private CodecData FromRaw(S80808B44 data, TigerReader reader)
+    {
+        CheckCodec(data.CodecType, AnimationCodecType.Raw);
+        return new CodecData
+        {
+            CodecType = data.CodecType,
+            ScaleStreamCount = data.ScaleStreamCount,
+            RotationStreamCount = data.RotationStreamCount,
+            TranslationStreamCount = data.TranslationStreamCount,
+            FrameCount = data.FrameCount,
+            RawScales = PrimitiveArrays.ReadSingle(reader, data.Scales),
+            RawRotations = PrimitiveArrays.ReadVector4(reader, data.Rotations),
+            RawTranslations = PrimitiveArrays.ReadVector4(reader, data.Translations),
+        };
+    }
+
     // decodes the clip and runs it on the rig
     public BoneAnimation[] Evaluate(
         EntityRuntimeRig rig, EntitySkeleton skeleton,
@@ -182,6 +223,26 @@ public class Animation : Tag<SAnimationClip>
 
         return new RootMotion(_tag.ExtractionMode, cycle, streams.Rotations[0], streams.Translations[0]);
     }
+
+
+    public void Debug()
+    {
+        using TigerReader reader = GetReader();
+        if (_tag.StaticBoneData.GetValue(reader) is S80808B40)
+            _ = false;
+        else if (_tag.StaticBoneData.ResourceClassHash != TigerHash.InvalidHash32)
+        {
+            var classId = Helpers.GetClassHashForStrategy(typeof(S80808B40), Strategy.CurrentStrategy);
+            Log.Debug($"{Hash} StaticBoneData: Should be 0x{classId:X8} but is {_tag.StaticBoneData.ResourceClassHash:X8}");
+        }
+
+        if (_tag.AnimatedBoneData.GetValue(reader) is S80808B43 or S80808B42 or S80808B40)
+            _ = false;
+        else if (_tag.AnimatedBoneData.GetValue(reader) is S80808B44 raw)
+            Log.Debug($"{Hash} AnimatedBoneData: Raw ({raw.CodecType})");
+        else if (_tag.AnimatedBoneData.ResourceClassHash != TigerHash.InvalidHash32)
+            Log.Debug($"{Hash} AnimatedBoneData: Unknown {_tag.AnimatedBoneData.ResourceClassHash:X8}");
+    }
 }
 
 public class CodecData
@@ -203,6 +264,9 @@ public class CodecData
     public float ScaleMinimum;
     public float[] TranslationExtent = new float[3];
     public float[] TranslationMinimum = new float[3];
+    public float[] RawScales = Array.Empty<float>();
+    public System.Numerics.Vector4[] RawRotations = Array.Empty<System.Numerics.Vector4>();
+    public System.Numerics.Vector4[] RawTranslations = Array.Empty<System.Numerics.Vector4>();
 }
 
 public class ControlMaps

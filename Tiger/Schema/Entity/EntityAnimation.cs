@@ -20,6 +20,9 @@ public class EntityAnimations : EntityComponent
             AnimationTags.Add(entry.Animation);
         }
 
+        if (Strategy.IsD1())
+            return;
+
         foreach (var entry in resource.Container.TagData.Clips2)
         {
             if (entry.Animation is null)
@@ -51,21 +54,25 @@ public class EntityAnimations : EntityComponent
     }
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80802B92, 0x330)] //922B8080
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80803466, 0x700)] //66348080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80802613, 0x830)] //13268080, component 0x8
 public struct S80802613
 {
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x808020BB, 0xD8)] //BB208080
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x8080344B, 0x120)] //4B348080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x808025F8, 0x130)] //F8258080
 public struct S808025F8
 {
+    [SchemaField(0x90, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x90, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xA8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Tag<S8080289F> Container;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80802C0E, 0x90)] //0E2C8080
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808036F6, 0x90)] //F6368080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x8080289F, 0x78)]
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x8080289F, 0x80)] //9F288080
@@ -74,25 +81,31 @@ public struct S8080289F
     [SchemaField(0x8)]
     public DynamicArray<S80808BDF> Clips;
 
-    [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x58, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x48, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArray<S80808AEA> ClipNames; // unsure
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArray<S80808BDE> Clips2;
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x8C, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x74, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Tag<S80802889> UnkExtraClips;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808BDF, 0x4)] //488F8080
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x8080408D, 0x4)] //8D408080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F48, 0x4)] //488F8080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808BDF, 0x10)] //DF8B8080
 public struct S80808BDF
 {
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Tag64 = true)]
     public Animation.Animation Animation;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80800525, 0x4)] //25058080
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F1C, 0x4)] //1C8F8080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808AEA, 0x4)] //EA8A8080
 public struct S80808AEA

@@ -59,6 +59,7 @@ public static class AnimationDecoder
     {
         return c.CodecType switch
         {
+            AnimationCodecType.Raw => DecodeCodec0(c),
             AnimationCodecType.Compressed => DecodeCodec1(c, clipFrameCount),
             AnimationCodecType.Uncompressed => DecodeCodec2(c),
             AnimationCodecType.PoseQuantized => DecodeCodec3(c),
@@ -251,6 +252,40 @@ public static class AnimationDecoder
         }
 
         return result;
+    }
+
+    private static DecodedStreams DecodeCodec0(CodecData c)
+    {
+        int frames = c.FrameCount;
+        int S = c.ScaleStreamCount, R = c.RotationStreamCount, T = c.TranslationStreamCount;
+
+        if (c.RawScales.Length != S * frames || c.RawRotations.Length != R * frames || c.RawTranslations.Length != T * frames)
+            throw new Exception($"Codec 0: array sizes ({c.RawScales.Length}, {c.RawRotations.Length}, {c.RawTranslations.Length}) don't match {S}/{R}/{T} streams * {frames} frames");
+
+        var d = new DecodedStreams
+        {
+            Scales = new float[S][],
+            Rotations = new Vector4[R][],
+            Translations = new Vector3[T][],
+        };
+
+        for (int s = 0; s < S; s++)
+            d.Scales[s] = c.RawScales.AsSpan(s * frames, frames).ToArray();
+
+        for (int s = 0; s < R; s++)
+            d.Rotations[s] = c.RawRotations.AsSpan(s * frames, frames).ToArray();
+
+        for (int s = 0; s < T; s++)
+        {
+            d.Translations[s] = new Vector3[frames];
+            for (int f = 0; f < frames; f++)
+            {
+                var v = c.RawTranslations[s * frames + f];
+                d.Translations[s][f] = new Vector3(v.X, v.Y, v.Z);
+            }
+        }
+
+        return d;
     }
 
     private static DecodedStreams DecodeCodec2(CodecData c)

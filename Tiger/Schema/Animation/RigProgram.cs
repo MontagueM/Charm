@@ -375,7 +375,12 @@ public class RigProgram
             output[end] = RigTransform.Compose(output[middle], _localBind[end]);
 
             RigTransform rootValue = output[root];
-            SolveInPlane(target, ref rootValue, ref output[middle], ref output[end]);
+            var control = _controls[index];
+            if (control.IkFunctionType == IkFunctionType.IK_3 && control.PoleAxis is >= 1 and <= 6)
+                SolveWithPole(target, PoleAxis(control.PoleAxis, output[root].Rotation), ref rootValue, ref output[middle], ref output[end]);
+            else
+                SolveInPlane(target, ref rootValue, ref output[middle], ref output[end]);
+
             if (root != 0)
                 output[root] = rootValue;
 
@@ -442,6 +447,53 @@ public class RigProgram
 
         root = new RigTransform(Reaim(rootAim, root.Rotation, elbow - start), start, 1);
         middle = new RigTransform(Reaim(middleAim, middle.Rotation, wrist - elbow), elbow, 1);
+        end = new RigTransform(target.Rotation, wrist, 1);
+    }
+
+    // 1-3 is +XYZ, 4-6 negative
+    private static Vector3 PoleAxis(byte pole, Quaternion rootRotation)
+    {
+        var axis = ((pole - 1) % 3) switch
+        {
+            0 => Vector3.UnitX,
+            1 => Vector3.UnitY,
+            _ => Vector3.UnitZ
+        };
+
+        return Vector3.Transform(pole > 3 ? -axis : axis, rootRotation);
+    }
+
+    private static void SolveWithPole(RigTransform target, Vector3 pole, ref RigTransform root, ref RigTransform middle, ref RigTransform end)
+    {
+        var start = root.Translation;
+        var upper = middle.Translation - start;
+        var lower = end.Translation - middle.Translation;
+        float upperLength = upper.Length();
+        float lowerLength = lower.Length();
+        if (upperLength < 0.0001f || lowerLength < 0.0001f)
+            return;
+
+        var aim = target.Translation - start;
+        var distance = Math.Clamp(aim.Length(), MathF.Abs(upperLength - lowerLength), upperLength + lowerLength);
+        var x = aim.LengthSquared() >= 0.0001f ? Vector3.Normalize(aim) : Vector3.Transform(Vector3.UnitX, root.Rotation);
+
+        var y = Vector3.Cross(pole, x);
+        if (y.LengthSquared() < 1e-12f)
+        {
+            SolveInPlane(target, ref root, ref middle, ref end);
+            return;
+        }
+        y = Vector3.Normalize(y);
+
+        var denominator = 2 * upperLength * distance;
+        var cosine = denominator <= 0.0001f ? 0 : (upperLength * upperLength + distance * distance - lowerLength * lowerLength) / denominator;
+        var sine = -MathF.Sqrt(MathF.Max(1 - cosine * cosine, 0));
+
+        var elbow = start + x * (upperLength * cosine) + y * (upperLength * sine);
+        var wrist = start + x * distance;
+
+        root = new RigTransform(Quaternion.Normalize(RigMath.FromTo(Vector3.Normalize(upper), Vector3.Normalize(elbow - start), pole) * root.Rotation), start, 1);
+        middle = new RigTransform(Quaternion.Normalize(RigMath.FromTo(Vector3.Normalize(lower), Vector3.Normalize(wrist - elbow), pole) * middle.Rotation), elbow, 1);
         end = new RigTransform(target.Rotation, wrist, 1);
     }
 

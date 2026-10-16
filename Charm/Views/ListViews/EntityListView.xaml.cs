@@ -941,11 +941,15 @@ public partial class EntityListView : UserControl
                                     {
                                         foreach (S80808358 dataEntry in datatable)
                                         {
-                                            SMapDataEntry? value = dataEntry.Datatable.Value;
+                                            SMapDataEntry? value = dataEntry.Datatable?.Value;
                                             if (value is null)
                                                 continue;
 
-                                            if (value.Value.DataResource.GetValue(resource.GetReader()) is S80807EB6 name)
+                                            var pointer = value.Value.DataResource;
+                                            if (pointer.GetValue(resource.GetReader()) is S80803FFD bossData)
+                                                pointer = bossData.Unk00;
+
+                                            if (pointer.GetValue(resource.GetReader()) is S80808019 name)
                                             {
                                                 if (name.EntityName.IsValid())
                                                 {

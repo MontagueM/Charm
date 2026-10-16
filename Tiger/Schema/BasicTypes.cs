@@ -84,6 +84,7 @@ public static class PrimitiveArrays
     public static short[] ReadInt16(TigerReader reader, DynamicArray<SInt16> array) => Read<short, SInt16>(reader, array);
     public static byte[] ReadByte(TigerReader reader, DynamicArray<SUInt8> array) => Read<byte, SUInt8>(reader, array);
     public static float[] ReadSingle(TigerReader reader, DynamicArray<SReal32> array) => Read<float, SReal32>(reader, array);
+    public static System.Numerics.Vector4[] ReadVector4(TigerReader reader, DynamicArray<Vec4> array) => Read<System.Numerics.Vector4, Vec4>(reader, array);
 
     private static T[] Read<T, TSchema>(TigerReader reader, DynamicArray<TSchema> array) where T : unmanaged
     {

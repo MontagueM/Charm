@@ -622,12 +622,6 @@ public struct S80808358
     public ResourceInTablePointer<SMapDataEntry>? Datatable;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80807EB6, 0x34)] //B67E8080
-public struct S80807EB6
-{
-    [SchemaField(0x20)]
-    public StringHash EntityName;
-}
 
 #region Named Bags
 
@@ -1351,26 +1345,31 @@ public struct S808036FD
     public StringHash UnkName;
 }
 
-// todo Other versions
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80802AB4, 0x50)] // B42A8080 // Component 0x10
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80802397, 0x50)] // 97238080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808038A3, 0x50)] // A3388080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80802AB4, 0x50)] // B42A8080 // Component 0x10
 public struct S80802AB4
 {
     [SchemaField(0x38)]
     public DynamicArray<SStringHash> Unk38;
 }
 
-// todo Other versions
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80802AB8, 0x120)] // B82A8080 // Component 0x18
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80802818, 0xD0)] // 18288080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808038A1, 0xD0)] // A1388080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80802AB8, 0x120)] // B82A8080 // Component 0x18
 public struct S80802AB8
 {
-    [SchemaField(0xE8)]
+    [SchemaField(0xA0, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0xA8, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0xE8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArray<S80806CF6> Parameters;
     public DynamicArray<SStringHash> Regions;
     public DynamicArray<S80802AB7> Variants;
 }
 
-// todo Other versions
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80806CF6, 0x18)] // F66C8080
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80802423, 0x18)] // 23248080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808038AA, 0x18)] // AA388080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80806CF6, 0x18)] // F66C8080
 public struct S80806CF6
 {
     [SchemaField(0x4)]
@@ -1378,8 +1377,9 @@ public struct S80806CF6
     public DynamicArray<SStringHash> Values;
 }
 
-// todo Other versions
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80802AB7, 0x30)] // B72A8080
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80802A34, 0x30)] // 342A8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808038A6, 0x30)] // A6388080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80802AB7, 0x30)] // B72A8080
 public struct S80802AB7
 {
     public float Weight;
