@@ -27,6 +27,7 @@ public class CommonSettings
     public bool CustomRenderer { get; set; } = false;
     public bool SaveShaderHLSL { get; set; } = false;
     public bool SaveEquirectCubemaps { get; set; } = false;
+    public bool ExportAnimations { get; set; } = false;
 }
 
 public class UnrealSettings
@@ -319,6 +320,18 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
     public bool GetExportEquirectCubemaps()
     {
         return _settings.Common.SaveEquirectCubemaps;
+    }
+
+
+    public void SetExportAnimations(bool b)
+    {
+        _settings.Common.ExportAnimations = b;
+        Save();
+    }
+
+    public bool GetExportAnimations()
+    {
+        return _settings.Common.ExportAnimations;
     }
 
     private string _configFilePath = "./config.json";

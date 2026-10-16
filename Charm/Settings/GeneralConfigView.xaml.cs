@@ -87,46 +87,84 @@ public partial class GeneralConfigView : UserControl
         csp.SettingValue = exportSavePath == "" ? "Not Set (Required)" : exportSavePath;
         csp.ChangeButton.Click += ExportSavePath_OnClick;
         GeneralConfigPanel.Children.Add(csp);
+        #endregion
+
+
+        #region Exporting
+        // ---- Exporting settings panel ----
+        ExportingConfigPanel.Children.Clear();
 
         // Output texture format
-        ConfigSettingComboControl ctf = new();
-        ctf.SettingName = "Output Texture Format";
-        ctf.SettingLabel = "(Use PNG or TGA in Blender)";
+        ConfigSettingComboControl ctf = new()
+        {
+            SettingName = "Output Texture Format",
+            SettingLabel = "(Use PNG or TGA in Blender)"
+        };
         TextureExportFormat etfval = _config.GetOutputTextureFormat();
         ctf.SettingsCombobox.ItemsSource = MakeEnumComboBoxItems<TextureExportFormat>();
         ctf.SettingsCombobox.SelectedIndex = (int)etfval;
         ctf.SettingsCombobox.SelectionChanged += OutputTextureFormat_OnSelectionChanged;
         ctf.ChangeButton.Visibility = Visibility.Hidden;
-        GeneralConfigPanel.Children.Add(ctf);
-        #endregion
+        ExportingConfigPanel.Children.Add(ctf);
 
-        #region Materials
-        // ---- Material settings panel ----
-        MaterialsConfigPanel.Children.Clear();
+        // Whether to export animations with entities
+        ConfigSettingToggleControl expAnim = new()
+        {
+            SettingName = "Export Animations",
+            SettingLabel = "EXPERIMENTAL: Export animations with entities, can slow down exports on entities with many animations."
+        };
+        bVal = _config.GetExportAnimations();
+        expAnim.SettingValue = bVal.ToString();
+        expAnim.ChangeButton.Click += ExportAnimations_OnClick;
+        ExportingConfigPanel.Children.Add(expAnim);
 
         // Whether to export shader hlsl files, always true if S&Box shaders are enabled
-        ConfigSettingToggleControl hlsl = new();
-        hlsl.SettingName = "Export Shader HLSL";
-        hlsl.SettingLabel = "Save shader hlsl code, can slow down larger exports such as maps.";
+        ConfigSettingToggleControl hlsl = new()
+        {
+            SettingName = "Export Shader HLSL",
+            SettingLabel = "Save shader hlsl code, can slow down larger exports such as maps."
+        };
         bVal = _config.GetSaveShaderHLSL();
         hlsl.SettingValue = bVal.ToString();
         hlsl.ChangeButton.Click += SaveShaderHLSL_OnClick;
-        MaterialsConfigPanel.Children.Add(hlsl);
+        ExportingConfigPanel.Children.Add(hlsl);
 
         // Whether to export cubemaps as equirectangular projected
-        ConfigSettingToggleControl equirectCubemaps = new();
-        equirectCubemaps.SettingName = "Export Equirectangular Cubemaps";
-        equirectCubemaps.SettingLabel = "Export cubemaps as spherical (equirectangular), alongside the default cross layout.";
+        ConfigSettingToggleControl equirectCubemaps = new()
+        {
+            SettingName = "Export Equirectangular Cubemaps",
+            SettingLabel = "Export cubemaps as spherical (equirectangular), alongside the default cross layout."
+        };
         bVal = _config.GetExportEquirectCubemaps();
         equirectCubemaps.SettingValue = bVal.ToString();
         equirectCubemaps.ChangeButton.Click += ExportEquirectCubemaps_OnClick;
-        MaterialsConfigPanel.Children.Add(equirectCubemaps);
+        ExportingConfigPanel.Children.Add(equirectCubemaps);
+
+
+        // Store all exported map assets in a single "Maps/Assets/" folder
+        // instead of "ExportPath/(MapName)/".
+        ConfigSettingToggleControl cfe = new()
+        {
+            SettingName = "Unified Map Asset Exports",
+            SettingLabel = "Export all map assets to a single \"Maps/Assets/\" folder."
+        };
+        bVal = _config.GetSingleFolderMapAssetsEnabled();
+        cfe.SettingValue = bVal.ToString();
+        cfe.ChangeButton.Click += SingleFolderMapAssetsEnabled_OnClick;
+        MiscConfigPanel.Children.Add(cfe);
+        #endregion
+
+        #region Rendering
+        // ---- Rendering settings panel ----
+        RenderingConfigPanel.Children.Clear();
 
         if (IRenderer.CharmRenderer is not null)
         {
-            ConfigSettingToggleControl cusRend = new();
-            cusRend.SettingName = "Custom Renderer";
-            cusRend.SettingLabel = "!!EXPERIMENTAL!! Enables a custom renderer for models. (Latest version only)";
+            ConfigSettingToggleControl cusRend = new()
+            {
+                SettingName = "Custom Renderer",
+                SettingLabel = "EXPERIMENTAL: Enables a custom renderer for models. (Latest version only)"
+            };
             bVal = _config.GetCustomRenderer();
             cusRend.SettingValue = bVal.ToString();
             cusRend.ChangeButton.Click += CustomRenderer_OnClick;
@@ -135,7 +173,7 @@ public partial class GeneralConfigView : UserControl
             if (!Strategy.IsLatest())
                 cusRend.IsEnabled = false;
 
-            MaterialsConfigPanel.Children.Add(cusRend);
+            RenderingConfigPanel.Children.Add(cusRend);
         }
         #endregion
 
@@ -143,36 +181,31 @@ public partial class GeneralConfigView : UserControl
         // ---- Misc settings panel ----
         MiscConfigPanel.Children.Clear();
 
-        // Store all exported map assets in a single "Maps/Assets/" folder
-        // instead of "ExportPath/(MapName)/".
-        ConfigSettingToggleControl cfe = new();
-        cfe.SettingName = "Unified Map Asset Exports";
-        cfe.SettingLabel = "Export all map assets to a single \"Maps/Assets/\" folder.";
-        bVal = _config.GetSingleFolderMapAssetsEnabled();
-        cfe.SettingValue = bVal.ToString();
-        cfe.ChangeButton.Click += SingleFolderMapAssetsEnabled_OnClick;
-        MiscConfigPanel.Children.Add(cfe);
-
-
-        ConfigSettingToggleControl disBg = new();
-        disBg.SettingName = "Animated Background";
-        disBg.SettingLabel = "Requires a restart to take effect.";
+        ConfigSettingToggleControl disBg = new()
+        {
+            SettingName = "Animated Background",
+            SettingLabel = "Requires a restart to take effect."
+        };
         bVal = _config.GetAnimatedBackground();
         disBg.SettingValue = bVal.ToString();
         disBg.ChangeButton.Click += AnimatedBackground_OnClick;
         MiscConfigPanel.Children.Add(disBg);
 
-        ConfigSettingToggleControl disME = new();
-        disME.SettingName = "Motion Effects";
-        disME.SettingLabel = "Enables a fake parallax effect when moving the mouse in menus.";
+        ConfigSettingToggleControl disME = new()
+        {
+            SettingName = "Motion Effects",
+            SettingLabel = "Enables a fake parallax effect when moving the mouse in menus."
+        };
         bVal = _config.GetMotionEffects();
         disME.SettingValue = bVal.ToString();
         disME.ChangeButton.Click += MotionEffects_OnClick;
         MiscConfigPanel.Children.Add(disME);
 
-        ConfigSettingToggleControl disHL = new();
-        disHL.SettingName = "Holofoil Effect";
-        disHL.SettingLabel = "Enables the Holofoil effect on weapon icons in the API View";
+        ConfigSettingToggleControl disHL = new()
+        {
+            SettingName = "Holofoil Effect",
+            SettingLabel = "Enables the Holofoil effect on weapon icons in the API View"
+        };
         bVal = _config.GetHolofoilShader();
         disHL.SettingValue = bVal.ToString();
         disHL.ChangeButton.Click += HolofoilShader_OnClick;
@@ -376,6 +409,14 @@ public partial class GeneralConfigView : UserControl
     {
         _config.SetCustomRenderer(!_config.GetCustomRenderer());
         ExperimentalWarning(_config.GetCustomRenderer());
+
+        PopulateConfigPanel();
+    }
+
+    private void ExportAnimations_OnClick(object sender, RoutedEventArgs e)
+    {
+        _config.SetExportAnimations(!_config.GetExportAnimations());
+        ExperimentalWarning(_config.GetExportAnimations());
 
         PopulateConfigPanel();
     }

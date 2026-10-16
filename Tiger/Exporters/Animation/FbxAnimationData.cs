@@ -54,13 +54,6 @@ public static class FbxAnimationBuilder
             };
         }
 
-        var inverseBindRotation = new GlmQuat[n];
-        for (int b = 0; b < n; b++)
-        {
-            var r = nodes[b].DefaultObjectSpaceTransform.QuaternionRotation;
-            inverseBindRotation[b] = new GlmQuat(r.W, r.X, r.Y, r.Z).Normalized().Inverse();
-        }
-
         var global = new Mat4[n];
         var previousAngles = new Vector3?[n];
 
@@ -77,7 +70,7 @@ public static class FbxAnimationBuilder
                 System.Numerics.Vector4 rp = bone.Rotations[f];
                 var animated = new GlmQuat(rp.W, rp.X, rp.Y, rp.Z);
 
-                global[b] = Mat4.Compose(translation, animated * inverseBindRotation[b], scale);
+                global[b] = Mat4.Compose(translation, animated, scale);
 
                 Mat4 local = parent >= 0 ? Mat4.Mul(global[parent].Inverse(), global[b]) : global[b];
                 local.Decompose(out Vector3 s, out GlmQuat r, out Vector3 t);

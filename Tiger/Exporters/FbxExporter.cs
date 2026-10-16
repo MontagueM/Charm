@@ -2,6 +2,7 @@
 using Arithmic;
 using Internal.Fbx;
 using Tiger.Schema;
+using Tiger.Schema.Animation;
 using Tiger.Schema.Entity;
 
 namespace Tiger.Exporters;
@@ -46,7 +47,7 @@ public class FbxExporter : AbstractExporter
                 {
                     if (entity.Mesh.Parts.Count == 0)
                         continue;
-                    AddEntity(apiScene, entity);
+                    AddEntity(apiScene, entity, scene.DataType);
                 }
                 ExportScene(apiScene, Path.Join(outputDirectory, scene.Name));
                 continue;
@@ -84,7 +85,7 @@ public class FbxExporter : AbstractExporter
                 && args.AggregateOutput ? args.OutputDirectory : outputDirectory;
 
                 FbxScene fbxIndivScene = FbxScene.Create(_manager, entity.Mesh.Hash);
-                AddEntity(fbxIndivScene, entity);
+                AddEntity(fbxIndivScene, entity, scene.DataType);
                 ExportScene(fbxIndivScene, Path.Join(savePath, entity.Mesh.Hash));
 
                 if (_config.GetSBoxExportEnabled() && scene.Type != ExportType.Terrain)
@@ -171,7 +172,7 @@ public class FbxExporter : AbstractExporter
         }
     }
 
-    private void AddEntity(FbxScene fbxScene, ExporterEntity entity)
+    private void AddEntity(FbxScene fbxScene, ExporterEntity entity, DataExportType exportType)
     {
         List<FbxNode> skeletonNodes = entity.BoneNodes == null ? new() : AddSkeleton(fbxScene, entity.BoneNodes);
         foreach (ExporterPart part in entity.Mesh.Parts)
@@ -193,7 +194,7 @@ public class FbxExporter : AbstractExporter
             }
         }
 
-        if (skeletonNodes.Count > 0)
+        if (skeletonNodes.Count > 0 && _config.GetExportAnimations() && exportType == DataExportType.Individual)
             AddAnimations(fbxScene, entity, skeletonNodes);
     }
 
@@ -245,12 +246,18 @@ public class FbxExporter : AbstractExporter
             newNode.Node = FbxNode.Create(_manager, boneNode.HashString);
             skeleton.SetSkeletonType(FbxSkeleton.EType.eLimbNode);
             newNode.Node.SetNodeAttribute(skeleton);
-            Vector3 location = boneNode.DefaultObjectSpaceTransform.Translation;
+
+            GetBindTransform(boneNode, out System.Numerics.Vector3 location, out GlmQuat rotation);
             if (boneNode.ParentNodeIndex != -1)
             {
-                location -= boneNodes[newNode.ParentNodeIndex].DefaultObjectSpaceTransform.Translation;
+                GetBindTransform(boneNodes[boneNode.ParentNodeIndex], out System.Numerics.Vector3 parentLocation, out GlmQuat parentRotation);
+                GlmQuat inverseParent = parentRotation.Inverse();
+                location = inverseParent.Rotate(location - parentLocation);
+                rotation = inverseParent * rotation;
             }
+            System.Numerics.Vector3 euler = EulerXyz.FromQuaternion(rotation, null);
             newNode.Node.LclTranslation.Set(new FbxDouble3(location.X, location.Y, location.Z));
+            newNode.Node.LclRotation.Set(new FbxDouble3(euler.X, euler.Y, euler.Z));
             nodes.Add(newNode);
         }
 
@@ -273,6 +280,13 @@ public class FbxExporter : AbstractExporter
             skeletonNodes.Add(node.Node);
         }
         return skeletonNodes;
+    }
+
+    private void GetBindTransform(BoneNode boneNode, out System.Numerics.Vector3 location, out GlmQuat rotation)
+    {
+        ObjectSpaceTransform bind = boneNode.DefaultObjectSpaceTransform;
+        location = new System.Numerics.Vector3(bind.Translation.X, bind.Translation.Y, bind.Translation.Z);
+        rotation = new GlmQuat(bind.QuaternionRotation.W, bind.QuaternionRotation.X, bind.QuaternionRotation.Y, bind.QuaternionRotation.Z).Normalized();
     }
 
     private void AddWeightsToMesh(FbxMesh mesh, DynamicMeshPart meshPart, List<FbxNode> skeletonNodes)

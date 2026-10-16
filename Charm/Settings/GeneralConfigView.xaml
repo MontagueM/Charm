@@ -24,7 +24,7 @@
             <StackPanel Margin="50,0,50,0" Orientation="Vertical">
                 <ContentControl ContentTemplate="{StaticResource ConfigViewSectionTemplate}">
                     <ContentControl.Content>
-                        <local:ConfigViewSectionData Title="GENERAL" Icon="💾" />
+                        <local:ConfigViewSectionData Title="GENERAL" Icon="🛠️" />
                     </ContentControl.Content>
                 </ContentControl>
 
@@ -35,12 +35,23 @@
 
                 <ContentControl ContentTemplate="{StaticResource ConfigViewSectionTemplate}">
                     <ContentControl.Content>
-                        <local:ConfigViewSectionData Title="MATERIALS" Icon="🎨" />
+                        <local:ConfigViewSectionData Title="EXPORTING" Icon="💾" />
                     </ContentControl.Content>
                 </ContentControl>
 
                 <StackPanel
-                    x:Name="MaterialsConfigPanel"
+                    x:Name="ExportingConfigPanel"
+                    Margin="0,10,0,50"
+                    Orientation="Vertical" />
+
+                <ContentControl ContentTemplate="{StaticResource ConfigViewSectionTemplate}">
+                    <ContentControl.Content>
+                        <local:ConfigViewSectionData Title="RENDERING" Icon="🌤️" />
+                    </ContentControl.Content>
+                </ContentControl>
+
+                <StackPanel
+                    x:Name="RenderingConfigPanel"
                     Margin="0,10,0,50"
                     Orientation="Vertical" />
 
