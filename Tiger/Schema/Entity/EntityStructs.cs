@@ -732,6 +732,9 @@ public struct S8080356E
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     [SchemaField(0x610, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)] // unsure if actually tag64
     public Tag<S80806FA3> FallbackAudioGroup;
+
+    [SchemaField(0x5F8, TigerStrategy.DESTINY2_LATEST, Tag64 = true), NoLoad]
+    public Entity AnimEnt;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x808031DE, 0xD8)] //DE318080
@@ -950,7 +953,7 @@ public struct S80808179
     [SchemaField(0x110, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x158, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1A8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x1C8, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)] // 100% gonna get changed with the next expansion, calling it now
+    [SchemaField(0x1C8, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public DynamicArray<S808091F1> Array1;
 
     [SchemaField(0x120, TigerStrategy.DESTINY1_RISE_OF_IRON)]

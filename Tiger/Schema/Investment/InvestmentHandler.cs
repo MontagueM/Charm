@@ -264,7 +264,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             _entityAssignmentsMap = FileResourcer.Get().GetSchemaTag<S80804F43>(new FileHash(0x80A7E1DD));
 
             // inventory item -> sandbox pattern index -> pattern global tag id -> entity assignment
-            _sandboxPatternGlobalTagIdTag = FileResourcer.Get().GetSchemaTag<S808052AA>(new FileHash(0x80A7E1DD));
+            _sandboxPatternGlobalTagIdTag = FileResourcer.Get().GetSchemaTag<S808052AA>(new FileHash(0x80A5FFA9));
 
             _artDyeReferenceTag = FileResourcer.Get().GetSchemaTag<S808055C2>(new FileHash(0x80A5FFA8));
             _dyeChannelTag = FileResourcer.Get().GetSchemaTag<SDyeChannels>(new FileHash(0x80A5E249));
@@ -915,6 +915,19 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         return entities;
     }
 
+    public List<Animation.Animation> GetEmote(InventoryItem item, bool isFinisher = false)
+    {
+        int index = item.ArtArrangementIndex;
+        if (index == -1)
+        {
+            Log.Warning($"Item {item.Name} ({item.ApiHash}) has no art arrangement index.");
+            return null;
+        }
+
+        Debug.Assert(item.GetArtArrangementCount() == 1);
+        return GetEmoteFromArrangementIndex(index, isFinisher);
+    }
+
     private List<Entity.Entity> GetEntitiesFromArrangementIndex(int index)
     {
         List<Entity.Entity> entities = new();
@@ -959,6 +972,47 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         return entities;
     }
 
+    private List<Animation.Animation>? GetEmoteFromArrangementIndex(int index, bool isFinisher = false)
+    {
+        List<Animation.Animation> anims = new();
+        S808055D4 entry = _entityAssignmentTag.TagData.ArtArrangementEntityAssignments.ElementAt(_entityAssignmentTag.GetReader(), index);
+        if (entry.MultipleEntityAssignments.Count == 0)  // single
+        {
+            if (entry.FeminineSingleEntityAssignment.IsValid())
+            {
+                var hash = entry.FeminineSingleEntityAssignment;
+                var emotes = isFinisher ? GetFinisherFromAssignmentHash(hash) : GetEmoteFromAssignmentHash(hash);
+                if (emotes is not null)
+                    anims.AddRange(emotes);
+            }
+            if (entry.MasculineSingleEntityAssignment.IsValid())
+            {
+                var hash = entry.MasculineSingleEntityAssignment;
+                var emotes = isFinisher ? GetFinisherFromAssignmentHash(hash) : GetEmoteFromAssignmentHash(hash);
+                if (emotes is not null)
+                    anims.AddRange(emotes);
+            }
+        }
+        else
+        {
+            foreach (S808055D7 entryMultipleEntityAssignment in entry.MultipleEntityAssignments)
+            {
+                foreach (S808055DA assignment in entryMultipleEntityAssignment.EntityAssignmentResource.Value.Value.EntityAssignments)
+                {
+                    if (assignment.EntityAssignmentHash.IsValid())
+                    {
+                        var hash = assignment.EntityAssignmentHash;
+                        var emotes = isFinisher ? GetFinisherFromAssignmentHash(hash) : GetEmoteFromAssignmentHash(hash);
+                        if (emotes is not null)
+                            anims.AddRange(emotes);
+                    }
+                }
+            }
+        }
+
+        return anims;
+    }
+
     private Entity.Entity GetEntityFromAssignmentHash(TigerHash assignmentHash)
     {
         // We can binary search here as the list is sorted.
@@ -969,7 +1023,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         Tag<S80806FA3> tag = _sortedArrangementHashmap[assignmentHash];
         tag.Load();
 
-        if (tag.TagData.EntityData.IsInvalid() || tag.TagData.EntityData is null)
+        if (tag.TagData.EntityData is null || tag.TagData.EntityData.IsInvalid())
             return null;
 
         // if entity
@@ -978,6 +1032,84 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
         Log.Warning($"Hash is not an Entity: {tag.TagData.EntityData}");
         return null;
+    }
+
+    private List<Animation.Animation>? GetEmoteFromAssignmentHash(TigerHash assignmentHash)
+    {
+        if (!_sortedArrangementHashmap.ContainsKey(assignmentHash))
+            return null;
+
+        Tag<S80806FA3> tag = _sortedArrangementHashmap[assignmentHash];
+        tag.Load();
+
+        if (tag.TagData.EntityData is null || tag.TagData.EntityData.IsInvalid())
+            return null;
+
+        List<Animation.Animation> anims = new();
+        var classId = Helpers.GetClassHashForStrategy(typeof(S80806429), _strategy);
+        if (tag.TagData.EntityData.GetReferenceHash() == classId)
+        {
+            var container = FileResourcer.Get().GetSchemaTag<S80806429>(tag.TagData.EntityData);
+            if (container.TagData.Pointer.GetValue(container.GetReader()) is S8080642F emote)
+            {
+                anims.Add(emote.Anim);
+            }
+            else if (container.TagData.Pointer.GetValue(container.GetReader()) is S8080642E loopingEmote)
+            {
+                anims.AddRange(new List<Animation.Animation>() { loopingEmote.Intro, loopingEmote.Hold, loopingEmote.Outro });
+            }
+            else if (container.TagData.Pointer.GetValue(container.GetReader()) is S8080642B multiEmote)
+            {
+                anims.AddRange(new List<Animation.Animation>() { multiEmote.P1Idle, multiEmote.P1Loop, multiEmote.Outro });
+                foreach (var anim in multiEmote.OtherPlayerAnims)
+                {
+                    anims.Add(anim.Idle);
+                    anims.Add(anim.Loop);
+                }
+            }
+            else
+                throw new NotImplementedException($"{tag.TagData.EntityData}: Unknown resource pointer {container.TagData.Pointer.ResourceClassHash:X8}");
+        }
+        else
+        {
+            Log.Warning($"Hash is not an emote container: {tag.TagData.EntityData}");
+            return null;
+        }
+
+        return anims;
+    }
+
+    private List<Animation.Animation>? GetFinisherFromAssignmentHash(TigerHash assignmentHash)
+    {
+        if (!_sortedArrangementHashmap.ContainsKey(assignmentHash))
+            return null;
+
+        Tag<S80806FA3> tag = _sortedArrangementHashmap[assignmentHash];
+        tag.Load();
+
+        if (tag.TagData.EntityData.IsInvalid() || tag.TagData.EntityData is null)
+            return null;
+
+        List<Animation.Animation> anims = new();
+        var classId = Helpers.GetClassHashForStrategy(typeof(S80803144), _strategy);
+        if (tag.TagData.EntityData.GetReferenceHash() == classId)
+        {
+            var container = FileResourcer.Get().GetSchemaTag<S80803144>(tag.TagData.EntityData);
+            if (container.TagData.Entity == null)
+                return null;
+
+            foreach (var sequence in container.TagData.Entity.Sequences)
+            {
+                anims.AddRange(sequence.GetSequencerAnimations());
+            }
+        }
+        else
+        {
+            Log.Warning($"Hash is not an emote container: {tag.TagData.EntityData}");
+            return null;
+        }
+
+        return anims;
     }
 
     private async Task PopulateOrnaments()
@@ -1100,23 +1232,41 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
         {
             var skeleHash = item.IsGhost ? 0x681CD34630600000 : 0x95952E340F670000;
-            Ent skele = FileResourcer.Get().GetFile<Ent>(new FileHash(Hash64Map.Get().GetHash32Checked(skeleHash))); // 64 bit more permanent
+            Ent skele = new Ent(new FileHash(Hash64Map.Get().GetHash32Checked(skeleHash))); // 64 bit more permanent
             overrideSkeleton = new EntitySkeleton(skele.Skeleton.Hash);
         }
         else if (Strategy.IsD1())
         {
-            Ent playerBase = FileResourcer.Get().GetFile<Ent>(new FileHash(0x8184E10A));
+            Ent playerBase = new Ent(new FileHash(0x8184E10A));
             overrideSkeleton = new EntitySkeleton(playerBase.Skeleton.Hash);
         }
 
         Ent? val = Investment.Get().GetPatternEntityFromHash(item.Parent != null ? item.Parent.TagData.InventoryItemHash : item.TagData.InventoryItemHash);
+        if (val?.Skeleton != null)
+            overrideSkeleton = val.Skeleton;
+
+        // todo, weapon animations arent just the pattern ent skeleton, its a whole player rig
+        //if (val?.PatternAudio != null)
+        //{
+        //    var resource = (S8080356E)val.PatternAudio.GetUnk18();
+        //    resource.AnimEnt?.Load();
+        //    if (resource.AnimEnt != null)
+        //    {
+        //        scene.OverrideSkeleton = resource.AnimEnt.Skeleton;
+        //        scene.OverrideAnimationEntity = resource.AnimEnt;
+        //    }
+
+        //}
+        //else
+        //{
+        //    scene.OverrideSkeleton = overrideSkeleton;
+        //    scene.OverrideAnimationEntity = val;
+        //}
+
+        scene.OverrideSkeleton = overrideSkeleton;
+        //scene.OverrideAnimationEntity = val;
 
         Log.Debug($"Pattern Entity {val?.Hash}");
-
-        if (val != null && val.Skeleton != null)
-        {
-            overrideSkeleton = val.Skeleton;
-        }
 
         List<Ent> entities = Investment.Get().GetEntitiesFromHash(item);
 
@@ -1124,12 +1274,19 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
         foreach (Ent entity in entities)
         {
+            if (entity is null)
+                continue;
+
             if (entity.Hash.CheckRedacted())
             {
                 Log.Warning($"Entity {entity.Hash} is redacted, can not export.");
                 continue;
             }
-            Log.Debug($"Entity {entity?.Hash}: HasGeometry {entity?.HasGeometry()}");
+            Log.Debug($"Entity {entity?.Hash}: HasGeometry {entity?.HasGeometry()}, Skeleton? {entity?.Skeleton != null}");
+            Debug.Assert(entity?.Skeleton == null); // I dont actually know if any investment entities use their own skeleton instead of the pattern skele
+
+            if (entity.Skeleton == null && overrideSkeleton != null)
+                entity.Skeleton = overrideSkeleton;
 
             // ghost projections have just a rectangle mesh, we want just the actual projection mesh 
             if (item.ItemTraits.Any(x => x == DestinyTraitID.item_ghost_hologram))
@@ -1138,16 +1295,13 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                 continue;
             }
 
-            if (entity.Skeleton == null && overrideSkeleton != null)
-                entity.Skeleton = overrideSkeleton;
-
             List<DynamicMeshPart> dynamicParts = entity.Load(ExportDetailLevel.MostDetailed);
-            List<BoneNode> boneNodes = overrideSkeleton != null ? overrideSkeleton.GetBoneNodes() : new List<BoneNode>();
-            if (entity.Skeleton != null && overrideSkeleton == null)
-            {
-                boneNodes = entity.Skeleton.GetBoneNodes();
-            }
-            scene.AddEntity(entity, dynamicParts, boneNodes);
+
+            //List<BoneNode> boneNodes = overrideSkeleton != null ? overrideSkeleton.GetBoneNodes() : new List<BoneNode>();
+            //if (entity.Skeleton != null && overrideSkeleton == null)
+            //    boneNodes = entity.Skeleton.GetBoneNodes();
+
+            scene.AddEntity(entity, dynamicParts, new List<BoneNode>(), true);
             entity.SaveMaterialsFromParts(scene, dynamicParts);
             entity.SaveTexturePlates(savePath);
         }
@@ -1216,6 +1370,60 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                 }
             }
         }
+    }
+
+    public void ExportEmote(InventoryItem item, string savePath, bool aggregateOutput = false, bool isFinisher = false)
+    {
+        ConfigSubsystem config = ConfigSubsystem.Get();
+        string name = item.Name != string.Empty ? Helpers.SanitizeString(item.Name) : $"{item.ApiHash}";
+        if (!aggregateOutput)
+            savePath = config.GetExportSavePath() + $"/{name}";
+
+        var emote = Investment.Get().GetEmote(item, isFinisher);
+        if (emote is null || emote.Count == 0)
+            return;
+
+        Directory.CreateDirectory(savePath);
+        ExporterScene scene = Tiger.Exporters.Exporter.Get().CreateScene(name, ExportType.Emote);
+
+        Ent playerSkele = null;
+        // using new Entity() here instead of FileResourcer since that would grab a cached version where possible,
+        // I dont want to overwrite its existing animations on accident since in EntityView it would then show only 1 animation (the emote)
+        if (Strategy.IsLatest())
+        {
+            var skeleHash = 0xD9378260016E0000;
+            playerSkele = new Ent(new FileHash(Hash64Map.Get().GetHash32Checked(skeleHash)));
+        }
+        else if (Strategy.IsD1())
+        {
+            playerSkele = new Ent(new FileHash(0x80A6A022));
+        }
+        if (playerSkele is null)
+            throw new Exception($"Player skeleton is null");
+
+        List<Animation.Animation> anims = new();
+        foreach (var anim in emote)
+        {
+            if (anim is null || anim.Hash.IsInvalid())
+                continue;
+
+            anims.Add(anim);
+        }
+
+        playerSkele.Animations = new(); // player has over 2000 anims..we dont want all those
+        playerSkele.Animations.Add(new(new FileHash(FileHash.InvalidHash32))
+        {
+            AnimationTags = anims.ToHashSet()
+        });
+
+        scene.AddEntity(playerSkele, playerSkele.Load(ExportDetailLevel.MostDetailed), playerSkele.Skeleton.BoneNodes, true);
+
+        if (!aggregateOutput)
+            Tiger.Exporters.Exporter.Get().Export();
+        else
+            Tiger.Exporters.Exporter.Get().Export(savePath);
+
+        Log.Info($"Exported {(isFinisher ? "finisher" : "emote")} {name} to {savePath.Replace('\\', '/')}/");
     }
 
     // I don't like this

@@ -37,18 +37,24 @@ public class FbxExporter : AbstractExporter
                     break;
             }
 
-            if (scene.Type is ExportType.API or ExportType.D1API)
+            if (scene.Type is ExportType.API or ExportType.D1API or ExportType.Emote)
             {
                 if (args.AggregateOutput)
                     outputDirectory = args.OutputDirectory;
 
                 FbxScene apiScene = FbxScene.Create(_manager, scene.Name);
+
+                List<FbxNode>? overrideSkele = scene.OverrideSkeleton != null ? AddSkeleton(apiScene, scene.OverrideSkeleton.GetBoneNodes()) : null;
                 foreach (ExporterEntity entity in scene.Entities)
                 {
                     if (entity.Mesh.Parts.Count == 0)
                         continue;
-                    AddEntity(apiScene, entity, scene.DataType);
+                    AddEntity(apiScene, entity, scene, overrideSkele);
                 }
+
+                if (overrideSkele != null && scene.OverrideAnimationEntity != null && _config.GetExportAnimations())
+                    AddAnimations(apiScene, scene.OverrideAnimationEntity, overrideSkele);
+
                 ExportScene(apiScene, Path.Join(outputDirectory, scene.Name));
                 continue;
             }
@@ -85,7 +91,7 @@ public class FbxExporter : AbstractExporter
                 && args.AggregateOutput ? args.OutputDirectory : outputDirectory;
 
                 FbxScene fbxIndivScene = FbxScene.Create(_manager, entity.Mesh.Hash);
-                AddEntity(fbxIndivScene, entity, scene.DataType);
+                AddEntity(fbxIndivScene, entity, scene);
                 ExportScene(fbxIndivScene, Path.Join(savePath, entity.Mesh.Hash));
 
                 if (_config.GetSBoxExportEnabled() && scene.Type != ExportType.Terrain)
@@ -172,9 +178,18 @@ public class FbxExporter : AbstractExporter
         }
     }
 
-    private void AddEntity(FbxScene fbxScene, ExporterEntity entity, DataExportType exportType)
+    private void AddEntity(FbxScene fbxScene, ExporterEntity entity, ExporterScene scene, List<FbxNode>? overrideSkele = null)
     {
-        List<FbxNode> skeletonNodes = entity.BoneNodes == null ? new() : AddSkeleton(fbxScene, entity.BoneNodes);
+        List<FbxNode> skeletonNodes;
+        if (overrideSkele != null)
+            skeletonNodes = overrideSkele;
+        else if (entity.BoneNodes != null && entity.BoneNodes.Count > 0)
+            skeletonNodes = AddSkeleton(fbxScene, entity.BoneNodes);
+        else if (scene.OverrideSkeleton != null)
+            skeletonNodes = AddSkeleton(fbxScene, scene.OverrideSkeleton.GetBoneNodes());
+        else
+            skeletonNodes = new();
+
         foreach (ExporterPart part in entity.Mesh.Parts)
         {
             var dynamicMeshPart = part.MeshPart as DynamicMeshPart;
@@ -194,21 +209,27 @@ public class FbxExporter : AbstractExporter
             }
         }
 
-        if (skeletonNodes.Count > 0 && _config.GetExportAnimations() && exportType == DataExportType.Individual)
-            AddAnimations(fbxScene, entity, skeletonNodes);
+        if (overrideSkele == null && skeletonNodes.Count > 0 && _config.GetExportAnimations() && scene.DataType == DataExportType.Individual)
+        {
+            // todo, maybe add Entity directly to ExporterEntity so it doesnt get recreated here? Idk how that would effect memory usage tho
+            Entity? animEntity = entity.Entity != null ? entity.Entity
+                : entity.EntityHash != null
+                ? FileResourcer.Get().GetFile<Entity>(entity.EntityHash) : null;
+
+            if (animEntity?.Animations == null || animEntity.Animations.Count == 0)
+                animEntity = scene.OverrideAnimationEntity;
+
+            if (animEntity != null)
+                AddAnimations(fbxScene, animEntity, skeletonNodes);
+        }
     }
 
-    // todo, maybe add Entity directly to ExporterEntity so it doesnt get recreated here? Idk how that would effect memory usage tho
-    private void AddAnimations(FbxScene fbxScene, ExporterEntity exporterEntity, List<FbxNode> skeletonNodes)
+    private void AddAnimations(FbxScene fbxScene, Entity entity, List<FbxNode> overrideSkele)
     {
-        if (exporterEntity.EntityHash == null)
+        if (entity.Skeleton == null || entity.RuntimeRig == null || entity.Animations == null)
             return;
 
-        Entity? entity = FileResourcer.Get().GetFile<Entity>(exporterEntity.EntityHash);
-        if (entity?.Skeleton == null || entity.RuntimeRig == null || entity.Animations == null)
-            return;
-
-        if (entity.Skeleton.BoneNodes.Count != skeletonNodes.Count)
+        if (entity.Skeleton.BoneNodes.Count != overrideSkele.Count)
             return;
 
         HashSet<FileHash> seen = new();
@@ -224,7 +245,7 @@ public class FbxExporter : AbstractExporter
                 {
                     animation.LoadAnimation();
                     var data = animation.EvaluateForFbx(entity.RuntimeRig, entity.Skeleton, animation.Hash.ToString(), animation.LayerType);
-                    FbxAnimationWriter.Write(_manager, fbxScene, skeletonNodes, data);
+                    FbxAnimationWriter.Write(_manager, fbxScene, overrideSkele, data);
                 }
                 catch (Exception e)
                 {

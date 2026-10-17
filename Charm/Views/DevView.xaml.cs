@@ -12,6 +12,7 @@ using System.Windows.Input;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
+using Tiger.Schema.Animation;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
@@ -420,65 +421,24 @@ public partial class DevView : UserControl
     // Get back where you belong and forget about all this...Until we meet again.
     public void RipAndTear()
     {
-        var entities = PackageResourcer.Get().GetAllFiles<Entity>();
-        foreach (var entity in entities)
+        var anims = PackageResourcer.Get().GetAllFiles<Animation>();
+        string animPath = Path.Combine(ConfigSubsystem.Get().GetExportSavePath(), "temp", "test", "anims");
+        Directory.CreateDirectory(animPath);
+
+        for (int i = 0; i < 2000; i++)
         {
-            if (entity.RuntimeRig == null || entity.Skeleton == null)
-                continue;
-
-            var animations = new List<Tiger.Schema.Animation.Animation>();
-            if (entity?.Animations != null)
-            {
-                HashSet<FileHash> seen = new();
-                foreach (EntityAnimations entityAnimations in entity.Animations)
-                {
-                    entityAnimations.GetAllAnimations();
-                    foreach (var animation in entityAnimations.AnimationTags)
-                    {
-                        if (seen.Add(animation.Hash))
-                            animations.Add(animation);
-                    }
-                }
-            }
-
-            string animPath = $"G:\\Charm Output\\temp\\Test\\{entity.Hash}\\anims";
-            Directory.CreateDirectory(animPath);
-            foreach (var anim in animations)
-            {
-                var animFile = System.IO.Path.Combine(animPath, $"{anim.Hash}.bin");
-                using (var fileStream = new FileStream(animFile, FileMode.Create))
-                {
-                    using (var writer = new BinaryWriter(fileStream))
-                    {
-                        byte[] data = anim.GetData();
-                        writer.Write(data);
-                    }
-                }
-            }
-
-            string path = $"G:\\Charm Output\\temp\\Test\\{entity.Hash}";
-            Directory.CreateDirectory(path);
-            var rigFile = System.IO.Path.Combine(path, $"runtime_rig_{entity.RuntimeRig.Hash}.bin");
-            using (var fileStream = new FileStream(rigFile, FileMode.Create))
+            var anim = anims.ElementAt(i);
+            var animFile = Path.Combine(animPath, $"{anim.Hash}.bin");
+            using (var fileStream = new FileStream(animFile, FileMode.Create))
             {
                 using (var writer = new BinaryWriter(fileStream))
                 {
-                    byte[] data = entity.RuntimeRig.GetData();
+                    byte[] data = anim.GetData();
                     writer.Write(data);
                 }
             }
-
-            var skeleFile = System.IO.Path.Combine(path, $"skele_{entity.Skeleton.Hash}.bin");
-            using (var fileStream = new FileStream(skeleFile, FileMode.Create))
-            {
-                using (var writer = new BinaryWriter(fileStream))
-                {
-                    byte[] data = entity.Skeleton.GetData();
-                    writer.Write(data);
-                }
-            }
-
         }
+
     }
 #endif
 }

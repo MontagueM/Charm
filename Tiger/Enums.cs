@@ -220,10 +220,11 @@ public enum DestinyTraitID : uint
 
     [Description("Emblem")]
     item_emblem = 2455696884,
-
+    [Description("Emote")]
     item_emote = 888082966,
     item_engram = 2893978702,
     item_exotic_catalyst = 4036726046,
+    [Description("Finisher")]
     item_finisher = 2582082890,
 
     [Description("Ghost Shell")]

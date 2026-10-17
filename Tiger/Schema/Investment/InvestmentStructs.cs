@@ -834,9 +834,97 @@ public struct S80806FA3
     public long FileSize;
 
     [SchemaField(0x10, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(8, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
-    public FileHash EntityData;  // can be entity, can be audio group for entity
+    [SchemaField(0x8, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
+    public FileHash EntityData;  // can be entity, can be audio group for entity, anim for emote
 }
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80802D11, 0x18)] // 112D8080
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80806429, 0x50)] // 29648080
+public struct S80806429
+{
+    [SchemaField(0x8)]
+    public StringHash Name;
+
+    [SchemaField(0x10)]
+    public ResourcePointer Pointer; // 2E648080
+}
+
+#region Emotes
+
+// basic emote
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80803125, 0x8)] // 25318080
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x8080642F, 0x18)] // 2F648080
+public struct S8080642F
+{
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_LATEST, Tag64 = true)]
+    public Animation.Animation Anim;
+
+    // int after on roi that looks like determines if it loops
+}
+
+
+// looping emote
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x8080642E, 0x30)] // 2E648080
+public struct S8080642E
+{
+    [SchemaField(Tag64 = true)]
+    public Animation.Animation Intro;
+    [SchemaField(Tag64 = true)]
+    public Animation.Animation Hold;
+    [SchemaField(Tag64 = true)]
+    public Animation.Animation Outro;
+}
+
+// multi player emote
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x8080642B, 0x50)] // 2B648080
+public struct S8080642B
+{
+    [SchemaField(Tag64 = true)]
+    public Animation.Animation P1Idle;
+    [SchemaField(Tag64 = true)]
+    public Animation.Animation P1Loop;
+
+    public DynamicArray<S8080642D> OtherPlayerAnims;
+
+    [SchemaField(0x38, Tag64 = true)]
+    public Animation.Animation Outro; // unsure
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x8080642D, 0x80)] // 2D648080
+public struct S8080642D
+{
+    [SchemaField(Tag64 = true)]
+    public Animation.Animation Idle;
+    [SchemaField(Tag64 = true)]
+    public Animation.Animation Loop;
+}
+#endregion
+
+#region Finishers
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80803144, 0x18)] // 44318080
+public struct S80803144
+{
+    [SchemaField(0x8, Tag64 = true)]
+    public Entity.Entity Entity;
+}
+
+// pointer from sequencer
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x80802379, 0x168)] // 79238080
+public struct S80802379
+{
+    [SchemaField(0x68)]
+    public ResourcePointer Pointer;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x8080237D, 0x4)] // 7D238080
+public struct S8080237D
+{
+    public Animation.Animation Anim;
+}
+
+#endregion
 
 #endregion
 

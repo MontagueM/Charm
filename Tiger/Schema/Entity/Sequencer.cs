@@ -1,4 +1,5 @@
 using Tiger.Schema.Audio;
+using Tiger.Schema.Investment;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Entity;
@@ -13,12 +14,13 @@ public class EntitySequencer : EntityComponent
     // todo, figure out where/how else this is used
     public List<Entity> GetSequencerEntities()
     {
+        using TigerReader reader = Reader;
         List<Entity> entities = new();
         if (GetUnk18() is S80808179 sequencer)
         {
             foreach (S808091F1 entry in sequencer.Array2)
             {
-                if (entry.Unk10.GetValue(Reader) is S80808881 entry2)
+                if (entry.Unk10.GetValue(reader) is S80808881 entry2)
                 {
                     if (entry2.Entity is null)
                         continue;
@@ -36,6 +38,27 @@ public class EntitySequencer : EntityComponent
         }
 
         return entities;
+    }
+
+    public List<Animation.Animation> GetSequencerAnimations()
+    {
+        using TigerReader reader = Reader;
+        List<Animation.Animation> anims = new();
+        if (GetUnk18() is S80808179 sequencer)
+        {
+            foreach (S808091F1 entry in sequencer.Array2)
+            {
+                if (entry.Unk10.GetValue(reader) is S80802379 entry2)
+                {
+                    if (entry2.Pointer.GetValue(reader) is S8080237D entry3)
+                        anims.Add(entry3.Anim);
+                    //else
+                    //    Debug.Assert(false, $"{Hash}: Unknown resource pointer {entry2.Pointer.ResourceClassHash:X8}");
+                }
+            }
+        }
+
+        return anims;
     }
 }
 

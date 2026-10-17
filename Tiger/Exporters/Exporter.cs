@@ -164,6 +164,10 @@ public class ExporterScene
     public DataExportType DataType { get; set; }
     public ExportType Type { get; set; }
 
+    // both for investment atm
+    public EntitySkeleton OverrideSkeleton { get; set; }
+    public Entity? OverrideAnimationEntity { get; set; } // skeleton/rig/animations
+
     public ConcurrentBag<ExporterMesh> TerrainMeshes = new();
     public ConcurrentBag<ExporterMesh> StaticMeshes = new();
     public ConcurrentBag<ExporterEntity> Entities = new();
@@ -269,7 +273,7 @@ public class ExporterScene
         });
     }
 
-    public void AddEntity(Entity entity, List<DynamicMeshPart> parts, List<BoneNode> boneNodes)
+    public void AddEntity(Entity entity, List<DynamicMeshPart> parts, List<BoneNode> boneNodes, bool useGivenEnt = false)
     {
         ExporterMesh mesh = new(entity.Hash);
         string name = $"{entity.Hash}" + (entity.Gender == DestinyGenderDefinition.None ? "" : $"_{entity.Gender}");
@@ -287,6 +291,8 @@ public class ExporterScene
             Mesh = mesh,
             BoneNodes = boneNodes,
         };
+        if (useGivenEnt)
+            exporterEntity.Entity = entity;
 
         if (entity.Model != null)
         {
@@ -433,6 +439,7 @@ public class ExporterScene
 public class ExporterEntity
 {
     public FileHash EntityHash = null;
+    public Entity Entity = null; // idk if should used spareingly
     public ExporterMesh Mesh { get; set; }
     public List<BoneNode> BoneNodes { get; set; } = new();
     public Vector4 TranslationOffset = Vector4.Zero;
@@ -537,5 +544,6 @@ public enum ExportType
     WaterDecals,
 
     API,
-    D1API
+    D1API,
+    Emote // also finisher
 }

@@ -22,7 +22,7 @@ public class Entity : Tag<SEntity>
     public EntityComponent? EntityChildren { get; private set; }
 
     public List<EntitySequencer>? Sequences { get; private set; } // The Sequencer (tm) ?
-    public List<EntityAnimations> Animations { get; private set; }
+    public List<EntityAnimations> Animations { get; set; }
 
     public EntityModel? Model => ModelParent?.GetModel();
     public EntityModel? PhysicsModel => PhysicsModelParent?.GetModel();

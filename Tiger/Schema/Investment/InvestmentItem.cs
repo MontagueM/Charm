@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Tiger.Schema.Entity;
 
 namespace Tiger.Schema.Investment;
 
@@ -7,6 +8,11 @@ public class InventoryItem : Tag<S8080799D>
     public InventoryItem(FileHash hash, bool shouldParse) : base(hash, shouldParse)
     {
     }
+
+    public List<Entity.Entity> Entities;
+    public EntityRuntimeRig Rig;
+    public EntitySkeleton Skeleton;
+    public EntityAnimations Animations;
 
     public int CollectibleIndex => Investment.Get().GetCollectibleIndexFromItemIndex(GetItemIndex());
 
@@ -30,6 +36,8 @@ public class InventoryItem : Tag<S8080799D>
 
     public bool IsEmblem => ItemTraits.Contains(DestinyTraitID.item_emblem) || Type == "Emblem"; // Some emblems dont have the trait?
     public bool IsShader => ItemTraits.Contains(DestinyTraitID.item_shader);
+    public bool IsEmote => ItemTraits.Contains(DestinyTraitID.item_emote);
+    public bool IsFinisher => ItemTraits.Contains(DestinyTraitID.item_finisher);
     public bool IsWeaponOrnament => ItemTraits.Contains(DestinyTraitID.item_ornament_weapon);
     public bool IsArmorOrnament => ItemTraits.Contains(DestinyTraitID.item_ornament_armor);
     public bool IsOrnament => IsWeaponOrnament || IsArmorOrnament;

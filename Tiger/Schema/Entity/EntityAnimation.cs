@@ -9,6 +9,9 @@ public class EntityAnimations : EntityComponent
 
     public void GetAllAnimations()
     {
+        if (Hash == FileHash.InvalidHash32)
+            return;
+
         if (GetUnk18() is not S808025F8 resource)
             return;
 

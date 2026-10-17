@@ -493,7 +493,11 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                 if (!dupNames.Add(curItem.Name))
                     curItem.Name += $" {curItem.ApiHash}";
 
-                if (curItem.ArtArrangementIndex != -1)
+                if (curItem.IsEmote || curItem.IsFinisher)
+                {
+                    Investment.Get().ExportEmote(curItem, savePath, aggregateOutput, curItem.IsFinisher);
+                }
+                else if (curItem.ArtArrangementIndex != -1)
                 {
                     // if has a model
                     Investment.Get().ExportInventoryItem(curItem, savePath, aggregateOutput);
@@ -510,7 +514,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                 }
                 else
                 {
-                    Log.Error($"Can't export item '{curItem.Name}' because it doesn't have a 3D model or isn't a Shader");
+                    Log.Error($"Can't export item '{curItem.Name}' because it has no exportable data or isn't a Shader.");
                 }
                 MainWindow.Progress.CompleteStage();
             });
@@ -693,21 +697,23 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         if (_added.ContainsKey(item.ApiHash))
             return true;
 
-        var blacklist = new HashSet<DestinyTraitID>
-        {
-            DestinyTraitID.item_emote,
-            DestinyTraitID.item_finisher,
-        };
+        //var blacklist = new HashSet<DestinyTraitID>
+        //{
+        //    DestinyTraitID.item_emote,
+        //    DestinyTraitID.item_finisher,
+        //};
 
         // TODO: Add emote fx mesh exporting
         var whitelist = new HashSet<DestinyTraitID>
         {
             DestinyTraitID.item_shader,
-            DestinyTraitID.item_ghost_hologram
+            DestinyTraitID.item_ghost_hologram,
+            DestinyTraitID.item_emote,
+            DestinyTraitID.item_finisher,
         };
 
-        if (item.ItemTraits.Any(blacklist.Contains))
-            return false;
+        //if (item.ItemTraits.Any(blacklist.Contains))
+        //    return false;
 
         // Gearset was removed on Artifacts in EoF for some reason, so the next best hacky solution is to:
         // 1: Check if the items InventoryBucket is the Seasonal Artifacts bucket
