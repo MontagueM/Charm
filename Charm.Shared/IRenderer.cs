@@ -75,8 +75,12 @@ public interface IRenderer
 
     public static bool CanUseRenderer()
     {
-        return Strategy.IsLatest()
-            && ConfigSubsystem.Get().GetCustomRenderer()
+        return ConfigSubsystem.Get().GetCustomRenderer()
             && CharmRenderer is not null;
+    }
+
+    public static bool CanUseFullRenderer()
+    {
+        return Strategy.IsLatest() && CanUseRenderer();
     }
 }

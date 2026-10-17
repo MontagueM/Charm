@@ -217,7 +217,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                 break;
         }
 
-        bool canView3D = MainWindow.Current?.CurrentTab?.Content is DareView2 && IRenderer.CanUseRenderer();
+        bool canView3D = MainWindow.Current?.CurrentTab?.Content is DareView2 && IRenderer.CanUseFullRenderer();
         bool canExport = MainWindow.Current?.CurrentTab?.Content is CategoryView && DareView2.ShouldAddToList(item);
 
         await Task.Run(() =>

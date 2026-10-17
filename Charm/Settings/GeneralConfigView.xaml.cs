@@ -163,15 +163,12 @@ public partial class GeneralConfigView : UserControl
             ConfigSettingToggleControl cusRend = new()
             {
                 SettingName = "Custom Renderer",
-                SettingLabel = "EXPERIMENTAL: Enables a custom renderer for models. (Latest version only)"
+                SettingLabel = "EXPERIMENTAL: Enables a custom renderer for models.\n- Full rendering on Latest, basic on older versions."
             };
             bVal = _config.GetCustomRenderer();
             cusRend.SettingValue = bVal.ToString();
             cusRend.ChangeButton.Click += CustomRenderer_OnClick;
             cusRend.IsEnabled = true;
-
-            if (!Strategy.IsLatest())
-                cusRend.IsEnabled = false;
 
             RenderingConfigPanel.Children.Add(cusRend);
         }

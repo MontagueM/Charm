@@ -93,7 +93,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         Focusable = true;
         Focus();
 
-        if (IRenderer.CanUseRenderer())
+        if (IRenderer.CanUseFullRenderer())
             Multi3DButton.Visibility = Visibility.Visible;
 
 #if DEBUG
@@ -370,7 +370,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         e.Handled = true;
         APIPlugItem apiItem = (sender as FrameworkElement).DataContext as APIPlugItem;
 
-        if (Keyboard.IsKeyDown(Key.LeftCtrl) && IRenderer.CanUseRenderer())
+        if (Keyboard.IsKeyDown(Key.LeftCtrl) && IRenderer.CanUseFullRenderer())
         {
             var item = apiItem.Item;
             if ((apiItem.Item.Type is "Artifact" or "Seasonal Artifact"))// && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is S808073C5 gearSet)
@@ -409,7 +409,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     private void Multi3DItemView(object sender, RoutedEventArgs e)
     {
-        if (!IRenderer.CanUseRenderer())
+        if (!IRenderer.CanUseFullRenderer())
             return;
 
         if (SelectedItems.Count == 0)
