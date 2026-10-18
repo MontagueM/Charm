@@ -1,5 +1,6 @@
 namespace Tiger.Schema.Animation;
 
+using Arithmic;
 using Quaternion = System.Numerics.Quaternion;
 using Vector3 = System.Numerics.Vector3;
 
@@ -21,7 +22,10 @@ public class ClipChannels
     public ClipChannels(Animation clip, BoneTracks[] decoded, RigProgram program, RetargetMode mode)
     {
         if (program.CompatibleControlCount(clip) == 0)
-            throw new NotSupportedException("Clip and rig have no matching control groups");
+        {
+            //Debug.Assert(false);
+            Log.Error($"{clip.Hash}: Clip and rig have no matching control groups. Can not play animation.");
+        }
 
         int[] map = program.ChannelMap(clip);
         float scale = program.TranslationScale(clip);

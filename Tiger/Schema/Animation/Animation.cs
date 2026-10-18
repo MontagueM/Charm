@@ -195,6 +195,53 @@ public class Animation : Tag<SAnimationClip>
         return FbxAnimationBuilder.Build(name, objectSpace, skeleton, layerType, FrameCount, frameRate);
     }
 
+    public FbxAnimationData EvaluateWeaponForFbx(
+        EntityRuntimeRig rig, EntitySkeleton rigSkeleton, EntitySkeleton weaponSkeleton, string name, LayerType layerType,
+        double frameRate = 30)
+    {
+        int first = AnimationSkinning.WeaponFirstBone(rigSkeleton, weaponSkeleton);
+        var objectSpace = Evaluate(rig, rigSkeleton, false);
+        var weaponBones = weaponSkeleton.BoneNodes;
+
+        var anchor = RigTransform.Compose(
+            RigTransform.FromObjectSpace(weaponBones[0].DefaultObjectSpaceTransform),
+            ToRigTransform(objectSpace[first], 0).Inverse());
+
+        var weapon = new BoneAnimation[weaponBones.Count];
+        for (int i = 0; i < weapon.Length; i++)
+        {
+            BoneAnimation source = objectSpace[first + i];
+            int frames = source.Rotations.Length;
+            var bone = new BoneAnimation
+            {
+                BoneHash = source.BoneHash,
+                Scales = new System.Numerics.Vector3[frames],
+                Rotations = new System.Numerics.Vector4[frames],
+                Translations = new System.Numerics.Vector3[frames],
+            };
+
+            for (int f = 0; f < frames; f++)
+            {
+                RigTransform t = RigTransform.Compose(anchor, ToRigTransform(source, f));
+                bone.Rotations[f] = new System.Numerics.Vector4(t.Rotation.X, t.Rotation.Y, t.Rotation.Z, t.Rotation.W);
+                bone.Translations[f] = t.Translation;
+                bone.Scales[f] = source.Scales[f] * anchor.Scale;
+            }
+            weapon[i] = bone;
+        }
+
+        return FbxAnimationBuilder.Build(name, weapon, weaponSkeleton, layerType, FrameCount, frameRate);
+    }
+
+    private static RigTransform ToRigTransform(BoneAnimation bone, int frame)
+    {
+        var r = bone.Rotations[frame];
+        return new RigTransform(
+            System.Numerics.Quaternion.Normalize(new System.Numerics.Quaternion(r.X, r.Y, r.Z, r.W)),
+            bone.Translations[frame],
+            bone.Scales[frame].X);
+    }
+
     public RootMotion? ReadRootMotion()
     {
         using TigerReader reader = GetReader();

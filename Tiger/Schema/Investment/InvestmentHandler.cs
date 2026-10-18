@@ -876,6 +876,38 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         return null;
     }
 
+    public Entity.Entity? GetWeaponAnimationEntity(InventoryItem item) => GetWeaponAnimationEntity(item, out _);
+    public Entity.Entity? GetWeaponAnimationEntity(InventoryItem item, out TigerHash? animationTag)
+    {
+        animationTag = null;
+        InventoryItem weapon = item.Parent ?? item;
+        Entity.Entity? pattern = GetPatternEntityFromHash(weapon.TagData.InventoryItemHash);
+        if (pattern?.PatternAudio?.GetUnk18() is not S8080356E resource)
+            return null;
+
+        TigerHash contentGroup = GetWeaponContentGroupHash(weapon);
+        Log.Debug($"{pattern.PatternAudio.Hash}: ContentGroupHash for {item.Name}: {contentGroup} ");
+        FileHash? hash = null;
+        if (resource.PatternAudioGroups is not null)
+        {
+            foreach (S8080319B entry in resource.PatternAudioGroups)
+            {
+                if (entry.WeaponContentGroup1Hash.Equals(contentGroup) && entry.WeaponSkeletonEntity is not null)
+                {
+                    hash = entry.WeaponSkeletonEntity.Hash;
+                    animationTag = entry.FirstPersonAnimID;
+                    break;
+                }
+            }
+        }
+
+        hash ??= resource.FallbackSkeletonEnt?.Hash;
+        if (hash is null || !hash.IsValid())
+            return null;
+
+        return FileResourcer.Get().GetFile<Entity.Entity>(hash);
+    }
+
     public TigerHash GetPatternGlobalTagId(InventoryItem item)
     {
         return _sandboxPatternGlobalTagIdTag.TagData.SandboxPatternGlobalTagId[_sandboxPatternGlobalTagIdTag.GetReader(), item.GetWeaponPatternIndex()].PatternGlobalTagIdHash;
@@ -1231,7 +1263,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         EntitySkeleton overrideSkeleton = null;
         if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
         {
-            var skeleHash = item.IsGhost ? 0x681CD34630600000 : 0x95952E340F670000;
+            var skeleHash = item.IsGhost ? 0xDF3F359A2E9E0000 : 0x95952E340F670000;
             Ent skele = new Ent(new FileHash(Hash64Map.Get().GetHash32Checked(skeleHash))); // 64 bit more permanent
             overrideSkeleton = new EntitySkeleton(skele.Skeleton.Hash);
         }
@@ -1245,26 +1277,26 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         if (val?.Skeleton != null)
             overrideSkeleton = val.Skeleton;
 
-        // todo, weapon animations arent just the pattern ent skeleton, its a whole player rig
-        //if (val?.PatternAudio != null)
-        //{
-        //    var resource = (S8080356E)val.PatternAudio.GetUnk18();
-        //    resource.AnimEnt?.Load();
-        //    if (resource.AnimEnt != null)
-        //    {
-        //        scene.OverrideSkeleton = resource.AnimEnt.Skeleton;
-        //        scene.OverrideAnimationEntity = resource.AnimEnt;
-        //    }
-
-        //}
-        //else
-        //{
-        //    scene.OverrideSkeleton = overrideSkeleton;
-        //    scene.OverrideAnimationEntity = val;
-        //}
-
         scene.OverrideSkeleton = overrideSkeleton;
         //scene.OverrideAnimationEntity = val;
+
+        // weapon animations come from a seperate entity
+        if (config.GetExportAnimations() && val?.Skeleton != null && (item.Parent ?? item).IsWeapon)
+        {
+            try
+            {
+                Ent? weaponAnimations = GetWeaponAnimationEntity(item, out TigerHash? weaponAnimationTag);
+                if (weaponAnimations?.Skeleton != null && weaponAnimations.RuntimeRig != null)
+                {
+                    scene.WeaponAnimationEntity = weaponAnimations;
+                    scene.WeaponAnimationID = weaponAnimationTag;
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error($"Couldnt get the weapon animation entity: {e.Message}");
+            }
+        }
 
         Log.Debug($"Pattern Entity {val?.Hash}");
 
@@ -1282,8 +1314,8 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                 Log.Warning($"Entity {entity.Hash} is redacted, can not export.");
                 continue;
             }
-            Log.Debug($"Entity {entity?.Hash}: HasGeometry {entity?.HasGeometry()}, Skeleton? {entity?.Skeleton != null}");
-            Debug.Assert(entity?.Skeleton == null); // I dont actually know if any investment entities use their own skeleton instead of the pattern skele
+            Log.Debug($"Entity {entity?.Hash}: HasGeometry {entity?.HasGeometry()}");
+            //Debug.Assert(entity?.Skeleton == null && entity.Skeleton.Hash == overrideSkeleton.Hash); // I dont actually know if any investment entities use their own skeleton instead of the pattern skele
 
             if (entity.Skeleton == null && overrideSkeleton != null)
                 entity.Skeleton = overrideSkeleton;

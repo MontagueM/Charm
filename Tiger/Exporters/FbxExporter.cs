@@ -52,10 +52,16 @@ public class FbxExporter : AbstractExporter
                     AddEntity(apiScene, entity, scene, overrideSkele);
                 }
 
-                if (overrideSkele != null && scene.OverrideAnimationEntity != null && _config.GetExportAnimations())
+                bool weaponAnimations = overrideSkele != null && scene.WeaponAnimationEntity != null && _config.GetExportAnimations();
+                if (weaponAnimations)
+                    AddAnimations(apiScene, scene.WeaponAnimationEntity!, overrideSkele!, scene.WeaponAnimationID, scene.OverrideSkeleton);
+                else if (overrideSkele != null && scene.OverrideAnimationEntity != null && _config.GetExportAnimations())
                     AddAnimations(apiScene, scene.OverrideAnimationEntity, overrideSkele);
 
                 ExportScene(apiScene, Path.Join(outputDirectory, scene.Name));
+
+                if (weaponAnimations)
+                    ExportFirstPersonRig(scene, Path.Join(outputDirectory, $"{scene.Name}_FirstPerson"));
                 continue;
             }
 
@@ -178,7 +184,47 @@ public class FbxExporter : AbstractExporter
         }
     }
 
-    private void AddEntity(FbxScene fbxScene, ExporterEntity entity, ExporterScene scene, List<FbxNode>? overrideSkele = null)
+    private void ExportFirstPersonRig(ExporterScene scene, string outputPath)
+    {
+        Entity rigEntity = scene.WeaponAnimationEntity!;
+        if (rigEntity.Skeleton == null || rigEntity.RuntimeRig == null)
+            return;
+
+        int first;
+        try
+        {
+            first = AnimationSkinning.WeaponFirstBone(rigEntity.Skeleton, scene.OverrideSkeleton);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Skipping first person rig export: {e.Message}");
+            return;
+        }
+
+        List<BoneNode> rigBones = rigEntity.Skeleton.GetBoneNodes();
+        List<BoneNode> weaponBones = scene.OverrideSkeleton.GetBoneNodes();
+        Mat4[] toRigBind = new Mat4[weaponBones.Count];
+        for (int i = 0; i < weaponBones.Count; i++)
+        {
+            toRigBind[i] = Mat4.Mul(
+                Mat4.FromTransform(rigBones[first + i].DefaultObjectSpaceTransform),
+                Mat4.FromTransform(weaponBones[i].DefaultInverseObjectSpaceTransform));
+        }
+
+        FbxScene rigScene = FbxScene.Create(_manager, $"{scene.Name}_FirstPerson");
+        List<FbxNode> skeletonNodes = AddSkeleton(rigScene, rigBones);
+        foreach (ExporterEntity entity in scene.Entities)
+        {
+            if (entity.Mesh.Parts.Count == 0)
+                continue;
+            AddEntity(rigScene, entity, scene, skeletonNodes, first, toRigBind);
+        }
+
+        AddAnimations(rigScene, rigEntity, skeletonNodes, scene.WeaponAnimationID, animPrefix: "fp");
+        ExportScene(rigScene, outputPath);
+    }
+
+    private void AddEntity(FbxScene fbxScene, ExporterEntity entity, ExporterScene scene, List<FbxNode>? overrideSkele = null, int boneOffset = 0, Mat4[]? toRigBind = null)
     {
         List<FbxNode> skeletonNodes;
         if (overrideSkele != null)
@@ -195,6 +241,8 @@ public class FbxExporter : AbstractExporter
             var dynamicMeshPart = part.MeshPart as DynamicMeshPart;
 
             FbxMesh fbxMesh = AddPart(fbxScene, part, true);
+            if (toRigBind != null)
+                MoveToRigBind(fbxMesh, dynamicMeshPart, toRigBind);
 
             if (dynamicMeshPart.VertexColourSlots.Count > 0 || dynamicMeshPart.GearDyeChangeColorIndex != 0xFF)
             {
@@ -205,7 +253,12 @@ public class FbxExporter : AbstractExporter
             if (dynamicMeshPart.VertexWeights.Count > 0 && skeletonNodes.Count > 0)
             {
                 Debug.Assert(dynamicMeshPart.VertexWeights.Count == dynamicMeshPart.VertexPositions.Count);
-                AddWeightsToMesh(fbxMesh, dynamicMeshPart, skeletonNodes);
+                AddWeightsToMesh(fbxMesh, dynamicMeshPart, skeletonNodes, boneOffset);
+            }
+            else if (scene.WeaponAnimationEntity != null && scene.OverrideSkeleton != null && skeletonNodes.Count > 0
+                && part.Material?.EnumerateScopes().Contains(TfxScope.SKINNING) == true)
+            {
+                AddRigidWeightsToMesh(fbxMesh, dynamicMeshPart, skeletonNodes, scene.OverrideSkeleton.BoneNodes.Count, boneOffset);
             }
         }
 
@@ -224,27 +277,50 @@ public class FbxExporter : AbstractExporter
         }
     }
 
-    private void AddAnimations(FbxScene fbxScene, Entity entity, List<FbxNode> overrideSkele)
+    private void AddAnimations(FbxScene fbxScene, Entity entity, List<FbxNode> overrideSkele, TigerHash? weaponTag = null, EntitySkeleton? weaponSkeleton = null, string animPrefix = "")
     {
         if (entity.Skeleton == null || entity.RuntimeRig == null || entity.Animations == null)
             return;
 
-        if (entity.Skeleton.BoneNodes.Count != overrideSkele.Count)
+        if ((weaponSkeleton ?? entity.Skeleton).BoneNodes.Count != overrideSkele.Count)
             return;
 
         HashSet<FileHash> seen = new();
         foreach (EntityAnimations animations in entity.Animations)
         {
             animations.GetAllAnimations();
+
+            Dictionary<FileHash, List<string>>? used = null;
+            if (weaponTag != null)
+            {
+                try
+                {
+                    used = animations.GetWeaponAnimations(weaponTag);
+                }
+                catch (Exception e)
+                {
+                    Log.Debug($"Couldnt find the weapon animation selector, exporting all animations instead: {e.Message}");
+                }
+            }
+
             foreach (var animation in animations.AnimationTags)
             {
-                if (animation == null || !seen.Add(animation.Hash))
+                if (animation == null || (used != null && !used.ContainsKey(animation.Hash)) || !seen.Add(animation.Hash))
                     continue;
+
+                string name = animation.Hash.ToString();
+                if (used != null && used[animation.Hash].Count > 0)
+                    name = $"{name}_{used[animation.Hash][0]}";
+
+                if (animPrefix != string.Empty)
+                    name = $"{animPrefix}_{name}";
 
                 try
                 {
                     animation.LoadAnimation();
-                    var data = animation.EvaluateForFbx(entity.RuntimeRig, entity.Skeleton, animation.Hash.ToString(), animation.LayerType);
+                    var data = weaponSkeleton != null
+                        ? animation.EvaluateWeaponForFbx(entity.RuntimeRig, entity.Skeleton, weaponSkeleton, name, animation.LayerType)
+                        : animation.EvaluateForFbx(entity.RuntimeRig, entity.Skeleton, name, animation.LayerType);
                     FbxAnimationWriter.Write(_manager, fbxScene, overrideSkele, data);
                 }
                 catch (Exception e)
@@ -313,7 +389,115 @@ public class FbxExporter : AbstractExporter
         rotation = new GlmQuat(bind.QuaternionRotation.W, bind.QuaternionRotation.X, bind.QuaternionRotation.Y, bind.QuaternionRotation.Z).Normalized();
     }
 
-    private void AddWeightsToMesh(FbxMesh mesh, DynamicMeshPart meshPart, List<FbxNode> skeletonNodes)
+    private static void MoveToRigBind(FbxMesh mesh, DynamicMeshPart part, Mat4[] toRigBind)
+    {
+        int count = part.VertexPositions.Count;
+        bool weighted = part.VertexWeights.Count == count;
+        var normals = mesh.GetLayer(0)?.GetNormals()?.GetDirectArray();
+        var tangents = mesh.GetLayer(0)?.GetTangents()?.GetDirectArray();
+        bool latest = Strategy.CurrentStrategy > TigerStrategy.DESTINY2_SHADOWKEEP_2999;
+
+        for (int i = 0; i < count; i++)
+        {
+            Mat4? matrix = weighted ? BlendedBind(part.VertexWeights[i], toRigBind) : RigidBind(part.VertexPositions[i], toRigBind);
+            if (matrix is not Mat4 m)
+                continue;
+
+            Vector4 p = part.VertexPositions[i];
+            System.Numerics.Vector3 position = TransformPoint(m, new System.Numerics.Vector3(p.X, p.Y, p.Z));
+            mesh.SetControlPointAt(new FbxVector4(position.X, position.Y, position.Z, 1), i);
+
+            if (normals != null && i < part.VertexNormals.Count && i < normals.GetCount())
+            {
+                Vector4 n = part.VertexNormals[i];
+                System.Numerics.Vector3 normal = TransformDirection(m, new System.Numerics.Vector3(n.X, n.Y, n.Z));
+                normals.SetAt(i, new FbxVector4(normal.X, normal.Y, normal.Z));
+            }
+
+            if (tangents != null && i < part.VertexTangents.Count && i < tangents.GetCount())
+            {
+                Vector4 t = part.VertexTangents[i];
+                Vector3 source = latest ? Vector4.QuaternionToEulerAngles(t) : new Vector3(t.X, t.Y, t.Z);
+                System.Numerics.Vector3 tangent = TransformDirection(m, new System.Numerics.Vector3(source.X, source.Y, source.Z));
+                tangents.SetAt(i, new FbxVector4(tangent.X, tangent.Y, tangent.Z));
+            }
+        }
+    }
+
+    private static Mat4? BlendedBind(VertexWeight vw, Mat4[] toRigBind)
+    {
+        float sum = 0;
+        Mat4 result = default;
+        for (int j = 0; j < 4; j++)
+        {
+            float w = vw.WeightValues[j];
+            int bone = vw.WeightIndices[j];
+            if (w <= 0 || bone < 0 || bone >= toRigBind.Length)
+                continue;
+
+            Mat4 m = toRigBind[bone];
+            result.C0 += m.C0 * w; result.C1 += m.C1 * w; result.C2 += m.C2 * w; result.C3 += m.C3 * w;
+            sum += w;
+        }
+
+        if (sum <= 0)
+            return null;
+
+        result.C0 /= sum; result.C1 /= sum; result.C2 /= sum; result.C3 /= sum;
+        return result;
+    }
+
+    private static Mat4? RigidBind(Vector4 position, Mat4[] toRigBind)
+    {
+        int bone = (int)(position.W * 32767f + 0.1f);
+        return bone >= 0 && bone < toRigBind.Length ? toRigBind[bone] : null;
+    }
+
+    private static System.Numerics.Vector3 TransformPoint(Mat4 m, System.Numerics.Vector3 p)
+    {
+        System.Numerics.Vector4 r = m.C0 * p.X + m.C1 * p.Y + m.C2 * p.Z + m.C3;
+        return new System.Numerics.Vector3(r.X, r.Y, r.Z);
+    }
+
+    private static System.Numerics.Vector3 TransformDirection(Mat4 m, System.Numerics.Vector3 d)
+    {
+        System.Numerics.Vector4 r = m.C0 * d.X + m.C1 * d.Y + m.C2 * d.Z;
+        var v = new System.Numerics.Vector3(r.X, r.Y, r.Z);
+        return v.LengthSquared() > 0 ? System.Numerics.Vector3.Normalize(v) : v;
+    }
+
+    private void AddRigidWeightsToMesh(FbxMesh mesh, DynamicMeshPart meshPart, List<FbxNode> skeletonNodes, int boneCount, int boneOffset)
+    {
+        int[] bones = new int[meshPart.VertexPositions.Count];
+        for (int i = 0; i < bones.Length; i++)
+        {
+            int bone = (int)(meshPart.VertexPositions[i].W * 32767f + 0.1f);
+            if (bone < 0 || bone >= boneCount || bone + boneOffset >= skeletonNodes.Count)
+                return;
+            bones[i] = bone + boneOffset;
+        }
+
+        FbxSkin skin = FbxSkin.Create(_manager, "skinName");
+        List<FbxCluster> weightClusters = new();
+        foreach (FbxNode node in skeletonNodes)
+        {
+            FbxCluster weightCluster = FbxCluster.Create(_manager, node.GetName());
+            weightCluster.SetLink(node);
+            weightCluster.SetLinkMode(FbxCluster.ELinkMode.eTotalOne);
+            weightCluster.SetTransformLinkMatrix(node.EvaluateGlobalTransform());
+            weightClusters.Add(weightCluster);
+        }
+
+        for (int i = 0; i < bones.Length; i++)
+            weightClusters[bones[i]].AddControlPointIndex(i, 1);
+
+        foreach (FbxCluster c in weightClusters)
+            skin.AddCluster(c);
+
+        mesh.AddDeformer(skin);
+    }
+
+    private void AddWeightsToMesh(FbxMesh mesh, DynamicMeshPart meshPart, List<FbxNode> skeletonNodes, int boneOffset = 0)
     {
         FbxSkin skin = FbxSkin.Create(_manager, "skinName");
         HashSet<int> seen = new();
@@ -342,10 +526,11 @@ public class FbxExporter : AbstractExporter
             {
                 if (vw.WeightValues[j] != 0)
                 {
-                    if (vw.WeightIndices[j] < weightClusters.Count)
+                    int bone = vw.WeightIndices[j] + boneOffset;
+                    if (bone < weightClusters.Count)
                     {
-                        seen.Add(vw.WeightIndices[j]);
-                        weightClusters[vw.WeightIndices[j]].AddControlPointIndex(lookup[v], (float)vw.WeightValues[j] / 255);
+                        seen.Add(bone);
+                        weightClusters[bone].AddControlPointIndex(lookup[v], (float)vw.WeightValues[j] / 255);
                     }
                 }
             }

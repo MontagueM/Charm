@@ -733,8 +733,9 @@ public struct S8080356E
     [SchemaField(0x610, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)] // unsure if actually tag64
     public Tag<S80806FA3> FallbackAudioGroup;
 
+    [SchemaField(0x4C8, TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
     [SchemaField(0x5F8, TigerStrategy.DESTINY2_LATEST, Tag64 = true), NoLoad]
-    public Entity AnimEnt;
+    public Entity FallbackSkeletonEnt; // default?
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x808031DE, 0xD8)] //DE318080
@@ -750,14 +751,16 @@ public struct S8080319B
     [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash WeaponContentGroup2Hash;  // "weaponContentGroupHash" from API
-    // theres other stringcontainer stuff but skipping it
+                                               // theres other stringcontainer stuff but skipping it
 
-    [SchemaField(0x40, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
-    public Entity? WeaponSkeletonEntityD1;
+    [SchemaField(0x58, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x90, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public TigerHash Unk90;
+    public TigerHash FirstPersonAnimID;
 
+    [SchemaField(0x68, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xA0, TigerStrategy.DESTINY2_WITCHQUEEN_6307, Tag64 = true)]
-    public Entity? WeaponSkeletonEntityD2;
+    public Entity? WeaponSkeletonEntity; // holds animations
 
     [SchemaField(0x88, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xD0, TigerStrategy.DESTINY2_WITCHQUEEN_6307, Tag64 = true)]

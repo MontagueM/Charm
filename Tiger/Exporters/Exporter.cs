@@ -164,9 +164,12 @@ public class ExporterScene
     public DataExportType DataType { get; set; }
     public ExportType Type { get; set; }
 
-    // both for investment atm
+    // for investment atm, not the biggest fan of this
     public EntitySkeleton OverrideSkeleton { get; set; }
     public Entity? OverrideAnimationEntity { get; set; } // skeleton/rig/animations
+    public Entity? WeaponAnimationEntity { get; set; }
+    public TigerHash? WeaponAnimationID { get; set; }
+    ///
 
     public ConcurrentBag<ExporterMesh> TerrainMeshes = new();
     public ConcurrentBag<ExporterMesh> StaticMeshes = new();
