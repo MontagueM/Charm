@@ -15,20 +15,13 @@ public class BoneAnimation
     public Vector3[] Translations = Array.Empty<Vector3>();
 }
 
-public enum RetargetMode
-{
-    Auto,
-    Absolute,
-    RestRelative, // added onto the rigs defaults
-}
-
 public static class RigRetarget
 {
     // evaluates every frame of the clip, object space tracks per skeleton bone
-    public static BoneAnimation[] Retarget(Animation clip, BoneTracks[] controls, EntitySkeleton skeleton, EntityRuntimeRig rig, RetargetMode mode = RetargetMode.Auto)
+    public static BoneAnimation[] Retarget(Animation clip, BoneTracks[] controls, EntitySkeleton skeleton, EntityRuntimeRig rig)
     {
         RigProgram program = new(rig, skeleton);
-        ClipChannels channels = new(clip, controls, program, mode);
+        ClipChannels channels = new(clip, controls, program);
 
         int frames = clip.FrameCount;
         var bones = skeleton.BoneNodes;

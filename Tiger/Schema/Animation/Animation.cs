@@ -180,10 +180,10 @@ public class Animation : Tag<SAnimationClip>
     // decodes the clip and runs it on the rig
     public BoneAnimation[] Evaluate(
         EntityRuntimeRig rig, EntitySkeleton skeleton,
-        bool localSpace = true, RetargetMode mode = RetargetMode.Auto)
+        bool localSpace = true)
     {
         var controls = AnimationDecoder.Decode(this);
-        var objectSpace = RigRetarget.Retarget(this, controls, skeleton, rig, mode);
+        var objectSpace = RigRetarget.Retarget(this, controls, skeleton, rig);
         return localSpace ? RigRetarget.ToLocalSpace(this, objectSpace, skeleton) : objectSpace;
     }
 

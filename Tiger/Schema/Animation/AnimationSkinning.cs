@@ -79,10 +79,10 @@ public class SkinningFrames
 
 public static class AnimationSkinning
 {
-    public static SkinningFrames Build(Animation animation, EntityRuntimeRig rig, EntitySkeleton skeleton, double frameRate = 30, RetargetMode mode = RetargetMode.Auto)
+    public static SkinningFrames Build(Animation animation, EntityRuntimeRig rig, EntitySkeleton skeleton, double frameRate = 30)
     {
         RigProgram program = new(rig, skeleton);
-        ClipChannels clip = new(animation, AnimationDecoder.Decode(animation), program, mode);
+        ClipChannels clip = new(animation, AnimationDecoder.Decode(animation), program);
 
         var bones = skeleton.BoneNodes;
         Mat4[] inverseBind = new Mat4[bones.Count];
@@ -115,13 +115,13 @@ public static class AnimationSkinning
         return first;
     }
 
-    public static SkinningFrames BuildWeapon(Animation animation, EntityRuntimeRig rig, EntitySkeleton rigSkeleton, EntitySkeleton weaponSkeleton, double frameRate = 30, RetargetMode mode = RetargetMode.Auto)
+    public static SkinningFrames BuildWeapon(Animation animation, EntityRuntimeRig rig, EntitySkeleton rigSkeleton, EntitySkeleton weaponSkeleton, double frameRate = 30)
     {
         var weaponBones = weaponSkeleton.BoneNodes;
         int first = WeaponFirstBone(rigSkeleton, weaponSkeleton);
 
         RigProgram program = new(rig, rigSkeleton);
-        ClipChannels clip = new(animation, AnimationDecoder.Decode(animation), program, mode);
+        ClipChannels clip = new(animation, AnimationDecoder.Decode(animation), program);
 
         Mat4[] inverseBind = new Mat4[weaponBones.Count];
         for (int i = 0; i < weaponBones.Count; i++)

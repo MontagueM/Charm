@@ -19,7 +19,7 @@ public class ClipChannels
     public LayerType Mode;
     private List<ChannelTrack> _tracks = new();
 
-    public ClipChannels(Animation clip, BoneTracks[] decoded, RigProgram program, RetargetMode mode)
+    public ClipChannels(Animation clip, BoneTracks[] decoded, RigProgram program)
     {
         if (program.CompatibleControlCount(clip) == 0)
         {
@@ -51,12 +51,7 @@ public class ClipChannels
         }
 
         FrameCount = clip.FrameCount;
-        Mode = mode switch
-        {
-            RetargetMode.Absolute => LayerType.Base,
-            RetargetMode.RestRelative => LayerType.Additive,
-            _ => clip.LayerType,
-        };
+        Mode = clip.LayerType;
     }
 
     // additive clips offset the values, base and replacement clips move them toward the clip by weight.
