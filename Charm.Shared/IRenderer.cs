@@ -21,10 +21,10 @@ public interface IRenderer
     void Destroy(bool fullyDestroy = false);
 
     void LoadStatic(FileHash hash);
-    void LoadEntity(Entity entity);
+    void LoadEntity(Entity entity, Dictionary<uint, uint>? state = null);
     void LoadInvestmentItem(InventoryItem item);
     void LoadInvestmentItems(IEnumerable<InventoryItem> items);
-    void RequestThumbnail(FileHash hash, TfxFeatureRenderer type, CancellationToken token, Action<BitmapSource> onComplete);
+    void RequestThumbnail(FileHash hash, TfxFeatureRenderer type, CancellationToken token, Action<BitmapSource> onComplete, Dictionary<uint, uint>? state = null);
 
     private static readonly object _lock = new();
     static HashSet<IRenderer> ActiveRenderers { get; } = new HashSet<IRenderer>();

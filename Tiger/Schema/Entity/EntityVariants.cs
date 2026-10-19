@@ -21,6 +21,40 @@ public class EntityVariants : EntityComponent
 
     public S80802AB8 Reader => ((S80802AB8)TagData.Unk18.GetValue(GetReader()));
 
+    public int FindVariantIndex(Dictionary<uint, uint>? state)
+    {
+        if (state is null || state.Count == 0)
+            return -1;
+
+        int best = -1;
+        int bestMatches = 0;
+        for (int i = 0; i < Variants.Count; i++)
+        {
+            int matches = 0;
+            bool conflicts = false;
+            foreach (var (key, value) in Variants[i].Labels)
+            {
+                if (!state.TryGetValue(key, out uint stateValue))
+                    continue;
+
+                if (stateValue != value)
+                {
+                    conflicts = true;
+                    break;
+                }
+                matches++;
+            }
+
+            if (!conflicts && matches > bestMatches)
+            {
+                best = i;
+                bestMatches = matches;
+            }
+        }
+
+        return best;
+    }
+
     private List<EntityVariant> GetVariants()
     {
         var resource = Reader;

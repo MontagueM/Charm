@@ -10,7 +10,7 @@ namespace Tiger.Exporters;
 
 public static class Source2Handler
 {
-    private static void SaveVMDL(string name, string savePath, string fbxPath, List<MeshPart> parts)
+    private static void SaveVMDL(string name, string savePath, string fbxPath, List<MeshPart> parts, string? fbxName = null)
     {
         try
         {
@@ -48,7 +48,7 @@ public static class Source2Handler
                 }
 
                 text = text.Replace("%MATERIALS%", mats.ToString());
-                text = text.Replace("%FILENAME%", $"{fbxPath}/{name}.fbx");
+                text = text.Replace("%FILENAME%", $"{fbxPath}/{fbxName ?? name}.fbx");
                 text = text.Replace("%MESHNAME%", name);
                 text = text.Replace("%EXCEPTIONS%", exceptions.ToString());
 
@@ -66,9 +66,9 @@ public static class Source2Handler
         SaveVMDL(mesh.Hash, savePath, fbxPath, mesh.Parts.Select(x => x.MeshPart).ToList());
     }
 
-    public static void SaveEntityVMDL(string savePath, string fbxPath, ExporterEntity entity)
+    public static void SaveEntityVMDL(string savePath, string fbxPath, ExporterEntity entity, string? fbxName = null)
     {
-        SaveVMDL(entity.Mesh.Hash, savePath, fbxPath, entity.Mesh.Parts.Select(x => x.MeshPart).ToList());
+        SaveVMDL(entity.Mesh.Hash, savePath, fbxPath, entity.Mesh.Parts.Select(x => x.MeshPart).ToList(), fbxName);
     }
 
     public static void SaveTerrainVMDL(string name, string savePath, List<StaticPart> parts)

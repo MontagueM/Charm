@@ -31,6 +31,7 @@ public partial class EntityListView : UserControl
 
     private int SortByIndex = 4;
     private Entity _currentEntity;
+    private EntityItem? _currentItem;
 
     private IRenderer Renderer = null;
     private EntityView RendererBasic = null;
@@ -473,10 +474,11 @@ public partial class EntityListView : UserControl
             return;
 
         EntityItem item = ((RadioButton)sender).DataContext as EntityItem;
-        LoadEntity(item.Hash);
+        _currentItem = item;
+        LoadEntity(item.Hash, item.States);
     }
 
-    private void LoadEntity(FileHash hash)
+    private void LoadEntity(FileHash hash, Dictionary<uint, uint>? state = null)
     {
         Log.Info($"Loading entity {hash}");
         _currentEntity = FileResourcer.Get().GetFile<Entity>(hash);
@@ -490,7 +492,7 @@ public partial class EntityListView : UserControl
         }
         else if (Renderer is not null)
         {
-            Renderer.LoadEntity(_currentEntity);
+            Renderer.LoadEntity(_currentEntity, state);
         }
     }
 
@@ -510,9 +512,8 @@ public partial class EntityListView : UserControl
         if (EntityList.ItemsSource is not IEnumerable<EntityItem> items || !items.Any())
             return;
 
-        // Hopefully this works fine, and not just for me
-        var exportItems = items.DistinctBy(x => x.Hash);
-        if (exportItems.Count() == 0)
+        var exportItems = items.DistinctBy(x => x.ExportName).ToList();
+        if (exportItems.Count == 0)
             return;
 
         bool exportChildren = ExportChildren.IsChecked.Value;
@@ -525,17 +526,36 @@ public partial class EntityListView : UserControl
         string savePath = $"{Config.GetExportSavePath()}/{pkgName}";
         Directory.CreateDirectory(savePath);
 
-        MainWindow.Progress.SetProgressStages(exportItems.Select((x, i) => $"Exporting {i + 1}/{exportItems.Count()}: {x.Hash}").ToList());
+        MainWindow.Progress.SetProgressStages(exportItems.Select((x, i) => $"Exporting {i + 1}/{exportItems.Count}: {x.DisplayName}").ToList());
         await Task.Run(() =>
         {
-            foreach (var item in exportItems)
+            Dictionary<EntityModelParent, HashSet<int>> previousStates = new();
+            try
             {
-                List<Entity> entities = new() { _currentEntity };
-                if (exportChildren)
-                    entities.AddRange(_currentEntity.GetEntityChildren());
+                foreach (var item in exportItems)
+                {
+                    Entity entity = FileResourcer.Get().GetFile<Entity>(item.Hash);
+                    if (entity.ModelParent is not null)
+                    {
+                        previousStates.TryAdd(entity.ModelParent, entity.ModelParent.AppliedMeshGroups);
+                        entity.ModelParent.ApplyState(item.States, entity.VariantMap);
+                    }
 
-                Entity.Export(entities, _currentEntity.Hash, savePath);
-                MainWindow.Progress.CompleteStage();
+                    List<Entity> entities = new() { entity };
+                    if (exportChildren)
+                        entities.AddRange(entity.GetEntityChildren());
+
+                    Entity.Export(entities, item.ExportName, savePath);
+                    MainWindow.Progress.CompleteStage();
+                }
+            }
+            finally
+            {
+                foreach (var (modelParent, groups) in previousStates)
+                {
+                    modelParent.AppliedMeshGroups = groups;
+                    modelParent.UpdateMeshGroups++;
+                }
             }
         });
 
@@ -546,7 +566,7 @@ public partial class EntityListView : UserControl
             {
                 Icon = "☑️",
                 Title = "Bulk Export Complete",
-                Description = $"Exported {exportItems.Count()} Entites to \"{savePath}\"",
+                Description = $"Exported {exportItems.Count} Entites to \"{savePath}\"",
                 Style = NotificationBanner.PopupStyle.Information
             };
             notify.Show();
@@ -558,9 +578,11 @@ public partial class EntityListView : UserControl
         if (_currentEntity is null)
             return;
 
+        // the viewer already has the items state applied
+        string exportName = _currentItem?.Hash == _currentEntity.Hash ? _currentItem.ExportName : _currentEntity.Hash;
         MainWindow.Progress.SetProgressStages(new List<string>
         {
-            $"Exporting Entity {_currentEntity.Hash}",
+            $"Exporting Entity {exportName}",
         });
 
         List<Entity> entities = new() { _currentEntity };
@@ -574,7 +596,7 @@ public partial class EntityListView : UserControl
 
         await Task.Run(() =>
         {
-            Entity.Export(entities, _currentEntity.Hash);
+            Entity.Export(entities, exportName);
             MainWindow.Progress.CompleteStage();
         });
 
@@ -585,7 +607,7 @@ public partial class EntityListView : UserControl
             {
                 Icon = "☑️",
                 Title = "Export Complete",
-                Description = $"Exported Entity {_currentEntity.Hash} to \"{ConfigSubsystem.Get().GetExportSavePath()}\\{_currentEntity.Hash}\\\"",
+                Description = $"Exported Entity {exportName} to \"{ConfigSubsystem.Get().GetExportSavePath()}\\{Helpers.SanitizeString(exportName)}\\\"",
                 Style = NotificationBanner.PopupStyle.Information
             };
             notify.Show();
@@ -711,7 +733,7 @@ public partial class EntityListView : UserControl
 
 
     private readonly Dictionary<EntityItem, CancellationTokenSource> _pendingThumbnailTokens = new();
-    private readonly Dictionary<FileHash, BitmapSource> _thumbnailCache = new();
+    private readonly Dictionary<string, BitmapSource> _thumbnailCache = new();
     private void Tag_Loaded(object sender, RoutedEventArgs e)
     {
         if (!IRenderer.CanUseRenderer())
@@ -722,7 +744,7 @@ public partial class EntityListView : UserControl
             btn.Tag = tag;
             if (tag.Thumbnail == null && !_pendingThumbnailTokens.ContainsKey(tag))
             {
-                var cachePath = ApiImageUtils.GetThumbnailCachePath(tag.Hash);
+                var cachePath = ApiImageUtils.GetThumbnailCachePath(tag.Hash, tag.States);
                 if (File.Exists(cachePath))
                 {
                     Task.Run(() => ApiImageUtils.LoadBitmap(cachePath)).ContinueWith(t =>
@@ -737,7 +759,7 @@ public partial class EntityListView : UserControl
 
                 var cts = new CancellationTokenSource();
                 _pendingThumbnailTokens[tag] = cts;
-                if (_thumbnailCache.TryGetValue(tag.Hash, out BitmapSource thumb))
+                if (_thumbnailCache.TryGetValue(cachePath, out BitmapSource thumb))
                 {
                     tag.Thumbnail = thumb;
                     return;
@@ -751,9 +773,10 @@ public partial class EntityListView : UserControl
                     {
                         tag.Thumbnail = bitmap;
                         _pendingThumbnailTokens.Remove(tag);
-                        _thumbnailCache.TryAdd(tag.Hash, bitmap);
+                        _thumbnailCache.TryAdd(cachePath, bitmap);
                         cts.Dispose();
-                    });
+                    },
+                    tag.States);
             }
         }
     }
@@ -787,6 +810,10 @@ public partial class EntityListView : UserControl
 
         public bool HasGeometry { get; set; } = true;
         public Dictionary<uint, uint>? States { get; set; }
+
+        public string ExportName => DisplayName is null || DisplayName == Hash || DisplayName == $"[{Hash}]"
+            ? Hash
+            : $"{Helpers.SanitizeString(DisplayName)}_{Hash}";
 
         private string _displayName;
         public string DisplayName

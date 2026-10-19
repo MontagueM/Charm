@@ -55,6 +55,11 @@ public class EntityModelParent : EntityComponent
 
     public EntityPermutationResult GetMeshGroupsWithOverrides(Dictionary<uint, uint> baseState, Dictionary<uint, uint> overrides, EntityVariant? variant = null)
     {
+        return new EntityPermutationResult(baseState, ApplyConditions(BuildConditions(baseState, overrides, variant)), -1);
+    }
+
+    private List<PartCondition> BuildConditions(Dictionary<uint, uint> baseState, Dictionary<uint, uint> overrides, EntityVariant? variant)
+    {
         var conditions = baseState.Select(x => new PartCondition(x.Key, x.Value)).ToList();
 
         if (variant is not null)
@@ -76,10 +81,36 @@ public class EntityModelParent : EntityComponent
             }
         }
 
-        return new EntityPermutationResult(baseState, ApplyConditions(conditions), -1);
+        return conditions;
     }
 
     public HashSet<int> ApplyConditions(List<PartCondition> conditions)
+    {
+        var result = EvaluateConditions(conditions);
+        AppliedMeshGroups = result;
+        UpdateMeshGroups++;
+        return result;
+    }
+
+    public HashSet<int> EvaluateState(Dictionary<uint, uint> state, EntityVariant? variant = null)
+    {
+        return EvaluateConditions(BuildConditions(state, new(), variant));
+    }
+
+    public void ApplyState(Dictionary<uint, uint>? state, EntityVariants? variants)
+    {
+        if (state is null || state.Count == 0)
+        {
+            AppliedMeshGroups = new();
+            UpdateMeshGroups++;
+            return;
+        }
+
+        int variant = variants?.FindVariantIndex(state) ?? -1;
+        ApplyConditions(BuildConditions(state, new(), variant == -1 ? null : variants!.Variants[variant]));
+    }
+
+    private HashSet<int> EvaluateConditions(List<PartCondition> conditions)
     {
         var labels = GetPartLabels();
         var result = new HashSet<int>();
@@ -88,10 +119,22 @@ public class EntityModelParent : EntityComponent
             if (!conditions.Any(x => x.Disables(labels[i])))
                 result.Add(i);
         }
-
-        AppliedMeshGroups = result;
-        UpdateMeshGroups++;
         return result;
+    }
+
+    // for thumbnail caching based on state
+    public static string? GetStateKey(Dictionary<uint, uint>? state)
+    {
+        if (state is null || state.Count == 0)
+            return null;
+
+        uint hash = 0x811C9DC5;
+        foreach (var (key, value) in state.OrderBy(x => x.Key))
+        {
+            hash = (hash ^ key) * 0x01000193;
+            hash = (hash ^ value) * 0x01000193;
+        }
+        return $"s{hash:X8}";
     }
 
     private HashSet<(uint, uint)>[] _cachedPartLabels;

@@ -29,6 +29,7 @@ class MetadataScene
     private readonly ConcurrentDictionary<string, dynamic> _config = new();
     private readonly ExportType _exportType;
     private readonly DataExportType _dataExportType;
+    private readonly string _sceneName;
 
     public MetadataScene(ExporterScene scene, Exporter.ExportEventArgs args)
     {
@@ -47,7 +48,12 @@ class MetadataScene
         _exportType = scene.Type;
         _dataExportType = scene.DataType;
         SetType(_exportType, _dataExportType);
-        SetMeshName(scene.Name);
+        _sceneName = scene.Name;
+        SetMeshName(scene.MeshName ?? scene.Name);
+        if (scene.Parent is not null)
+            _config["Parent"] = scene.Parent;
+        if (scene.AttachmentBone is not null)
+            _config["AttachmentBone"] = scene.AttachmentBone;
 
         _config.TryAdd("Game", MetadataGame.DESTINY);
         _config["UnifiedAssets"] = _charmConfig.GetSingleFolderMapAssetsEnabled();
@@ -96,7 +102,7 @@ class MetadataScene
                 {
                     Translation = entityMesh.TranslationOffset,
                     Rotation = entityMesh.RotationOffset
-                });
+                }, entityMesh.AttachmentBoneIndex);
             }
         }
 
@@ -107,7 +113,7 @@ class MetadataScene
         }
     }
 
-    public void AddPart(ExporterPart part, string partName, MapTransform? offset = null)
+    public void AddPart(ExporterPart part, string partName, MapTransform? offset = null, int attachmentBoneIndex = -1)
     {
         if (!_config["Parts"].ContainsKey(part.SubName))
         {
@@ -133,6 +139,9 @@ class MetadataScene
                 jsonPart.TranslationOffset = new float[] { trans.X, trans.Y, trans.Z };
                 jsonPart.RotationOffset = new float[] { rot.X, rot.Y, rot.Z, rot.W };
             }
+
+            if (attachmentBoneIndex != -1)
+                jsonPart.AttachmentBoneIndex = attachmentBoneIndex;
 
             _config["Parts"][part.SubName] = jsonPart;
         }
@@ -200,7 +209,7 @@ class MetadataScene
         {
             if (_dataExportType is DataExportType.Individual)
             {
-                path = Path.Join(path, _config["MeshName"]);
+                path = Path.Join(path, _sceneName);
             }
             else if (_dataExportType is DataExportType.Map)
             {
@@ -221,6 +230,8 @@ class MetadataScene
 
     public struct JsonPart
     {
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public int? AttachmentBoneIndex;
         public float[] TranslationOffset;
         public float[] RotationOffset;  // Quaternion
         public JsonMisc Misc;

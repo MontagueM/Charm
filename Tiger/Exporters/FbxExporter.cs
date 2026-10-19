@@ -96,14 +96,15 @@ public class FbxExporter : AbstractExporter
                 && scene.DataType == DataExportType.Individual
                 && args.AggregateOutput ? args.OutputDirectory : outputDirectory;
 
-                FbxScene fbxIndivScene = FbxScene.Create(_manager, entity.Mesh.Hash);
+                string fileName = scene.MeshName ?? entity.Mesh.Hash;
+                FbxScene fbxIndivScene = FbxScene.Create(_manager, fileName);
                 AddEntity(fbxIndivScene, entity, scene);
-                ExportScene(fbxIndivScene, Path.Join(savePath, entity.Mesh.Hash));
+                ExportScene(fbxIndivScene, Path.Join(savePath, fileName));
 
                 if (_config.GetSBoxExportEnabled() && scene.Type != ExportType.Terrain)
                 {
                     string fbxPath = scene.DataType == DataExportType.Map ? modelSubDirectory : "Models";
-                    Source2Handler.SaveEntityVMDL(savePath, fbxPath, entity);
+                    Source2Handler.SaveEntityVMDL(savePath, fbxPath, entity, fileName);
                 }
             }
 

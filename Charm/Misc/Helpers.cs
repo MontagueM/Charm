@@ -78,8 +78,12 @@ public static class ApiImageUtils
     public static string ThumbnailCacheDirectory =>
        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Charm", "ThumbnailCache");
 
-    public static string GetThumbnailCachePath(FileHash hash) =>
-       Path.Combine(ThumbnailCacheDirectory, $"{Strategy.CurrentStrategy}_{hash}.png");
+    public static string GetThumbnailCachePath(FileHash hash, Dictionary<uint, uint>? state = null)
+    {
+        string? stateKey = Tiger.Schema.Entity.EntityModelParent.GetStateKey(state);
+        string name = stateKey is null ? $"{Strategy.CurrentStrategy}_{hash}" : $"{Strategy.CurrentStrategy}_{hash}_{stateKey}";
+        return Path.Combine(ThumbnailCacheDirectory, $"{name}.png");
+    }
 
     public static BitmapImage LoadBitmap(string path)
     {

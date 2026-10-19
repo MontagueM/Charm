@@ -31,7 +31,7 @@ public class Entity : Tag<SEntity>
     public DestinyGenderDefinition Gender { get; set; } = DestinyGenderDefinition.None; // Only used for player armor
 
     public IEnumerable<FileHash> Components => _tag.EntityComponents.Select(GetReader(), r => r.Resource);
-
+    private List<Entity> _cachedEntityChildren;
     private bool _loaded = false;
     public Entity(FileHash hash, bool shouldParse = true) : base(hash, shouldParse)
     {
@@ -250,6 +250,9 @@ public class Entity : Tag<SEntity>
             }
         }
 
+        if (_cachedEntityChildren is not null)
+            return _cachedEntityChildren;
+
         List<Entity> entities = new();
         if (CarriedWeapon is not null)
         {
@@ -276,7 +279,9 @@ public class Entity : Tag<SEntity>
 
                         Quaternion newRot = offsetRot.ToQuat() * offset.Rotation.ToQuat();
 
-                        offsetTrans += new Vector4(offset.Translation.X, offset.Translation.Y, offset.Translation.Z);
+                        System.Numerics.Vector3 boneOffset = System.Numerics.Vector3.Transform(
+                            new System.Numerics.Vector3(offset.Translation.X, offset.Translation.Y, offset.Translation.Z), offsetRot.ToQuat());
+                        offsetTrans += new Vector4(boneOffset.X, boneOffset.Y, boneOffset.Z);
                         offsetRot = new Vector4(newRot.X, newRot.Y, newRot.Z, newRot.W);
 
                         //Log.Debug($"{GlobalStrings.Get().GetString(nodes[parentBone].Hash)}: {offsetTrans} : {offsetRot}");
@@ -356,7 +361,9 @@ public class Entity : Tag<SEntity>
 
                         Quaternion newRot = offsetRot.ToQuat() * offset.Rotation.ToQuat();
 
-                        offsetTrans += new Vector4(offset.Translation.Z, offset.Translation.X, offset.Translation.Y);
+                        System.Numerics.Vector3 boneOffset = System.Numerics.Vector3.Transform(
+                            new System.Numerics.Vector3(offset.Translation.X, offset.Translation.Y, offset.Translation.Z), offsetRot.ToQuat());
+                        offsetTrans += new Vector4(boneOffset.X, boneOffset.Y, boneOffset.Z);
                         offsetRot = new Vector4(newRot.X, newRot.Y, newRot.Z, newRot.W);
 
                         //Log.Debug($"{entry.Entity.Hash}, {GlobalStrings.Get().GetString(nodes[parentBone].Hash)}: {offsetTrans} : {Vector4.QuaternionToEulerAngles(offsetRot)}");
@@ -407,6 +414,7 @@ public class Entity : Tag<SEntity>
             }
         }
 
+        _cachedEntityChildren = entities;
         return entities;
     }
 
@@ -421,6 +429,17 @@ public class Entity : Tag<SEntity>
         foreach (Entity entity in entities)
         {
             var scene = Tiger.Exporters.Exporter.Get().CreateScene(entity.Hash, ExportType.Entities);
+            if (entity == entities[0])
+                scene.MeshName = sanitizedName;
+            else
+                scene.Parent = sanitizedName;
+
+            if (entity != entities[0] && entity.Model is not null && entity.Model.BoneAttachIndex != -1)
+            {
+                List<BoneNode>? parentBones = (overrideSkeleton ?? entities[0].Skeleton)?.GetBoneNodes();
+                if (parentBones is not null && entity.Model.BoneAttachIndex < parentBones.Count)
+                    scene.AttachmentBone = parentBones[entity.Model.BoneAttachIndex].HashString;
+            }
 
             if (entity.Skeleton == null && overrideSkeleton != null)
                 entity.Skeleton = overrideSkeleton;

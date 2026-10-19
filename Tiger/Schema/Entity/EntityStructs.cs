@@ -1281,7 +1281,7 @@ public struct S80809AC9
     [SchemaField(0x10, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Vector4 Rotation;
-    public Vector4 Translation; // ZXY???
+    public Vector4 Translation;
 
     [SchemaField(0x4, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x24, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
@@ -1340,7 +1340,7 @@ public struct S808036FD
     [SchemaField(0x10, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Vector4 Rotation;
-    public Vector4 Translation; // ZXY???
+    public Vector4 Translation;
 
     [SchemaField(0x4, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x24, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]

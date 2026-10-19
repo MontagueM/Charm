@@ -161,6 +161,9 @@ public class GlobalExporterScene : ExporterScene
 public class ExporterScene
 {
     public string Name { get; set; }
+    public string? MeshName { get; set; }
+    public string? Parent { get; set; }
+    public string? AttachmentBone { get; set; }
     public DataExportType DataType { get; set; }
     public ExportType Type { get; set; }
 
@@ -301,6 +304,7 @@ public class ExporterScene
         {
             exporterEntity.TranslationOffset = entity.Model.TranslationOffset;
             exporterEntity.RotationOffset = entity.Model.RotationOffset;
+            exporterEntity.AttachmentBoneIndex = entity.Model.BoneAttachIndex;
         }
 
         Entities.Add(exporterEntity);
@@ -445,6 +449,7 @@ public class ExporterEntity
     public Entity Entity = null; // idk if should used spareingly
     public ExporterMesh Mesh { get; set; }
     public List<BoneNode> BoneNodes { get; set; } = new();
+    public int AttachmentBoneIndex = -1;
     public Vector4 TranslationOffset = Vector4.Zero;
     public Vector4 RotationOffset = Vector4.Quaternion;
 }
