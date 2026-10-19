@@ -257,38 +257,74 @@ public class PackagePathsCache
 // Idk where else to put this, or if this is even needed
 public struct NamedEntities
 {
-    public ConcurrentDictionary<TigerStrategy, ConcurrentDictionary<string, List<string>>> EntityNames;
+    // strategy -> entity hash -> entity name -> state
+    public ConcurrentDictionary<TigerStrategy, ConcurrentDictionary<string, ConcurrentDictionary<string, EntityState>>> EntityNames;
 
-    public NamedEntities(TigerStrategy version, FileHash entityHash, List<string> entityNames)
+    public NamedEntities(TigerStrategy version, FileHash entityHash, ConcurrentDictionary<string, EntityState> entityNames)
     {
-        var innerDictionary = new ConcurrentDictionary<string, List<string>>();
+        var innerDictionary = new ConcurrentDictionary<string, ConcurrentDictionary<string, EntityState>>();
         innerDictionary[entityHash] = entityNames;
 
-        EntityNames = new ConcurrentDictionary<TigerStrategy, ConcurrentDictionary<string, List<string>>>();
+        EntityNames = new ConcurrentDictionary<TigerStrategy, ConcurrentDictionary<string, ConcurrentDictionary<string, EntityState>>>();
         EntityNames[version] = innerDictionary;
     }
 
-    public void AddEntityName(TigerStrategy strategy, string entityHash, string entityName)
+    public void AddEntityName(TigerStrategy strategy, string entityHash, string entityName, Dictionary<uint, uint>? state = null)
     {
-        EntityNames.AddOrUpdate(
-            strategy,
-            _ => new ConcurrentDictionary<string, List<string>>(),  // Add a new inner dictionary if not present
-            (_, existingDict) =>
-            {
-                // Update the inner dictionary (for this entity hash)
-                existingDict.AddOrUpdate(
-                    entityHash,
-                    _ => new List<string> { entityName }, // Add a new entry if the entity hash is new
-                    (_, existingList) =>
-                    {
-                        // Check if the name is already in the list to avoid duplicates
-                        if (!existingList.Contains(entityName))
-                        {
-                            existingList.Add(entityName);
-                        }
-                        return existingList;
-                    });
-                return existingDict;
-            });
+        var hashes = EntityNames.GetOrAdd(strategy, _ => new());
+        var names = hashes.GetOrAdd(entityHash, _ => new());
+        var entry = names.GetOrAdd(entityName, _ => new EntityState());
+        if (state == null)
+            return;
+
+        lock (entry)
+        {
+            entry.State ??= new();
+            foreach (var (key, value) in state)
+                entry.State[key] = value;
+        }
     }
+}
+
+public class EntityState
+{
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    [JsonConverter(typeof(HexDictionaryConverter))]
+    public Dictionary<uint, uint>? State;
+}
+
+public class HexDictionaryConverter : JsonConverter<Dictionary<uint, uint>>
+{
+    public override void WriteJson(JsonWriter writer, Dictionary<uint, uint>? value, JsonSerializer serializer)
+    {
+        if (value == null)
+        {
+            writer.WriteNull();
+            return;
+        }
+
+        writer.WriteStartObject();
+        foreach (var (key, val) in value)
+        {
+            writer.WritePropertyName($"0x{key:X8}");
+            writer.WriteValue($"0x{val:X8}");
+        }
+        writer.WriteEndObject();
+    }
+
+    public override Dictionary<uint, uint>? ReadJson(JsonReader reader, Type objectType, Dictionary<uint, uint>? existingValue, bool hasExistingValue, JsonSerializer serializer)
+    {
+        if (reader.TokenType == JsonToken.Null)
+            return null;
+
+        Dictionary<uint, uint> result = new();
+        foreach (var (key, val) in serializer.Deserialize<Dictionary<string, string>>(reader)!)
+            result[Parse(key)] = Parse(val);
+
+        return result;
+    }
+
+    private static uint Parse(string s) => s.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
+        ? Convert.ToUInt32(s[2..], 16)
+        : uint.Parse(s);
 }

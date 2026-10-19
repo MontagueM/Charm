@@ -680,13 +680,14 @@ public struct SStaticAmbientOcclusionMappings
 /// <summary>
 /// Entity overrides
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801333, 0x34)] //33138080
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80807EB6, 0x34)] //B67E8080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808019, 0x50)] //19808080
 [SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, 0x80808019, 0x54)] //19808080
 public struct S80808019
 {
     public ResourcePointer Unk00;
-    [SchemaField(0x20, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x24, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public StringHash EntityName;
 }
@@ -701,6 +702,8 @@ public struct S80803FFD
     public float Unk20; // health?
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80802B15, 0x28)] //152B8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x808038A0, 0x28)] //A0388080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80802AB2, 0x28)] //B22A8080
 public struct S80802AB2
 {
@@ -709,6 +712,9 @@ public struct S80802AB2
     public TigerHash Unk20;
 }
 
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80802A4E, 0x8)] //4E2A8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x8080389F, 0x8)] //9F388080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80802AB1, 0x8)] //B12A8080
 public struct SMapEntityOverride
 {

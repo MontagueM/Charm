@@ -211,29 +211,6 @@ public struct S80801348
     public ResourcePointer Pointer; // 06048080 (SMapDataEntry), data resource pointing to 33138080
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80801333, 0x34)] //33138080 // D2 works the same
-public struct S80801333
-{
-    public ResourcePointer Pointer; // 152B8080
-    [SchemaField(0x20)]
-    public StringHash EntityName; // Vosik, The Archpriest
-}
-
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80802B15, 0x28)] //152B8080
-public struct S80802B15
-{
-    [SchemaField(0x10)]
-    public DynamicArray<S80802A4E> Unk10;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80802A4E, 0x8)] //4E2A8080
-public struct S80802A4E
-{
-    public TigerHash Unk00;
-    public StringHash Type; // Faction? Type? (Devil Splicer's, Scorch Cannon)
-}
-
-
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x8080132B, 0x30)] //2B138080
 public struct S8080132B
 {
