@@ -113,16 +113,17 @@ public class RigProgram
     public void WriteBind(RigTransform[] output) => Array.Copy(_bind, output, BoneCount);
 
     #region Clip binding
-    public int CompatibleControlCount(Animation clip)
+    public int CompatibleControlCount(Animation clip) => CompatibleControlCount(clip.RigComponents);
+    public int CompatibleControlCount(IReadOnlyList<S80808C5F> clipGroups)
     {
         int count = 0;
-        int groups = Math.Min(clip.RigComponents.Count, _groupHashes.Length);
+        int groups = Math.Min(clipGroups.Count, _groupHashes.Length);
         for (int i = 0; i < groups; i++)
         {
-            if (clip.RigComponents[i].Unk00.Hash32 != _groupHashes[i])
+            if (clipGroups[i].Unk00.Hash32 != _groupHashes[i])
                 break;
 
-            count += clip.RigComponents[i].Unk04;
+            count += clipGroups[i].Unk04;
         }
 
         return Math.Min(count, ControlCount);

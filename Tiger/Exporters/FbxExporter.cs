@@ -285,6 +285,10 @@ public class FbxExporter : AbstractExporter
         if ((weaponSkeleton ?? entity.Skeleton).BoneNodes.Count != overrideSkele.Count)
             return;
 
+        // animations with no matching control groups cant play
+        var program = new RigProgram(entity.RuntimeRig, entity.Skeleton);
+
+        int unplayable = 0;
         HashSet<FileHash> seen = new();
         foreach (EntityAnimations animations in entity.Animations)
         {
@@ -307,6 +311,12 @@ public class FbxExporter : AbstractExporter
             {
                 if (animation == null || (used != null && !used.ContainsKey(animation.Hash)) || !seen.Add(animation.Hash))
                     continue;
+
+                if (program != null && program.CompatibleControlCount(animation.TagData.RigComponents) == 0)
+                {
+                    unplayable++;
+                    continue;
+                }
 
                 string name = animation.Hash.ToString();
                 if (used != null && used[animation.Hash].Count > 0)
@@ -332,6 +342,9 @@ public class FbxExporter : AbstractExporter
                 }
             }
         }
+
+        if (unplayable > 0)
+            Log.Info($"Skipped {unplayable} animations with no control groups matching rig {entity.RuntimeRig.Hash}");
     }
 
     private List<FbxNode> AddSkeleton(FbxScene fbxScene, List<BoneNode> boneNodes)
