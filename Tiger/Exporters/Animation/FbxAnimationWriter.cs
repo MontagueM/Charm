@@ -10,7 +10,8 @@ namespace Tiger.Exporters;
 internal static class FbxAnimationWriter
 {
     /// <param name="skeletonNodes">The skeleton's nodes in bone order, as returned by AddSkeleton.</param>
-    public static void Write(FbxManager manager, FbxScene scene, IReadOnlyList<FbxNode> skeletonNodes, FbxAnimationData animation)
+    /// <param name="skipChannels">[bone, channel] channels that get no curve, see <see cref="FindRestChannels"/>.</param>
+    public static void Write(FbxManager manager, FbxScene scene, IReadOnlyList<FbxNode> skeletonNodes, FbxAnimationData animation, bool[,]? skipChannels = null)
     {
         if (skeletonNodes.Count != animation.Bones.Length)
         {
@@ -39,22 +40,64 @@ internal static class FbxAnimationWriter
 
         stack.SetLocalTimeSpan(new FbxTimeSpan(SecondsToTime(0), SecondsToTime((animation.FrameCount - 1) / animation.FrameRate)));
 
+        string[] components = { FbxWrapperNative.FBXSDK_CURVENODE_COMPONENT_X, FbxWrapperNative.FBXSDK_CURVENODE_COMPONENT_Y, FbxWrapperNative.FBXSDK_CURVENODE_COMPONENT_Z };
         for (int i = 0; i < skeletonNodes.Count; i++)
         {
             FbxNode node = skeletonNodes[i];
-            FbxBoneCurves c = animation.Bones[i];
+            float[][] channels = Channels(animation.Bones[i]);
+            for (int channel = 0; channel < ChannelCount; channel++)
+            {
+                if (skipChannels != null && skipChannels[i, channel])
+                    continue;
 
-            WriteChannel(node.LclTranslation, layer, FbxWrapperNative.FBXSDK_CURVENODE_COMPONENT_X, c.TranslationX, animation.FrameRate);
-            WriteChannel(node.LclTranslation, layer, FbxWrapperNative.FBXSDK_CURVENODE_COMPONENT_Y, c.TranslationY, animation.FrameRate);
-            WriteChannel(node.LclTranslation, layer, FbxWrapperNative.FBXSDK_CURVENODE_COMPONENT_Z, c.TranslationZ, animation.FrameRate);
-            WriteChannel(node.LclRotation, layer, FbxWrapperNative.FBXSDK_CURVENODE_COMPONENT_X, c.RotationX, animation.FrameRate);
-            WriteChannel(node.LclRotation, layer, FbxWrapperNative.FBXSDK_CURVENODE_COMPONENT_Y, c.RotationY, animation.FrameRate);
-            WriteChannel(node.LclRotation, layer, FbxWrapperNative.FBXSDK_CURVENODE_COMPONENT_Z, c.RotationZ, animation.FrameRate);
-            WriteChannel(node.LclScaling, layer, FbxWrapperNative.FBXSDK_CURVENODE_COMPONENT_X, c.ScaleX, animation.FrameRate);
-            WriteChannel(node.LclScaling, layer, FbxWrapperNative.FBXSDK_CURVENODE_COMPONENT_Y, c.ScaleY, animation.FrameRate);
-            WriteChannel(node.LclScaling, layer, FbxWrapperNative.FBXSDK_CURVENODE_COMPONENT_Z, c.ScaleZ, animation.FrameRate);
+                FbxProperty property = channel < 3 ? node.LclTranslation : channel < 6 ? node.LclRotation : node.LclScaling;
+                WriteChannel(property, layer, components[channel % 3], channels[channel], animation.FrameRate);
+            }
         }
     }
+
+    private const int ChannelCount = 9;
+    private static readonly float[] Tolerances =
+    {
+        TranslationTolerance, TranslationTolerance, TranslationTolerance,
+        RotationTolerance, RotationTolerance, RotationTolerance,
+        ScaleTolerance, ScaleTolerance, ScaleTolerance
+    };
+
+    // translation xyz, rotation xyz, scale xyz
+    private static float[][] Channels(FbxBoneCurves c) => new[]
+    {
+        c.TranslationX, c.TranslationY, c.TranslationZ,
+        c.RotationX, c.RotationY, c.RotationZ,
+        c.ScaleX, c.ScaleY, c.ScaleZ
+    };
+
+    /// <summary>
+    /// [bone, channel] channels that stay at the bone's rest value in every animation. Those dont need a curve at all,
+    /// most of the export time is spent creating and writing curves. It has to hold for every animation since in Blender
+    /// a channel without a curve keeps whatever the previous action left it at.
+    /// </summary>
+    /// <param name="restValues">Per bone, the 9 rest pose local values the skeleton nodes were created with.</param>
+    public static bool[,] FindRestChannels(IReadOnlyList<FbxAnimationData> animations, IReadOnlyList<float[]> restValues)
+    {
+        var skip = new bool[restValues.Count, ChannelCount];
+        for (int bone = 0; bone < restValues.Count; bone++)
+        {
+            for (int channel = 0; channel < ChannelCount; channel++)
+            {
+                float rest = restValues[bone][channel];
+                float tolerance = Tolerances[channel];
+                skip[bone, channel] = animations.All(animation =>
+                    bone < animation.Bones.Length && Channels(animation.Bones[bone])[channel].All(value => MathF.Abs(value - rest) <= tolerance));
+            }
+        }
+        return skip;
+    }
+
+    // How close to the rest value a channel has to stay to count as not animated
+    private const float TranslationTolerance = 1e-5f; // units
+    private const float RotationTolerance = 1e-3f; // degrees
+    private const float ScaleTolerance = 1e-5f;
 
     private static FbxTime SecondsToTime(double seconds)
     {

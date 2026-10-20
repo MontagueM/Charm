@@ -86,13 +86,14 @@ public class EntityModel : Tag<SEntityModel>
         List<int> exportPartRange = new();
         if (_tag.Meshes.Count == 0) return parts;
 
+        bool allStages = loadLevel is LoadLevel.Full or LoadLevel.Render;
         int meshIndex = 0;
         foreach (SEntityModelMesh mesh in _tag.Meshes.Enumerate(GetReader()))
         {
             exportPartRange = GetExportRanges(mesh);
             foreach ((int i, S80806ECB part) in dynamicParts[meshIndex])
             {
-                if (!exportPartRange.Contains(i) && loadLevel != LoadLevel.Full)
+                if (!exportPartRange.Contains(i) && !allStages)
                     continue;
 
                 var renderStage = GetStageForPart(mesh, i);
@@ -134,11 +135,13 @@ public class EntityModel : Tag<SEntityModel>
                 if (dynamicMeshPart.Material is null)
                     continue;
 
-                if (loadLevel != LoadLevel.Full && (dynamicMeshPart.Material.Vertex.Shader is null || dynamicMeshPart.Material.Pixel.Shader is null))
+                if (!allStages && (dynamicMeshPart.Material.Vertex.Shader is null || dynamicMeshPart.Material.Pixel.Shader is null))
                     continue;
 
                 dynamicMeshPart.Material.RenderStage = dynamicMeshPart.RenderStage;
-                if (loadLevel != LoadLevel.Minimal)
+                if (loadLevel == LoadLevel.Render)
+                    dynamicMeshPart.GetBuffers(mesh, _tag);
+                else if (loadLevel != LoadLevel.Minimal)
                     dynamicMeshPart.GetAllData(mesh, _tag);
 
                 parts.Add(dynamicMeshPart);
@@ -214,6 +217,27 @@ public class DynamicMeshPart : MeshPart
 
     public DynamicMeshPart() : base()
     {
+    }
+
+
+    public void GetBuffers(SEntityModelMesh mesh, SEntityModel model)
+    {
+        IndexBuffer = mesh.Indices;
+        VertexBuffer0 = mesh.Vertices1;
+        VertexBuffer1 = mesh.Vertices2;
+        VertexColorBuffer = mesh.VertexColour;
+        VertexSkinningBuffer = mesh.SinglePassSkinningBuffer;
+        VertexOldWeightsBuffer = mesh.OldWeights;
+
+        if (Material.EnumerateScopes().Any(x => x == TfxScope.SPEEDTREE))
+            return;
+
+        var d1 = Strategy.IsD1();
+        MeshScale = d1 ? mesh.ModelScale : model.ModelScale;
+        MeshTransform = d1 ? mesh.ModelTranslation : model.ModelTranslation;
+        VertexScale = MeshScale.ToVec3();
+        VertexOffset = MeshTransform.ToVec3();
+        UVTransform = d1 ? new Vector4(mesh.TexcoordScale, mesh.TexcoordTranslation) : new Vector4(model.TexcoordScale, model.TexcoordTranslation);
     }
 
     public void GetAllData(SEntityModelMesh mesh, SEntityModel model)

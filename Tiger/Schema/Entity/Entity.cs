@@ -390,10 +390,7 @@ public class Entity : Tag<SEntity>
             }
         }
 
-        if (EntityChildren is null)
-            return entities;
-
-        if (EntityChildren.GetUnk18() is S8080840E children)
+        if (EntityChildren is not null && EntityChildren.GetUnk18() is S8080840E children)
         {
             foreach (S8080841B entry in children.Unk88)
             {

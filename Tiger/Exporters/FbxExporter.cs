@@ -174,6 +174,7 @@ public class FbxExporter : AbstractExporter
             exporter.Export(fbxScene);
         exporter.Destroy();
         fbxScene.Clear();
+        _restValues.Clear();
     }
 
     private void AddMesh(FbxScene fbxScene, ExporterMesh mesh)
@@ -291,6 +292,7 @@ public class FbxExporter : AbstractExporter
 
         int unplayable = 0;
         HashSet<FileHash> seen = new();
+        List<(FileHash Hash, FbxAnimationData Data)> evaluated = new();
         foreach (EntityAnimations animations in entity.Animations)
         {
             animations.GetAllAnimations();
@@ -332,7 +334,7 @@ public class FbxExporter : AbstractExporter
                     var data = weaponSkeleton != null
                         ? animation.EvaluateWeaponForFbx(entity.RuntimeRig, entity.Skeleton, weaponSkeleton, name, animation.LayerType)
                         : animation.EvaluateForFbx(entity.RuntimeRig, entity.Skeleton, name, animation.LayerType);
-                    FbxAnimationWriter.Write(_manager, fbxScene, overrideSkele, data);
+                    evaluated.Add((animation.Hash, data));
                 }
                 catch (Exception e)
                 {
@@ -346,7 +348,30 @@ public class FbxExporter : AbstractExporter
 
         if (unplayable > 0)
             Log.Info($"Skipped {unplayable} animations with no control groups matching rig {entity.RuntimeRig.Hash}");
+
+        // all evaluated first so channels that stay at rest in every animation can be left out
+        bool[,]? skipChannels = overrideSkele.All(_restValues.ContainsKey)
+            ? FbxAnimationWriter.FindRestChannels(evaluated.Select(x => x.Data).ToList(), overrideSkele.Select(x => _restValues[x]).ToList())
+            : null;
+
+        foreach ((FileHash hash, FbxAnimationData data) in evaluated)
+        {
+            try
+            {
+                FbxAnimationWriter.Write(_manager, fbxScene, overrideSkele, data, skipChannels);
+            }
+            catch (Exception e)
+            {
+#if DEBUG
+                throw e;
+#endif
+                Log.Error($"Skipping animation {hash}: {e.Message}");
+            }
+        }
     }
+
+    // rest pose local values (translation, euler rotation, scale) of the skeleton nodes, so animations can skip curves that never leave them
+    private readonly Dictionary<FbxNode, float[]> _restValues = new(ReferenceEqualityComparer.Instance);
 
     private List<FbxNode> AddSkeleton(FbxScene fbxScene, List<BoneNode> boneNodes)
     {
@@ -372,6 +397,7 @@ public class FbxExporter : AbstractExporter
             System.Numerics.Vector3 euler = EulerXyz.FromQuaternion(rotation, null);
             newNode.Node.LclTranslation.Set(new FbxDouble3(location.X, location.Y, location.Z));
             newNode.Node.LclRotation.Set(new FbxDouble3(euler.X, euler.Y, euler.Z));
+            _restValues[newNode.Node] = new[] { location.X, location.Y, location.Z, euler.X, euler.Y, euler.Z, 1f, 1f, 1f };
             nodes.Add(newNode);
         }
 

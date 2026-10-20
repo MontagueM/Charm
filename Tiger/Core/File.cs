@@ -116,12 +116,18 @@ public class TigerReferenceFile<THeader> : Tag<THeader> where THeader : struct
 
     public MemoryStream GetReferenceStream()
     {
-        return new MemoryStream(GetReferenceData());
+        return new MemoryStream(GetReferenceData(), false);
     }
 
+    private WeakReference<byte[]>? _referenceData;
     public byte[] GetReferenceData()
     {
-        return PackageResourcer.Get().GetFileData(ReferenceHash);
+        if (_referenceData is not null && _referenceData.TryGetTarget(out byte[]? cached))
+            return cached;
+
+        byte[] data = PackageResourcer.Get().GetFileData(ReferenceHash);
+        _referenceData = new WeakReference<byte[]>(data);
+        return data;
     }
 
     public Blob ToBlob()

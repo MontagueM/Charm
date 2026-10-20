@@ -14,7 +14,8 @@ public enum LoadLevel
 {
     Full, // Loads all render stage meshes
     Default, // Loads only the 'main' render stage meshes
-    Minimal // Doesnt process any mesh data, only information
+    Minimal, // Doesnt process any mesh data, only information
+    Render // Like Full but only the buffers and transforms, no vertex data is read (renderer without skinning)
 }
 
 /// <summary>
