@@ -1,5 +1,34 @@
 [
     {
+        "version": "3.5.0 BETA",
+        "date": "10-20-2026",
+        "changes": [
+            {
+                "title": "Animation Exporting!",
+                "notes": [
+                    "Animations from all versions can now be exported! You can enable it in the settings.\n- Exporting entities with lots of animations will take some time.\n- For full support, use the custom renderer to preview and filter animations for exporting.",
+                    "Weapon, Ghost, Sparrow, Skimmer, Emotes and Finisher animations can also be previewed/exported, though not filtered yet.\n- Weapons will also export with an additional first person skeleton.",
+                    "Please report any issues you may run into!"
+                ]
+            },
+            {
+                "title": "Additions",
+                "notes": [
+                    "Entity variants will now automatically apply in thumbnails/renderer and on export",
+                    "Custom renderer support for all versions, any version below Latest will just be simple/flat shading.\n- This allows previewing animations on all versions.",
+                    "Adjustable columns in Entity, Static, Audio and Texture views"
+                ]
+            },
+            {
+                "title": "Fixes",
+                "notes": [
+                    "Renderer: Improved thumbnail rendering speed and entity loading speed.",
+                    "Misc"
+                ]
+            }
+        ]
+    },
+    {
         "version": "3.3.8",
         "date": "10-07-2026",
         "changes": [
