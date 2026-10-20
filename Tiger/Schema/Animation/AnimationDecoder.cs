@@ -108,7 +108,7 @@ public static class AnimationDecoder
 
     private static DecodedStreams DecodeCodec1(CodecData c, int frames)
     {
-        if (c.CompressedData.Length != 0 && (c.UnkArray7.Length == 0 || c.UnkArray7[c.UnkArray7.Length - 1] != c.CompressedData.Length))
+        if (c.UnkArray7.Length == 0 || c.UnkArray7[c.UnkArray7.Length - 1] != c.CompressedData.Length)
             throw new Exception("Codec 1: last element of array 7 does not equal the compressed data length");
 
         var d = new DecodedStreams
@@ -148,7 +148,7 @@ public static class AnimationDecoder
     }
 
 
-    private static double[][] DecodeCodec1Stream(CodecData c, short array7Element, int frames, Kind kind, int streamIndex)
+    private static double[][] DecodeCodec1Stream(CodecData c, int array7Element, int frames, Kind kind, int streamIndex)
     {
         int comps = kind == Kind.Scale ? 1 : kind == Kind.Rotation ? 4 : 3;
         int rawComps = kind == Kind.Scale ? 1 : 3;

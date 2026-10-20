@@ -157,8 +157,27 @@ public class Animation : Tag<SAnimationClip>
             InterpolationData = PrimitiveArrays.ReadByte(reader, data.InterpolationData),
             QuantizationExtents = PrimitiveArrays.ReadSingle(reader, data.QuantizationExtents),
             QuantizationMinimums = PrimitiveArrays.ReadSingle(reader, data.QuantizationMinimums),
-            UnkArray7 = PrimitiveArrays.ReadInt16(reader, data.Unk70),
+            UnkArray7 = GetUnkArray7(reader, data.Unk70),
         };
+    }
+
+    // apparently UnkArray7 can be a uint32 array as well? whack
+    private static int[] GetUnkArray7(TigerReader reader, DynamicArrayUnloaded<SInt16> array)
+    {
+        if (array.Count <= 0)
+            return Array.Empty<int>();
+
+        long offset = array.Offset.AbsoluteOffset;
+        reader.Seek(offset - 8, SeekOrigin.Begin);
+        if (reader.ReadUInt32() != 0x80800007)
+            return PrimitiveArrays.ReadInt16(reader, array).Select(x => (int)x).ToArray();
+
+        var result = new int[array.Count];
+        reader.Seek(offset, SeekOrigin.Begin);
+        for (int i = 0; i < result.Length; i++)
+            result[i] = reader.ReadInt32();
+
+        return result;
     }
 
     private CodecData FromRaw(S80808B44 data, TigerReader reader)
@@ -305,7 +324,7 @@ public class CodecData
     public short[] CompressedData = Array.Empty<short>();
     public byte[] KeyframeDeltas = Array.Empty<byte>();
     public byte[] InterpolationData = Array.Empty<byte>();
-    public short[] UnkArray7 = Array.Empty<short>();
+    public int[] UnkArray7 = Array.Empty<int>();
     public ushort[] StreamData = Array.Empty<ushort>();
     public float ScaleExtent;
     public float ScaleMinimum;

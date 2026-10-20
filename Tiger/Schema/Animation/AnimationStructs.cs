@@ -227,7 +227,7 @@ public struct S80808B43
     public DynamicArrayUnloaded<SUInt8> InterpolationData;
     public DynamicArrayUnloaded<SReal32> QuantizationExtents;
     public DynamicArrayUnloaded<SReal32> QuantizationMinimums;
-    public DynamicArrayUnloaded<SInt16> Unk70;
+    public DynamicArrayUnloaded<SInt16> Unk70; // can be SInt32 sometimes???
 }
 
 // codec 0
