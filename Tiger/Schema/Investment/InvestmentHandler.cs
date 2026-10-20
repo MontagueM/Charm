@@ -1239,7 +1239,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     #endregion
 
     #region Exporting
-    public void ExportInventoryItem(InventoryItem item, string savePath, bool aggregateOutput = false)
+    public void ExportInventoryItem(InventoryItem item, string savePath, bool aggregateOutput = false, bool exportAnims = false)
     {
         // just to be safe, hopefully this doesn't cause issues
         if (item.IsOrnament && item.Parent is null)
@@ -1252,7 +1252,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
         Directory.CreateDirectory(savePath);
         Directory.CreateDirectory($"{savePath}/Textures");
-        ExporterScene scene = Tiger.Exporters.Exporter.Get().CreateScene(name, Strategy.IsD1() ? ExportType.D1API : ExportType.API);
+        ExporterScene scene = Tiger.Exporters.Exporter.Get().CreateScene(name, Strategy.IsD1() ? ExportType.D1API : ExportType.API, exportAnims: exportAnims);
 
         // Dont export gear shader for ghost projections since they dont use it
         if (!item.ItemTraits.Any(x => x == DestinyTraitID.item_ghost_hologram))
@@ -1281,7 +1281,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         //scene.OverrideAnimationEntity = val;
 
         // weapon animations come from a seperate entity
-        if (config.GetExportAnimations() && val?.Skeleton != null && (item.Parent ?? item).IsWeapon)
+        if (exportAnims && config.GetExportAnimations() && val?.Skeleton != null && (item.Parent ?? item).IsWeapon)
         {
             try
             {

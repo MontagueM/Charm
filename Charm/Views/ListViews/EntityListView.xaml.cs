@@ -545,7 +545,7 @@ public partial class EntityListView : UserControl
                     if (exportChildren)
                         entities.AddRange(entity.GetEntityChildren());
 
-                    Entity.Export(entities, item.ExportName, savePath);
+                    Entity.Export(entities, item.ExportName, savePath, useAnimationSelection: false);
                     MainWindow.Progress.CompleteStage();
                 }
             }

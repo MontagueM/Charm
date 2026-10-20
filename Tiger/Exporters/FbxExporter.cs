@@ -53,10 +53,10 @@ public class FbxExporter : AbstractExporter
                 }
 
                 bool weaponAnimations = overrideSkele != null && scene.WeaponAnimationEntity != null && _config.GetExportAnimations();
-                if (weaponAnimations)
-                    AddAnimations(apiScene, scene.WeaponAnimationEntity!, overrideSkele!, scene.WeaponAnimationID, scene.OverrideSkeleton);
-                else if (overrideSkele != null && scene.OverrideAnimationEntity != null && _config.GetExportAnimations())
-                    AddAnimations(apiScene, scene.OverrideAnimationEntity, overrideSkele);
+                if (weaponAnimations && scene.ExportAnimations)
+                    AddAnimations(apiScene, scene.WeaponAnimationEntity!, overrideSkele!, scene.UseAnimationSelection, scene.WeaponAnimationID, scene.OverrideSkeleton);
+                else if (scene.ExportAnimations && overrideSkele != null && scene.OverrideAnimationEntity != null && _config.GetExportAnimations())
+                    AddAnimations(apiScene, scene.OverrideAnimationEntity, overrideSkele, scene.UseAnimationSelection);
 
                 ExportScene(apiScene, Path.Join(outputDirectory, scene.Name));
 
@@ -188,6 +188,9 @@ public class FbxExporter : AbstractExporter
 
     private void ExportFirstPersonRig(ExporterScene scene, string outputPath)
     {
+        if (!scene.ExportAnimations)
+            return;
+
         Entity rigEntity = scene.WeaponAnimationEntity!;
         if (rigEntity.Skeleton == null || rigEntity.RuntimeRig == null)
             return;
@@ -222,7 +225,7 @@ public class FbxExporter : AbstractExporter
             AddEntity(rigScene, entity, scene, skeletonNodes, first, toRigBind);
         }
 
-        AddAnimations(rigScene, rigEntity, skeletonNodes, scene.WeaponAnimationID, animPrefix: "fp");
+        AddAnimations(rigScene, rigEntity, skeletonNodes, scene.UseAnimationSelection, scene.WeaponAnimationID, animPrefix: "fp");
         ExportScene(rigScene, outputPath);
     }
 
@@ -264,7 +267,7 @@ public class FbxExporter : AbstractExporter
             }
         }
 
-        if (overrideSkele == null && skeletonNodes.Count > 0 && _config.GetExportAnimations() && scene.DataType == DataExportType.Individual)
+        if (scene.ExportAnimations && overrideSkele == null && skeletonNodes.Count > 0 && _config.GetExportAnimations() && scene.DataType == DataExportType.Individual)
         {
             // todo, maybe add Entity directly to ExporterEntity so it doesnt get recreated here? Idk how that would effect memory usage tho
             Entity? animEntity = entity.Entity != null ? entity.Entity
@@ -275,11 +278,11 @@ public class FbxExporter : AbstractExporter
                 animEntity = scene.OverrideAnimationEntity;
 
             if (animEntity != null)
-                AddAnimations(fbxScene, animEntity, skeletonNodes);
+                AddAnimations(fbxScene, animEntity, skeletonNodes, scene.UseAnimationSelection);
         }
     }
 
-    private void AddAnimations(FbxScene fbxScene, Entity entity, List<FbxNode> overrideSkele, TigerHash? weaponTag = null, EntitySkeleton? weaponSkeleton = null, string animPrefix = "")
+    private void AddAnimations(FbxScene fbxScene, Entity entity, List<FbxNode> overrideSkele, bool useSelection, TigerHash? weaponTag = null, EntitySkeleton? weaponSkeleton = null, string animPrefix = "")
     {
         if (entity.Skeleton == null || entity.RuntimeRig == null || entity.Animations == null)
             return;
@@ -312,7 +315,7 @@ public class FbxExporter : AbstractExporter
 
             foreach (var animation in animations.AnimationTags)
             {
-                if (animation == null || (used != null && !used.ContainsKey(animation.Hash)) || !seen.Add(animation.Hash))
+                if (animation == null || (used != null && !used.ContainsKey(animation.Hash)) || (useSelection && AnimationExportSelection.IsExcluded(entity.Hash, animation.Hash)) || !seen.Add(animation.Hash))
                     continue;
 
                 if (program != null && program.CompatibleControlCount(animation.TagData.RigComponents) == 0)

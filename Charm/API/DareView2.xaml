@@ -615,7 +615,7 @@
 
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
-                    <RowDefinition Height="5*" />
+                    <RowDefinition Height="auto" />
                     <RowDefinition Height="5*" />
                     <RowDefinition Height="90*" />
                 </Grid.RowDefinitions>
@@ -666,27 +666,54 @@
 
                 <Grid
                     Grid.Row="1"
-                    Margin="15,0,15,0"
+                    Margin="15,10,15,10"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
                     Background="Transparent">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+
                     <ToggleButton
                         x:Name="AggregateOutputButton"
+                        Grid.Row="1"
                         HorizontalAlignment="Left"
-                        Content="AGGREGATE OUTPUT"
-                        FontSize="18"
+                        Content="Aggregate Output"
+                        FontSize="16"
                         Style="{DynamicResource D2StyleToggleBoxButton}">
                         <local:GenericTooltipProperties.TooltipData>
                             <local:GenericTooltip
                                 Name="AGGREGATE OUTPUT"
-                                Description="Exports selected items to a singular folder in your Charm output path.&#x0a;&#x0a;The folder will be named 'ApiOutput#', where the hashtag represents the current ApiOutput folder count"
+                                Description="Exports selected items to a singular folder in your Charm output path.&#x0a;&#x0a;The folder will be named 'GearOutput#', where the hashtag represents the current GearOutput folder count"
                                 Style="Category"
                                 Type="Export Option" />
                         </local:GenericTooltipProperties.TooltipData>
+
+                    </ToggleButton>
+
+                    <ToggleButton
+                        x:Name="ExportAnimationsButton"
+                        Grid.Row="0"
+                        Margin="0,0,0,5"
+                        HorizontalAlignment="Left"
+                        Content="Export Animations"
+                        FontSize="16"
+                        Style="{DynamicResource D2StyleToggleBoxButton}"
+                        Visibility="Collapsed">
+                        <local:GenericTooltipProperties.TooltipData>
+                            <local:GenericTooltip
+                                Name="EXPORT ANIMATIONS"
+                                Description="Exports selected items animations.&#x0a;Weapons export with an additional first person skeleton."
+                                Style="Category"
+                                Type="Export Option" />
+                        </local:GenericTooltipProperties.TooltipData>
+
                     </ToggleButton>
 
                     <Button
                         x:Name="Multi3DButton"
+                        Grid.Row="1"
                         HorizontalAlignment="Right"
                         Click="Multi3DItemView"
                         Style="{DynamicResource D2StyleButton}"

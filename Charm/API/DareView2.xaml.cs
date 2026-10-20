@@ -96,6 +96,9 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         if (IRenderer.CanUseFullRenderer())
             Multi3DButton.Visibility = Visibility.Visible;
 
+        if (ConfigSubsystem.Get().GetExportAnimations())
+            ExportAnimationsButton.Visibility = Visibility.Visible;
+
 #if DEBUG
         DareViewDevPanel.Visibility = Visibility.Visible;
 #endif
@@ -466,6 +469,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         ConfigSubsystem config = TigerInstance.GetSubsystem<ConfigSubsystem>();
         string savePath = config.GetExportSavePath();
         bool aggregateOutput = (bool)AggregateOutputButton.IsChecked;
+        var exportAnims = ExportAnimationsButton.IsChecked ?? false;
 
         if (aggregateOutput && SelectedItems.Any(x => !x.Item.IsShader))
             savePath = CreateNextOutputFolder(config.GetExportSavePath());
@@ -500,7 +504,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                 else if (curItem.ArtArrangementIndex != -1)
                 {
                     // if has a model
-                    Investment.Get().ExportInventoryItem(curItem, savePath, aggregateOutput);
+                    Investment.Get().ExportInventoryItem(curItem, savePath, aggregateOutput, exportAnims);
                 }
                 else if (curItem.IsShader)
                 {

@@ -36,9 +36,9 @@ public class Exporter : Subsystem<Exporter>
         return true;
     }
 
-    public ExporterScene CreateScene(string name, ExportType type, DataExportType dataType = DataExportType.Individual)
+    public ExporterScene CreateScene(string name, ExportType type, DataExportType dataType = DataExportType.Individual, bool exportAnims = true)
     {
-        var scene = new ExporterScene { Name = name, Type = type, DataType = dataType };
+        var scene = new ExporterScene { Name = name, Type = type, DataType = dataType, ExportAnimations = exportAnims };
         _scenes.Add(scene);
         return scene;
     }
@@ -164,6 +164,9 @@ public class ExporterScene
     public string? MeshName { get; set; }
     public string? Parent { get; set; }
     public string? AttachmentBone { get; set; }
+
+    public bool ExportAnimations { get; set; } = true; // override
+    public bool UseAnimationSelection { get; set; }
     public DataExportType DataType { get; set; }
     public ExportType Type { get; set; }
 
@@ -499,6 +502,35 @@ public class ExporterPart
         SubName = name;
         Name = $"{name}_Group{meshPart.GroupIndex}_Index{meshPart.Index}_{index}_{meshPart.LodCategory}";
         Index = index;
+    }
+}
+
+public static class AnimationExportSelection
+{
+    private static readonly Dictionary<FileHash, HashSet<FileHash>> _excluded = new();
+
+    public static bool IsExcluded(FileHash entity, FileHash animation)
+    {
+        lock (_excluded)
+            return _excluded.TryGetValue(entity, out var excluded) && excluded.Contains(animation);
+    }
+
+    public static void SetExcluded(FileHash entity, FileHash animation, bool excluded)
+    {
+        lock (_excluded)
+        {
+            if (!_excluded.TryGetValue(entity, out var set))
+            {
+                if (!excluded)
+                    return;
+                _excluded[entity] = set = new HashSet<FileHash>();
+            }
+
+            if (excluded)
+                set.Add(animation);
+            else if (set.Remove(animation) && set.Count == 0)
+                _excluded.Remove(entity);
+        }
     }
 }
 

@@ -415,7 +415,7 @@ public class Entity : Tag<SEntity>
         return entities;
     }
 
-    public static void Export(List<Entity> entities, string name, string? overridePath = null, EntitySkeleton overrideSkeleton = null)
+    public static void Export(List<Entity> entities, string name, string? overridePath = null, EntitySkeleton overrideSkeleton = null, bool useAnimationSelection = true)
     {
         ConfigSubsystem config = ConfigSubsystem.Get();
         string sanitizedName = Helpers.SanitizeString(name);
@@ -426,6 +426,7 @@ public class Entity : Tag<SEntity>
         foreach (Entity entity in entities)
         {
             var scene = Tiger.Exporters.Exporter.Get().CreateScene(entity.Hash, ExportType.Entities);
+            scene.UseAnimationSelection = useAnimationSelection;
             if (entity == entities[0])
                 scene.MeshName = sanitizedName;
             else
