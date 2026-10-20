@@ -40,7 +40,7 @@
 
         <DataTemplate x:Key="StaticTemplate">
             <RadioButton
-                Width="275"
+                Width="210"
                 MinHeight="110"
                 Margin="0,0,0,0"
                 HorizontalAlignment="Left"
@@ -66,8 +66,8 @@
 
                             <Border BorderBrush="{StaticResource BackgroundColour30}" BorderThickness="1">
                                 <Image
-                                    Width="256"
-                                    Height="256"
+                                    Width="200"
+                                    Height="200"
                                     HorizontalAlignment="Center"
                                     Source="{Binding Thumbnail}" />
                             </Border>
@@ -151,9 +151,9 @@
             </Grid.RenderTransform>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="15*" />
-                <ColumnDefinition Width="20*" />
-                <ColumnDefinition Width="30*" />
+                <ColumnDefinition Width="15*" MinWidth="250" />
+                <ColumnDefinition Width="25*" MinWidth="250" />
+                <ColumnDefinition Width="25*" MinWidth="300" />
             </Grid.ColumnDefinitions>
 
             <local:PackageList x:Name="PackageList" Margin="10" />
@@ -282,6 +282,30 @@
                     </Border>
                 </StackPanel>
             </Grid>
+
+            <GridSplitter
+                Grid.Column="1"
+                Width="10"
+                Margin="-15,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Stretch"
+                Background="Transparent"
+                Cursor="SizeWE"
+                ResizeBehavior="PreviousAndCurrent"
+                ResizeDirection="Columns"
+                ShowsPreview="False" />
+
+            <GridSplitter
+                Grid.Column="2"
+                Width="10"
+                Margin="-5,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Stretch"
+                Background="Transparent"
+                Cursor="SizeWE"
+                ResizeBehavior="PreviousAndCurrent"
+                ResizeDirection="Columns"
+                ShowsPreview="True" />
         </Grid>
 
     </Grid>

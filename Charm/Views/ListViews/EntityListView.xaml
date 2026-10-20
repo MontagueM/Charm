@@ -12,6 +12,8 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+
         <ItemsPanelTemplate x:Key="ThumbnailPanelTemplate">
             <wrap:VirtualizingWrapPanel HorizontalAlignment="Left" Orientation="Horizontal" />
         </ItemsPanelTemplate>
@@ -121,7 +123,8 @@
                             d:FontFamily="Haas Grot Text 55 Roman"
                             FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                             FontSize="14"
-                            Foreground="{StaticResource ForegroundColour70}">
+                            Foreground="{StaticResource ForegroundColour70}"
+                            Visibility="{Binding IsChecked, ElementName=ShowDetailsCheckBox, Converter={StaticResource BoolToVisibility}}">
                             <Run Text="Components: " />
                             <Run Text="{Binding ResourceCount}" />
                         </TextBlock>
@@ -133,7 +136,8 @@
                             d:FontFamily="Haas Grot Text 55 Roman"
                             FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                             FontSize="14"
-                            Foreground="{StaticResource ForegroundColour70}">
+                            Foreground="{StaticResource ForegroundColour70}"
+                            Visibility="{Binding IsChecked, ElementName=ShowDetailsCheckBox, Converter={StaticResource BoolToVisibility}}">
                             <Run Text="Has Skeleton: " />
                             <Run Text="{Binding HasSkeleton}" />
                         </TextBlock>
@@ -255,7 +259,8 @@
                             d:FontFamily="Haas Grot Text 55 Roman"
                             FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                             FontSize="16"
-                            Foreground="{StaticResource ForegroundColour70}">
+                            Foreground="{StaticResource ForegroundColour70}"
+                            Visibility="{Binding IsChecked, ElementName=ShowDetailsCheckBox, Converter={StaticResource BoolToVisibility}}">
                             <Run Text="Components: " />
                             <Run Text="{Binding ResourceCount}" />
                         </TextBlock>
@@ -267,7 +272,8 @@
                             d:FontFamily="Haas Grot Text 55 Roman"
                             FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                             FontSize="16"
-                            Foreground="{StaticResource ForegroundColour70}">
+                            Foreground="{StaticResource ForegroundColour70}"
+                            Visibility="{Binding IsChecked, ElementName=ShowDetailsCheckBox, Converter={StaticResource BoolToVisibility}}">
                             <Run Text="Has Skeleton: " />
                             <Run Text="{Binding HasSkeleton}" />
                         </TextBlock>
@@ -382,9 +388,9 @@
             </Grid.RenderTransform>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="15*" />
-                <ColumnDefinition Width="20*" />
-                <ColumnDefinition Width="30*" />
+                <ColumnDefinition Width="15*" MinWidth="250" />
+                <ColumnDefinition Width="20*" MinWidth="250" />
+                <ColumnDefinition Width="30*" MinWidth="300" />
             </Grid.ColumnDefinitions>
 
             <local:PackageList x:Name="PackageList" Margin="10" />
@@ -417,18 +423,40 @@
                         TextWrapping="Wrap" />
                 </StackPanel>
 
-                <CheckBox
-                    x:Name="UseThumbnailsCheckBox"
+                <StackPanel
                     Grid.Row="1"
                     Margin="10,0,0,0"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
-                    local:StyleHelper.Scale="0.75"
-                    Click="UseThumbnailsCheckBox_Changed"
-                    Content="Show Thumbnails"
-                    FontSize="18"
-                    IsChecked="True"
-                    Style="{StaticResource D2StyleToggleBoxButton}" />
+                    Orientation="Horizontal">
+                    <CheckBox
+                        x:Name="UseThumbnailsCheckBox"
+                        Margin="0,0,0,0"
+                        local:StyleHelper.Scale="0.75"
+                        Click="UseThumbnailsCheckBox_Changed"
+                        Content="Show Thumbnails"
+                        FontSize="18"
+                        IsChecked="True"
+                        Style="{StaticResource D2StyleToggleBoxButton}" />
+
+                    <Border
+                        Margin="10,0,10,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Stretch"
+                        BorderBrush="White"
+                        BorderThickness="1,0,0,0"
+                        Opacity="0.5" />
+
+                    <CheckBox
+                        x:Name="ShowDetailsCheckBox"
+                        Margin="0,0,20,0"
+                        local:StyleHelper.Scale="0.75"
+                        Content="Show Details"
+                        FontSize="18"
+                        IsChecked="True"
+                        Style="{StaticResource D2StyleToggleBoxButton}" />
+                </StackPanel>
+
 
                 <ListView
                     x:Name="EntityList"
@@ -529,6 +557,30 @@
                 </StackPanel>
 
             </Grid>
+
+            <GridSplitter
+                Grid.Column="1"
+                Width="10"
+                Margin="-15,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Stretch"
+                Background="Transparent"
+                Cursor="SizeWE"
+                ResizeBehavior="PreviousAndCurrent"
+                ResizeDirection="Columns"
+                ShowsPreview="False" />
+
+            <GridSplitter
+                Grid.Column="2"
+                Width="10"
+                Margin="-5,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Stretch"
+                Background="Transparent"
+                Cursor="SizeWE"
+                ResizeBehavior="PreviousAndCurrent"
+                ResizeDirection="Columns"
+                ShowsPreview="True" />
         </Grid>
 
     </Grid>

@@ -85,9 +85,9 @@
             </Grid.RenderTransform>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="15*" />
-                <ColumnDefinition Width="25*" />
-                <ColumnDefinition Width="25*" />
+                <ColumnDefinition Width="15*" MinWidth="250" />
+                <ColumnDefinition Width="25*" MinWidth="250" />
+                <ColumnDefinition Width="25*" MinWidth="300" />
             </Grid.ColumnDefinitions>
 
             <local:PackageList x:Name="PackageList" Margin="10" />
@@ -214,6 +214,30 @@
                 </StackPanel>
 
             </Grid>
+
+            <GridSplitter
+                Grid.Column="1"
+                Width="10"
+                Margin="-15,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Stretch"
+                Background="Transparent"
+                Cursor="SizeWE"
+                ResizeBehavior="PreviousAndCurrent"
+                ResizeDirection="Columns"
+                ShowsPreview="False" />
+
+            <GridSplitter
+                Grid.Column="2"
+                Width="10"
+                Margin="-5,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Stretch"
+                Background="Transparent"
+                Cursor="SizeWE"
+                ResizeBehavior="PreviousAndCurrent"
+                ResizeDirection="Columns"
+                ShowsPreview="False" />
         </Grid>
 
     </Grid>

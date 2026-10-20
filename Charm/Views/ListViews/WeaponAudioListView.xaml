@@ -288,9 +288,9 @@
             </Grid.RenderTransform>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="450*" />
-                <ColumnDefinition Width="725*" />
-                <ColumnDefinition Width="750*" />
+                <ColumnDefinition Width="450*" MinWidth="250" />
+                <ColumnDefinition Width="725*" MinWidth="250" />
+                <ColumnDefinition Width="750*" MinWidth="300" />
             </Grid.ColumnDefinitions>
 
             <Grid Margin="10,10,10,10" Background="Transparent">
@@ -500,8 +500,31 @@
                         </Button>
                     </Border>
                 </StackPanel>
-
             </Grid>
+
+            <GridSplitter
+                Grid.Column="1"
+                Width="10"
+                Margin="-15,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Stretch"
+                Background="Transparent"
+                Cursor="SizeWE"
+                ResizeBehavior="PreviousAndCurrent"
+                ResizeDirection="Columns"
+                ShowsPreview="False" />
+
+            <GridSplitter
+                Grid.Column="2"
+                Width="10"
+                Margin="-5,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Stretch"
+                Background="Transparent"
+                Cursor="SizeWE"
+                ResizeBehavior="PreviousAndCurrent"
+                ResizeDirection="Columns"
+                ShowsPreview="False" />
         </Grid>
 
     </Grid>
