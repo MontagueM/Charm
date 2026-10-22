@@ -34,7 +34,7 @@ public class TextureExporter
         {
             lock (_lock)
             {
-                if (savePath.Contains('.')) // TODO: Figure this out
+                if (Path.GetFileName(savePath).Contains('.')) // TODO: Figure this out
                 {
                     Log.Error($"[BUG] Save Path {savePath} contains a period, cant export texture!");
                     scratchImage.Dispose();
@@ -50,8 +50,10 @@ public class TextureExporter
                         break;
 
                     case TextureExportFormat.DDS_BGRA_BC3_DX10:
-                        scratchImage = CompressBC3(scratchImage);
-                        scratchImage.SaveToDDSFile(DDS_FLAGS.FORCE_DX9_LEGACY, savePath + ".dds");
+                        using (ScratchImage compressed = CompressBC3(scratchImage))
+                        {
+                            compressed.SaveToDDSFile(DDS_FLAGS.FORCE_DX9_LEGACY, savePath + ".dds");
+                        }
                         break;
 
                     case TextureExportFormat.PNG:

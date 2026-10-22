@@ -63,8 +63,15 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 
     protected override void Reset()
     {
+        foreach (Package package in _packagesCache.Values)
+        {
+            package.Dispose();
+        }
         _packagesCache.Clear();
-        _packagePathsCache = new PackagePathsCache(_strategy);
+        _packagePathsCache = null;
+        _keys.Clear();
+        _activityNames.Clear();
+        _d1NamedTags.Clear();
     }
 
     /// <summary>
@@ -162,12 +169,13 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     private Package LoadPackageIntoCacheFromDisk(ushort packageId, string packagePath)
     {
         Package? package = (Package?)Activator.CreateInstance(_strategy.GetPackageType(), packagePath);
-
-        if (package == null || !_packagesCache.TryAdd(packageId, package))
+        if (package == null)
         {
-            Log.Verbose($"Failed to add package to package cache: '{packageId}', '{packagePath}'");
+            throw new Exception($"Failed to create package: '{packageId}', '{packagePath}'");
         }
-        return package;
+
+        // If another thread loaded it first, use theirs so there's only ever one instance (and one set of file handles) per package
+        return _packagesCache.GetOrAdd(packageId, package);
     }
 
     private Package LoadPackageNoCacheFromDisk(string packagePath)
@@ -334,7 +342,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         ConcurrentHashSet<PackageActivityEntry> activityEntries = new();
 
         ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount / 2, CancellationToken = CancellationToken.None };
-        Parallel.ForEach(_packagesCache.Values, parallelOptions, async (package, ct) =>
+        Parallel.ForEach(_packagesCache.Values, parallelOptions, package =>
         {
             activityEntries.UnionWith(package.GetAllActivities());
         });
@@ -357,12 +365,12 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         }
     }
 
-    private async void CacheAllD1NamedTags()
+    private void CacheAllD1NamedTags()
     {
         ConcurrentHashSet<PackageActivityEntry> activityEntries = new();
 
         ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount / 2, CancellationToken = CancellationToken.None };
-        await Parallel.ForEachAsync(_packagesCache.Values, parallelOptions, async (package, ct) =>
+        Parallel.ForEach(_packagesCache.Values, parallelOptions, package =>
         {
             activityEntries.UnionWith(package.GetAllActivities());
         });

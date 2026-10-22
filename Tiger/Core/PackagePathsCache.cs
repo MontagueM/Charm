@@ -13,6 +13,7 @@ public class PackagePathsCache
     private PackagePathCacheData _cacheData;
     private readonly string _cacheFilePath;
     private readonly string _packagesDirectory;
+    private readonly TigerStrategy _strategy;
     private const byte CacheVersion = 1;
     private static readonly string CacheDirectory = "./PackagePathsCaches";
 
@@ -46,6 +47,7 @@ public class PackagePathsCache
     {
         string packagesDirectory = strategy.GetStrategyConfiguration().PackagesDirectory;
         Strategy.CheckValidPackagesDirectory(packagesDirectory);
+        _strategy = strategy;
         _packagesDirectory = packagesDirectory;
         _cacheFilePath = MakeCacheFileName(strategy);
         FillCache();
@@ -71,8 +73,8 @@ public class PackagePathsCache
                 try
                 {
                     Ents = JsonConvert.DeserializeObject<NamedEntities>(File.ReadAllText($"./EntityNames.json"));
-                    if (Ents.EntityNames.ContainsKey(Strategy.CurrentStrategy))
-                        Ents.EntityNames[Strategy.CurrentStrategy].Clear();
+                    if (Ents.EntityNames.ContainsKey(_strategy))
+                        Ents.EntityNames[_strategy].Clear();
 
                     File.WriteAllText($"./EntityNames.json", JsonConvert.SerializeObject(Ents, Formatting.Indented));
                 }
@@ -96,7 +98,21 @@ public class PackagePathsCache
             return true;
         }
 
-        _cacheData = JsonConvert.DeserializeObject<PackagePathCacheData>(File.ReadAllText(_cacheFilePath));
+        try
+        {
+            _cacheData = JsonConvert.DeserializeObject<PackagePathCacheData>(File.ReadAllText(_cacheFilePath));
+        }
+        catch (JsonException e)
+        {
+            Log.Info($"Cache file '{_cacheFilePath}' could not be read: {e.Message}");
+            return true;
+        }
+
+        if (_cacheData.PackageIdToNameMap == null || _cacheData.PackageDirectory == null)
+        {
+            Log.Info($"Cache file '{_cacheFilePath}' is incomplete.");
+            return true;
+        }
 
         if (CacheVersion != _cacheData.Version.CacheVersion)
         {
@@ -108,6 +124,13 @@ public class PackagePathsCache
         if (_cacheData.Version.GameVersionHash != gameVersionHash)
         {
             Log.Info($"Cache file '{_cacheFilePath}' has old game version hash '{_cacheData.Version.GameVersionHash}' (current is {gameVersionHash}.");
+            return true;
+        }
+
+        // The cache file is named per strategy, so it has to be rebuilt if that strategy now points at a different install
+        if (!IsSameDirectory(_cacheData.PackageDirectory, _packagesDirectory))
+        {
+            Log.Info($"Cache file '{_cacheFilePath}' is for packages directory '{_cacheData.PackageDirectory}' (current is '{_packagesDirectory}').");
             return true;
         }
 
@@ -140,9 +163,17 @@ public class PackagePathsCache
     /// <summary>
     /// If we can't get a game version, presume its static and set it to 0.
     /// </summary>
+    private static bool IsSameDirectory(string a, string b)
+    {
+        static string Normalise(string path) => Path.GetFullPath(path).TrimEnd('/', '\\');
+        return string.Equals(Normalise(a), Normalise(b), StringComparison.OrdinalIgnoreCase);
+    }
+
     private uint GetGameVersionHash()
     {
-        string path = _packagesDirectory.Split("packages")[0] + "destiny2.exe";
+        // The executable sits next to the packages folder
+        string gameDirectory = Path.GetDirectoryName(_packagesDirectory.TrimEnd('/', '\\')) ?? _packagesDirectory;
+        string path = Path.Combine(gameDirectory, "destiny2.exe");
         if (!File.Exists(path))
         {
             Log.Warning($"Could not find game executable '{path}' for game version, assuming static.");
@@ -155,7 +186,7 @@ public class PackagePathsCache
             Log.Warning($"Could not find game version of executable '{path}', assuming static.");
             return 0;
         }
-        byte[] encoded = SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(version));
+        byte[] encoded = SHA256.HashData(Encoding.UTF8.GetBytes(version));
         uint value = BitConverter.ToUInt32(encoded, 0);
         return value;
     }
@@ -165,7 +196,7 @@ public class PackagePathsCache
         PackagePathCacheData data = JsonConvert.DeserializeObject<PackagePathCacheData>(File.ReadAllText(_cacheFilePath));
         foreach (KeyValuePair<ushort, string> entry in data.PackageIdToNameMap)
         {
-            PackageIdToPathMap.TryAdd(entry.Key, Path.Combine(data.PackageDirectory, entry.Value));
+            PackageIdToPathMap.TryAdd(entry.Key, Path.Combine(_packagesDirectory, entry.Value));
         }
     }
 
@@ -235,12 +266,12 @@ public class PackagePathsCache
     public ushort GetPackageIdFromPath(string packagePath)
     {
         // This search is not performant but will be rarely used
-        ushort packageId = PackageIdToPathMap.FirstOrDefault(x => x.Value == packagePath).Key;
-        if (packageId != default(ushort))
+        foreach ((ushort packageId, string path) in PackageIdToPathMap)
         {
-            return packageId;
+            if (path == packagePath)
+                return packageId;
         }
-        throw new ArgumentException(PackageStringNotInPackagePathsCacheMessage + packageId);
+        throw new ArgumentException(PackageStringNotInPackagePathsCacheMessage + packagePath);
     }
 
     public List<ushort> GetAllPackageIds()

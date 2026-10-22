@@ -116,7 +116,8 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
     }
 
     private readonly ConcurrentDictionary<StringHash, List<StringBiasView>> _strings = new();
-    private readonly ConcurrentBag<TigerHash> _addedLocalizedStrings = new();
+    // Used as a set; TryAdd makes the "already added?" check atomic across the parallel loaders
+    private readonly ConcurrentDictionary<TigerHash, byte> _addedLocalizedStrings = new();
     private readonly ConcurrentBag<TigerHash> _localizedStringsBias = new();
 
     protected override void Initialise()
@@ -164,6 +165,7 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
     protected override void Reset()
     {
         _strings.Clear();
+        _addedLocalizedStrings.Clear();
         _localizedStringsBias.Clear();
     }
 
@@ -181,16 +183,20 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
     {
         if (_strings.TryGetValue(hash, out List<StringBiasView>? sv))
         {
-            if (!_localizedStringsBias.IsEmpty)
+            lock (sv)
             {
-                StringBiasView bias = sv.Find(s => _localizedStringsBias.Contains(s.ContainerHash));
-                if (!string.IsNullOrEmpty(bias.String))
+                if (!_localizedStringsBias.IsEmpty)
                 {
-                    return bias.String;
+                    StringBiasView bias = sv.Find(s => _localizedStringsBias.Contains(s.ContainerHash));
+                    if (!string.IsNullOrEmpty(bias.String))
+                    {
+                        return bias.String;
+                    }
                 }
-            }
 
-            return sv[0].String;
+                if (sv.Count > 0)
+                    return sv[0].String;
+            }
         }
         else if (Wordlist.Strings.TryGetValue(hash.Hash32, out string value))
             return value;
@@ -211,23 +217,22 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
 
     public void AddStrings(LocalizedStrings? localizedStrings)
     {
-        if (localizedStrings == null || _addedLocalizedStrings.Contains(localizedStrings.Hash))
+        if (localizedStrings == null || !_addedLocalizedStrings.TryAdd(localizedStrings.Hash, 0))
         {
             return;
         }
 
-        _addedLocalizedStrings.Add(localizedStrings.Hash);
         localizedStrings.GetAllStringViews().ForEach(s =>
         {
-            if (!_strings.ContainsKey(s.StringHash))
+            List<StringBiasView> views = _strings.GetOrAdd(s.StringHash, _ => new List<StringBiasView>());
+            lock (views)
             {
-                _strings.TryAdd(s.StringHash, new List<StringBiasView>());
+                views.Add(new StringBiasView
+                {
+                    String = s.RawString,
+                    ContainerHash = localizedStrings.Hash
+                });
             }
-            _strings[s.StringHash].Add(new StringBiasView
-            {
-                String = s.RawString,
-                ContainerHash = localizedStrings.Hash
-            });
         });
     }
 

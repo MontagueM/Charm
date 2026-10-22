@@ -360,24 +360,41 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
 
     private bool LoadConfig()
     {
+        _settings = default;
         try
         {
             _settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(_configFilePath));
         }
-        catch (JsonSerializationException e)
+        catch (JsonException e)
         {
             Log.Error($"Failed to load config file {_configFilePath}: {e.Message}");
-        }
-        catch (JsonReaderException e)
-        {
-            Log.Error($"Failed to load config file {_configFilePath}: {e.Message}");
+            BackupConfig();
         }
 
+        // Fill each section separately so older configs missing a section don't cause null references later
+        bool missingSection = false;
         if (_settings.Common == null)
         {
             _settings.Common = new CommonSettings();
+            missingSection = true;
+        }
+        if (_settings.Common.PackagesPath == null)
+        {
+            _settings.Common.PackagesPath = new Dictionary<TigerStrategy, string>();
+            missingSection = true;
+        }
+        if (_settings.Unreal == null)
+        {
             _settings.Unreal = new UnrealSettings();
+            missingSection = true;
+        }
+        if (_settings.Source2 == null)
+        {
             _settings.Source2 = new Source2Settings();
+            missingSection = true;
+        }
+        if (missingSection)
+        {
             WriteConfig();
         }
 
@@ -403,6 +420,20 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
         }
 
         return true;
+    }
+
+    private void BackupConfig()
+    {
+        string backupPath = $"{_configFilePath}.{DateTime.Now:yyyyMMdd_HHmmss}.bak";
+        try
+        {
+            File.Copy(_configFilePath, backupPath, true);
+            Log.Warning($"Backed up unreadable config file to {backupPath}");
+        }
+        catch (IOException e)
+        {
+            Log.Error($"Failed to back up config file {_configFilePath}: {e.Message}");
+        }
     }
 
     private bool WriteConfig()

@@ -139,23 +139,25 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
             }
         }
 
-        string hlsl = "";
-        lock (_lock)
+        // The decompiler can still be holding the file on slow machines, so retry for a bit.
+        // An empty file is a valid (failed) result, not a reason to keep waiting.
+        const int maxAttempts = 50;
+        for (int attempt = 1; ; attempt++)
         {
-            while (hlsl == "")
+            try
             {
-                try  // needed for slow machines
-                {
-                    hlsl = File.ReadAllText(hlslPath);
-                    _decompiled = hlsl;
-                }
-                catch (IOException)
-                {
-                    Thread.Sleep(100);
-                }
+                string hlsl = File.ReadAllText(hlslPath);
+                if (hlsl.Length == 0)
+                    Log.Warning($"Decompiled shader {name} is empty");
+
+                _decompiled = hlsl;
+                return hlsl;
+            }
+            catch (IOException) when (attempt < maxAttempts)
+            {
+                Thread.Sleep(100);
             }
         }
-        return hlsl;
     }
 
     //These are kinda messy and can probably be simplified
