@@ -261,7 +261,7 @@ public partial class ActivityMapEntityView : UserControl
         ConcurrentBag<DisplayEntityList> items = new();
         ConcurrentDictionary<FileHash, ConcurrentBag<ulong>> entities = new();
 
-        Parallel.ForEach(dataTables, data =>
+        FileOrder.ParallelForEach(dataTables, data =>
         {
             List<SMapDataEntry> dataEntries = new();
             if (Strategy.IsD1() && data.GetReferenceHash().Hash32 == 0x808003F6) //F6038080
@@ -410,7 +410,7 @@ public partial class ActivityMapEntityView : UserControl
         ExporterScene roadDecalsScene = Exporter.Get().CreateScene($"{hash}_RoadDecals", ExportType.RoadDecals, DataExportType.Map);
         ExporterScene waterDecalsScene = Exporter.Get().CreateScene($"{hash}_WaterDecals", ExportType.WaterDecals, DataExportType.Map);
 
-        Parallel.ForEach(dataTables, data =>
+        FileOrder.ParallelForEach(dataTables, data =>
         {
             if (Strategy.IsD1() && data.GetReferenceHash().Hash32 == 0x808003F6)
             {

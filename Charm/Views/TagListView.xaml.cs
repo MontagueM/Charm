@@ -636,7 +636,7 @@ public partial class TagListView : UserControl
         if (Strategy.IsPreBL())
         {
             ConcurrentHashSet<FileHash> vals = await PackageResourcer.Get().GetAllHashesAsync<S80808930>();
-            Parallel.ForEach(vals, val =>
+            FileOrder.ParallelForEach(vals, val =>
             {
                 Tag<S80808930> bag = FileResourcer.Get().GetSchemaTag<S80808930>(val);
                 if (bag.TagData.Entries.Count == 0)
@@ -655,7 +655,7 @@ public partial class TagListView : UserControl
         else
         {
             ConcurrentHashSet<FileHash> vals = await PackageResourcer.Get().GetAllHashesAsync<S8080471D>();
-            Parallel.ForEach(vals, val =>
+            FileOrder.ParallelForEach(vals, val =>
             {
                 Tag<S8080471D> dgtbParent = FileResourcer.Get().GetSchemaTag<S8080471D>(val);
                 if (dgtbParent.TagData.DestinationGlobalTagBags.Count == 0)
@@ -854,7 +854,7 @@ public partial class TagListView : UserControl
 
             case TigerStrategy.DESTINY2_SHADOWKEEP_2601 or TigerStrategy.DESTINY2_SHADOWKEEP_2999:
                 ConcurrentHashSet<FileHash> valsChild = await PackageResourcer.Get().GetAllHashesAsync<SUnkActivity_SK>();
-                Parallel.ForEach(valsChild, val =>
+                FileOrder.ParallelForEach(valsChild, val =>
                 {
                     Tag<SUnkActivity_SK> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(val);
                     nameHashes.TryAdd(tag.TagData.ActivityDevName.Value, tag.TagData.DestinationName);
@@ -864,7 +864,7 @@ public partial class TagListView : UserControl
 
             default:
                 valsChild = await PackageResourcer.Get().GetAllHashesAsync<S80808E8B>();
-                Parallel.ForEach(valsChild, val =>
+                FileOrder.ParallelForEach(valsChild, val =>
                 {
                     Tag<S80808E8B> tag = FileResourcer.Get().GetSchemaTag<S80808E8B>(val);
                     nameHashes.TryAdd(tag.TagData.DestinationName, tag.TagData.LocationName);
@@ -901,7 +901,7 @@ public partial class TagListView : UserControl
         else
         {
             ConcurrentHashSet<FileHash> vals = await PackageResourcer.Get().GetAllHashesAsync<IActivity>();
-            Parallel.ForEach(vals, val =>
+            FileOrder.ParallelForEach(vals, val =>
             {
                 string activityName = PackageResourcer.Get().GetActivityName(val);
                 string first = Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402

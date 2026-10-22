@@ -1,9 +1,11 @@
 ﻿using System.Collections.Concurrent;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using Arithmic;
 
 namespace Tiger;
+
 public class StrategyEventArgs : EventArgs
 {
     public TigerStrategy Strategy { get; set; }
@@ -103,9 +105,11 @@ public class Strategy
             return true;
         }
 
+        Stopwatch stopwatch = Stopwatch.StartNew();
         BeforeStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
         OnStrategyChangedEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
         AfterStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
+        Log.Debug($"Set game version {strategy} in {stopwatch.ElapsedMilliseconds} ms");
 
         //Task.Run(() =>
         //{
@@ -333,7 +337,9 @@ public class Strategy
 
             _strategyInstances.TryAdd(strategy, _instance);
 
+            Stopwatch stopwatch = Stopwatch.StartNew();
             _instance.Initialise();
+            Log.Info($"Initialised {typeof(T).Name} for {strategy} in {stopwatch.ElapsedMilliseconds} ms");
         }
 
         static StrategistSingleton()
@@ -375,7 +381,9 @@ public class Strategy
                 throw new Exception("Strategy to reset does not exist");
             }
             _strategyInstances[e.Strategy].Reset();
+            Stopwatch stopwatch = Stopwatch.StartNew();
             _strategyInstances[e.Strategy].Initialise();
+            Log.Info($"Re-initialised {typeof(T).Name} for {e.Strategy} in {stopwatch.ElapsedMilliseconds} ms");
             DuringStrategyEvent.Invoke(e);
         }
     }

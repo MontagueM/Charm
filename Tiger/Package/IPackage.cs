@@ -525,8 +525,17 @@ public abstract class Package : IPackage, IDisposable
         foreach (D2BlockEntry blockEntry in blocks)
         {
             // todo use spans
-            byte[] blockBuffer = ReadBlockBuffer(GetPatchFileHandle(blockEntry.PatchId), blockEntry);
-            blockBuffer = DecryptAndDecompressBlockBufferIfRequired(blockBuffer, blockEntry);
+            byte[] blockBuffer;
+            if (blockCount == 1)
+            {
+                // Single-block files are mostly small tags packed many to a block, so the decompressed block is worth keeping
+                blockBuffer = BlockCache.GetOrLoad(this, fileEntry.StartingBlockIndex,
+                    () => LoadBlock(blockEntry));
+            }
+            else
+            {
+                blockBuffer = LoadBlock(blockEntry);
+            }
 
             bool isFirstBlock = currentBlockId == 0;
             bool isLastBlock = currentBlockId == blockCount - 1;
@@ -613,6 +622,12 @@ public abstract class Package : IPackage, IDisposable
     private int GetBlockCount(D2FileEntry fileEntry)
     {
         return 1 + (int)Math.Floor((double)(fileEntry.StartingBlockOffset + fileEntry.FileSize - 1) / BlockSize);
+    }
+
+    private byte[] LoadBlock(D2BlockEntry blockEntry)
+    {
+        byte[] blockBuffer = ReadBlockBuffer(GetPatchFileHandle(blockEntry.PatchId), blockEntry);
+        return DecryptAndDecompressBlockBufferIfRequired(blockBuffer, blockEntry);
     }
 
     private SafeFileHandle GetPatchFileHandle(ushort patchId)

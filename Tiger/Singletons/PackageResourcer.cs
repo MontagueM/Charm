@@ -68,6 +68,8 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
             package.Dispose();
         }
         _packagesCache.Clear();
+        // Package ids can point at different files after a reset, and keys (redacted blocks) are reloaded
+        BlockCache.Clear();
         _packagePathsCache = null;
         _keys.Clear();
         _activityNames.Clear();

@@ -11,17 +11,45 @@ namespace Tiger;
 
 public static class Wordlist
 {
-    private static readonly Dictionary<uint, string> _strings = new Dictionary<uint, string>();
+    private static Dictionary<uint, string> _strings = new Dictionary<uint, string>();
+    private static Task? _loadTask;
+    private static readonly object _loadLock = new();
     private const int FileStreamBuffer = 1 << 20;   // 1 MiB file buffer
     private const int ReadBuffer = 1 << 16;         // 64 KiB read buffer
 
-    public static Dictionary<uint, string> Strings => _strings;
-
-    public static void AddFromWordlist()
+    public static Dictionary<uint, string> Strings
     {
-        if (_strings.Count > 0) // Already filled, dont fill when changing versions as its a waste of time.
-            return;
+        get
+        {
+            _loadTask?.Wait();
+            return _strings;
+        }
+    }
 
+    public static void StartLoading()
+    {
+        lock (_loadLock)
+        {
+            _loadTask ??= Task.Run(Load);
+        }
+    }
+
+    private static void Load()
+    {
+        try
+        {
+            Dictionary<uint, string> strings = new();
+            ParseInto(strings);
+            _strings = strings;
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Failed to load wordlist: {e.Message}");
+        }
+    }
+
+    private static void ParseInto(Dictionary<uint, string> strings)
+    {
         const string path = "./wordlist.txt.gz";
         if (!File.Exists(path))
         {
@@ -69,9 +97,9 @@ public static class Wordlist
 
                         string s = Encoding.UTF8.GetString(lineBuf, 0, actualLen);
                         uint hash = Helpers.Fnv1a32(s);
-                        if (!_strings.ContainsKey(hash))
+                        if (!strings.ContainsKey(hash))
                         {
-                            _strings.Add(hash, s);
+                            strings.Add(hash, s);
                         }
 
                         lineBufLen = 0;
@@ -88,9 +116,9 @@ public static class Wordlist
 
                 string s = Encoding.UTF8.GetString(lineBuf, 0, actualLen);
                 uint hash = Helpers.Fnv1a32(s);
-                if (!_strings.ContainsKey(hash))
+                if (!strings.ContainsKey(hash))
                 {
-                    _strings.Add(hash, s);
+                    strings.Add(hash, s);
                 }
             }
         }
@@ -101,7 +129,7 @@ public static class Wordlist
         }
 
         stopwatch.Stop();
-        Log.Info($"Parsed Wordlist: {stopwatch.ElapsedMilliseconds}ms ({_strings.Count} lines)");
+        Log.Info($"Parsed Wordlist: {stopwatch.ElapsedMilliseconds}ms ({strings.Count} lines)");
     }
 
 }
@@ -116,18 +144,17 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
     }
 
     private readonly ConcurrentDictionary<StringHash, List<StringBiasView>> _strings = new();
-    // Used as a set; TryAdd makes the "already added?" check atomic across the parallel loaders
     private readonly ConcurrentDictionary<TigerHash, byte> _addedLocalizedStrings = new();
     private readonly ConcurrentBag<TigerHash> _localizedStringsBias = new();
 
     protected override void Initialise()
     {
-        Wordlist.AddFromWordlist();
+        Wordlist.StartLoading();
 
         if (Strategy.IsD1())
         {
             ConcurrentCollections.ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S80800550>();
-            Parallel.ForEach(vals, val =>
+            FileOrder.ParallelForEach(vals, val =>
             {
                 Tag<S80800550> tag = FileResourcer.Get().GetSchemaTag<S80800550>(val);
                 AddStrings(tag.TagData.CharacterNames);
@@ -138,7 +165,7 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
         else
         {
             ConcurrentCollections.ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S80802102>(); //TODO: Beyond Light
-            Parallel.ForEach(vals, val =>
+            FileOrder.ParallelForEach(vals, val =>
             {
                 Tag<S80802102> tag = FileResourcer.Get().GetSchemaTag<S80802102>(val);
                 foreach (S80803C0E entry in tag.TagData.Unk28)

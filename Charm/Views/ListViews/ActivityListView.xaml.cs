@@ -120,7 +120,7 @@ public partial class ActivityListView : UserControl
                 break;
 
             case TigerStrategy.DESTINY2_SHADOWKEEP_2601 or TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                Parallel.ForEach(PackageResourcer.Get().GetAllHashes<SUnkActivity_SK>(), val =>
+                FileOrder.ParallelForEach(PackageResourcer.Get().GetAllHashes<SUnkActivity_SK>(), val =>
                 {
                     var tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(val);
                     nameHashes.TryAdd(tag.TagData.ActivityDevName.Value, tag.TagData.DestinationName);
@@ -129,7 +129,7 @@ public partial class ActivityListView : UserControl
                 break;
 
             default:
-                Parallel.ForEach(PackageResourcer.Get().GetAllHashes<S80808E8B>(), val =>
+                FileOrder.ParallelForEach(PackageResourcer.Get().GetAllHashes<S80808E8B>(), val =>
                 {
                     var tag = FileResourcer.Get().GetSchemaTag<S80808E8B>(val);
                     nameHashes.TryAdd(tag.TagData.DestinationName, tag.TagData.LocationName);
