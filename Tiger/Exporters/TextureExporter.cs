@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 using Arithmic;
 using DirectXTexNet;
 using Tiger.Schema;
@@ -8,7 +9,11 @@ namespace Tiger.Exporters;
 public class TextureExporter
 {
     private static TextureExportFormat _format = TextureExportFormat.PNG;
-    private static readonly object _lock = new();
+
+    // Saves currently being written, keyed by output file. Different textures save in parallel, but two saves of the
+    // same file at once (a texture shared by two materials) would fight over it, so the second one waits for the
+    // first and reuses its result instead of writing it again.
+    private static readonly ConcurrentDictionary<string, Lazy<bool>> _inFlightSaves = new(StringComparer.OrdinalIgnoreCase);
 
     public static void SetTextureFormat(TextureExportFormat textureExportFormat) => _format = textureExportFormat;
 
@@ -27,53 +32,137 @@ public class TextureExporter
         texture.SavetoFile(Path.Combine(savePath, fileHash.ToString()), index);
     }
 
+    /// <summary>
+    /// Saves and then disposes <paramref name="scratchImage"/>. Safe to call from several threads at once.
+    /// </summary>
     public static bool SaveTextureToFile(string savePath, ScratchImage scratchImage,
         TextureDimension dimension = TextureDimension.D2, TextureExportFormat? overrideFormat = null)
     {
+        var format = overrideFormat ?? _format;
+        string key = $"{GetFullPathOrSelf(savePath)}|{format}";
+
+        Lazy<bool> save = new(() => SaveTextureToFileCore(savePath, scratchImage, dimension, format));
+        Lazy<bool> activeSave = _inFlightSaves.GetOrAdd(key, save);
+        if (!ReferenceEquals(activeSave, save))
+        {
+            scratchImage.Dispose();
+            return activeSave.Value;
+        }
+
         try
         {
-            lock (_lock)
+            return save.Value;
+        }
+        finally
+        {
+            _inFlightSaves.TryRemove(new KeyValuePair<string, Lazy<bool>>(key, save));
+        }
+    }
+
+    private static string GetFullPathOrSelf(string path)
+    {
+        try
+        {
+            return Path.GetFullPath(path);
+        }
+        catch (Exception)
+        {
+            return path;
+        }
+    }
+
+    private static bool SaveTextureToFileCore(string savePath, ScratchImage scratchImage, TextureDimension dimension, TextureExportFormat format)
+    {
+        try
+        {
+            if (Path.GetFileName(savePath).Contains('.')) // TODO: Figure this out
             {
-                if (Path.GetFileName(savePath).Contains('.')) // TODO: Figure this out
-                {
-                    Log.Error($"[BUG] Save Path {savePath} contains a period, cant export texture!");
-                    scratchImage.Dispose();
-                    return false;
-                }
-
-                var format = overrideFormat ?? _format;
-
-                switch (format)
-                {
-                    case TextureExportFormat.DDS_BGRA_UNCOMP_DX10:
-                        scratchImage.SaveToDDSFile(DDS_FLAGS.FORCE_DX10_EXT, savePath + ".dds");
-                        break;
-
-                    case TextureExportFormat.DDS_BGRA_BC3_DX10:
-                        using (ScratchImage compressed = CompressBC3(scratchImage))
-                        {
-                            compressed.SaveToDDSFile(DDS_FLAGS.FORCE_DX9_LEGACY, savePath + ".dds");
-                        }
-                        break;
-
-                    case TextureExportFormat.PNG:
-                        SavePNGTexture(scratchImage, savePath, dimension, WICCodecs.PNG);
-                        break;
-
-                    case TextureExportFormat.TGA:
-                        SaveTGATexture(scratchImage, savePath, dimension);
-                        break;
-                }
-
+                Log.Error($"[BUG] Save Path {savePath} contains a period, cant export texture!");
                 scratchImage.Dispose();
-                return true;
+                return false;
             }
+
+            switch (format)
+            {
+                case TextureExportFormat.DDS_BGRA_UNCOMP_DX10:
+                    scratchImage.SaveToDDSFile(DDS_FLAGS.FORCE_DX10_EXT, savePath + ".dds");
+                    break;
+
+                case TextureExportFormat.DDS_BGRA_BC3_DX10:
+                    using (ScratchImage compressed = CompressBC3(scratchImage))
+                    {
+                        compressed.SaveToDDSFile(DDS_FLAGS.FORCE_DX9_LEGACY, savePath + ".dds");
+                    }
+                    break;
+
+                case TextureExportFormat.PNG:
+                    using (ScratchImage savable = MakeSavable(scratchImage, format))
+                    {
+                        SavePNGTexture(savable, savePath, dimension, WICCodecs.PNG);
+                    }
+                    break;
+
+                case TextureExportFormat.TGA:
+                    using (ScratchImage savable = MakeSavable(scratchImage, format))
+                    {
+                        SaveTGATexture(savable, savePath, dimension);
+                    }
+                    break;
+            }
+
+            scratchImage.Dispose();
+            return true;
         }
         catch (Exception e)
         {
-            Log.Error($"{Path.GetFileName(savePath)} : {e.Message}");
+            Log.Error($"{Path.GetFileName(savePath)}: could not save {DescribeImage(scratchImage)} as {format}: {e.Message}");
             scratchImage.Dispose();
             return false;
+        }
+    }
+
+    private static readonly HashSet<DXGI_FORMAT> _wicFormats = new()
+    {
+        DXGI_FORMAT.R32G32B32A32_FLOAT, DXGI_FORMAT.R16G16B16A16_FLOAT, DXGI_FORMAT.R16G16B16A16_UNORM,
+        DXGI_FORMAT.R8G8B8A8_UNORM, DXGI_FORMAT.R8G8B8A8_UNORM_SRGB, DXGI_FORMAT.B8G8R8A8_UNORM, DXGI_FORMAT.B8G8R8A8_UNORM_SRGB,
+        DXGI_FORMAT.B8G8R8X8_UNORM, DXGI_FORMAT.B8G8R8X8_UNORM_SRGB, DXGI_FORMAT.R10G10B10A2_UNORM,
+        DXGI_FORMAT.R10G10B10_XR_BIAS_A2_UNORM, DXGI_FORMAT.B5G5R5A1_UNORM, DXGI_FORMAT.B5G6R5_UNORM,
+        DXGI_FORMAT.R32_FLOAT, DXGI_FORMAT.R16_FLOAT, DXGI_FORMAT.R16_UNORM, DXGI_FORMAT.R8_UNORM, DXGI_FORMAT.A8_UNORM,
+    };
+
+    private static readonly HashSet<DXGI_FORMAT> _tgaFormats = new()
+    {
+        DXGI_FORMAT.R8G8B8A8_UNORM, DXGI_FORMAT.R8G8B8A8_UNORM_SRGB, DXGI_FORMAT.B8G8R8A8_UNORM, DXGI_FORMAT.B8G8R8A8_UNORM_SRGB,
+        DXGI_FORMAT.B8G8R8X8_UNORM, DXGI_FORMAT.B8G8R8X8_UNORM_SRGB, DXGI_FORMAT.B5G5R5A1_UNORM, DXGI_FORMAT.R8_UNORM, DXGI_FORMAT.A8_UNORM,
+    };
+
+
+    private static ScratchImage MakeSavable(ScratchImage scratchImage, TextureExportFormat format)
+    {
+        DXGI_FORMAT imageFormat = scratchImage.GetMetadata().Format;
+        HashSet<DXGI_FORMAT> supported = format == TextureExportFormat.TGA ? _tgaFormats : _wicFormats;
+        if (supported.Contains(imageFormat) || TexHelper.Instance.IsCompressed(imageFormat))
+        {
+            return TexHelper.Instance.InitializeTemporary(Enumerable.Range(0, scratchImage.GetImageCount()).Select(scratchImage.GetImage).ToArray(), scratchImage.GetMetadata());
+        }
+
+        string name = imageFormat.ToString();
+        bool wide = name.Contains("16") || name.Contains("32") || name.StartsWith("R11G11B10") || name.StartsWith("R9G9B9E5");
+        DXGI_FORMAT target = format == TextureExportFormat.PNG && wide ? DXGI_FORMAT.R16G16B16A16_UNORM : DXGI_FORMAT.R8G8B8A8_UNORM;
+        Log.Debug($"Converting {imageFormat} to {target} to save as {format}");
+        return scratchImage.Convert(target, TEX_FILTER_FLAGS.DEFAULT, 0.5f);
+    }
+
+    private static string DescribeImage(ScratchImage scratchImage)
+    {
+        try
+        {
+            TexMetadata metadata = scratchImage.GetMetadata();
+            return $"{metadata.Format} {metadata.Dimension} {metadata.Width}x{metadata.Height} (depth {metadata.Depth}, array {metadata.ArraySize}, mips {metadata.MipLevels})";
+        }
+        catch (Exception)
+        {
+            return "texture";
         }
     }
 

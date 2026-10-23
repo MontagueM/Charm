@@ -1,4 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
+using Arithmic;
 using Tiger.Schema;
 
 namespace Tiger.Exporters;
@@ -50,14 +52,36 @@ public class MaterialExporter : AbstractExporter
             }
         });
 
-        foreach ((Texture texture, string path) in textures)
-        {
-            texture.SavetoFile(path);
-        }
-
+        var materialTextures = new ConcurrentBag<(Texture Texture, string SavePath)>();
         foreach ((ExportMaterial material, string path) in materials)
         {
-            material.Material.Export(path);
+            material.Material.Export(path, textureSaves: materialTextures);
+        }
+
+        List<(Texture Texture, string SavePath)> textureSaves = textures
+            .Concat(materialTextures)
+            .DistinctBy(t => FullPathOrSelf(t.Item2), StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        // capped so a big export doesnt hold too many decoded textures in memory at once
+        ParallelOptions options = new() { MaxDegreeOfParallelism = Math.Clamp(Environment.ProcessorCount / 2, 1, 8) };
+        Parallel.ForEach(textureSaves, options, save =>
+        {
+            save.Texture.SavetoFile(save.SavePath);
+        });
+        Log.Debug($"Saved {textureSaves.Count} textures in {stopwatch.Elapsed.TotalSeconds:0.00} seconds");
+    }
+
+    private static string FullPathOrSelf(string path)
+    {
+        try
+        {
+            return Path.GetFullPath(path);
+        }
+        catch (Exception)
+        {
+            return path;
         }
     }
 }
