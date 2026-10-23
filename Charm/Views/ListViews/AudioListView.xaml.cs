@@ -135,7 +135,7 @@ public partial class AudioListView : UserControl
             Log.Debug($"Stage 1: Getting all Dialogue Tags took {stopwatch.Elapsed.TotalSeconds} seconds to process. ({hashes.Count})");
             stopwatch = Stopwatch.StartNew();
 
-            Parallel.ForEach(hashes, hash =>
+            FileOrder.ParallelForEach(hashes, hash =>
             {
                 var dialogueTable = DialogueView.Load(hash);
                 foreach (var entry in dialogueTable)
@@ -186,7 +186,7 @@ public partial class AudioListView : UserControl
             Log.Debug($"Stage 1: Getting all WwiseSound Tags took {stopwatch.Elapsed.TotalSeconds} seconds to process. ({hashes.Count})");
             stopwatch = Stopwatch.StartNew();
 
-            Parallel.ForEach(hashes, hash =>
+            FileOrder.ParallelForEach(hashes, hash =>
             {
                 var bank = FileResourcer.Get().GetFile<WwiseSound>(hash, true, false);
                 if (bank.TagData.Wems.Count > 0)

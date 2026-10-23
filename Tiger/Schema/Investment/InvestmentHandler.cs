@@ -96,8 +96,9 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     public ConcurrentDictionary<int, S808057FA> TraitIndexMap = null;
     public ConcurrentDictionary<DestinyTraitID, S808057FA> TraitMap = null;
 
-    // For exporting purposes, Parent item -> Ornaments
-    private ConcurrentDictionary<InventoryItem, ConcurrentBag<InventoryItem>> _ornaments = new();
+    // Ornament -> parent item, built once on first use
+    private ConcurrentDictionary<InventoryItem, InventoryItem>? _ornamentParents = null;
+    private readonly SemaphoreSlim _ornamentParentsLock = new(1, 1);
 
     // uses item index
     public ConcurrentHashSet<int> FeaturedItems = new();
@@ -1146,21 +1147,35 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     private async Task PopulateOrnaments()
     {
-        IEnumerable<InventoryItem> inventoryItems = await GetInventoryItems();
-        await Parallel.ForEachAsync(inventoryItems, async (item, ct) =>
+        IEnumerable<InventoryItem> inventoryItems = await GetInventoryItems().ConfigureAwait(false);
+        ConcurrentDictionary<InventoryItem, InventoryItem> ornamentParents = new();
+        Parallel.ForEach(inventoryItems, item =>
         {
-            _ornaments.TryAdd(item, item.GetItemOrnaments());
+            foreach (InventoryItem ornament in item.Ornaments)
+            {
+                ornamentParents.TryAdd(ornament, item);
+            }
         });
+        _ornamentParents = ornamentParents;
     }
 
     public async Task<InventoryItem> GetOrnamentParent(InventoryItem ornament)
     {
-        if (_ornaments is null || _ornaments.Count is 0)
-            await PopulateOrnaments();
+        if (_ornamentParents is null)
+        {
+            await _ornamentParentsLock.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                if (_ornamentParents is null)
+                    await PopulateOrnaments().ConfigureAwait(false);
+            }
+            finally
+            {
+                _ornamentParentsLock.Release();
+            }
+        }
 
-        var parent = _ornaments.FirstOrDefault(kv => kv.Value.Contains(ornament)).Key;
-
-        return parent;
+        return _ornamentParents!.TryGetValue(ornament, out InventoryItem? parent) ? parent : null;
     }
     #endregion
 

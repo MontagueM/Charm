@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using Arithmic;
 using ConcurrentCollections;
+using Microsoft.Win32.SafeHandles;
 
 namespace Tiger;
 
@@ -76,7 +77,7 @@ public struct SD2PackageActivityEntry
     public StringPointer Name;
 }
 
-public abstract class Package : IPackage
+public abstract class Package : IPackage, IDisposable
 {
     private static string PackageExtension = ".pkg";
     private List<D2FileEntry> FileEntries;
@@ -85,6 +86,10 @@ public abstract class Package : IPackage
     public string PackagePath { get; }
     protected IPackageHeader Header;
     protected TigerStrategy PackageStrategy;
+
+    // One handle per patch file, opened on first use and read with RandomAccess so threads don't share a position
+    private readonly ConcurrentDictionary<ushort, SafeFileHandle> _patchHandles = new();
+    private bool _disposed;
 
     private static readonly byte[] AesKey0 = { 0xD6, 0x2A, 0xB2, 0xC1, 0x0C, 0xC0, 0x1B, 0xC5, 0x35, 0xDB, 0x7B, 0x86, 0x55, 0xC7, 0xDC,
         0x3B };
@@ -125,7 +130,6 @@ public abstract class Package : IPackage
     private void Initialise()
     {
         using TigerReader reader = GetReader();
-        GetReader();
         ReadHeader(reader);
         FileEntries = Header.GetFileEntries(reader);
         BlockEntries = Header.GetBlockEntries(reader);
@@ -189,7 +193,7 @@ public abstract class Package : IPackage
 
     public List<TigerFile> GetAllFiles(Type fileType)
     {
-        List<TigerFile> tags = new();
+        ConcurrentBag<TigerFile> tags = new();
 
         SchemaStructAttribute attribute = GetAttribute<SchemaStructAttribute>(fileType.BaseType.GenericTypeArguments[0]);
         TigerHash referenceHash = new(attribute.ClassID);
@@ -205,7 +209,7 @@ public abstract class Package : IPackage
             tags.Add(tag);
         });
 
-        return tags;
+        return tags.ToList();
     }
 
     // public HashSet<FileHash> GetAllHashesAsync<T>()
@@ -371,12 +375,11 @@ public abstract class Package : IPackage
 
         Parallel.ForEach(patchBlockEntryMap, pair =>
         {
-            using TigerReader packageHandle = GetPackageHandle(pair.Key);
+            SafeFileHandle packageHandle = GetPatchFileHandle(pair.Key);
             List<(int, D2BlockEntry)> sortedBlockIndices = pair.Value.OrderBy(x => x.Item2.Offset).ToList();
             foreach ((int, D2BlockEntry) block in sortedBlockIndices)
             {
-                packageHandle.Seek(block.Item2.Offset, SeekOrigin.Begin);
-                blockMap.TryAdd(block.Item1, packageHandle.ReadBytes((int)block.Item2.Size));
+                blockMap.TryAdd(block.Item1, ReadBlockBuffer(packageHandle, block.Item2));
             }
         });
 
@@ -521,14 +524,18 @@ public abstract class Package : IPackage
         List<D2BlockEntry> blocks = GetBlockEntries(fileEntry.StartingBlockIndex, blockCount);
         foreach (D2BlockEntry blockEntry in blocks)
         {
-            // TigerReader packageHandle = GetPackageHandle(blockEntry.PatchId);
             // todo use spans
             byte[] blockBuffer;
-            using (TigerReader packageHandle = GetPackageHandle(blockEntry.PatchId))
+            if (blockCount == 1)
             {
-                blockBuffer = ReadBlockBuffer(packageHandle, blockEntry).ToArray();
+                // Single-block files are mostly small tags packed many to a block, so the decompressed block is worth keeping
+                blockBuffer = BlockCache.GetOrLoad(this, fileEntry.StartingBlockIndex,
+                    () => LoadBlock(blockEntry));
             }
-            blockBuffer = DecryptAndDecompressBlockBufferIfRequired(blockBuffer, blockEntry);
+            else
+            {
+                blockBuffer = LoadBlock(blockEntry);
+            }
 
             bool isFirstBlock = currentBlockId == 0;
             bool isLastBlock = currentBlockId == blockCount - 1;
@@ -617,16 +624,63 @@ public abstract class Package : IPackage
         return 1 + (int)Math.Floor((double)(fileEntry.StartingBlockOffset + fileEntry.FileSize - 1) / BlockSize);
     }
 
-    private TigerReader GetPackageHandle(ushort patchId)
+    private byte[] LoadBlock(D2BlockEntry blockEntry)
     {
-        // if (!_packageHandles.TryGetValue(patchId, out TigerReader packageHandle))
-        // {
-        //     packageHandle =
-        //         new TigerReader(new FileStream(GetSpecificPackagePatchPath(patchId), FileMode.Open, FileAccess.Read, FileShare.Read));
-        //     _packageHandles.Add(patchId, packageHandle);
-        // }
-        return new TigerReader(new FileStream(GetSpecificPackagePatchPath(patchId), FileMode.Open, FileAccess.Read, FileShare.Read));
-        // return packageHandle;
+        byte[] blockBuffer = ReadBlockBuffer(GetPatchFileHandle(blockEntry.PatchId), blockEntry);
+        return DecryptAndDecompressBlockBufferIfRequired(blockBuffer, blockEntry);
+    }
+
+    private SafeFileHandle GetPatchFileHandle(ushort patchId)
+    {
+        if (_patchHandles.TryGetValue(patchId, out SafeFileHandle? handle))
+        {
+            return handle;
+        }
+
+        lock (_patchHandles)
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            if (!_patchHandles.TryGetValue(patchId, out handle))
+            {
+                // Share write/delete so a game update isn't blocked while Charm has the package open
+                handle = File.OpenHandle(GetSpecificPackagePatchPath(patchId), FileMode.Open, FileAccess.Read,
+                    FileShare.ReadWrite | FileShare.Delete, FileOptions.RandomAccess);
+                _patchHandles[patchId] = handle;
+            }
+            return handle;
+        }
+    }
+
+    private static byte[] ReadBlockBuffer(SafeFileHandle handle, D2BlockEntry blockEntry)
+    {
+        byte[] blockBuffer = new byte[blockEntry.Size];
+        int totalRead = 0;
+        while (totalRead < blockBuffer.Length)
+        {
+            int read = RandomAccess.Read(handle, blockBuffer.AsSpan(totalRead), blockEntry.Offset + totalRead);
+            if (read == 0)
+            {
+                throw new EndOfStreamException($"Block at offset {blockEntry.Offset:X} (size {blockEntry.Size:X}) runs past the end of the patch file");
+            }
+            totalRead += read;
+        }
+        return blockBuffer;
+    }
+
+    /// <summary>
+    /// Closes any open patch file handles. The package can't read file data afterwards.
+    /// </summary>
+    public void Dispose()
+    {
+        lock (_patchHandles)
+        {
+            _disposed = true;
+            foreach (SafeFileHandle handle in _patchHandles.Values)
+            {
+                handle.Dispose();
+            }
+            _patchHandles.Clear();
+        }
     }
 
     private string GetSpecificPackagePatchPath(ushort patchId)
@@ -638,12 +692,6 @@ public abstract class Package : IPackage
         return Path.Combine(directory, fullPkg);
     }
 
-    private byte[] ReadBlockBuffer(TigerReader packageHandle, D2BlockEntry blockEntry)
-    {
-        packageHandle.Seek(blockEntry.Offset, SeekOrigin.Begin);
-        byte[] blockBuffer = packageHandle.ReadBytes((int)blockEntry.Size);
-        return blockBuffer;
-    }
 
     [DllImport("ThirdParty/oo2core_9_win64.dll", EntryPoint = "OodleLZ_Decompress")]
     public static extern bool OodleLZ_Decompress(byte[] buffer, int bufferSize, byte[] outputBuffer, int outputBufferSize, int a, int b,

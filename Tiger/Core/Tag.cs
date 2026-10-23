@@ -51,7 +51,7 @@ public class Tag<T> : TigerFile where T : struct
             Deserialize(force);
     }
 
-    public bool IsLoaded()
+    public override bool IsLoaded()
     {
         return _isLoaded;
     }

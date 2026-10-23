@@ -127,9 +127,9 @@ public class Texture : TigerReferenceFile<STextureHeader>
                     if (TexHelper.Instance.IsCompressed(format))
                         scratchImage = DecompressScratchImage(scratchImage, IsSrgb() ? DXGI_FORMAT.B8G8R8A8_UNORM_SRGB : DXGI_FORMAT.B8G8R8A8_UNORM);
                     else if (IsSrgb())
-                        scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM_SRGB, TEX_FILTER_FLAGS.SEPARATE_ALPHA, 0);
+                        scratchImage = ReplaceScratchImage(scratchImage, scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM_SRGB, TEX_FILTER_FLAGS.SEPARATE_ALPHA, 0));
                     else
-                        scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM, 0, 0);
+                        scratchImage = ReplaceScratchImage(scratchImage, scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM, 0, 0));
                 }
             }
             catch (Exception e)
@@ -145,7 +145,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
             TexMetadata metadata = scratchImage.GetMetadata();
             metadata.Depth = 1;
             metadata.Dimension = TEX_DIMENSION.TEXTURE2D;
-            scratchImage = TexHelper.Instance.InitializeTemporary(new[] { scratchImage.GetImage(index) }, metadata);
+            scratchImage = TexHelper.Instance.InitializeTemporary(new[] { scratchImage.GetImage(index) }, metadata, scratchImage);
         }
 
         // scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM, TEX_FILTER_FLAGS.RGB_COPY_RED, 0);
@@ -155,33 +155,20 @@ public class Texture : TigerReferenceFile<STextureHeader>
 
     private ScratchImage DecompressScratchImage(ScratchImage scratchImage, DXGI_FORMAT format)
     {
-        while (true)
-        {
-            try
-            {
-                scratchImage = scratchImage.Decompress(format);
-                return scratchImage;
-            }
-            catch (AccessViolationException)
-            {
-            }
-        }
+        return ReplaceScratchImage(scratchImage, scratchImage.Decompress(format));
     }
 
-    // Not a fix at all but this (and the method above) stops(?) the random release build only crash that can happen here, idfk whats going on im not smart enough for this shit man.
     private ScratchImage PremultiplyAlpha(ScratchImage scratchImage, TEX_PMALPHA_FLAGS flags)
     {
-        while (true)
-        {
-            try
-            {
-                scratchImage = scratchImage.PremultiplyAlpha(flags);
-                return scratchImage;
-            }
-            catch (AccessViolationException)
-            {
-            }
-        }
+        return ReplaceScratchImage(scratchImage, scratchImage.PremultiplyAlpha(flags));
+    }
+
+    private static ScratchImage ReplaceScratchImage(ScratchImage old, ScratchImage replacement)
+    {
+        if (!ReferenceEquals(old, replacement))
+            old.Dispose();
+
+        return replacement;
     }
 
     public static ScratchImage FlattenCubemap(ScratchImage input)

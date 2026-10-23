@@ -4,7 +4,7 @@ namespace Tiger;
 
 public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
 {
-    private readonly ConcurrentDictionary<uint, dynamic> _fileCache = new();
+    private readonly ConcurrentDictionary<uint, ConcurrentDictionary<Type, dynamic>> _fileCache = new();
 
     public FileResourcer(TigerStrategy strategy, StrategyConfiguration strategyConfiguration) : base(strategy)
     {
@@ -52,31 +52,26 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
             return null;
         }
 
-        if (_fileCache.TryGetValue(hash.Hash32, out dynamic? cachedFile))
-        {
-            // checks that the type of the cached file is the same as the type we're looking for
-            if (cachedFile.GetType() == type)
-            {
-                return cachedFile;
-            }
-
-            // want a Tag<T>
-            if (type.IsValueType)
-            {
-                if (cachedFile.GetType().GenericTypeArguments.Length > 0 && cachedFile.GetType().GenericTypeArguments[0].UnderlyingSystemType == type)
-                {
-                    return cachedFile;
-                }
-            }
-
-            // todo causes thread safety issues
-            // _fileCache.TryRemove(hash.Hash32, out dynamic? r);
-        }
-
         // want a Tag<T>
         if (type.IsValueType)
         {
             type = typeof(Tag<>).MakeGenericType(type);
+        }
+
+        if (_fileCache.TryGetValue(hash.Hash32, out ConcurrentDictionary<Type, dynamic>? cachedFiles))
+        {
+            if (cachedFiles.TryGetValue(type, out dynamic? cachedFile))
+            {
+                return cachedFile;
+            }
+
+            foreach (dynamic candidate in cachedFiles.Values)
+            {
+                if (type.IsInstanceOfType(candidate) && (!shouldLoad || ((TigerFile)candidate).IsLoaded()))
+                {
+                    return candidate;
+                }
+            }
         }
 
         dynamic? file;
@@ -94,7 +89,10 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
         }
 
         if (shouldCache)
-            _fileCache.TryAdd(hash.Hash32, file);
+        {
+            // If another thread cached the same file and type first, return theirs so callers share one instance
+            return _fileCache.GetOrAdd(hash.Hash32, _ => new ConcurrentDictionary<Type, dynamic>()).GetOrAdd(type, (object)file);
+        }
         return file;
     }
 

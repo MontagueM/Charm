@@ -113,7 +113,9 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
 
     private void FillSchemaTypeCaches()
     {
-        var types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes());
+        Type[] types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).ToArray();
+
+        FillSchemaInterfaceCaches(types);
 
         Parallel.ForEach(types, type =>
         {
@@ -175,31 +177,44 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                 _schemaSerializedSizeMap.TryAdd(type, schemaTypeAttribute.SerializedSize);
                 return;
             }
-
-            bool isSchemaInterface = type.GetInterfaces().Contains(typeof(ISchema));
-            if (isSchemaInterface)
-            {
-                // ConcurrentDictionary<TigerStrategy, Type> interfaceMap = new();
-                // find the types that implement this interface, then find the strategy from their namespaces
-                foreach (Type interfaceType in types.Where(t => t.GetInterfaces().Contains(type)))
-                {
-                    TigerStrategy strategy = GetStrategyFromNamespace(interfaceType.Namespace);
-                    if (strategy == TigerStrategy.NONE)
-                    {
-                        throw new Exception($"Could not find strategy for interface {interfaceType}");
-                    }
-                    if (strategy > _strategy)
-                    {
-                        continue;
-                    }
-                    // interfaceMap.TryAdd(strategy, interfaceType);
-
-                    SchemaStructAttribute? intSchemaStructAttribute = GetAttribute<SchemaStructAttribute>(interfaceType.BaseType.GenericTypeArguments.First());
-                    _schemaTypeHashMap.TryAdd(type, intSchemaStructAttribute.ClassID);
-                    _interfaceImplementingTypeMap.TryAdd(type, interfaceType);
-                }
-            }
         });
+    }
+
+    /// <summary>
+    /// Maps each ISchema interface to the implementation for the current strategy, which is the one with the
+    /// highest strategy that's not newer than ours (the strategy is taken from the implementation's namespace).
+    /// </summary>
+    private void FillSchemaInterfaceCaches(Type[] types)
+    {
+        IEnumerable<Type> schemaInterfaces = types.Where(t => t.IsInterface && t.GetInterfaces().Contains(typeof(ISchema)));
+        foreach (Type schemaInterface in schemaInterfaces)
+        {
+            Type? bestType = null;
+            TigerStrategy bestStrategy = TigerStrategy.NONE;
+            foreach (Type implementingType in types.Where(t => !t.IsInterface && t.GetInterfaces().Contains(schemaInterface)))
+            {
+                TigerStrategy strategy = GetStrategyFromNamespace(implementingType.Namespace);
+                if (strategy == TigerStrategy.NONE)
+                {
+                    throw new Exception($"Could not find strategy for interface {implementingType}");
+                }
+                if (strategy > _strategy || strategy <= bestStrategy)
+                {
+                    continue;
+                }
+                bestType = implementingType;
+                bestStrategy = strategy;
+            }
+
+            if (bestType == null)
+            {
+                continue;
+            }
+
+            SchemaStructAttribute? intSchemaStructAttribute = GetAttribute<SchemaStructAttribute>(bestType.BaseType.GenericTypeArguments.First());
+            _schemaTypeHashMap.TryAdd(schemaInterface, intSchemaStructAttribute.ClassID);
+            _interfaceImplementingTypeMap.TryAdd(schemaInterface, bestType);
+        }
     }
 
     private FieldInfo[] GetStrategyFields(FieldInfo[] getFields)
@@ -380,39 +395,41 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             {
                 SchemaFieldAttribute? attr = GetAttribute<SchemaFieldAttribute>(fieldInfo);
                 if (attr == null)
-                {
                     throw new Exception($"Array type must have SchemaFieldAttribute to define array size. ({reader.Hash:X})");
-                }
+
+
                 int arraySize = attr.ArraySizeConst;
+                Type elementType = fieldType.GetElementType()!;
+                bool isTigerDeserializeElement = IsTigerDeserializeType(elementType);
+                bool isTigerFileElement = IsTigerFileType(elementType);
                 fieldValue = Activator.CreateInstance(fieldType, arraySize);
                 for (int i = 0; i < arraySize; i++)
                 {
                     dynamic value;
-                    if (IsTigerDeserializeType(fieldType)) // Does this need GetElementType()?
+                    if (isTigerDeserializeElement)
                     {
-                        value = DeserializeTigerType(reader, fieldType.GetElementType());
+                        value = DeserializeTigerType(reader, elementType);
                     }
-                    else if (IsTigerFileType(fieldType.GetElementType()))
+                    else if (isTigerFileElement)
                     {
                         FileHash fileHash = new(reader.ReadUInt32());
                         bool shouldLoad = !HasNoLoadAttribute(fieldInfo);
-                        value = FileResourcer.Get().GetFile(fieldType.GetElementType(), fileHash, shouldLoad);
+                        value = FileResourcer.Get().GetFile(elementType, fileHash, shouldLoad);
                     }
                     else
                     {
-                        value = DeserializeMarshalType(reader, fieldType.GetElementType());
+                        value = DeserializeMarshalType(reader, elementType);
                     }
-                    // assume it's a tiger deserialize type
                     fieldValue[i] = value;
                 }
 
-                if (IsTigerDeserializeType(fieldType) || IsTigerFileType(fieldType.GetElementType()))
+                if (isTigerDeserializeElement || isTigerFileElement)
                 {
-                    fieldSize = GetSchemaTypeSize(fieldType.GetElementType()) * arraySize;
+                    fieldSize = GetSchemaTypeSize(elementType) * arraySize;
                 }
                 else
                 {
-                    fieldSize = Marshal.SizeOf(fieldType.GetElementType()) * arraySize;
+                    fieldSize = Marshal.SizeOf(elementType) * arraySize;
                 }
             }
             else

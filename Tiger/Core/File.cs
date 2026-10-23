@@ -26,6 +26,11 @@ public class TigerFile
         return new TigerReader(GetStream(), Hash);
     }
 
+    public virtual bool IsLoaded()
+    {
+        return true;
+    }
+
     public MemoryStream GetStream()
     {
         return new MemoryStream(GetData());

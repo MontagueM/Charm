@@ -113,10 +113,11 @@ public partial class EntityListView : UserControl
 
         await Task.Run(() =>
         {
+            Stopwatch stopwatch = Stopwatch.StartNew();
             foreach (var pkg in PackageList.PackageItems)
             {
                 ConcurrentHashSet<FileHash> newHashes = new();
-                Parallel.ForEach(pkg.Hashes, hash =>
+                FileOrder.ParallelForEach(pkg.Hashes, hash =>
                 {
                     if (hash.GetReferenceHash().IsInvalid())
                         return;
@@ -144,6 +145,7 @@ public partial class EntityListView : UserControl
                     });
                 }
             }
+            Log.Debug($"Filtered entity packages in {stopwatch.Elapsed.TotalSeconds:0.00} seconds");
         });
         Dispatcher.Invoke(() =>
         {
@@ -187,7 +189,8 @@ public partial class EntityListView : UserControl
             if (Entities.Count != 0)
                 Entities.Clear();
 
-            Parallel.ForEach(item.Hashes, hash =>
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            FileOrder.ParallelForEach(item.Hashes, hash =>
             {
                 if (hash.GetReferenceHash().IsInvalid())
                     return;
@@ -225,6 +228,7 @@ public partial class EntityListView : UserControl
                     });
                 }
             });
+            Log.Debug($"Loaded {item.Hashes.Count} entities from {item.Name} in {stopwatch.Elapsed.TotalSeconds:0.00} seconds");
 
             MainWindow.Progress.CompleteStage();
             Dispatcher.Invoke(() => ShowBasicRenderer());
@@ -251,7 +255,7 @@ public partial class EntityListView : UserControl
             if (Strategy.IsPreBL())
             {
                 ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S80808930>();
-                Parallel.ForEach(vals, val =>
+                FileOrder.ParallelForEach(vals, val =>
                 {
                     Tag<S80808930> bag = FileResourcer.Get().GetSchemaTag<S80808930>(val);
                     if (bag.TagData.Entries.Count == 0)
@@ -271,7 +275,7 @@ public partial class EntityListView : UserControl
             else
             {
                 ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S8080471D>();
-                Parallel.ForEach(vals, val =>
+                FileOrder.ParallelForEach(vals, val =>
                 {
                     Tag<S8080471D> dgtbParent = FileResourcer.Get().GetSchemaTag<S8080471D>(val);
 
@@ -333,7 +337,7 @@ public partial class EntityListView : UserControl
 
             Entities.Clear();
 
-            Parallel.ForEach(item.Hashes, hash =>
+            FileOrder.ParallelForEach(item.Hashes, hash =>
             {
                 var tagBag = FileResourcer.Get().GetSchemaTag<S80808930>(hash);
                 foreach (var val in tagBag.TagData.Entries)
@@ -880,7 +884,7 @@ public partial class EntityListView : UserControl
 
             await Task.Run(() =>
             {
-                Parallel.ForEach(vals, parallelOptions, val =>
+                FileOrder.ParallelForEach(vals, parallelOptions, val =>
                 {
                     Tag<S808012D9> entry = FileResourcer.Get().GetSchemaTag<S808012D9>(val);
                     using TigerReader reader = entry.GetReader();
@@ -918,7 +922,7 @@ public partial class EntityListView : UserControl
 
             await Task.Run(() =>
             {
-                Parallel.ForEach(vals2, parallelOptions, val =>
+                FileOrder.ParallelForEach(vals2, parallelOptions, val =>
                 {
                     Tag<S808003F6> entry = FileResourcer.Get().GetSchemaTag<S808003F6>(val);
                     if (entry.TagData.EntityComponent is not null)
@@ -961,7 +965,7 @@ public partial class EntityListView : UserControl
 
             await Task.Run(() =>
             {
-                Parallel.ForEach(vals, parallelOptions, val =>
+                FileOrder.ParallelForEach(vals, parallelOptions, val =>
                 {
                     //Console.WriteLine($"Resource {val}");
                     Tag<S80809B14> entry = FileResourcer.Get().GetSchemaTag<S80809B14>(val);
@@ -1018,7 +1022,7 @@ public partial class EntityListView : UserControl
 
             await Task.Run(() =>
             {
-                Parallel.ForEach(vals, parallelOptions, val =>
+                FileOrder.ParallelForEach(vals, parallelOptions, val =>
                 {
                     if (!val.ContainsHash(0x80808019))
                         return;
@@ -1048,7 +1052,7 @@ public partial class EntityListView : UserControl
 
             await Task.Run(() =>
             {
-                Parallel.ForEach(resources, parallelOptions, val =>
+                FileOrder.ParallelForEach(resources, parallelOptions, val =>
                 {
                     if (!val.ContainsHash(0x8080470E))
                         return;
@@ -1093,7 +1097,7 @@ public partial class EntityListView : UserControl
             var hashes = await PackageResourcer.Get().GetAllHashesAsync(typeof(SEntity));
             Log.Debug($"{hashes.Count} Entities");
 
-            Parallel.ForEach(hashes, hash =>
+            FileOrder.ParallelForEach(hashes, hash =>
             {
                 if (!hash.ContainsHash(tagClass.Hash32))
                     return;

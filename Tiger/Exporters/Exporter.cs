@@ -39,7 +39,8 @@ public class Exporter : Subsystem<Exporter>
     public ExporterScene CreateScene(string name, ExportType type, DataExportType dataType = DataExportType.Individual, bool exportAnims = true)
     {
         var scene = new ExporterScene { Name = name, Type = type, DataType = dataType, ExportAnimations = exportAnims };
-        _scenes.Add(scene);
+        lock (_scenes)
+            _scenes.Add(scene);
         return scene;
     }
 
@@ -188,6 +189,20 @@ public class ExporterScene
     public ConcurrentDictionary<string, List<FileHash>> TerrainDyemaps = new();
     private ConcurrentDictionary<string, bool> _addedEntities = new();
 
+    private static void AppendToList<T>(ConcurrentDictionary<string, List<T>> dict, string key, IEnumerable<T> items)
+    {
+        List<T> list = dict.GetOrAdd(key, _ => new());
+        lock (list)
+            list.AddRange(items);
+    }
+
+    private static void AppendToList<T>(ConcurrentDictionary<string, List<T>> dict, string key, T item)
+    {
+        List<T> list = dict.GetOrAdd(key, _ => new());
+        lock (list)
+            list.Add(item);
+    }
+
     public void AddStatic(string meshHash, List<StaticPart> parts)
     {
         ExporterMesh mesh = new(meshHash);
@@ -214,33 +229,13 @@ public class ExporterScene
 
     public void AddStaticInstancesToMesh(string modelHash, IEnumerable<SStaticMeshInstanceTransform> instances)
     {
-        if (!StaticMeshInstances.ContainsKey(modelHash))
-        {
-            StaticMeshInstances.TryAdd(modelHash, InstancesToTransforms(instances));
-        }
-        else
-        {
-            foreach (Transform transform in InstancesToTransforms(instances))
-            {
-                StaticMeshInstances[modelHash].Add(transform);
-            }
-        }
+        AppendToList(StaticMeshInstances, modelHash, InstancesToTransforms(instances));
     }
 
     // D1
     public void AddStaticInstancesToMesh(string modelHash, IEnumerable<InstanceTransform> instances)
     {
-        if (!StaticMeshInstances.ContainsKey(modelHash))
-        {
-            StaticMeshInstances.TryAdd(modelHash, InstancesToTransforms(instances));
-        }
-        else
-        {
-            foreach (Transform transform in InstancesToTransforms(instances))
-            {
-                StaticMeshInstances[modelHash].Add(transform);
-            }
-        }
+        AppendToList(StaticMeshInstances, modelHash, InstancesToTransforms(instances));
     }
 
     private static List<Transform> InstancesToTransforms(IEnumerable<SStaticMeshInstanceTransform> instances)
@@ -268,12 +263,7 @@ public class ExporterScene
 
     public void AddStaticInstance(FileHash modelHash, Vector3 scale, Vector4 quatRotation, Vector3 translation)
     {
-        if (!StaticMeshInstances.ContainsKey(modelHash))
-        {
-            StaticMeshInstances.TryAdd(modelHash, new());
-        }
-
-        StaticMeshInstances[modelHash].Add(new Transform
+        AppendToList(StaticMeshInstances, modelHash, new Transform
         {
             Position = translation,
             Rotation = Vector4.QuaternionToEulerAngles(quatRotation),
@@ -342,7 +332,6 @@ public class ExporterScene
                 });
             }
 
-            EntityInstances.TryAdd(ent.Hash, new());
             if (transform is null)
             {
                 transform = new Transform
@@ -353,7 +342,7 @@ public class ExporterScene
                     Scale = new Vector3(entry.Transfrom.Translation.W, entry.Transfrom.Translation.W, entry.Transfrom.Translation.W)
                 };
             }
-            EntityInstances[ent.Hash].Add((Transform)transform);
+            AppendToList(EntityInstances, ent.Hash, (Transform)transform);
         }
     }
 
@@ -372,8 +361,7 @@ public class ExporterScene
             Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = null });
         }
 
-        EntityInstances.TryAdd(model.Hash, new());
-        EntityInstances[model.Hash].Add(transform);
+        AppendToList(EntityInstances, model.Hash, transform);
     }
 
     public void AddModel(EntityModel model, Material overrideMaterial = null)
@@ -393,11 +381,7 @@ public class ExporterScene
 
     public void AddTerrainDyemap(FileHash modelHash, FileHash dyemapHash)
     {
-        if (!TerrainDyemaps.ContainsKey(modelHash))
-        {
-            TerrainDyemaps.TryAdd(modelHash, new());
-        }
-        TerrainDyemaps[modelHash].Add(dyemapHash);
+        AppendToList(TerrainDyemaps, modelHash, dyemapHash);
     }
 
     public void AddMapModelParts(string name, List<DynamicMeshPart> parts, Transform transform)
@@ -414,8 +398,7 @@ public class ExporterScene
             Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = null });
         }
 
-        EntityInstances.TryAdd(name, new());
-        EntityInstances[name].Add(transform);
+        AppendToList(EntityInstances, name, transform);
     }
 
     public void AddMapModelParts(string name, List<MeshPart> parts, Transform transform)
@@ -428,10 +411,7 @@ public class ExporterScene
         }
         StaticMeshes.Add(mesh);
 
-        if (!StaticMeshInstances.ContainsKey(name))
-            StaticMeshInstances.TryAdd(name, new());
-
-        StaticMeshInstances[name].Add(transform);
+        AppendToList(StaticMeshInstances, name, transform);
     }
 
     public void AddTerrain(string meshHash, List<StaticPart> parts, ulong? id = null, int index = 0)

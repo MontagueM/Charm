@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using System.Text;
 using Arithmic;
 using Newtonsoft.Json;
@@ -118,7 +119,7 @@ namespace Tiger.Schema.Shaders
             }
         }
 
-        public void Export(string saveDirectory, bool fromMaterialViewer = false)
+        public void Export(string saveDirectory, bool fromMaterialViewer = false, ConcurrentBag<(Texture Texture, string SavePath)>? textureSaves = null)
         {
             string texturePath = $"{saveDirectory}/Textures";
             string materialPath = $"{saveDirectory}/Materials";
@@ -174,7 +175,10 @@ namespace Tiger.Schema.Shaders
                     if (File.Exists($"{savePath}.{TextureExporter.GetExtension(_config.GetOutputTextureFormat())}"))
                         continue;
 
-                    texture.Texture.SavetoFile(savePath);
+                    if (textureSaves is not null)
+                        textureSaves.Add((texture.Texture, savePath));
+                    else
+                        texture.Texture.SavetoFile(savePath);
                 }
 
                 psCB.TileTextureDetails = new();
@@ -252,7 +256,10 @@ namespace Tiger.Schema.Shaders
                     if (File.Exists($"{savePath}.{TextureExporter.GetExtension(_config.GetOutputTextureFormat())}"))
                         continue;
 
-                    texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
+                    if (textureSaves is not null)
+                        textureSaves.Add((texture.Texture, savePath));
+                    else
+                        texture.Texture.SavetoFile(savePath);
                 }
 
                 vsCB.TileTextureDetails = new();

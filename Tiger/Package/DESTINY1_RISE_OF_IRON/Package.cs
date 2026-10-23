@@ -124,7 +124,7 @@ public struct PackageHeader : IPackageHeader
                 Name = Name,
             });
 
-            reader.Seek(NamedTagTableOffset + (0x44 * i), SeekOrigin.Begin);
+            reader.Seek(NamedTagTableOffset + (0x44 * (i + 1)), SeekOrigin.Begin);
         }
 
         return activityEntries;
