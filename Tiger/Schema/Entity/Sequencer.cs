@@ -50,7 +50,7 @@ public class EntitySequencer : EntityComponent
             {
                 if (entry.Unk10.GetValue(reader) is S80802379 entry2)
                 {
-                    if (entry2.Pointer.GetValue(reader) is S8080237D entry3)
+                    if (entry2.Pointer.GetValue(reader) is S8080237D entry3 && entry3.Anim is not null)
                         anims.Add(entry3.Anim);
                     //else
                     //    Debug.Assert(false, $"{Hash}: Unknown resource pointer {entry2.Pointer.ResourceClassHash:X8}");

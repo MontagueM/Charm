@@ -138,6 +138,15 @@ public class Entity : Tag<SEntity>
                     break;
             }
         }
+
+        if (Sequences != null)
+        {
+            Animations ??= new();
+            if (Animations.Count == 0)
+                Animations.Add(new(new FileHash(FileHash.InvalidHash32)));
+
+            Animations[0].Sequences = Sequences;
+        }
     }
 
     /// <summary>

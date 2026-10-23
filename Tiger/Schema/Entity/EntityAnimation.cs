@@ -3,12 +3,32 @@
 public class EntityAnimations : EntityComponent
 {
     public HashSet<Animation.Animation> AnimationTags = new();
+    public List<EntitySequencer>? Sequences;
     public EntityAnimations(FileHash resource) : base(resource)
     {
     }
 
     public void GetAllAnimations()
     {
+        if (Sequences != null)
+        {
+            foreach (var sequence in Sequences)
+                AnimationTags.UnionWith(sequence.GetSequencerAnimations());
+
+            //foreach (var ents in Sequences.Select(x => x.GetSequencerEntities()))
+            //{
+            //    foreach (var ent in ents)
+            //    {
+            //        if (ent is null || ent.Sequences is null)
+            //            continue;
+
+            //        foreach (var sequence in ent.Sequences)
+            //            AnimationTags.UnionWith(sequence.GetSequencerAnimations());
+            //    }
+            //}
+
+        }
+
         if (Hash == FileHash.InvalidHash32)
             return;
 
