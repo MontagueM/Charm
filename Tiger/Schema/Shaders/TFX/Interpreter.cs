@@ -54,8 +54,6 @@ public class TfxBytecodeInterpreterHLSL
 
     public Dictionary<int, string> Evaluate(DynamicArray<Vec4> constants, bool print = false, Material? material = null)
     {
-        bool bInline = CanInlineBytecode() || material?.RenderStage == TfxRenderStage.WaterReflection;
-
         Dictionary<int, string> hlsl = new();
         try
         {
@@ -108,31 +106,19 @@ public class TfxBytecodeInterpreterHLSL
                         break;
                     case TfxBytecode.Dot:
                         List<string> dot = StackPop(2);
-                        if (bInline)
-                            StackPush($"(dot({dot[0]}, {dot[1]}))");
-                        else
-                            StackPush($"(dot4({dot[0]}, {dot[1]}))");
+                        StackPush($"(dot({dot[0]}, {dot[1]}))");
                         break;
                     case TfxBytecode.Merge_1_3:
                         List<string> merge = StackPop(2);
-                        if (bInline)
-                            StackPush($"float4({merge[0]}.x, {merge[1]}.xyz)");
-                        else
-                            StackPush($"(float4({merge[0]}.x, {merge[1]}.x, {merge[1]}.y, {merge[1]}.z))");
+                        StackPush($"float4({merge[0]}.x, {merge[1]}.xyz)");
                         break;
                     case TfxBytecode.Merge_2_2:
                         List<string> merge2_2 = StackPop(2);
-                        if (bInline)
-                            StackPush($"float4({merge2_2[0]}.xy, {merge2_2[1]}.xy)");
-                        else
-                            StackPush($"(float4({merge2_2[0]}.x, {merge2_2[0]}.y, {merge2_2[1]}.x, {merge2_2[1]}.y))");
+                        StackPush($"float4({merge2_2[0]}.xy, {merge2_2[1]}.xy)");
                         break;
                     case TfxBytecode.Merge_3_1:
                         List<string> merge3_1 = StackPop(2);
-                        if (bInline)
-                            StackPush($"(float4({merge3_1[0]}.xyz, {merge3_1[1]}.x))");
-                        else
-                            StackPush($"(float4({merge3_1[0]}.x, {merge3_1[0]}.y, {merge3_1[0]}.z, {merge3_1[1]}.x))");
+                        StackPush($"(float4({merge3_1[0]}.xyz, {merge3_1[1]}.x))");
                         break;
                     case TfxBytecode.Cubic:
                         List<string> Unk0f = StackPop(2);
@@ -177,22 +163,13 @@ public class TfxBytecodeInterpreterHLSL
                         StackPush($"(-{StackTop()})");
                         break;
                     case TfxBytecode.VecRotSin:
-                        if (bInline)
-                            StackPush($"_trig_helper_vector_sin_rotations_estimate({StackTop()})");
-                        else
-                            StackPush(_trig_helper_vector_sin_rotations_estimate(StackTop()));
+                        StackPush(_trig_helper_vector_sin_rotations_estimate(StackTop()));
                         break;
                     case TfxBytecode.VecRotCos:
-                        if (bInline)
-                            StackPush($"_trig_helper_vector_cos_rotations_estimate({StackTop()})");
-                        else
-                            StackPush(_trig_helper_vector_cos_rotations_estimate(StackTop()));
+                        StackPush(_trig_helper_vector_cos_rotations_estimate(StackTop()));
                         break;
                     case TfxBytecode.VecRotSinCos:
-                        if (bInline)
-                            StackPush($"_trig_helper_vector_sin_cos_rotations_estimate({StackTop()})");
-                        else
-                            StackPush(_trig_helper_vector_sin_cos_rotations_estimate(StackTop()));
+                        StackPush(_trig_helper_vector_sin_cos_rotations_estimate(StackTop()));
                         break;
                     case TfxBytecode.PermuteAllX:
                         StackPush($"({StackTop()}.xxxx)");
@@ -206,34 +183,19 @@ public class TfxBytecodeInterpreterHLSL
                         StackPush($"(saturate({StackTop()}))");
                         break;
                     case TfxBytecode.Triangle:
-                        if (bInline)
-                            StackPush($"bytecode_op_triangle({StackTop()})");
-                        else
-                            StackPush(bytecode_op_triangle(StackTop()));
+                        StackPush(bytecode_op_triangle(StackTop()));
                         break;
                     case TfxBytecode.Jitter:
-                        if (bInline)
-                            StackPush($"bytecode_op_jitter({StackTop()})");
-                        else
-                            StackPush(bytecode_op_jitter(StackTop()));
+                        StackPush(bytecode_op_jitter(StackTop()));
                         break;
                     case TfxBytecode.Wander:
-                        if (bInline)
-                            StackPush($"bytecode_op_wander({StackTop()})");
-                        else
-                            StackPush($"{bytecode_op_wander(StackTop())}");
+                        StackPush($"{bytecode_op_wander(StackTop())}");
                         break;
                     case TfxBytecode.Rand:
-                        if (bInline)
-                            StackPush($"bytecode_op_rand({StackTop()})");
-                        else
-                            StackPush(bytecode_op_rand(StackTop()));
+                        StackPush(bytecode_op_rand(StackTop()));
                         break;
                     case TfxBytecode.RandSmooth:
-                        if (bInline)
-                            StackPush($"bytecode_op_rand_smooth({StackTop()})");
-                        else
-                            StackPush(bytecode_op_rand_smooth(StackTop()));
+                        StackPush(bytecode_op_rand_smooth(StackTop()));
                         break;
                     case TfxBytecode.TransformVec4:
                         List<string> TransformVec4 = StackPop(5);
@@ -266,11 +228,7 @@ public class TfxBytecodeInterpreterHLSL
                         string C1 = $"float4{constants[s4c_index + 2].Vec}";
                         string C0 = $"float4{constants[s4c_index + 3].Vec}";
                         string threshold = $"float4{constants[s4c_index + 4].Vec}";
-
-                        if (bInline)
-                            StackPush($"bytecode_op_spline4_const({X}, {C3}, {C2}, {C1}, {C0}, {threshold})");
-                        else
-                            StackPush($"{bytecode_op_spline4_const(X, C3, C2, C1, C0, threshold)}");
+                        StackPush($"{bytecode_op_spline4_const(X, C3, C2, C1, C0, threshold)}");
                         break;
 
                     case TfxBytecode.Spline8Const:
@@ -286,11 +244,7 @@ public class TfxBytecodeInterpreterHLSL
                         string s8c_D0 = $"float4{constants[s8c_index + 7].Vec}";
                         string s8c_CThresholds = $"float4{constants[s8c_index + 8].Vec}";
                         string s8c_DThresholds = $"float4{constants[s8c_index + 9].Vec}";
-
-                        if (bInline)
-                            StackPush($"bytecode_op_spline8_const({s8c_X}, {s8c_C3}, {s8c_C2}, {s8c_C1}, {s8c_C0}, {s8c_D3}, {s8c_D2}, {s8c_D1}, {s8c_D0}, {s8c_CThresholds}, {s8c_DThresholds})");
-                        else
-                            StackPush($"{bytecode_op_spline8_const(s8c_X, s8c_C3, s8c_C2, s8c_C1, s8c_C0, s8c_D3, s8c_D2, s8c_D1, s8c_D0, s8c_CThresholds, s8c_DThresholds)}");
+                        StackPush($"{bytecode_op_spline8_const(s8c_X, s8c_C3, s8c_C2, s8c_C1, s8c_C0, s8c_D3, s8c_D2, s8c_D1, s8c_D0, s8c_CThresholds, s8c_DThresholds)}");
                         break;
 
                     case TfxBytecode.Spline8ConstChain:
@@ -307,11 +261,7 @@ public class TfxBytecodeInterpreterHLSL
                         string s8cc_D0 = $"float4{constants[s8cc_index + 7].Vec}";
                         string s8cc_CThresholds = $"float4{constants[s8cc_index + 8].Vec}";
                         string s8cc_DThresholds = $"float4{constants[s8cc_index + 9].Vec}";
-
-                        if (bInline)
-                            StackPush($"bytecode_op_spline8_chain_const({s8cc_X[1]}, {s8cc_X[0]}, {s8cc_C3}, {s8cc_C2}, {s8cc_C1}, {s8cc_C0}, {s8cc_D3}, {s8cc_D2}, {s8cc_D1}, {s8cc_D0}, {s8cc_CThresholds}, {s8cc_DThresholds})");
-                        else
-                            StackPush($"{bytecode_op_spline8_chain_const(s8cc_X[1], s8cc_X[0], s8cc_C3, s8cc_C2, s8cc_C1, s8cc_C0, s8cc_D3, s8cc_D2, s8cc_D1, s8cc_D0, s8cc_CThresholds, s8cc_DThresholds)}");
+                        StackPush($"{bytecode_op_spline8_chain_const(s8cc_X[1], s8cc_X[0], s8cc_C3, s8cc_C2, s8cc_C1, s8cc_C0, s8cc_D3, s8cc_D2, s8cc_D1, s8cc_D0, s8cc_CThresholds, s8cc_DThresholds)}");
                         break;
 
                     case TfxBytecode.Gradient4Const:
@@ -323,11 +273,7 @@ public class TfxBytecodeInterpreterHLSL
                         string Cblue = $"float4{constants[g4c_index + 3].Vec}";
                         string Calpha = $"float4{constants[g4c_index + 4].Vec}";
                         string Cthresholds = $"float4{constants[g4c_index + 5].Vec}";
-
-                        if (bInline)
-                            StackPush($"bytecode_op_gradient4_const({g4c_X}, {BaseColor}, {Cred}, {Cgreen}, {Cblue}, {Calpha}, {Cthresholds})");
-                        else
-                            StackPush($"{bytecode_op_gradient4_const(g4c_X, BaseColor, Cred, Cgreen, Cblue, Calpha, Cthresholds)}");
+                        StackPush($"{bytecode_op_gradient4_const(g4c_X, BaseColor, Cred, Cgreen, Cblue, Calpha, Cthresholds)}");
                         break;
 
                     case TfxBytecode.Gradient8Const: // A massive unknown function with a 12 inputs, maybe this is Gradient8Const? (idk if that exists)
@@ -344,18 +290,15 @@ public class TfxBytecodeInterpreterHLSL
                         string g8c_Dalpha = $"float4{constants[g8c_index + 8].Vec}";
                         string g8c_Cthresholds = $"float4{constants[g8c_index + 9].Vec}";
                         string g8c_Dthresholds = $"float4{constants[g8c_index + 10].Vec}";
-                        if (bInline)
-                            StackPush($"bytecode_op_gradient8_const({g8c_X1}, {g8c_BaseColor}, {g8c_Cred}, {g8c_Cgreen}, {g8c_Cblue}, {g8c_Calpha}, {g8c_Dred}, {g8c_Dgreen}, {g8c_Dblue}, {g8c_Dalpha}, {g8c_Cthresholds}, {g8c_Dthresholds})");
-                        else
-                            StackPush($"{bytecode_op_gradient8_const(g8c_X1, g8c_BaseColor, g8c_Cred, g8c_Cgreen, g8c_Cblue, g8c_Calpha, g8c_Dred, g8c_Dgreen, g8c_Dblue, g8c_Dalpha, g8c_Cthresholds, g8c_Dthresholds)}");
+                        StackPush($"{bytecode_op_gradient8_const(g8c_X1, g8c_BaseColor, g8c_Cred, g8c_Cgreen, g8c_Cblue, g8c_Calpha, g8c_Dred, g8c_Dgreen, g8c_Dblue, g8c_Dalpha, g8c_Cthresholds, g8c_Dthresholds)}");
                         break;
 
                     case TfxBytecode.PushExternInputFloat:
-                        string v = Externs.GetExternFloat((TfxExtern)((TfxData2Byte)op.data).value, ((TfxData2Byte)op.data).value2 * 4, bInline);
+                        string v = Externs.GetExternFloat((TfxExtern)((TfxData2Byte)op.data).value, ((TfxData2Byte)op.data).value2 * 4);
                         StackPush(v);
                         break;
                     case TfxBytecode.PushExternInputVec4:
-                        string PushExternInputVec4 = Externs.GetExternVec4((TfxExtern)((TfxData2Byte)op.data).value, ((TfxData2Byte)op.data).value2 * 16, bInline);
+                        string PushExternInputVec4 = Externs.GetExternVec4((TfxExtern)((TfxData2Byte)op.data).value, ((TfxData2Byte)op.data).value2 * 16);
                         StackPush(PushExternInputVec4);
                         break;
                     case TfxBytecode.PushExternInputMat4:
@@ -785,32 +728,5 @@ public class TfxBytecodeInterpreterHLSL
     private string _trig_helper_vector_pseudo_sin_rotations_clamped(string a)
     {
         return $"({a} * (abs({a}) * -16.0 + 8.0))";
-    }
-
-    /// <summary>
-    /// Used for S&Box Only.
-    /// Determines if this bytecode should be put into the materials shader as normal HLSL,
-    /// or if it can be added to the vmat and used by the dynamic expression compilier.
-    /// S&Box can crash if the bytecode is too long and/or complex in a materials dynamic expressions, worked before so its bugged now I guess.
-    /// Gradient and Spline being the main offenders.
-    /// </summary>
-    /// <returns></returns>
-    public bool CanInlineBytecode()
-    {
-        //TODO or something: Material expressions were removed in S&Box :))))
-        // Idfk why they removed them, so they all have to be inlined into the shader itself now.
-        // I LOOOVE having unnecessary duplicate shaders!!
-        return true;
-
-        if (Opcodes.Count > 100 ||
-            (Opcodes.Exists(x => x.op == TfxBytecode.Spline4Const) ||
-            Opcodes.Exists(x => x.op == TfxBytecode.Spline8Const) ||
-            Opcodes.Exists(x => x.op == TfxBytecode.Spline8ConstChain) ||
-            Opcodes.Exists(x => x.op == TfxBytecode.Gradient4Const) ||
-            Opcodes.Exists(x => x.op == TfxBytecode.Gradient8Const)))
-        {
-            return true;
-        }
-        return false;
     }
 }

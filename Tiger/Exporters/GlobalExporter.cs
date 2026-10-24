@@ -55,8 +55,6 @@ public class GlobalExporter : AbstractExporter
             {
                 // Not ideal but it works
                 TextureExporter.SaveTextureToFile($"{texSavePath}/{tex.Hash}", tex.IsVolume() ? Texture.FlattenVolume(tex.GetScratchImage(true)) : tex.GetScratchImage());
-                if (_config.GetSBoxExportEnabled())
-                    Source2Handler.SaveVTEX(tex, $"{texSavePath}", "Atmosphere");
             }
 
             string dataSavePath = $"{SavePath}/Rendering";
@@ -183,8 +181,6 @@ public class GlobalExporter : AbstractExporter
                     continue;
 
                 TextureExporter.SaveTextureToFile($"{texSavePath}/{tex.Hash}", tex.IsVolume() ? Texture.FlattenVolume(tex.GetScratchImage(true)) : Texture.FlattenCubemap(tex.GetScratchImage()));
-                if (_config.GetSBoxExportEnabled())
-                    Source2Handler.SaveVTEX(tex, $"{texSavePath}", "Cubemaps");
             }
 
             File.WriteAllText($"{dataSavePath}/Cubemaps.json", JsonConvert.SerializeObject(data, Formatting.Indented));
@@ -236,9 +232,8 @@ public class GlobalExporter : AbstractExporter
                     continue;
 
                 tex.SavetoFile($"{texSavePath}/{tex.Hash}");
-                if (_config.GetSBoxExportEnabled())
-                    Source2Handler.SaveVTEX(tex, $"{texSavePath}", "Lights");
             }
+
             var jsonSettings = new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
@@ -346,16 +341,6 @@ public class GlobalExporter : AbstractExporter
 
                                 Directory.CreateDirectory($"{SavePath}/Textures/LUT");
                                 lut.Unk28.TagData.LUT.SavetoFile($"{SavePath}/Textures/LUT/{lut.Unk28.TagData.LUT.Hash}");
-
-                                Source2Handler.SaveVTEX(
-                                    lut.Unk28.TagData.LUT,
-                                    new VTEX
-                                    {
-                                        OutputFormat = "RGBA8888",
-                                        OutputTypeString = "2D"
-                                    },
-                                    $"{SavePath}/Textures/LUT/",
-                                    "LUT");
 
                                 // TODO move out of global channels when theres more general stuff to export
                                 channels.TryAdd("LUT", new GlobalChannelData

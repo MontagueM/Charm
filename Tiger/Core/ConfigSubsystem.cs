@@ -100,51 +100,6 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
 
     #endregion
 
-    #region source2Path
-
-    //public string GetSource2Path()
-    //{
-    //    return _settings.Source2.Source2Path;
-    //}
-
-    //public bool TrySetSource2Path(string path)
-    //{
-    //    if (path == "")
-    //    {
-    //        return false;
-    //    }
-
-    //    if (!path.EndsWith("win64"))
-    //    {
-    //        return false;
-    //    }
-
-    //    _settings.Source2.Source2Path = path;
-
-    //    Save();
-    //    return true;
-    //}
-
-    #endregion
-
-    #region source2ExportsEnabled
-
-    public void SetSBoxExportEnabled(bool bS2ExportEnabled)
-    {
-        _settings.Source2.Source2ExportsEnabled = bS2ExportEnabled;
-        Save();
-    }
-
-    // TODO, havent decided if I want to continue supporting s&box
-    public bool GetSBoxExportEnabled()
-    {
-        return false;
-        //return _settings.Source2.Source2ExportsEnabled;
-    }
-
-    #endregion
-
-
     #region exportSavePath
 
     public string GetExportSavePath()
@@ -163,49 +118,6 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
 
         Save();
         return true;
-    }
-
-    #endregion
-
-    #region unrealInteropPath
-
-    public bool TrySetUnrealInteropPath(string interopPath)
-    {
-        if (!interopPath.Contains("Content"))
-        {
-            SetUnrealInteropEnabled(false);
-            return false;
-        }
-
-        _settings.Unreal.UnrealInteropPath = interopPath;
-        SetUnrealInteropEnabled(true);
-
-        Save();
-        return true;
-    }
-
-    public string GetUnrealInteropPath()
-    {
-        return _settings.Unreal.UnrealInteropPath;
-    }
-
-    #endregion
-
-    #region unrealInteropEnabled
-
-    public void SetUnrealInteropEnabled(bool bUnrealInteropEnabled)
-    {
-        _settings.Unreal.UnrealInteropEnabled = bUnrealInteropEnabled;
-        Save();
-    }
-
-    public bool GetUnrealInteropEnabled()
-    {
-        if (_settings.Unreal == null)
-        {
-            return false;
-        }
-        return _settings.Unreal.UnrealInteropEnabled;
     }
 
     #endregion

@@ -118,7 +118,7 @@ public partial class GeneralConfigView : UserControl
         expAnim.ChangeButton.Click += ExportAnimations_OnClick;
         ExportingConfigPanel.Children.Add(expAnim);
 
-        // Whether to export shader hlsl files, always true if S&Box shaders are enabled
+        // Whether to export shader hlsl files
         ConfigSettingToggleControl hlsl = new()
         {
             SettingName = "Export Shader HLSL",

@@ -51,7 +51,7 @@ namespace Tiger.Schema.Shaders
 
             // Dont export the hlsl if none of the shader related settings are enabled
             // but force export if we're saving from the material viewer
-            if (!_config.GetSaveShaderHLSL() && !_config.GetSBoxExportEnabled() && !fromMaterialViewer)
+            if (!_config.GetSaveShaderHLSL() && !fromMaterialViewer)
                 return;
 
             if (Pixel.Shader != null && Pixel.Shader.Hash.IsValid())
@@ -61,30 +61,6 @@ namespace Tiger.Schema.Shaders
                     string pixel = Pixel.Shader.Decompile($"ps{Pixel.Shader.Hash}");
                     Directory.CreateDirectory($"{saveDirectory}/Shaders/HLSL");
                     File.WriteAllText($"{saveDirectory}/Shaders/HLSL/PS_{Pixel.Shader.Hash}.hlsl", pixel);
-
-                    if (_config.GetUnrealInteropEnabled())
-                    {
-                        string usf = new UsfConverter().HlslToUsf(this, false);
-                        Directory.CreateDirectory($"{saveDirectory}/Shaders/Unreal");
-                        File.WriteAllText($"{saveDirectory}/Shaders/Unreal/PS_{Pixel.Shader.Hash}.usf", usf);
-                    }
-
-                    if (_config.GetSBoxExportEnabled())
-                    {
-                        string vfx = new S2ShaderConverter().HlslToVfx(this);
-                        Directory.CreateDirectory($"{saveDirectory}/Shaders/Source2");
-                        Directory.CreateDirectory($"{saveDirectory}/Shaders/Source2/materials");
-
-                        if (!File.Exists($"{saveDirectory}/Shaders/TFXFunctions.hlsl"))
-                            File.Copy("./Exporters/Sbox/TFXFunctions.hlsl", $"{saveDirectory}/Shaders/TFXFunctions.hlsl");
-
-                        if (!File.Exists($"{saveDirectory}/Shaders/D2ShadingModel.hlsl"))
-                            File.Copy("./Exporters/Sbox/D2ShadingModel.hlsl", $"{saveDirectory}/Shaders/D2ShadingModel.hlsl");
-
-                        FileHash hash = (Pixel.GetBytecode().CanInlineBytecode() || RenderStage == TfxRenderStage.WaterReflection) ? Hash : Pixel.Shader.Hash;
-                        File.WriteAllText($"{saveDirectory}/Shaders/Source2/PS_{hash}.shader", vfx);
-                        Source2Handler.SaveVMAT(saveDirectory, Hash, this);
-                    }
                 }
                 catch (IOException e)  // threading error
                 {
@@ -101,7 +77,7 @@ namespace Tiger.Schema.Shaders
 
             // Dont export the hlsl if none of the shader related settings are enabled
             // but force export if we're saving from the material viewer
-            if (!_config.GetSaveShaderHLSL() && !_config.GetSBoxExportEnabled() && !fromMaterialViewer)
+            if (!_config.GetSaveShaderHLSL() && !fromMaterialViewer)
                 return;
 
             if (Vertex.Shader != null && Vertex.Shader.Hash.IsValid())

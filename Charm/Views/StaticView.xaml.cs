@@ -61,13 +61,6 @@ public partial class StaticView : UserControl
         staticMesh.SaveMaterialsFromParts(scene, parts);
 
         Directory.CreateDirectory(savePath);
-        if (exportType == ExportTypeFlag.Full)
-        {
-            if (config.GetUnrealInteropEnabled())
-            {
-                AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Static, config.GetOutputTextureFormat());
-            }
-        }
 
         if (extraPath != string.Empty)
             Exporter.Get().Export($"{savePath}");

@@ -391,11 +391,6 @@ public partial class ActivityMapEntityView : UserControl
     {
         Directory.CreateDirectory(savePath);
         ExtractDataTables(dataTables, hash, savePath);
-
-        if (_config.GetUnrealInteropEnabled())
-        {
-            AutomatedExporter.SaveInteropUnrealPythonFile(savePath, hash, AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapAssetsEnabled());
-        }
     }
 
     private static void ExtractDataTables(List<FileHash> dataTables, string hash, string savePath)

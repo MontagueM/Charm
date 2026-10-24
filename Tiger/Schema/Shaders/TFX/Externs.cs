@@ -448,12 +448,8 @@ public static class Externs
         //throw new InvalidCastException($"Couldn't cast extern value {value} ({name}) for {Strategy.CurrentStrategy}");
     }
 
-    // TODO s&box, remove InlineOrDefault since they are defined in the shader now since the removal of dynamic expressions
-    public static string GetExternFloat(TfxExtern extern_, int element, bool bInline = false)
+    public static string GetExternFloat(TfxExtern extern_, int element)
     {
-        string InlineOrDefault(string name, string defaultValue) =>
-                    bInline ? $"float4({name}.xxxx)" : $"(exists({name}) ? ({name}) : ({defaultValue}))";
-
         static string HandleUnknownElement(int element, TfxExtern extern_)
         {
             Log.Warning($"Unimplemented element {element} (0x{element:X}) for extern {extern_}");
@@ -466,47 +462,48 @@ public static class Externs
                 return element switch
                 {
                     // Not using inline method for time since its an engine provided value
-                    0 => bInline ? $"float4(CurrentTime.xxxx)" : "(Time)", // game_time
-                    0x04 => bInline ? $"float4(CurrentTime.xxxx)" : "(Time)", // render_time
-                    0x10 => InlineOrDefault("FrameTimeOfDay", "0.5"),
+                    0 => $"float4(CurrentTime.xxxx)", // game_time
+                    0x04 => $"float4(CurrentTime.xxxx)", // render_time
+                    0x10 => "FrameTimeOfDay",
                     0x14 => "float4(0.05.xxxx)", // delta_game_time
                     0x18 => "float4(0.016.xxxx)", // exposure_time
-                    0x1C => InlineOrDefault("ExposureScale", "0.65"), // exposure_scale
-                    0x28 => InlineOrDefault("ExposureIllumRelative", "1"), // exposure_illum_relative
+                    0x1C => "ExposureScale",  // exposure_scale
+                    0x28 => "ExposureIllumRelative",  // exposure_illum_relative
                     _ => HandleUnknownElement(element, extern_)
                 };
 
             case TfxExtern.Atmosphere:
                 return element switch
                 {
-                    0x70 => InlineOrDefault("AtmosTimeOfDay", "0.5"),
-                    0x74 => InlineOrDefault("AtmosUnk74", "0"),
-                    0x78 => InlineOrDefault("AtmosUnk78", "0"),
-                    0x150 => InlineOrDefault("AtmosUnk150", "0"),
-                    0x154 => InlineOrDefault("AtmosUnk154", "0"),
-                    0x160 => InlineOrDefault("AtmosFogIntensity", "0"),
-                    0x164 => InlineOrDefault("AtmosUnk164", "0"),
-                    0x168 => InlineOrDefault("AtmosUnk168", "0"),
-                    0x16c => InlineOrDefault("AtmosUnk16C", "0"),
-                    0x170 => InlineOrDefault("AtmosUnk170", "0.0001"),
-                    0x190 => InlineOrDefault("AtmosUnk190", "0"),
-                    0x194 => InlineOrDefault("AtmosUnk194", "0"),
-                    0x198 => InlineOrDefault("AtmosUnk198", "0.0001"),
-                    0x1b4 => InlineOrDefault("AtmosRotation", "0"),
-                    0x1b8 => InlineOrDefault("AtmosIntensity", "1"),
-                    0x1bc => InlineOrDefault("AtmosUnk1BC", "0.5"),
-                    0x1c0 => InlineOrDefault("AtmosUnk1C0", "0"),
-                    0x1c4 => InlineOrDefault("AtmosUnk1C4", "0"),
-                    0x1e0 => InlineOrDefault("AtmosUnk1E0", "0"),
-                    0x1e4 => InlineOrDefault("AtmosSunIntensity", "0.05923"),
-                    0x1e8 => InlineOrDefault("AtmosUnk1E8", "0"),
-                    0x1ec => InlineOrDefault("AtmosUnk1EC", "0"),
-                    0x1f8 => InlineOrDefault("AtmosUnk1F8", "0"),
-                    0x1fc => InlineOrDefault("AtmosUnk1FC", "0"),
-                    0x208 => InlineOrDefault("AtmosUnk208", "0"),
+                    0x70 => "AtmosTimeOfDay",
+                    0x74 => "AtmosUnk74",
+                    0x78 => "AtmosUnk78",
+                    0x150 => "AtmosUnk150",
+                    0x154 => "AtmosUnk154",
+                    0x160 => "AtmosFogIntensity",
+                    0x164 => "AtmosUnk164",
+                    0x168 => "AtmosUnk168",
+                    0x16c => "AtmosUnk16C",
+                    0x170 => "AtmosUnk170",
+                    0x190 => "AtmosUnk190",
+                    0x194 => "AtmosUnk194",
+                    0x198 => "AtmosUnk198",
+                    0x1b4 => "AtmosRotation",
+                    0x1b8 => "AtmosIntensity",
+                    0x1bc => "AtmosUnk1BC",
+                    0x1c0 => "AtmosUnk1C0",
+                    0x1c4 => "AtmosUnk1C4",
+                    0x1e0 => "AtmosUnk1E0",
+                    0x1e4 => "AtmosSunIntensity",
+                    0x1e8 => "AtmosUnk1E8",
+                    0x1ec => "AtmosUnk1EC",
+                    0x1f8 => "AtmosUnk1F8",
+                    0x1fc => "AtmosUnk1FC",
+                    0x208 => "AtmosUnk208",
 
                     _ => HandleUnknownElement(element, extern_)
-                };
+                }
+        ;
 
             default:
                 Log.Warning($"Unimplemented extern {extern_}[{element} (0x{(element):X})]");
@@ -521,9 +518,6 @@ public static class Externs
             Log.Warning($"Unimplemented element {element} (0x{element:X}) for extern {extern_}");
             return "float4(1,1,1,1)";
         }
-
-        string InlineOrDefault(string name, string defaultValue) =>
-            bInline ? $"{name}" : $"(exists({name}) ? ({name}) : ({defaultValue}))";
 
         switch (extern_)
         {
@@ -545,13 +539,13 @@ public static class Externs
             case TfxExtern.Atmosphere:
                 return element switch
                 {
-                    0x90 => InlineOrDefault("AtmosRTDimensions", "float4(480.0, 270.0, 0.00208, 0.0037)"),
+                    0x90 => "AtmosRTDimensions",
                     0xD0 => "float4(512.0, 512.0, 1.0 / 512.0, 1.0 / 512.0)", // depth_angle_density_lookup_resolution
-                    0x110 => InlineOrDefault("AtmosSunDir", "float4(-0.30372, -0.59835, 0.74144, 0.0)"),
-                    0x140 => InlineOrDefault("AtmosSunColor", "float4(1.0, 0.95, 0.85, 1.0)"), // actually fog color..?
-                    0x180 => InlineOrDefault("AtmosUnk180", "float4(0,0,0,0)"),
-                    0x1D0 => InlineOrDefault("AtmosUnk1D0", "float4(0,0,0,0)"),
-                    0x210 => InlineOrDefault("AtmosUnk210", "float4(0,0,0,0)"),
+                    0x110 => "AtmosSunDir",
+                    0x140 => "AtmosSunColor", // actually fog color..?
+                    0x180 => "AtmosUnk180",
+                    0x1D0 => "AtmosUnk1D0",
+                    0x210 => "AtmosUnk210",
                     _ => HandleUnknownElement(element, extern_)
                 };
 

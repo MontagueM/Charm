@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using Arithmic;
 using DirectXTex;
 using DirectXTexNet;
-using Newtonsoft.Json;
 using Tiger.Exporters;
 using Tiger.Schema.Entity;
 using static DirectXTex.DirectXTexUtility;
@@ -306,23 +305,6 @@ public class Texture : TigerReferenceFile<STextureHeader>
         }
 
         ScratchImage simg = GetScratchImage(index: index);
-        if (ConfigSubsystem.Get().GetSBoxExportEnabled()) // TODO make not shit
-            simg = ResizeToNearestPowerOf2(simg);
-
-        if (ConfigSubsystem.Get().GetSBoxExportEnabled())
-        {
-            if (_tag.LargeTextureBuffer == null) // ??
-            {
-                try
-                {
-                    File.WriteAllText($"{savePath}.{ConfigSubsystem.Get().GetOutputTextureFormat().ToString().ToLower()}.meta", JsonConvert.SerializeObject(new { nomip = 1 }, Formatting.Indented));
-                }
-                catch (IOException)
-                {
-                }
-            }
-        }
-
         SavetoFile(savePath, simg, GetDimension());// || (IsVolume() && !ConfigSubsystem.Get().GetSBoxExportEnabled()));
     }
 

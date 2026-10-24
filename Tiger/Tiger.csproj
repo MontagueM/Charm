@@ -30,38 +30,17 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\Tiger\Exporters\Sbox\TFXFunctions.hlsl">
-        <Link>Exporters\Sbox\TFXFunctions.hlsl</Link>
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\Tiger\Exporters\Sbox\D2ShadingModel.hlsl">
-        <Link>Exporters\Sbox\D2ShadingModel.hlsl</Link>
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      
-      <None Update="blender_map_importer_addon.py">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
       <None Remove="blender_api_template.py" />
       <None Remove="Audio\**" />
       <None Remove="import_to_ue5.py" />
       <None Remove="Strings\**" />
-      <None Remove="sbox_model_template.vmdl" />
       <None Remove="Statics\**" />
       <None Remove="Textures\**" />
       <None Remove="Models\**" />
-      <None Remove="import_to_blender.py" />
-      <None Remove="fnv_charm.json" />
       <None Remove="Entities\**" />
       <None Remove="General\**" />
       <None Remove="Investment\**" />
       <None Update="Exporters\blender_api_template.py">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="Exporters\import_to_ue5.py">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="Exporters\Sbox\sbox_model_template.vmdl">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

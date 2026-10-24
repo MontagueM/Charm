@@ -76,8 +76,6 @@
             </Grid.RenderTransform>
 
             <local:GeneralConfigView x:Name="ConfigControl" Visibility="Collapsed" />
-            <local:PortingConfigView x:Name="PortingControl" Visibility="Collapsed" />
-
         </Grid>
 
     </Grid>

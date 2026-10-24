@@ -78,12 +78,6 @@ public class FbxExporter : AbstractExporter
                 FbxScene fbxIndivScene = FbxScene.Create(_manager, mesh.Hash);
                 AddMesh(fbxIndivScene, mesh);
                 ExportScene(fbxIndivScene, Path.Join(savePath, mesh.Hash));
-
-                if (_config.GetSBoxExportEnabled() && scene.Type != ExportType.Terrain)
-                {
-                    string fbxPath = scene.DataType == DataExportType.Map ? modelSubDirectory : "Models";
-                    Source2Handler.SaveStaticVMDL(savePath, fbxPath, mesh);
-                }
             }
 
             foreach (ExporterEntity entity in scene.Entities)
@@ -100,12 +94,6 @@ public class FbxExporter : AbstractExporter
                 FbxScene fbxIndivScene = FbxScene.Create(_manager, fileName);
                 AddEntity(fbxIndivScene, entity, scene);
                 ExportScene(fbxIndivScene, Path.Join(savePath, fileName));
-
-                if (_config.GetSBoxExportEnabled() && scene.Type != ExportType.Terrain)
-                {
-                    string fbxPath = scene.DataType == DataExportType.Map ? modelSubDirectory : "Models";
-                    Source2Handler.SaveEntityVMDL(savePath, fbxPath, entity, fileName);
-                }
             }
 
             foreach (ExporterMesh mesh in scene.TerrainMeshes)
