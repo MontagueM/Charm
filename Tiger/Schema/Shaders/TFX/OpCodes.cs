@@ -372,6 +372,20 @@ public static class TfxBytecodeOp
         return output;
     }
 
+    public static string ToExportString(TfxData tfxData)
+    {
+        string name = tfxData.op.ToString();
+        object? data = tfxData.data;
+        return data switch
+        {
+            TfxData1Byte d => $"{name}: {d.value}",
+            TfxData2Byte d when name.StartsWith("PushExternInput") => $"{name}: {(TfxExtern)d.value}, {d.value2}",
+            TfxData2Byte d => $"{name}: {d.value}, {d.value2}",
+            TfxDataUint d => $"{name}: {d.value}",
+            _ => name
+        };
+    }
+
     public static string DecodePermuteParam(byte param)
     {
         char[] dims = { 'x', 'y', 'z', 'w' };

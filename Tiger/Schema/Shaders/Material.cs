@@ -141,11 +141,11 @@ namespace Tiger.Schema.Shaders
                 ShaderDetails psCB = new();
                 psCB.Hash = Pixel.Shader.Hash;
                 psCB.CBuffers = Pixel.GetCBuffer0();
-                psCB.Bytecode = Pixel.TFX_Bytecode.Select(x => x.Value).ToList();
                 psCB.Constants = Pixel.TFX_Bytecode_Constants.Select(x => x.Vec).ToList();
 
-                var bytecode = new TfxBytecodeInterpreterHLSL(TfxBytecodeOp.ParseAll(Pixel.TFX_Bytecode));
-                foreach (var objectChannel in bytecode.Opcodes.Where(x => x.op == TfxBytecode.PushObjectChannelVector))
+                List<TfxData> psOps = TfxBytecodeOp.ParseAll(Pixel.TFX_Bytecode);
+                psCB.Bytecode = psOps.Select(TfxBytecodeOp.ToExportString).ToList();
+                foreach (var objectChannel in psOps.Where(x => x.op == TfxBytecode.PushObjectChannelVector))
                 {
                     var hash = new StringHash(((TfxDataUint)objectChannel.data).value);
                     material.UsedChannelNames.TryAdd(hash, GlobalStrings.Get().GetString(hash));
@@ -222,11 +222,11 @@ namespace Tiger.Schema.Shaders
                 ShaderDetails vsCB = new();
                 vsCB.Hash = Vertex.Shader.Hash;
                 vsCB.CBuffers = Vertex.GetCBuffer0();
-                vsCB.Bytecode = Vertex.TFX_Bytecode.Select(x => x.Value).ToList();
                 vsCB.Constants = Vertex.TFX_Bytecode_Constants.Select(x => x.Vec).ToList();
 
-                var bytecode = new TfxBytecodeInterpreterHLSL(TfxBytecodeOp.ParseAll(Vertex.TFX_Bytecode));
-                foreach (var objectChannel in bytecode.Opcodes.Where(x => x.op == TfxBytecode.PushObjectChannelVector))
+                List<TfxData> vsOps = TfxBytecodeOp.ParseAll(Vertex.TFX_Bytecode);
+                vsCB.Bytecode = vsOps.Select(TfxBytecodeOp.ToExportString).ToList();
+                foreach (var objectChannel in vsOps.Where(x => x.op == TfxBytecode.PushObjectChannelVector))
                 {
                     var hash = new StringHash(((TfxDataUint)objectChannel.data).value);
                     material.UsedChannelNames.TryAdd(hash, GlobalStrings.Get().GetString(hash));
@@ -344,7 +344,7 @@ namespace Tiger.Schema.Shaders
             public string Hash { get; set; }
             public Dictionary<int, TextureDetails> Textures { get; set; } = new();
             public List<Vector4> CBuffers { get; set; } = new();
-            public List<byte> Bytecode { get; set; } = new();
+            public List<string> Bytecode { get; set; } = new(); // decoded ops, "PushConstantVec4: 6"
             public List<Vector4> Constants { get; set; } = new();
             public Dictionary<int, D3D11_SAMPLER_DESC> Samplers { get; set; } = new();
             public Dictionary<int, TileTextureDetails> TileTextureDetails { get; set; } = new();
