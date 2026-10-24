@@ -111,7 +111,7 @@ public partial class GeneralConfigView : UserControl
         ConfigSettingToggleControl expAnim = new()
         {
             SettingName = "Export Animations",
-            SettingLabel = "EXPERIMENTAL: Export animations with entities, can slow down exports on entities with many animations."
+            SettingLabel = "EXPERIMENTAL: Export animations with entities.\n- Will slow down exports and increase file size on entities with many animations."
         };
         bVal = _config.GetExportAnimations();
         expAnim.SettingValue = bVal.ToString();

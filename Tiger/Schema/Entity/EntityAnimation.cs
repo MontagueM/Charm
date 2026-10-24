@@ -84,52 +84,22 @@ public class EntityAnimations : EntityComponent
         if (GetUnk18() is not S808025F8 resource || resource.QueryTable is null || resource.Container is null)
             return null;
 
-        List<dynamic?> queries;
-        using (TigerReader reader = resource.QueryTable.GetReader())
-            queries = resource.QueryTable.TagData.Unk18.Select(x => x.Pointer.GetValue(reader)).ToList();
-
-        Dictionary<int, List<string>> names = new();
-        foreach (var key in resource.QueryTable.TagData.Table)
-        {
-            if (!names.TryGetValue(key.Index, out var list))
-                names.Add(key.Index, list = new List<string>());
-
-            var name = GlobalStrings.Get().GetString(key.Name);
-            if (name.Length <= 8 && name.All(Uri.IsHexDigit))
-                continue;
-
-            list.Add(name);
-        }
-
+        List<dynamic?> queries = ReadQueries(resource);
         if (queries.Any(x => x is not (S808025E1 or S808025DF)))
             return null;
 
+        Dictionary<int, List<string>> names = QueryNames(resource);
         uint[]? mask = queries.OfType<S808025DF>()
             .SelectMany(x => x.Nodes)
             .FirstOrDefault(x => x.Tag.Hash32 == weaponTag.Hash32).Mask;
 
         Dictionary<int, List<string>> rows = new();
-        void AddRows(IEnumerable<int> indices, int query)
-        {
-            foreach (int index in indices)
-            {
-                if (!rows.TryGetValue(index, out var list))
-                    rows.Add(index, list = new List<string>());
-
-                foreach (string name in names.GetValueOrDefault(query) ?? new List<string>())
-                {
-                    if (!list.Contains(name))
-                        list.Add(name);
-                }
-            }
-        }
-
         for (int i = 0; i < queries.Count; i++)
         {
             var query = queries[i];
             if (query is S808025E1 single)
             {
-                AddRows(single.Table.Select(x => x.Index), i);
+                AddRows(rows, single.Table.Select(x => x.Index), names.GetValueOrDefault(i));
                 continue;
             }
 
@@ -143,10 +113,82 @@ public class EntityAnimations : EntityComponent
             foreach (int leaf in leaves)
             {
                 if (leaf >= 0 && leaf < tree.Sets.Count)
-                    AddRows(tree.Sets[leaf].Table.Select(x => x.Index), i);
+                    AddRows(rows, tree.Sets[leaf].Table.Select(x => x.Index), names.GetValueOrDefault(i));
             }
         }
 
+        return RowAnimations(resource, rows);
+    }
+
+    public Dictionary<FileHash, List<string>>? GetEntityAnimations()
+    {
+        if (Hash == FileHash.InvalidHash32)
+            return null;
+
+        if (GetUnk18() is not S808025F8 resource || resource.QueryTable is null || resource.Container is null)
+            return null;
+
+        List<dynamic?> queries = ReadQueries(resource);
+        Dictionary<int, List<string>> names = QueryNames(resource);
+
+        Dictionary<int, List<string>> rows = new();
+        for (int i = 0; i < queries.Count; i++)
+        {
+            var query = queries[i];
+            if (query is S808025E1 single)
+            {
+                AddRows(rows, single.Table.Select(x => x.Index), names.GetValueOrDefault(i));
+            }
+            else if (query is S808025DF tree)
+            {
+                foreach (var set in tree.Sets)
+                    AddRows(rows, set.Table.Select(x => x.Index), names.GetValueOrDefault(i));
+            }
+        }
+
+        return RowAnimations(resource, rows);
+    }
+
+    private static List<dynamic?> ReadQueries(S808025F8 resource)
+    {
+        using TigerReader reader = resource.QueryTable.GetReader();
+        return resource.QueryTable.TagData.Unk18.Select(x => x.Pointer.GetValue(reader)).ToList();
+    }
+
+    private static Dictionary<int, List<string>> QueryNames(S808025F8 resource)
+    {
+        Dictionary<int, List<string>> names = new();
+        foreach (var key in resource.QueryTable.TagData.Table)
+        {
+            if (!names.TryGetValue(key.Index, out var list))
+                names.Add(key.Index, list = new List<string>());
+
+            var name = GlobalStrings.Get().GetString(key.Name);
+            if (name.Length <= 8 && name.All(Uri.IsHexDigit))
+                continue;
+
+            list.Add(name);
+        }
+        return names;
+    }
+
+    private static void AddRows(Dictionary<int, List<string>> rows, IEnumerable<int> indices, List<string>? names)
+    {
+        foreach (int index in indices)
+        {
+            if (!rows.TryGetValue(index, out var list))
+                rows.Add(index, list = new List<string>());
+
+            foreach (string name in names ?? new List<string>())
+            {
+                if (!list.Contains(name))
+                    list.Add(name);
+            }
+        }
+    }
+
+    private static Dictionary<FileHash, List<string>> RowAnimations(S808025F8 resource, Dictionary<int, List<string>> rows)
+    {
         var container = resource.Container.TagData;
         Dictionary<FileHash, List<string>> animations = new();
         foreach (var (row, rowNames) in rows)

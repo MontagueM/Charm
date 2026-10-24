@@ -301,15 +301,28 @@ public class FbxExporter : AbstractExporter
             animations.GetAllAnimations();
 
             Dictionary<FileHash, List<string>>? used = null;
+            Dictionary<FileHash, List<string>>? names = null;
             if (weaponTag != null)
             {
                 try
                 {
                     used = animations.GetWeaponAnimations(weaponTag);
+                    names = used;
                 }
                 catch (Exception e)
                 {
                     Log.Debug($"Couldnt find the weapon animation selector, exporting all animations instead: {e.Message}");
+                }
+            }
+            else
+            {
+                try
+                {
+                    names = animations.GetEntityAnimations();
+                }
+                catch (Exception e)
+                {
+                    Log.Debug($"Couldnt read the entity animation names: {e.Message}");
                 }
             }
 
@@ -325,8 +338,8 @@ public class FbxExporter : AbstractExporter
                 }
 
                 string name = animation.Hash.ToString();
-                if (used != null && used[animation.Hash].Count > 0)
-                    name = $"{name}_{used[animation.Hash][0]}";
+                if (names != null && names.TryGetValue(animation.Hash, out var clipNames) && clipNames.Count > 0)
+                    name = $"{name}_{clipNames[0]}";
 
                 if (animPrefix != string.Empty)
                     name = $"{animPrefix}_{name}";
