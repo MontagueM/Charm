@@ -905,10 +905,10 @@ public class APIPlugItem : CharmUIElement
     private readonly AsyncImageLoader _iconOverlay2Loader;
     private readonly AsyncImageLoader _watermarkLoader;
 
-    public ImageSource IconBackground => _iconBgLoader.GetImage();
-    public ImageSource IconOverlay => _iconOverlayLoader.GetImage();
-    public ImageSource IconOverlay2 => _iconOverlay2Loader.GetImage();
-    public ImageSource ItemWatermark => Strategy.IsD1() ? null : _watermarkLoader.GetImage();
+    public ImageSource IconBackground => _iconBgLoader?.GetImage();
+    public ImageSource IconOverlay => _iconOverlayLoader?.GetImage();
+    public ImageSource IconOverlay2 => _iconOverlay2Loader?.GetImage();
+    public ImageSource ItemWatermark => Strategy.IsD1() ? null : _watermarkLoader?.GetImage();
 
     public ImageSource Icon
     {
@@ -919,6 +919,8 @@ public class APIPlugItem : CharmUIElement
             OnPropertyChanged(nameof(Icon));
         }
     }
+
+    public virtual IEnumerable<InputBlock>? GetTooltipInputs() => null;
 }
 
 public class SocketCategory : CharmUIElement

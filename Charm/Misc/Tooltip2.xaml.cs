@@ -152,7 +152,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
         ShowTooltip();
     }
 
-    public async Task MakeTooltip(InventoryItem item, DestinySocketCategoryStyle overrideStyle = DestinySocketCategoryStyle.Unknown)
+    public async Task MakeTooltip(InventoryItem item, DestinySocketCategoryStyle overrideStyle = DestinySocketCategoryStyle.Unknown, Func<IEnumerable<InputBlock>?>? inputOverride = null)
     {
         ClearTooltip();
 
@@ -222,6 +222,10 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
         await Task.Run(() =>
         {
+            var overrideInputs = inputOverride?.Invoke();
+            if (overrideInputs is not null)
+                inputBlocks.AddRange(overrideInputs);
+
             // Spacer
             blocks.Add(new SpacerBlock { Order = -1 });
 
@@ -307,37 +311,40 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                     }
                 }
 
-                if (strings.TagData.Unk40.GetValue(strings.GetReader()) is S808054D7 preview)
+                if (overrideInputs is null)
                 {
-                    inputBlocks.Add(new InputBlock
+                    if (strings.TagData.Unk40.GetValue(strings.GetReader()) is S808054D7 preview)
                     {
-                        Order = 0,
-                        Key = "", // Key glyph
-                        KeyPress = "", // 2nd key glyph (mouse left/right)
-                        Action = preview.PreviewActionString.Value ?? "Details"
-                    });
+                        inputBlocks.Add(new InputBlock
+                        {
+                            Order = 0,
+                            Key = "", // Key glyph
+                            KeyPress = "", // 2nd key glyph (mouse left/right)
+                            Action = preview.PreviewActionString.Value ?? "Details"
+                        });
 
-                    if (canExport)
+                        if (canExport)
+                        {
+                            inputBlocks.Add(new InputBlock
+                            {
+                                Order = 1,
+                                Key = "",
+                                Action = "Export"
+                            });
+                        }
+                    }
+
+                    if (canView3D && !item.IsShader)
                     {
                         inputBlocks.Add(new InputBlock
                         {
                             Order = 1,
-                            Key = "",
-                            Action = "Export"
+                            KeyAdditional = "+",
+                            Key = "",
+                            KeyPress = "",
+                            Action = "View in 3D"
                         });
                     }
-                }
-
-                if (canView3D && !item.IsShader)
-                {
-                    inputBlocks.Add(new InputBlock
-                    {
-                        Order = 1,
-                        KeyAdditional = "+",
-                        Key = "",
-                        KeyPress = "",
-                        Action = "View in 3D"
-                    });
                 }
             }
         });

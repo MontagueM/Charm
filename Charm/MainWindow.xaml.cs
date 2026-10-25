@@ -686,8 +686,8 @@ public partial class MainWindow
         {
             switch (element.DataContext)
             {
-                case APIPlugItem item:
-                    ToolTip.MakeTooltip(item.Item, item.ParentSocketStyle);
+                case APIPlugItem item when item.Item != null:
+                    ToolTip.MakeTooltip(item.Item, item.ParentSocketStyle, item.GetTooltipInputs);
                     break;
                 case Category item:
                     ToolTip.MakeTooltip(item);

@@ -961,6 +961,29 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         return GetEmoteFromArrangementIndex(index, isFinisher);
     }
 
+    public List<EmoteAnimations> GetEmoteAnimations(InventoryItem item)
+    {
+        List<EmoteAnimations> emotes = new();
+        int index = item.ArtArrangementIndex;
+        if (index == -1)
+        {
+            Log.Warning($"Item {item.Name} ({item.ApiHash}) has no art arrangement index.");
+            return emotes;
+        }
+
+        foreach (var (hash, gender) in GetArrangementAssignments(index))
+        {
+            EmoteAnimations? emote = ReadEmoteFromAssignmentHash(hash);
+            if (emote is null)
+                continue;
+
+            emote.Gender = gender;
+            emotes.Add(emote);
+        }
+
+        return emotes;
+    }
+
     private List<Entity.Entity> GetEntitiesFromArrangementIndex(int index)
     {
         List<Entity.Entity> entities = new();
@@ -1005,26 +1028,16 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         return entities;
     }
 
-    private List<Animation.Animation>? GetEmoteFromArrangementIndex(int index, bool isFinisher = false)
+    private List<(TigerHash Hash, DestinyGenderDefinition Gender)> GetArrangementAssignments(int index)
     {
-        List<Animation.Animation> anims = new();
+        List<(TigerHash, DestinyGenderDefinition)> assignments = new();
         S808055D4 entry = _entityAssignmentTag.TagData.ArtArrangementEntityAssignments.ElementAt(_entityAssignmentTag.GetReader(), index);
         if (entry.MultipleEntityAssignments.Count == 0)  // single
         {
             if (entry.FeminineSingleEntityAssignment.IsValid())
-            {
-                var hash = entry.FeminineSingleEntityAssignment;
-                var emotes = isFinisher ? GetFinisherFromAssignmentHash(hash) : GetEmoteFromAssignmentHash(hash);
-                if (emotes is not null)
-                    anims.AddRange(emotes);
-            }
+                assignments.Add((entry.FeminineSingleEntityAssignment, DestinyGenderDefinition.Feminine));
             if (entry.MasculineSingleEntityAssignment.IsValid())
-            {
-                var hash = entry.MasculineSingleEntityAssignment;
-                var emotes = isFinisher ? GetFinisherFromAssignmentHash(hash) : GetEmoteFromAssignmentHash(hash);
-                if (emotes is not null)
-                    anims.AddRange(emotes);
-            }
+                assignments.Add((entry.MasculineSingleEntityAssignment, DestinyGenderDefinition.Masculine));
         }
         else
         {
@@ -1033,14 +1046,22 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                 foreach (S808055DA assignment in entryMultipleEntityAssignment.EntityAssignmentResource.Value.Value.EntityAssignments)
                 {
                     if (assignment.EntityAssignmentHash.IsValid())
-                    {
-                        var hash = assignment.EntityAssignmentHash;
-                        var emotes = isFinisher ? GetFinisherFromAssignmentHash(hash) : GetEmoteFromAssignmentHash(hash);
-                        if (emotes is not null)
-                            anims.AddRange(emotes);
-                    }
+                        assignments.Add((assignment.EntityAssignmentHash, DestinyGenderDefinition.None));
                 }
             }
+        }
+
+        return assignments;
+    }
+
+    private List<Animation.Animation>? GetEmoteFromArrangementIndex(int index, bool isFinisher = false)
+    {
+        List<Animation.Animation> anims = new();
+        foreach (var (hash, _) in GetArrangementAssignments(index))
+        {
+            var emotes = isFinisher ? GetFinisherFromAssignmentHash(hash) : GetEmoteFromAssignmentHash(hash);
+            if (emotes is not null)
+                anims.AddRange(emotes);
         }
 
         return anims;
@@ -1069,6 +1090,11 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     private List<Animation.Animation>? GetEmoteFromAssignmentHash(TigerHash assignmentHash)
     {
+        return ReadEmoteFromAssignmentHash(assignmentHash)?.GetAnimations();
+    }
+
+    private EmoteAnimations? ReadEmoteFromAssignmentHash(TigerHash assignmentHash)
+    {
         if (!_sortedArrangementHashmap.ContainsKey(assignmentHash))
             return null;
 
@@ -1078,38 +1104,41 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         if (tag.TagData.EntityData is null || tag.TagData.EntityData.IsInvalid())
             return null;
 
-        List<Animation.Animation> anims = new();
         var classId = Helpers.GetClassHashForStrategy(typeof(S80806429), _strategy);
-        if (tag.TagData.EntityData.GetReferenceHash() == classId)
-        {
-            var container = FileResourcer.Get().GetSchemaTag<S80806429>(tag.TagData.EntityData);
-            if (container.TagData.Pointer.GetValue(container.GetReader()) is S8080642F emote)
-            {
-                anims.Add(emote.Anim);
-            }
-            else if (container.TagData.Pointer.GetValue(container.GetReader()) is S8080642E loopingEmote)
-            {
-                anims.AddRange(new List<Animation.Animation>() { loopingEmote.Intro, loopingEmote.Hold, loopingEmote.Outro });
-            }
-            else if (container.TagData.Pointer.GetValue(container.GetReader()) is S8080642B multiEmote)
-            {
-                anims.AddRange(new List<Animation.Animation>() { multiEmote.P1Idle, multiEmote.P1Loop, multiEmote.Outro });
-                foreach (var anim in multiEmote.OtherPlayerAnims)
-                {
-                    anims.Add(anim.Idle);
-                    anims.Add(anim.Loop);
-                }
-            }
-            else
-                throw new NotImplementedException($"{tag.TagData.EntityData}: Unknown resource pointer {container.TagData.Pointer.ResourceClassHash:X8}");
-        }
-        else
+        if (tag.TagData.EntityData.GetReferenceHash() != classId)
         {
             Log.Warning($"Hash is not an emote container: {tag.TagData.EntityData}");
             return null;
         }
 
-        return anims;
+        var container = FileResourcer.Get().GetSchemaTag<S80806429>(tag.TagData.EntityData);
+        switch (container.TagData.Pointer.GetValue(container.GetReader()))
+        {
+            case S8080642F emote:
+                return new EmoteAnimations { Kind = EmoteKind.Simple, Loop = emote.Anim };
+
+            case S8080642E loopingEmote:
+                return new EmoteAnimations
+                {
+                    Kind = EmoteKind.Looping,
+                    Intro = loopingEmote.Intro,
+                    Loop = loopingEmote.Hold,
+                    Outro = loopingEmote.Outro
+                };
+
+            case S8080642B multiEmote:
+                return new EmoteAnimations
+                {
+                    Kind = EmoteKind.Multiplayer,
+                    Intro = multiEmote.P1Idle,
+                    Loop = multiEmote.P1Loop,
+                    Outro = multiEmote.Outro,
+                    Participants = multiEmote.OtherPlayerAnims.Select(x => new EmoteParticipant { Idle = x.Idle, Loop = x.Loop, Transform = x.Transform }).ToList()
+                };
+
+            default:
+                throw new NotImplementedException($"{tag.TagData.EntityData}: Unknown resource pointer {container.TagData.Pointer.ResourceClassHash:X8}");
+        }
     }
 
     private List<Animation.Animation>? GetFinisherFromAssignmentHash(TigerHash assignmentHash)

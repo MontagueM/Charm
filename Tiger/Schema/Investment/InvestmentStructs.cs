@@ -898,6 +898,7 @@ public struct S8080642D
     public Animation.Animation Idle;
     [SchemaField(Tag64 = true)]
     public Animation.Animation Loop;
+    public MapTransform Transform;
 }
 #endregion
 
