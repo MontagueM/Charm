@@ -668,9 +668,10 @@ public class TexturePlate : Tag<S80809E91>
     {
     }
 
-    public ScratchImage? MakePlatedTexture()
+    public ScratchImage? MakePlatedTexture(int canvasScale = 1)
     {
         IntVector2 dimension = GetPlateDimensions();
+        dimension = new IntVector2(dimension.X * canvasScale, dimension.Y * canvasScale);
         if (dimension.X == 0)
         {
             return null;
@@ -693,7 +694,7 @@ public class TexturePlate : Tag<S80809E91>
         return outputPlate;
     }
 
-    public void SavePlatedTexture(string savePath)
+    public void SavePlatedTexture(string savePath, int canvasScale = 1)
     {
         if (Hash.CheckRedacted())
         {
@@ -701,7 +702,7 @@ public class TexturePlate : Tag<S80809E91>
             return;
         }
 
-        ScratchImage? simg = MakePlatedTexture();
+        ScratchImage? simg = MakePlatedTexture(canvasScale);
         if (simg != null)
         {
             Texture.SavetoFile(savePath, simg);
@@ -711,7 +712,8 @@ public class TexturePlate : Tag<S80809E91>
     public IntVector2 GetPlateDimensions()
     {
         int maxDimension = 0;  // plate must be square
-        foreach (S80809E93 transform in _tag.PlateTransforms.Enumerate(GetReader()))
+        using TigerReader reader = GetReader();
+        foreach (S80809E93 transform in _tag.PlateTransforms.Enumerate(reader))
         {
             if (transform.Translation.X + transform.Scale.X > maxDimension)
             {

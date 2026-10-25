@@ -211,6 +211,10 @@ public struct S80806E1C
 {
     public long FileSize;
 
+    [SchemaField(0x14, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public byte Type; // 0 armor, 1 weapon, 2 ship, 3 sparrow, 4 ghost
+
     [SchemaField(0x24, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TexturePlate AlbedoPlate;
@@ -219,6 +223,30 @@ public struct S80806E1C
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TexturePlate DyemapPlate;
+
+    public int GetPlateCanvasScale()
+    {
+        if (AlbedoPlate is null)
+            return 1;
+
+        int extent = AlbedoPlate.GetPlateDimensions().X;
+        if (extent == 0)
+            return 1;
+
+        int canvas = (Type, AlbedoPlate.TagData.SizeClass) switch
+        {
+            (0 or 2, 0 or 1) => 2048, // armor, ship
+            (0 or 2, 2) => 1024,
+            (0, 3) => 1024,
+            (1, 2) when Strategy.IsD1() => 512,
+            (1 or 3, 0) => 2048, // weapon, sparrow
+            (1 or 3, 1 or 2) => 1024,
+            (4, 0) => 1024, // ghost
+            _ => extent
+        };
+
+        return Math.Max(1, canvas / extent);
+    }
 }
 
 /// <summary>
@@ -229,6 +257,12 @@ public struct S80806E1C
 public struct S80809E91
 {
     public long FileSize;
+    [SchemaField(0x8)]
+    public ushort PlateIndex; // 0 albedo, 1 normal, 2 gstack, 3 dyemap
+
+    [SchemaField(0xA)]
+    public ushort SizeClass;
+
     [SchemaField(0x10)]
     public DynamicArrayUnloaded<S80809E93> PlateTransforms;
 }

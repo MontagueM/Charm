@@ -231,10 +231,11 @@ public class Entity : Tag<SEntity>
 
         S80806E1C rsrc = Strategy.IsD1() ? parentResource.TexturePlatesROI[0].TexturePlates.TagData : parentResource.TexturePlates.TagData;
 
-        rsrc.AlbedoPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_albedo");
-        rsrc.NormalPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_normal");
-        rsrc.GStackPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_gstack");
-        rsrc.DyemapPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_dyemap");
+        int canvasScale = rsrc.GetPlateCanvasScale();
+        rsrc.AlbedoPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_albedo", canvasScale);
+        rsrc.NormalPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_normal", canvasScale);
+        rsrc.GStackPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_gstack", canvasScale);
+        rsrc.DyemapPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_dyemap", canvasScale);
     }
 
     private readonly object _lock = new();
