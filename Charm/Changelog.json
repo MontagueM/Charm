@@ -1,7 +1,7 @@
 [
     {
-        "version": "3.5.0 BETA",
-        "date": "10-20-2026",
+        "version": "3.5.0",
+        "date": "10-27-2026",
         "changes": [
             {
                 "title": "Animation Exporting!",
@@ -23,6 +23,7 @@
                 "title": "Fixes",
                 "notes": [
                     "Renderer: Improved thumbnail rendering speed and entity loading speed.",
+                    "Fixed some gear texture plates being incorrectly sized (needing 2x UV scale in Blender).",
                     "Misc"
                 ]
             }
