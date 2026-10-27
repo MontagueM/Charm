@@ -102,4 +102,6 @@ The Charm source code is licensed under GPLv3. All other used code and DLLs are 
 ## Credits
 
 - Thanks to Alcidine, BIOS, Carson Reed, Delta, and nblock for testing, feedback, and help throughout the project's development. HighRTT for audio help (RevorbStd and librevorb).
+- [SolUnshadowed](https://github.com/SolUnshadowed/tiger-animation-exporter) - Animation parsing
+- [Cohae](https://github.com/cohaereo/alkahest) - Alkahest
 - I (Delta) want to thank Mont for initially creating this program and allowing me to continue to update/support Charm while also giving me a passion in reverse engineering the Tiger Engine.
