@@ -323,7 +323,7 @@ public partial class BadgeView : UserControl
             if (item.EntryType != CategoryEntryType.Collectible)
                 return;
 
-            if (!DareView2.ShouldAddToList(item.Collectible.Item))
+            if (!GearView.ShouldAddToList(item.Collectible.Item))
                 return;
 
             MainWindow.Progress.SetProgressStages(new() { $"Exporting {item.ItemName}" });

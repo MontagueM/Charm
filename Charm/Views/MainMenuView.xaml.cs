@@ -76,7 +76,7 @@ public partial class MainMenuView : UserControl
     {
         await LoadInvestment();
 
-        DareView2 apiView = new();
+        GearView apiView = new();
         apiView.LoadContent();
         _mainWindow.MakeNewTab("Gear", apiView);
         _mainWindow.SetNewestTabSelected();

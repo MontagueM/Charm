@@ -408,7 +408,7 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
         var items = Items?.ToList() ?? new List<CharmUIElement>();
         int itemsPerPage = GetItemsPerPage();
         int count = items.Count;
-        int totalPages = Math.Max(1, (int)Math.Ceiling((double)count / itemsPerPage));
+        int totalPages = itemsPerPage > 0 ? Math.Max(1, (int)Math.Ceiling((double)count / itemsPerPage)) : 1;
         var itemsToShow = items.Skip(CurrentPage * itemsPerPage).Take(itemsPerPage).ToList();
 
         if (UsePlaceholders)

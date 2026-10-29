@@ -25,9 +25,9 @@ using Tiger.Schema.Investment;
 namespace Charm;
 
 /// <summary>
-/// Interaction logic for DareView2.xaml
+/// Interaction logic for GearView.xaml
 /// </summary>
-public partial class DareView2 : UserControl, INotifyPropertyChanged
+public partial class GearView : UserControl, INotifyPropertyChanged
 {
     public ConcurrentDictionary<DestinyTraitID, List<InventoryItem>> SortedItems { get; set; } = new();
 
@@ -72,7 +72,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
     private const uint DefaultShaderApiHash = 2325217837;
     public APIPlugItem DefaultShader { get; set; }
 
-    public DareView2()
+    public GearView()
     {
         //#if DEBUG
         PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
@@ -541,7 +541,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
             if (!MainWindow.Current.SetCurrentTab($"{apiItem.Item.Name} {apiItem.Item.GetItemIndex()} - 3D"))
             {
-                var renderer = IRenderer.CreateRenderer(nameof(DareView2));
+                var renderer = IRenderer.CreateRenderer(nameof(GearView));
                 MainWindow.Current.MakeNewTab($"{apiItem.Item.Name} {apiItem.Item.GetItemIndex()} - 3D", renderer as UserControl);
                 MainWindow.Current.SetNewestTabSelected();
 
@@ -588,7 +588,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
         if (!MainWindow.Current.SetCurrentTab($"Gear 3D MultiView"))
         {
-            var renderer = IRenderer.CreateRenderer(nameof(DareView2));
+            var renderer = IRenderer.CreateRenderer(nameof(GearView));
             MainWindow.Current.MakeNewTab($"Gear 3D MultiView", renderer as UserControl);
             MainWindow.Current.SetNewestTabSelected();
             renderer.LoadInvestmentItems(items);
