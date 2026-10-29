@@ -1564,6 +1564,50 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                 }
             }
 
+            // override
+            if (item.OverrideShader?.TagData.Unk90.GetValue(item.OverrideShader.GetReader()) is S80807377 shaderBlock)
+            {
+                Dictionary<string, (TigerHash Channel, Dye Dye)> shaderDyes = new();
+                foreach (S8080737B dyeEntry in shaderBlock.CustomDyes)
+                {
+                    TigerHash channel = Investment.Get().GetChannelHashFromIndex(dyeEntry.GetChannelIndex());
+                    Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.GetDyeIndex());
+                    if (dye is not null)
+                        shaderDyes[Dye.GetChannelName(channel)] = (channel, dye);
+                }
+
+                InventoryItem baseItem = item.Parent ?? item;
+                string[] channelNames = null;
+                if (baseItem.IsArmor || baseItem.IsArmorOrnament)
+                    channelNames = new[] { "ArmorPlate", "ArmorSuit", "ArmorCloth" };
+                else if (baseItem.IsWeapon || baseItem.IsWeaponOrnament)
+                    channelNames = new[] { "Weapon1", "Weapon2", "Weapon3" };
+                else if (baseItem.IsGhost)
+                    channelNames = new[] { "GhostMain", "GhostHighlights", "GhostDecals" };
+                else if (baseItem.IsShip)
+                    channelNames = new[] { "ShipUpper", "ShipDecals", "ShipLower" };
+                else if (baseItem.IsSparrow)
+                    channelNames = new[] { "SparrowUpper", "SparrowEngine", "SparrowLower" };
+
+                if (channelNames is not null)
+                {
+                    Dictionary<TigerHash, Dye> overridden = new();
+                    foreach (string channelName in channelNames)
+                    {
+                        if (shaderDyes.TryGetValue(channelName, out var shaderDye))
+                            overridden[shaderDye.Channel] = shaderDye.Dye;
+                        else
+                        {
+                            var existing = dyes.Where(x => Dye.GetChannelName(x.Key) == channelName).ToList();
+                            if (existing.Count != 0)
+                                overridden[existing[0].Key] = existing[0].Value;
+                        }
+                    }
+                    if (overridden.Count != 0)
+                        dyes = overridden;
+                }
+            }
+
             AutomatedExporter.SaveBlenderApiFile(savePath, itemName,
                 config.GetOutputTextureFormat(), dyes.Values.ToList());
 

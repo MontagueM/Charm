@@ -14,6 +14,8 @@ public class InventoryItem : Tag<S8080799D>
     public EntitySkeleton Skeleton;
     public EntityAnimations Animations;
 
+    public InventoryItem OverrideShader { get; set; } = null;
+
     public int CollectibleIndex => Investment.Get().GetCollectibleIndexFromItemIndex(GetItemIndex());
 
     private string _source = null;

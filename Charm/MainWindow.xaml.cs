@@ -21,6 +21,7 @@ using Tiger.Schema;
 using VersionChecker;
 using static Charm.CategoryView;
 using static Charm.CollectionsView;
+using static Charm.DareView2;
 
 namespace Charm;
 /// <summary>
@@ -686,9 +687,17 @@ public partial class MainWindow
         {
             switch (element.DataContext)
             {
-                case APIPlugItem item when item.Item != null:
-                    ToolTip.MakeTooltip(item.Item, item.ParentSocketStyle, item.GetTooltipInputs);
+                case Gear_ItemEntry item when item.Item != null:
+                    ToolTip.MakeTooltip(item.Item, item.GearItem.ParentSocketStyle, item.GearItem.GetTooltipInputs);
                     break;
+
+                case APIPlugItem item when item.Item != null:
+                    if (item.Item.IsShader && CurrentTab?.Content is DareView2)
+                        ToolTip.MakeTooltip(item.Item, item.ParentSocketStyle, DareView2.NoTooltipInputs, DareView2.DefaultShaderDescription(item.Item));
+                    else
+                        ToolTip.MakeTooltip(item.Item, item.ParentSocketStyle, item.GetTooltipInputs);
+                    break;
+
                 case Category item:
                     ToolTip.MakeTooltip(item);
                     break;

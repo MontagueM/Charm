@@ -45,8 +45,8 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         }
     }
 
-    private ObservableCollection<APIPlugItem> _selectedItems = new();
-    public ObservableCollection<APIPlugItem> SelectedItems
+    private ObservableCollection<Gear_ItemEntry> _selectedItems = new();
+    public ObservableCollection<Gear_ItemEntry> SelectedItems
     {
         get => _selectedItems;
         set
@@ -69,6 +69,9 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
     private DestinyTierType? RarityFilter = null;
     private List<DestinyTraitID>? ReleaseFilter = null;
 
+    private const uint DefaultShaderApiHash = 2325217837;
+    public APIPlugItem DefaultShader { get; set; }
+
     public DareView2()
     {
         //#if DEBUG
@@ -83,7 +86,18 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
         // By default, DisplayItems only gets called if the whole collection is reassigned
         // These trigger if something in the collection changes (add/remove), which will call DisplayItems.
-        SelectedItems.CollectionChanged += (s, e) => SelectedItemsList.DisplayItems();
+        SelectedItems.CollectionChanged += (s, e) =>
+        {
+            if (e.OldItems is not null)
+            {
+                foreach (Gear_ItemEntry removed in e.OldItems)
+                {
+                    removed.ResetOverrideShader();
+                }
+            }
+
+            SelectedItemsList.DisplayItems();
+        };
         ItemCategories.CollectionChanged += (s, e) => Categories.DisplayItems();
     }
 
@@ -216,6 +230,10 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         List<string> mapStages = Enumerable.Range(1, inventoryItems.Count).Select(i => $"Loading {i}/{inventoryItems.Count}").ToList();
         MainWindow.Progress.SetProgressStages(mapStages, false);
 
+        // dont see a point in supporting d1 for this
+        if (DefaultShader is null && !Strategy.IsD1())
+            DefaultShader = new(Investment.Get().GetInventoryItem(new TigerHash(DefaultShaderApiHash)));
+
         await Parallel.ForEachAsync(inventoryItems, async (item, ct) =>
         {
             string name = item.Name;
@@ -252,9 +270,9 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
         foreach ((var trait, var items) in SortedItems.OrderBy(x => x.Key.GetEnumDescription()).Where(x => x.Value.Count != 0))
         {
-            var orderedItems = new ObservableCollection<APIPlugItem>(
+            var orderedItems = new ObservableCollection<Gear_ItemEntry>(
                     items.DistinctBy(x => x.ApiHash)
-                    .Select(x => new APIPlugItem(x))
+                    .Select(x => new Gear_ItemEntry(x, DefaultShader))
                     .OrderByDescending(x => x.Item.GetItemIndex())
                     .OrderByDescending(x => x.Item.GetItemRarity()));
 
@@ -295,20 +313,20 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
             if (searchStr is not null && searchStr != string.Empty)
             {
-                newItem.Items = new ObservableCollection<APIPlugItem>(item.Items
+                newItem.Items = new ObservableCollection<Gear_ItemEntry>(item.Items
                 .Where(x => x.Item.Name.Contains(searchStr, StringComparison.InvariantCultureIgnoreCase)
                             || x.Item.Type.Contains(searchStr, StringComparison.InvariantCultureIgnoreCase)
                             || x.Item.Parent?.Name.Contains(searchStr, StringComparison.InvariantCultureIgnoreCase) == true
-                            || $"{x.Hash}" == searchStr));
+                            || $"{x.GearItem.Hash}" == searchStr));
             }
             else
                 newItem.Items = item.Items;
 
             if (RarityFilter is not null)
-                newItem.Items = new ObservableCollection<APIPlugItem>(newItem.Items.Where(x => x.Item.GetItemRarity() == RarityFilter));
+                newItem.Items = new ObservableCollection<Gear_ItemEntry>(newItem.Items.Where(x => x.Item.GetItemRarity() == RarityFilter));
 
             if (ReleaseFilter is not null)
-                newItem.Items = new ObservableCollection<APIPlugItem>(newItem.Items.Where(x => x.Item.ItemTraits.Any(trait => ReleaseFilter.Contains(trait))));
+                newItem.Items = new ObservableCollection<Gear_ItemEntry>(newItem.Items.Where(x => x.Item.ItemTraits.Any(trait => ReleaseFilter.Contains(trait))));
 
             if (newItem.Items.Count != 0)
                 itemCategories.Add(newItem);
@@ -322,7 +340,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
     private void SelectedDareEntry_Click(object sender, RoutedEventArgs e)
     {
         var element = (sender as FrameworkElement);
-        APIPlugItem apiItem = element.DataContext as APIPlugItem;
+        Gear_ItemEntry apiItem = element.DataContext as Gear_ItemEntry;
         if (SelectedItems.Contains(apiItem) && !apiItem.IsNewlyAdded) // Using IsNewlyAdded just to stop multi-clicking 
         {
             apiItem.IsNewlyAdded = true;
@@ -340,7 +358,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     private void DareEntry_Click(object sender, RoutedEventArgs e)
     {
-        APIPlugItem apiItem = (sender as FrameworkElement).DataContext as APIPlugItem;
+        Gear_ItemEntry apiItem = (sender as FrameworkElement).DataContext as Gear_ItemEntry;
         if (!SelectedItems.Contains(apiItem))
         {
             apiItem.IsNewlyAdded = true;
@@ -348,10 +366,137 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         }
     }
 
+    private Point _dragStart;
+    private void DareEntry_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _dragStart = e.GetPosition(null);
+    }
+
+    private void DareEntry_PreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton != MouseButtonState.Pressed || Strategy.IsD1())
+            return;
+
+        Point pos = e.GetPosition(null);
+        if (Math.Abs(pos.X - _dragStart.X) < SystemParameters.MinimumHorizontalDragDistance
+            && Math.Abs(pos.Y - _dragStart.Y) < SystemParameters.MinimumVerticalDragDistance)
+            return;
+
+        var element = (FrameworkElement)sender;
+        if (element.DataContext is Gear_ItemEntry entry && entry.Item.IsShader)
+        {
+            Window dragVisual = CreateDragVisual(entry);
+            GiveFeedbackEventHandler followCursor = (s, args) =>
+            {
+                MoveDragVisual(dragVisual);
+                dragVisual.Opacity = args.Effects == DragDropEffects.None ? 0.35 : 1.0;
+            };
+            element.GiveFeedback += followCursor;
+
+            try
+            {
+                MoveDragVisual(dragVisual);
+                dragVisual.Show();
+                DragDrop.DoDragDrop(element, new DataObject(typeof(Gear_ItemEntry), entry), DragDropEffects.Copy);
+            }
+            finally
+            {
+                element.GiveFeedback -= followCursor;
+                dragVisual.Close();
+            }
+            e.Handled = true;
+        }
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool GetCursorPos(out POINT point);
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern int GetWindowLong(IntPtr hWnd, int index);
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern int SetWindowLong(IntPtr hWnd, int index, int value);
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    private struct POINT { public int X; public int Y; }
+
+    private const int DragVisualSize = 64;
+
+    private Window CreateDragVisual(Gear_ItemEntry entry)
+    {
+        var icon = new ContentControl
+        {
+            Width = DragVisualSize,
+            Height = DragVisualSize,
+            Content = entry.GearItem,
+            ContentTemplate = (DataTemplate)FindResource("OverrideShaderTemplate"),
+        };
+
+        var frame = new Border
+        {
+            Child = icon,
+            Background = new SolidColorBrush(Color.FromArgb(0xAA, 0x1B, 0x1C, 0x20)),
+            BorderBrush = new SolidColorBrush(Color.FromArgb(0xCC, 0xFF, 0xFF, 0xFF)),
+            BorderThickness = new Thickness(1),
+            Opacity = 0.9,
+            Effect = new System.Windows.Media.Effects.DropShadowEffect { BlurRadius = 10, ShadowDepth = 2, Opacity = 0.6 },
+            Margin = new Thickness(8), // for the shadow
+        };
+
+        var window = new Window
+        {
+            WindowStyle = WindowStyle.None,
+            AllowsTransparency = true,
+            Background = Brushes.Transparent,
+            ShowInTaskbar = false,
+            ShowActivated = false,
+            Topmost = true,
+            ResizeMode = ResizeMode.NoResize,
+            SizeToContent = SizeToContent.WidthAndHeight,
+            Content = frame,
+            IsHitTestVisible = false,
+        };
+
+        window.SourceInitialized += (s, e) =>
+        {
+            IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(window).Handle;
+            const int GWL_EXSTYLE = -20, WS_EX_TRANSPARENT = 0x20, WS_EX_NOACTIVATE = 0x08000000, WS_EX_TOOLWINDOW = 0x80;
+            SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_TRANSPARENT | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW);
+        };
+        return window;
+    }
+
+    private void MoveDragVisual(Window window)
+    {
+        if (!GetCursorPos(out POINT p))
+            return;
+
+        DpiScale dpi = VisualTreeHelper.GetDpi(this);
+        window.Left = p.X / dpi.DpiScaleX + 6;
+        window.Top = p.Y / dpi.DpiScaleY + 6;
+    }
+
+    private void SelectedEntry_DragOver(object sender, DragEventArgs e)
+    {
+        e.Effects = !Strategy.IsD1() && (sender as FrameworkElement)?.DataContext is Gear_ItemEntry target && target.CanOverrideShader
+            && e.Data.GetDataPresent(typeof(Gear_ItemEntry))
+            ? DragDropEffects.Copy
+            : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void SelectedEntry_Drop(object sender, DragEventArgs e)
+    {
+        if (Strategy.IsD1() || (sender as FrameworkElement)?.DataContext is not Gear_ItemEntry target || !target.CanOverrideShader
+            || e.Data.GetData(typeof(Gear_ItemEntry)) is not Gear_ItemEntry shader || !shader.Item.IsShader)
+            return;
+
+        target.OverrideShader = shader.GearItem;
+        e.Handled = true;
+    }
+
     private void DareSelectedEntry_Loaded(object sender, RoutedEventArgs e)
     {
         var element = (sender as FrameworkElement);
-        APIPlugItem apiItem = element.DataContext as APIPlugItem;
+        Gear_ItemEntry apiItem = element.DataContext as Gear_ItemEntry;
         if (apiItem is null)
             return;
 
@@ -371,7 +516,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             return;
 
         e.Handled = true;
-        APIPlugItem apiItem = (sender as FrameworkElement).DataContext as APIPlugItem;
+        Gear_ItemEntry apiItem = (sender as FrameworkElement).DataContext as Gear_ItemEntry;
 
         if (Keyboard.IsKeyDown(Key.LeftCtrl) && IRenderer.CanUseFullRenderer())
         {
@@ -494,6 +639,8 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                     //}
                 }
 
+                curItem.OverrideShader = item.ExportShader;
+
                 if (!dupNames.Add(curItem.Name))
                     curItem.Name += $" {curItem.ApiHash}";
 
@@ -566,6 +713,12 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             }
             await Task.Delay(50);
         }
+
+        foreach (Gear_ItemEntry removed in SelectedItems)
+        {
+            removed.ResetOverrideShader();
+        }
+
         SelectedItems.Clear();
         _isClearing = false;
     }
@@ -625,6 +778,28 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
 
         RefreshItemList();
+    }
+
+    public static IEnumerable<InputBlock>? NoTooltipInputs() => Enumerable.Empty<InputBlock>();
+    public static string? DefaultShaderDescription(InventoryItem shader) =>
+        shader.ApiHash == DefaultShaderApiHash
+            ? "Drag and drop a shader onto this item to override its shader.\nClick to reset it to default."
+            : null;
+    private void OverrideShader_Click(object sender, RoutedEventArgs e)
+    {
+        FrameworkElement button = (FrameworkElement)sender;
+        if ((button.Parent as FrameworkElement)?.DataContext is Gear_ItemEntry entry)
+        {
+            entry.ResetOverrideShader();
+
+            if (button.DataContext is APIPlugItem shader && shader.Item is not null)
+            {
+                MainWindow.Current.ToolTip.ClearTooltip();
+                MainWindow.Current.ToolTip.MakeTooltip(shader.Item, shader.ParentSocketStyle, NoTooltipInputs, DefaultShaderDescription(shader.Item));
+            }
+        }
+
+        e.Handled = true;
     }
 
     private void UserControl_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -798,6 +973,73 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         about.Show();
     }
 
+    public class Gear_ItemEntry : CharmUIElement
+    {
+        public APIPlugItem GearItem { get; set; }
+
+        private readonly APIPlugItem _defaultShader;
+        private APIPlugItem _overrideShader;
+        private bool _checked = false;
+
+        public APIPlugItem OverrideShader
+        {
+            get
+            {
+                Check();
+                return _overrideShader;
+            }
+            set
+            {
+                Check();
+                if (!CanOverrideShader || _overrideShader == value)
+                    return;
+
+                _overrideShader = value ?? _defaultShader;
+                OnPropertyChanged(nameof(OverrideShader));
+            }
+        }
+
+        public bool CanOverrideShader
+        {
+            get
+            {
+                Check();
+                return _overrideShader is not null;
+            }
+        }
+
+        public InventoryItem? ExportShader =>
+            OverrideShader != null && OverrideShader.Item.ApiHash != _defaultShader.Item.ApiHash ? OverrideShader.Item : null;
+
+        public void ResetOverrideShader() => OverrideShader = _defaultShader;
+
+        private void Check()
+        {
+            if (_checked)
+                return;
+
+            _checked = true;
+            if (_defaultShader is not null && IsPlayerGear(Item))
+                _overrideShader = _defaultShader;
+        }
+
+        private static bool IsPlayerGear(InventoryItem item)
+        {
+            if (item.IsShader || item.IsEmote || item.IsFinisher || item.Type is "Artifact" or "Seasonal Artifact")
+                return false;
+
+            return item.TagData.Unk90.GetValue(item.GetReader()) is S80807377 block
+                && (block.DefaultDyes.Any() || block.LockedDyes.Any());
+        }
+
+        public InventoryItem Item => GearItem.Item;
+        public Gear_ItemEntry(InventoryItem item, APIPlugItem defaultShader)
+        {
+            GearItem = new APIPlugItem(item);
+            _defaultShader = defaultShader;
+        }
+    }
+
     public class Dare_ItemCategory : CharmUIElement
     {
         private string _categoryName;
@@ -842,8 +1084,8 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             }
         }
 
-        private ObservableCollection<APIPlugItem> _items = new();
-        public ObservableCollection<APIPlugItem> Items
+        private ObservableCollection<Gear_ItemEntry> _items = new();
+        public ObservableCollection<Gear_ItemEntry> Items
         {
             get => _items;
             set
@@ -870,4 +1112,6 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             }
         }
     }
+
+
 }

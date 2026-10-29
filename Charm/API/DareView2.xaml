@@ -252,8 +252,37 @@
 
         </DataTemplate>
 
+        <!--  Consumable  -->
+        <DataTemplate x:Key="OverrideShaderTemplate">
+            <Grid Margin="0,0,0,0" Background="#70000000">
+                <Image
+                    Margin="0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    RenderOptions.BitmapScalingMode="NearestNeighbor"
+                    Source="{Binding IconBackground}" />
+                <Image
+                    Margin="0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    RenderOptions.BitmapScalingMode="NearestNeighbor"
+                    Source="{Binding Icon}" />
+                <Image
+                    Margin="0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    RenderOptions.BitmapScalingMode="NearestNeighbor"
+                    Source="{Binding IconOverlay}" />
+            </Grid>
+        </DataTemplate>
+
         <DataTemplate x:Key="DareSelectedEntry">
-            <Grid Height="92" Background="Transparent">
+            <Grid
+                Height="92"
+                AllowDrop="True"
+                Background="Transparent"
+                DragOver="SelectedEntry_DragOver"
+                Drop="SelectedEntry_Drop">
                 <Grid Loaded="DareSelectedEntry_Loaded" Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                     <Rectangle
                         Grid.Row="0"
@@ -261,7 +290,7 @@
                         Opacity="1">
                         <Rectangle.Fill>
                             <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
-                                <GradientStop Offset="0.75" Color="{Binding RarityColor}" />
+                                <GradientStop Offset="0.75" Color="{Binding GearItem.RarityColor}" />
                                 <GradientStop Offset="0" Color="#00000000" />
                             </LinearGradientBrush>
                         </Rectangle.Fill>
@@ -279,8 +308,26 @@
                             Height="92"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            Content="{Binding}"
+                            Content="{Binding GearItem}"
                             ContentTemplate="{StaticResource ItemIconTemplate}" />
+
+                        <Button
+                            Grid.Column="0"
+                            Width="32"
+                            Height="32"
+                            Margin="2"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+                            Panel.ZIndex="100"
+                            Click="OverrideShader_Click"
+                            DataContext="{Binding OverrideShader}"
+                            Style="{StaticResource D2StyleButtonNoOverlay}"
+                            Visibility="{Binding DataContext, RelativeSource={RelativeSource Self}, Converter={StaticResource NullToVisibilityConverter}}">
+                            <ContentControl
+                                Content="{Binding}"
+                                ContentTemplate="{StaticResource OverrideShaderTemplate}"
+                                IsHitTestVisible="False" />
+                        </Button>
 
                         <!--  Icon Watermark  -->
                         <Grid
@@ -289,7 +336,8 @@
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top"
                             Panel.ZIndex="10"
-                            Visibility="{Binding ItemWatermark, Converter={StaticResource NullToVisibilityConverter}}">
+                            IsHitTestVisible="False"
+                            Visibility="{Binding GearItem.ItemWatermark, Converter={StaticResource NullToVisibilityConverter}}">
                             <Rectangle
                                 Grid.Row="1"
                                 Width="22"
@@ -334,7 +382,7 @@
                                 Margin="0,3,0,0"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Top"
-                                Source="{Binding ItemWatermark}" />
+                                Source="{Binding GearItem.ItemWatermark}" />
                         </Grid>
 
                         <Border
@@ -454,7 +502,7 @@
                         Height="86"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        Content="{Binding}"
+                        Content="{Binding GearItem}"
                         ContentTemplate="{StaticResource ItemIconTemplate}" />
 
                     <Button
@@ -465,6 +513,8 @@
                         Focusable="False"
                         IsHitTestVisible="True"
                         MouseRightButtonDown="APIItem_View"
+                        PreviewMouseLeftButtonDown="DareEntry_PreviewMouseLeftButtonDown"
+                        PreviewMouseMove="DareEntry_PreviewMouseMove"
                         Style="{StaticResource D2StyleButton}" />
 
                     <Border
@@ -478,7 +528,7 @@
                         Height="86"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        Content="{Binding}"
+                        Content="{Binding GearItem}"
                         ContentTemplate="{StaticResource ItemIconWatermarkTemplate}" />
 
                 </Grid>

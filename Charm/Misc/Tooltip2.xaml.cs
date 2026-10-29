@@ -152,7 +152,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
         ShowTooltip();
     }
 
-    public async Task MakeTooltip(InventoryItem item, DestinySocketCategoryStyle overrideStyle = DestinySocketCategoryStyle.Unknown, Func<IEnumerable<InputBlock>?>? inputOverride = null)
+    public async Task MakeTooltip(InventoryItem item, DestinySocketCategoryStyle overrideStyle = DestinySocketCategoryStyle.Unknown, Func<IEnumerable<InputBlock>?>? inputOverride = null, string? descriptionOverride = null)
     {
         ClearTooltip();
 
@@ -230,7 +230,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
             blocks.Add(new SpacerBlock { Order = -1 });
 
             // Description
-            blocks.Add(new TextsBlock { Order = 0, Text = item.Description });
+            blocks.Add(new TextsBlock { Order = 0, Text = descriptionOverride ?? item.Description });
 
             // Flavor
             blocks.Add(new TextsBlock { Order = 1, Italic = true, Text = item.FlavorText });
