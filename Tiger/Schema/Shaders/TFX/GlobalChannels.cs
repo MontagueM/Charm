@@ -33,35 +33,6 @@ public static class GlobalChannels
         Globals.Get().FillGlobalChannelDefaults();
     }
 
-    private static void Fill()
-    {
-        //Channels[10] = Vector4.One;
-        //Channels[25] = new Vector4(40.0f);
-        //Channels[26] = new Vector4(0.90f); // Atmos intensity but a channel?
-        //Channels[27] = Vector4.One; // specular tint intensity
-        //Channels[28] = Vector4.One; // specular tint
-        //Channels[31] = Vector4.One; // diffuse tint 1
-        //Channels[32] = Vector4.One; // diffuse tint 1 intensity
-        //Channels[33] = Vector4.One; // diffuse tint 2
-        //Channels[34] = Vector4.One; // diffuse tint 2 intensity
-        //Channels[35] = new Vector4(0.55f);
-        //Channels[37] = new Vector4(500000.0f, 0.0f, 0.0f, 0.0f); // Fog start
-        //Channels[40] = Vector4.Zero;
-        //Channels[41] = new Vector4(50.0f, 0.0f, 0.0f, 0.0f); // Fog falloff
-        //Channels[43] = Vector4.Zero;
-        //Channels[82] = Vector4.Zero;
-        //Channels[83] = Vector4.Zero;
-        //Channels[84] = Vector4.One;
-        //Channels[93] = new Vector4(1.0f, 0.0f, 0.0f, 0.0f);
-        //Channels[97] = Vector4.Zero;
-        //Channels[98] = Vector4.Zero;
-        //Channels[100] = Vector4.Zero; //new Vector4(0.41105f, 0.71309f, 0.56793f, 0.56793f);
-        //Channels[102] = Vector4.One; // Seems like sun angle
-        //Channels[113] = Vector4.Zero;
-        //Channels[127] = Vector4.Zero;
-        //Channels[131] = new Vector4(0.0f, 0.5f, 0.3f, 0.0f); // Seems related to line lights
-    }
-
     public static Dictionary<uint, string> KnownChannelNames = new()
     {
         { 1050803134, "skybox_sun_intensity"},
@@ -149,6 +120,52 @@ public static class GlobalChannels
         { 90179527, "sun_glow_color"},
         { 911706265, "autoexposure_frame_delay"},
         { 954006746, "skybox_up_ambient_intensity"},
+        { 2658574034, "fog_density_lookup_start"},
+        { 1241234657, "fog_density_lookup_end"},
+        { 1338215099, "ao_ambient_weight"},
+        { 61911189, "ao_sun_weight"},
+        { 4222214337, "character_lighting_scale_ao"},
+        { 2093588672, "character_lighting_scale_emissive"},
+        { 3076743815, "reticle_location"},
+        { 3638890901, "sky_cloud_lighting_front"},
+        { 4284370545, "sky_cloud_lighting_back"},
+        { 2404723577, "cubemap_relighting_sun_intensity"},
+        { 2243399393, "sky_snapshot_weather_amount"},
+        { 743670141, "sky_colour_tint_01"},
+        { 743670142, "sky_colour_tint_02"},
+        { 743670143, "sky_colour_tint_03"},
+        { 743670136, "sky_colour_tint_04"},
+        { 743670137, "sky_colour_tint_05"},
+        { 743670138, "sky_colour_tint_06"},
+        { 743670139, "sky_colour_tint_07"},
+        { 743670132, "sky_colour_tint_08"},
+        { 743670133, "sky_colour_tint_09"},
+        { 760447727, "sky_colour_tint_10"},
+        { 760447726, "sky_colour_tint_11"},
+        { 760447725, "sky_colour_tint_12"},
+        { 760447724, "sky_colour_tint_13"},
+        { 760447723, "sky_colour_tint_14"},
+        { 760447722, "sky_colour_tint_15"},
+        { 760447721, "sky_colour_tint_16"},
+        { 760447720, "sky_colour_tint_17"},
+        { 760447719, "sky_colour_tint_18"},
+        { 760447718, "sky_colour_tint_19"},
+        { 777225282, "sky_colour_tint_20"},
+        { 777225283, "sky_colour_tint_21"},
+        { 777225280, "sky_colour_tint_22"},
+        { 777225281, "sky_colour_tint_23"},
+        { 777225286, "sky_colour_tint_24"},
+        { 777225287, "sky_colour_tint_25"},
+        { 777225284, "sky_colour_tint_26"},
+        { 777225285, "sky_colour_tint_27"},
+        { 777225290, "sky_colour_tint_28"},
+        { 777225291, "sky_colour_tint_29"},
+        { 794002997, "sky_colour_tint_30"},
+        { 794002996, "sky_colour_tint_31"},
+        { 794002999, "sky_colour_tint_32"},
+        { 1150719031, "cubemap_exterior_ground_intensity"},
+        { 3781913451, "skybox_lighting_start_distance"},
+        { 3421710210, "skybox_lighting_transition_distance"},
     };
 }
 
