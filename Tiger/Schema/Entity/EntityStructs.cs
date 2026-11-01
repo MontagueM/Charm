@@ -1425,7 +1425,47 @@ public struct S80802AB7
     public float Weight;
     public StringHash Name;
     public int Unk08;
+
     [SchemaField(0x10)]
     public DynamicArray<S80809AFB> SwitchTable;
     public DynamicArray<SStringHash> RegionPermutations; // one per S80802AB8.Regions
+}
+
+// named places on a weapon (fp_support, fx_ejection, primary_trigger, etc), the first person rigs hand constraints put the hands on them
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x808008FB, 0xD8)] //FB088080
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x8080819D, 0x108)] //9D818080
+public struct S8080819D
+{
+    [SchemaField(0xC8, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0xB8, TigerStrategy.DESTINY2_LATEST)]
+    public DynamicArray<S808081A9> Points;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80800428, 0x40)] //28048080
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, 0x808081A9, 0x30)] //A9818080
+public struct S808081A9
+{
+    [SchemaField(0x10, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x00, TigerStrategy.DESTINY2_LATEST)]
+    public Vector4 Rotation;
+
+    [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_LATEST)]
+    public Vector4 Translation; // relative to the weapons root bone?
+
+    [SchemaField(0x00, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_LATEST)]
+    public int Unk20; // weapon bone
+
+    [SchemaField(0x04, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x24, TigerStrategy.DESTINY2_LATEST)]
+    public int Unk24;
+
+    [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_LATEST)]
+    public StringHash Name;
+
+    [SchemaField(0x34, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x2C, TigerStrategy.DESTINY2_LATEST)]
+    public uint Unk2C; // increases per point
 }

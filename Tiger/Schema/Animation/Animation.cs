@@ -199,27 +199,27 @@ public class Animation : Tag<SAnimationClip>
     // decodes the clip and runs it on the rig
     public BoneAnimation[] Evaluate(
         EntityRuntimeRig rig, EntitySkeleton skeleton,
-        bool localSpace = true)
+        bool localSpace = true, IReadOnlyList<WeaponLayerClip>? layers = null, HandIkSetup? hands = null)
     {
         var controls = AnimationDecoder.Decode(this);
-        var objectSpace = RigRetarget.Retarget(this, controls, skeleton, rig);
+        var objectSpace = RigRetarget.Retarget(this, controls, skeleton, rig, layers, hands);
         return localSpace ? RigRetarget.ToLocalSpace(this, objectSpace, skeleton) : objectSpace;
     }
 
     public FbxAnimationData EvaluateForFbx(
         EntityRuntimeRig rig, EntitySkeleton skeleton, string name, LayerType layerType,
-        double frameRate = 30)
+        double frameRate = 30, IReadOnlyList<WeaponLayerClip>? layers = null, HandIkSetup? hands = null)
     {
-        var objectSpace = Evaluate(rig, skeleton, false);
+        var objectSpace = Evaluate(rig, skeleton, false, layers, hands);
         return FbxAnimationBuilder.Build(name, objectSpace, skeleton, layerType, FrameCount, frameRate);
     }
 
     public FbxAnimationData EvaluateWeaponForFbx(
         EntityRuntimeRig rig, EntitySkeleton rigSkeleton, EntitySkeleton weaponSkeleton, string name, LayerType layerType,
-        double frameRate = 30)
+        double frameRate = 30, IReadOnlyList<WeaponLayerClip>? layers = null, HandIkSetup? hands = null)
     {
         int first = AnimationSkinning.WeaponFirstBone(rigSkeleton, weaponSkeleton);
-        var objectSpace = Evaluate(rig, rigSkeleton, false);
+        var objectSpace = Evaluate(rig, rigSkeleton, false, layers, hands);
         var weaponBones = weaponSkeleton.BoneNodes;
 
         var anchor = RigTransform.Compose(
@@ -259,6 +259,54 @@ public class Animation : Tag<SAnimationClip>
             System.Numerics.Quaternion.Normalize(new System.Numerics.Quaternion(r.X, r.Y, r.Z, r.W)),
             bone.Translations[frame],
             bone.Scales[frame].X);
+    }
+
+    public HandConstraintTracks? TryReadHandConstraints()
+    {
+        try
+        {
+            return ReadHandConstraints();
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Couldnt read the hand constraints of {Hash}: {e.Message}");
+            return null;
+        }
+    }
+
+    private HandConstraintTracks? ReadHandConstraints()
+    {
+        using TigerReader reader = GetReader();
+        if (_tag.HandConstraints.GetValue(reader) is not S80808B2A constraints || constraints.Constraints.Count == 0)
+            return null;
+
+        DecodedStreams? offsets = null;
+        int offsetFrames = 0;
+
+        if (_tag.HandOffsets.GetValue(reader) is S80808B42 offsetData)
+        {
+            offsets = AnimationDecoder.DecodeStreams(FromUncompressed(offsetData, reader), _tag.FrameCount);
+            offsetFrames = offsetData.FrameCount;
+        }
+
+        float[][]? weights = _tag.HandWeights.GetValue(reader) is S80808B4C weightData
+            ? HandConstraintTracks.DecodeScalars(weightData, _tag.FrameCount) : null;
+
+        var tracks = new HandConstraintTracks { FrameCount = _tag.FrameCount };
+        for (int i = 0; i < constraints.Constraints.Count; i++)
+        {
+            S80808B2D constraint = constraints.Constraints[i];
+            tracks.Constraints.Add(new HandConstraintTracks.Constraint
+            {
+                RootControl = constraint.ChainRootControl,
+                EndControl = constraint.ChainEndControl,
+                PointName = constraint.PointName.Hash32,
+                Weight = weights != null && i < weights.Length ? weights[i] : Array.Empty<float>(),
+                Offsets = offsets != null ? HandConstraintTracks.Offsets(offsets, i, offsetFrames) : Array.Empty<RigTransform>(),
+            });
+        }
+
+        return tracks;
     }
 
     public RootMotion? ReadRootMotion()

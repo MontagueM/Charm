@@ -39,9 +39,6 @@ public class Entity : Tag<SEntity>
             Load();
     }
 
-
-    // TODO: Try to speed up a little more.
-    // TagListView LoadEntityList currently down to ~33 seconds with roughly 4.5 - 5gb of ram usage
     public void Load()
     {
         Deserialize();
@@ -249,6 +246,52 @@ public class Entity : Tag<SEntity>
 
         return ModelParent != null;
     }
+
+    private T? FindComponentData<T>() where T : struct
+    {
+        foreach (FileHash hash in Components)
+        {
+            EntityComponent component = FileResourcer.Get().GetFile<EntityComponent>(hash);
+            using TigerReader reader = component.GetReader();
+            if (component.TagData.Unk18.GetValue(reader, false) is T && component.TagData.Unk18.GetValue(reader) is T data)
+                return data;
+        }
+
+        return null;
+    }
+
+    public List<S808081A9> GetWeaponPoints() => FindComponentData<S8080819D>() is { } points ? points.Points : new();
+
+    public static List<S808081A9> MergeWeaponPoints(IEnumerable<Entity> parts)
+    {
+        List<(FileHash Hash, List<S808081A9> Points)> found = new();
+        foreach (Entity part in parts)
+        {
+            try
+            {
+                var points = part.GetWeaponPoints();
+                if (points.Count > 0)
+                    found.Add((part.Hash, points));
+            }
+            catch (Exception e)
+            {
+                Log.Warning($"Couldnt read the weapon points of {part.Hash}: {e.Message}");
+            }
+        }
+
+        HashSet<uint> names = new();
+        List<S808081A9> merged = new();
+        foreach (var (_, points) in found.OrderByDescending(x => x.Points.Count).ThenBy(x => x.Hash.Hash32))
+        {
+            foreach (S808081A9 point in points)
+            {
+                if (names.Add(point.Name.Hash32))
+                    merged.Add(point);
+            }
+        }
+        return merged;
+    }
+    public S8080263C? GetAnimationGraph() => FindComponentData<S8080263C>();
 
     public List<Entity> GetEntityChildren()
     {

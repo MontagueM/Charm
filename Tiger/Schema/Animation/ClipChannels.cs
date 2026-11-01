@@ -18,6 +18,9 @@ public class ClipChannels
     public int FrameCount;
     public LayerType Mode;
     private List<ChannelTrack> _tracks = new();
+    private HashSet<int> _controls = new();
+
+    public bool HasChannel(int control) => _controls.Contains(control);
 
     public ClipChannels(Animation clip, BoneTracks[] decoded, RigProgram program)
     {
@@ -52,7 +55,10 @@ public class ClipChannels
 
         FrameCount = clip.FrameCount;
         Mode = clip.LayerType;
+        _controls = _tracks.Select(x => x.Control).ToHashSet();
     }
+
+    private (int First, int Second, float Amount) Keys(double frame, bool loop) => ClipTime.Keys(frame, loop, FrameCount);
 
     // additive clips offset the values, base and replacement clips move them toward the clip by weight.
     // anything the clip doesnt have a channel for is left alone
@@ -61,23 +67,7 @@ public class ClipChannels
         if (FrameCount <= 0 || weight <= 0f)
             return;
 
-        // the last frame repeats the first in a looping clip, so the loop is one frame shorter
-        int last = FrameCount - 1;
-        double time;
-        if (loop && last > 0)
-        {
-            time = frame % last;
-            if (time < 0)
-                time += last;
-        }
-        else
-        {
-            time = Math.Clamp(frame, 0, last);
-        }
-
-        int first = Math.Min((int)time, last);
-        int second = Math.Min(first + 1, last);
-        float amount = (float)Math.Clamp(time - first, 0, 1);
+        var (first, second, amount) = Keys(frame, loop);
         bool additive = Mode == LayerType.Additive;
 
         foreach (ChannelTrack track in _tracks)
@@ -119,6 +109,33 @@ public class ClipChannels
         }
     }
 
-    // static tracks only have one key
-    private static T Key<T>(T[] keys, int frame) => keys[Math.Min(frame, keys.Length - 1)];
+    private static T Key<T>(T[] keys, int frame) => ClipTime.Key(keys, frame);
+}
+
+/// <summary>
+/// Clip timing shared by clip channels and hand constraint tracks
+/// </summary>
+internal static class ClipTime
+{
+    public static (int First, int Second, float Amount) Keys(double frame, bool loop, int frameCount)
+    {
+        int last = Math.Max(frameCount - 1, 0);
+        double time;
+
+        if (loop && last > 0)
+        {
+            time = frame % last;
+            if (time < 0)
+                time += last;
+        }
+        else
+        {
+            time = Math.Clamp(frame, 0, last);
+        }
+
+        int first = Math.Clamp((int)time, 0, last);
+        return (first, Math.Min(first + 1, last), (float)Math.Clamp(time - first, 0, 1));
+    }
+
+    public static T Key<T>(T[] keys, int frame) => keys[Math.Min(frame, keys.Length - 1)];
 }

@@ -54,7 +54,8 @@ public class FbxExporter : AbstractExporter
 
                 bool weaponAnimations = overrideSkele != null && scene.WeaponAnimationEntity != null && _config.GetExportAnimations();
                 if (weaponAnimations && scene.ExportAnimations)
-                    AddAnimations(apiScene, scene.WeaponAnimationEntity!, overrideSkele!, scene.UseAnimationSelection, scene.WeaponAnimationID, scene.OverrideSkeleton);
+                    AddAnimations(apiScene, scene.WeaponAnimationEntity!, overrideSkele!, scene.UseAnimationSelection, scene.WeaponAnimationID, scene.OverrideSkeleton,
+                        weaponPoints: GetWeaponPoints(scene), pointsSkeleton: scene.OverrideSkeleton);
                 else if (scene.ExportAnimations && overrideSkele != null && scene.OverrideAnimationEntity != null && _config.GetExportAnimations())
                     AddAnimations(apiScene, scene.OverrideAnimationEntity, overrideSkele, scene.UseAnimationSelection);
 
@@ -213,7 +214,8 @@ public class FbxExporter : AbstractExporter
             AddEntity(rigScene, entity, scene, skeletonNodes, first, toRigBind);
         }
 
-        AddAnimations(rigScene, rigEntity, skeletonNodes, scene.UseAnimationSelection, scene.WeaponAnimationID, animPrefix: "fp");
+        AddAnimations(rigScene, rigEntity, skeletonNodes, scene.UseAnimationSelection, scene.WeaponAnimationID, animPrefix: "fp",
+            weaponPoints: GetWeaponPoints(scene), pointsSkeleton: scene.OverrideSkeleton);
         ExportScene(rigScene, outputPath);
     }
 
@@ -270,16 +272,32 @@ public class FbxExporter : AbstractExporter
         }
     }
 
-    private void AddAnimations(FbxScene fbxScene, Entity entity, List<FbxNode> overrideSkele, bool useSelection, TigerHash? weaponTag = null, EntitySkeleton? weaponSkeleton = null, string animPrefix = "")
+    private void AddAnimations(FbxScene fbxScene, Entity entity, List<FbxNode> overrideSkele, bool useSelection, TigerHash? weaponTag = null, EntitySkeleton? weaponSkeleton = null, string animPrefix = "",
+        IReadOnlyList<S808081A9>? weaponPoints = null, EntitySkeleton? pointsSkeleton = null)
     {
         if (entity.Skeleton == null || entity.RuntimeRig == null || entity.Animations == null)
             return;
+
+        HandIkSetup? hands = null;
+        if (pointsSkeleton != null)
+        {
+            try
+            {
+                hands = HandIkSetup.Create(entity.Skeleton, pointsSkeleton, weaponPoints);
+            }
+            catch (Exception e)
+            {
+                Log.Warning($"Exporting without hand constraints: {e.Message}");
+            }
+        }
 
         if ((weaponSkeleton ?? entity.Skeleton).BoneNodes.Count != overrideSkele.Count)
             return;
 
         // animations with no matching control groups cant play
         var program = new RigProgram(entity.RuntimeRig, entity.Skeleton);
+
+        WeaponLayerContext? layerContext = weaponTag != null ? WeaponLayerContext.Create(entity, weaponTag) : null;
 
         int unplayable = 0;
         HashSet<FileHash> seen = new();
@@ -335,9 +353,15 @@ public class FbxExporter : AbstractExporter
                 try
                 {
                     animation.LoadAnimation();
+
+                    bool additive = animation.LayerType == LayerType.Additive;
+                    List<WeaponLayerClip>? layers = layerContext != null && !additive ? layerContext.ForRow(layerContext.RowOf(animation.Hash) ?? -1) : null;
+                    HandIkSetup? clipHands = additive ? null : hands;
+
                     var data = weaponSkeleton != null
-                        ? animation.EvaluateWeaponForFbx(entity.RuntimeRig, entity.Skeleton, weaponSkeleton, name, animation.LayerType)
-                        : animation.EvaluateForFbx(entity.RuntimeRig, entity.Skeleton, name, animation.LayerType);
+                        ? animation.EvaluateWeaponForFbx(entity.RuntimeRig, entity.Skeleton, weaponSkeleton, name, animation.LayerType, layers: layers, hands: clipHands)
+                        : animation.EvaluateForFbx(entity.RuntimeRig, entity.Skeleton, name, animation.LayerType, layers: layers, hands: clipHands);
+
                     evaluated.Add((animation.Hash, data));
                 }
                 catch (Exception e)
@@ -374,9 +398,28 @@ public class FbxExporter : AbstractExporter
         }
     }
 
-    // rest pose local values (translation, euler rotation, scale) of the skeleton nodes, so animations can skip curves that never leave them
-    private readonly Dictionary<FbxNode, float[]> _restValues = new(ReferenceEqualityComparer.Instance);
+    private static List<S808081A9>? GetWeaponPoints(ExporterScene scene)
+    {
+        List<Entity> parts = new();
+        foreach (ExporterEntity exported in scene.Entities)
+        {
+            try
+            {
+                Entity? weapon = exported.Entity ?? (exported.EntityHash != null ? FileResourcer.Get().GetFile<Entity>(exported.EntityHash) : null);
+                if (weapon != null)
+                    parts.Add(weapon);
+            }
+            catch (Exception e)
+            {
+                Log.Warning($"Couldnt read the weapon points of {exported.EntityHash}: {e.Message}");
+            }
+        }
 
+        var merged = Entity.MergeWeaponPoints(parts);
+        return merged.Count > 0 ? merged : null;
+    }
+
+    private readonly Dictionary<FbxNode, float[]> _restValues = new(ReferenceEqualityComparer.Instance);
     private List<FbxNode> AddSkeleton(FbxScene fbxScene, List<BoneNode> boneNodes)
     {
         FbxNode rootNode = null;

@@ -43,6 +43,7 @@ public class RigProgram
     private RigTransform[] _original;
     private HashSet<int> _chain = new();
     private Stack<int> _pending = new();
+    private int _keepRoot = -1;
 
     public RigProgram(EntityRuntimeRig rig, EntitySkeleton skeleton)
     {
@@ -56,6 +57,7 @@ public class RigProgram
         _parents = new int[BoneCount];
         _firstChild = new int[BoneCount];
         _nextSibling = new int[BoneCount];
+
         for (int i = 0; i < BoneCount; i++)
         {
             _bind[i] = RigTransform.FromObjectSpace(bones[i].DefaultObjectSpaceTransform);
@@ -79,6 +81,7 @@ public class RigProgram
         _controls = rig.Constraints.ToArray();
         _defaults = new RigTransform[ControlCount];
         _controlled = new bool[BoneCount];
+
         for (int i = 0; i < ControlCount; i++)
         {
             var control = _controls[i];
@@ -91,10 +94,12 @@ public class RigProgram
             var rotation = new Quaternion(value.Rotation.X, value.Rotation.Y, value.Rotation.Z, value.Rotation.W);
             var translation = new Vector3(value.Translation.X, value.Translation.Y, value.Translation.Z);
             var scale = value.Translation.W > 1e-4f ? value.Translation.W : 1f;
+
             _defaults[i] = new RigTransform(Quaternion.Normalize(rotation), translation, scale);
         }
 
         _ikControls = rig.IkControls.Select(x => (int)x).ToArray();
+
         if (_ikControls.Any(x => x < 0 || x >= ControlCount) || _ikControls.Distinct().Count() != _ikControls.Length)
             throw new Exception("Rig IK list has invalid control indices");
 
@@ -129,25 +134,29 @@ public class RigProgram
         return Math.Min(count, ControlCount);
     }
 
+    // clip control -> rig control. Each clip control group goes to the rig group with the same hash. A group the rig doesnt
+    // have isn't applied, those controls keep their rest pose
     public int[] ChannelMap(Animation clip)
     {
-        var lead = CompatibleControlCount(clip);
-        var map = Enumerable.Range(0, clip.RigControlCount).Select(x => x < lead ? x : -1).ToArray();
+        var map = Enumerable.Repeat(-1, clip.RigControlCount).ToArray();
 
-        int groups = 0;
-        while (groups < Math.Min(clip.RigComponents.Count, _groupHashes.Length) && clip.RigComponents[groups].Unk00.Hash32 == _groupHashes[groups])
-            groups++;
+        Dictionary<uint, int> rigStarts = new();
+        for (int i = 0, start = 0; i < _groupHashes.Length; start += _groupCounts[i], i++)
+            rigStarts.TryAdd(_groupHashes[i], start);
 
-        var trailing = clip.RigComponents.Skip(groups).Where(x => x.Unk04 != 0).ToList();
-        var names = _groupHashes.ToHashSet();
-
-        if (lead == 0 || trailing.Count == 0 || trailing.Any(x => names.Contains(x.Unk00.Hash32)) || trailing.Sum(x => x.Unk04) != ControlCount - lead)
-            return map;
-
-        var remaining = Enumerable.Range(lead, ControlCount - lead).OrderBy(x => _controls[x].BoneIndex).ThenBy(x => x).ToArray();
-        for (int i = 0; i < remaining.Length && lead + i < map.Length; i++)
+        int clipStart = 0;
+        foreach (var group in clip.RigComponents)
         {
-            map[lead + i] = remaining[i];
+            int count = group.Unk04;
+            if (rigStarts.TryGetValue(group.Unk00.Hash32, out int rigStart))
+            {
+                int rigCount = _groupCounts[Array.IndexOf(_groupHashes, group.Unk00.Hash32)];
+
+                for (int i = 0; i < Math.Min(count, rigCount) && clipStart + i < map.Length; i++)
+                    map[clipStart + i] = rigStart + i;
+            }
+
+            clipStart += count;
         }
 
         return map;
@@ -159,6 +168,7 @@ public class RigProgram
         {
             var keys = items.Item1;
             var scale = items.Item2;
+
             if (clip.RetargetKeys.Any(keys.Contains))
                 return scale > 0 && float.IsFinite(scale) ? scale : 1f;
         }
@@ -347,6 +357,7 @@ public class RigProgram
         var relative = RigTransform.Compose(output[start].Inverse(), output[control.BoneIndex]);
         var inverseBind = _bind[start].Inverse();
         int step = 1;
+
         for (int i = chain.Count - 1; i >= 0; i--)
         {
             float amount = (float)step / (chain.Count + 1);
@@ -371,29 +382,67 @@ public class RigProgram
             int middle = _parents[end];
             int root = middle < 0 ? -1 : _parents[middle];
 
-            RigTransform target = _original[end];
+            var target = _original[end];
             output[middle] = RigTransform.Compose(_original[root], _localBind[middle]);
             output[end] = RigTransform.Compose(output[middle], _localBind[end]);
 
-            RigTransform rootValue = output[root];
-            var control = _controls[index];
-            if (control.IkFunctionType == IkFunctionType.IK_3 && control.PoleAxis is >= 1 and <= 6)
-                SolveWithPole(target, PoleAxis(control.PoleAxis, output[root].Rotation), ref rootValue, ref output[middle], ref output[end]);
-            else
-                SolveInPlane(target, ref rootValue, ref output[middle], ref output[end]);
+            var rootValue = output[root];
+            SolveArm(index, target, ref rootValue, middle, end, output);
 
             if (root != 0)
                 output[root] = rootValue;
 
-            _chain.Clear();
-            _chain.Add(root);
-            _chain.Add(middle);
-            _chain.Add(end);
+            CarryChain(root, middle, end, output);
+        }
+    }
+
+    public int ControlBone(int control) => control >= 0 && control < ControlCount ? _controls[control].BoneIndex : -1;
+    public int ParentOf(int bone) => bone >= 0 && bone < BoneCount ? _parents[bone] : -1;
+    public RigTransform BindOf(int bone) => _bind[bone];
+
+    public void SolveChain(int end, RigTransform target, RigTransform[] output, int keep = -1)
+    {
+        int middle = ParentOf(end);
+        int root = ParentOf(middle);
+        if (middle < 0 || root < 0)
+            return;
+
+        Array.Copy(output, _original, BoneCount);
+
+        var rootValue = output[root];
+        SolveArm(Array.FindIndex(_controls, x => x.BoneIndex == end), target, ref rootValue, middle, end, output);
+
+        output[root] = rootValue;
+
+        CarryChain(root, middle, end, output, keep);
+    }
+
+    private void SolveArm(int control, RigTransform target, ref RigTransform root, int middle, int end, RigTransform[] output)
+    {
+        if (control >= 0 && _controls[control].IkFunctionType == IkFunctionType.IK_3 && _controls[control].PoleAxis is >= 1 and <= 6)
+            SolveWithPole(target, PoleAxis(_controls[control].PoleAxis, root.Rotation), ref root, ref output[middle], ref output[end]);
+        else
+            SolveInPlane(target, ref root, ref output[middle], ref output[end]);
+    }
+
+    private void CarryChain(int root, int middle, int end, RigTransform[] output, int keep = -1)
+    {
+        _chain.Clear();
+        _chain.Add(root);
+        _chain.Add(middle);
+        _chain.Add(end);
+        _keepRoot = keep;
+        try
+        {
             foreach (int joint in _chain)
             {
-                RigTransform delta = RigTransform.Compose(output[joint], _original[joint].Inverse());
+                var delta = RigTransform.Compose(output[joint], _original[joint].Inverse());
                 CarryChildren(joint, delta, output);
             }
+        }
+        finally
+        {
+            _keepRoot = -1;
         }
     }
 
@@ -410,7 +459,7 @@ public class RigProgram
             if (_nextSibling[bone] >= 0)
                 _pending.Push(_nextSibling[bone]);
 
-            if (_chain.Contains(bone))
+            if (_chain.Contains(bone) || bone == _keepRoot)
                 continue;
 
             output[bone] = RigTransform.Compose(delta, _original[bone]);
@@ -425,8 +474,10 @@ public class RigProgram
         var start = root.Translation;
         var upper = middle.Translation - start;
         var lower = end.Translation - middle.Translation;
+
         float upperLength = upper.Length();
         float lowerLength = lower.Length();
+
         if (upperLength < 0.0001f || lowerLength < 0.0001f)
             return;
 
@@ -469,8 +520,10 @@ public class RigProgram
         var start = root.Translation;
         var upper = middle.Translation - start;
         var lower = end.Translation - middle.Translation;
+
         float upperLength = upper.Length();
         float lowerLength = lower.Length();
+
         if (upperLength < 0.0001f || lowerLength < 0.0001f)
             return;
 
@@ -484,6 +537,7 @@ public class RigProgram
             SolveInPlane(target, ref root, ref middle, ref end);
             return;
         }
+
         y = Vector3.Normalize(y);
 
         var denominator = 2 * upperLength * distance;

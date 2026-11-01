@@ -18,10 +18,24 @@ public class BoneAnimation
 public static class RigRetarget
 {
     // evaluates every frame of the clip, object space tracks per skeleton bone
-    public static BoneAnimation[] Retarget(Animation clip, BoneTracks[] controls, EntitySkeleton skeleton, EntityRuntimeRig rig)
+    public static BoneAnimation[] Retarget(Animation clip, BoneTracks[] controls, EntitySkeleton skeleton, EntityRuntimeRig rig, IReadOnlyList<WeaponLayerClip>? layers = null,
+        HandIkSetup? hands = null)
     {
         RigProgram program = new(rig, skeleton);
         ClipChannels channels = new(clip, controls, program);
+        List<(ClipChannels Clip, WeaponLayerClip Layer, HandConstraintTracks? Constraints)> layerChannels = new();
+
+        foreach (WeaponLayerClip layer in layers ?? Array.Empty<WeaponLayerClip>())
+        {
+            layer.Clip.LoadAnimation();
+            var layerClip = new ClipChannels(layer.Clip, AnimationDecoder.Decode(layer.Clip), program);
+            if (layerClip.FrameCount > 0)
+                layerChannels.Add((layerClip, layer, hands != null ? layer.Clip.TryReadHandConstraints() : null));
+        }
+
+        HandConstraintTracks? clipConstraints = hands != null ? clip.TryReadHandConstraints() : null;
+        bool solveHands = hands != null && (clipConstraints != null || layerChannels.Any(x => x.Constraints != null));
+        List<HandIk.Source> sources = new();
 
         int frames = clip.FrameCount;
         var bones = skeleton.BoneNodes;
@@ -33,7 +47,21 @@ public static class RigRetarget
         {
             program.CopyDefaults(values);
             channels.Apply(frame, false, values, 1f);
+
+            foreach (var (layer, track, _) in layerChannels)
+                layer.Apply(track.FrameFor(frame, frames, layer.FrameCount), track.Loops, values, 1f);
+
             program.Evaluate(values, pose);
+
+            if (solveHands)
+            {
+                sources.Clear();
+                sources.Add(new(clipConstraints, channels, frame, false, 1f));
+                foreach (var (layer, track, constraints) in layerChannels)
+                    sources.Add(new(constraints, layer, track.FrameFor(frame, frames, layer.FrameCount), track.Loops, 1f));
+
+                HandIk.Apply(program, pose, sources, hands!.Points, hands.WeaponSocket);
+            }
 
             for (int i = 0; i < program.BoneCount; i++)
                 SetFrame(result[i], frame, pose[i]);

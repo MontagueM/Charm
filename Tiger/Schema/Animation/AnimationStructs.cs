@@ -60,10 +60,21 @@ public struct SAnimationClip
     // currently unused, idk what they're used for, no point in loading
     //public ResourcePointer Unk20; // 4C8B8080, 4B8B8080
     //public ResourcePointer Unk28; // 488B8080, ??
-    //public ResourcePointer Unk30; // 2A8B8080, ??
-    //public ResourcePointer Unk38; // 4C8B8080, ??
-    //public ResourcePointer Unk40; // 4C8B8080, ??
-    //public ResourcePointer Unk48; // 428B8080, ??
+
+    [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    public ResourcePointer HandConstraints;
+
+    [SchemaField(0x38, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    public ResourcePointer HandWeights; // the constraint's weight, drives both the hand's rotation and translation
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0x40, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    public ResourcePointer Unk40;
+
+    [SchemaField(0x40, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x48, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    public ResourcePointer HandOffsets; // one scale, rotation and translation stream per constraint
+
     // unsure of any pointers at 50, 58
 
     [SchemaField(0x58, TigerStrategy.DESTINY1_RISE_OF_IRON)] // I think?
@@ -101,6 +112,7 @@ public struct SAnimationClip
     [SchemaField(0x13E, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x142, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public short NodeCount;
+
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x140, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x144, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
@@ -109,6 +121,7 @@ public struct SAnimationClip
     [SchemaField(0x12A, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     public byte NodeCountD1;
+
     [SchemaField(0x12B, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     public byte RigControlCountD1;
@@ -267,30 +280,34 @@ public struct S80808B4E
     public DynamicArray<SInt16> Unk50;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x808008F4, 0x10)] // F4088080
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F59, 0x10)] // 598F8080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808B2A, 0x10)] // 2A8B8080
 public struct S80808B2A
 {
-    public DynamicArray<S80808B2D> Unk00;
+    public DynamicArray<S80808B2D> Constraints;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x8080081F, 0x40)] // 1F088080
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F5C, 0x40)] // 5C8F8080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808B2D, 0x40)] // 2D8B8080
 public struct S80808B2D
 {
-    public short Unk00;
-    public short Unk02;
+    // a two bone chain, the upper arm and hand controls (3 and 5, 4 and 6 on the first person rig)
+    public short ChainRootControl;
+    public short ChainEndControl;
 
     [SchemaField(0x10)]
     public short Unk10;
     public short Unk12;
-    public TigerHash Unk14;
+    public StringHash PointName;
 
     [SchemaField(0x20)]
-    public Vector4 Unk20;
-    public Vector4 Unk30;
+    public Vector4 Unk20; // identity
+    public Vector4 Unk30; // identity
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80800770, 0x50)] // 70078080
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F7C, 0x50)] // 7C8F8080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808B4C, 0x50)] // 4C8B8080
 public struct S80808B4C
@@ -305,6 +322,7 @@ public struct S80808B4C
     public DynamicArray<SReal32> Unk40;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x80800F33, 0x2)] // 330F8080
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x80808F82, 0x2)] // 828F8080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x80808B52, 0x2)] // 528B8080
 public struct S80808B52
