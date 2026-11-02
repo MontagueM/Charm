@@ -1,5 +1,5 @@
+using System.Collections.Concurrent;
 using Arithmic;
-﻿using System.Collections.Concurrent;
 using Newtonsoft.Json;
 using Tiger.Schema;
 
@@ -53,13 +53,18 @@ class MetadataScene
         SetType(_exportType, _dataExportType);
         _sceneName = scene.Name;
         SetMeshName(scene.MeshName ?? scene.Name);
+
         if (scene.Parent is not null)
             _config["Parent"] = scene.Parent;
+
         if (scene.AttachmentBone is not null)
             _config["AttachmentBone"] = scene.AttachmentBone;
 
         _config.TryAdd("Game", MetadataGame.DESTINY);
         _config["UnifiedAssets"] = _charmConfig.GetSingleFolderMapAssetsEnabled();
+        if (scene.UseCombinedFbx)
+            _config["CombinedFbx"] = true; // all the statics are in Models/Statics/{MeshName}.fbx
+
         if (_charmConfig.GetSingleFolderMapAssetsEnabled() && scene.DataType == DataExportType.Map)
         {
             _config["AssetsPath"] = Path.Join(_charmConfig.GetExportSavePath(), $"Maps/Assets/").Replace("\\", "/");

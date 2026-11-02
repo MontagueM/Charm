@@ -81,6 +81,21 @@ public class FbxExporter : AbstractExporter
             return;
         }
 
+        if (scene.UseCombinedFbx)
+        {
+            HashSet<string> added = new();
+            foreach (ExporterMesh mesh in scene.StaticMeshes)
+            {
+                if (mesh.Parts.Count == 0 || !added.Add(mesh.Hash))
+                    continue;
+
+                AddMesh(fbxScene, mesh);
+            }
+
+            ExportScene(fbxScene, Path.Join(outputDirectory, scene.Name));
+            return;
+        }
+
         foreach (ExporterMesh mesh in scene.StaticMeshes)
         {
             if (mesh.Parts.Count == 0)

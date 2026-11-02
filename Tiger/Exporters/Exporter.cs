@@ -1,5 +1,5 @@
+using System.Collections.Concurrent;
 using Arithmic;
-﻿using System.Collections.Concurrent;
 using ConcurrentCollections;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
@@ -199,6 +199,7 @@ public class ExporterScene
     public bool UseAnimationSelection { get; set; }
     public DataExportType DataType { get; set; }
     public ExportType Type { get; set; }
+    public bool UseCombinedFbx => Type == ExportType.Statics && DataType == DataExportType.Map && ConfigSubsystem.Get().GetCombinedStaticMapFbxEnabled();
 
     // for investment atm, not the biggest fan of this
     public EntitySkeleton OverrideSkeleton { get; set; }

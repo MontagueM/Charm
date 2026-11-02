@@ -1,3 +1,4 @@
+using Arithmic;
 using Tiger.Schema.Entity;
 
 namespace Tiger.Schema.Animation;
@@ -98,6 +99,8 @@ public class RigProgram
             _defaults[i] = new RigTransform(Quaternion.Normalize(rotation), translation, scale);
         }
 
+        RepairDefaults(rig);
+
         _ikControls = rig.IkControls.Select(x => (int)x).ToArray();
 
         if (_ikControls.Any(x => x < 0 || x >= ControlCount) || _ikControls.Distinct().Count() != _ikControls.Length)
@@ -111,6 +114,42 @@ public class RigProgram
 
         _retargets = rig.RetargetProfiles;
         _original = new RigTransform[BoneCount];
+    }
+
+    private void RepairDefaults(EntityRuntimeRig rig)
+    {
+        RigTransform? LocalBind(S80808C56 control)
+        {
+            if (control.ConstraintType != ConstraintType.PARENT || control.RotationSpace0.Type != SpaceType.RELATIVE)
+                return null;
+
+            int space = control.RotationSpace0.BoneIndex0;
+            return space < 0 ? _bind[control.BoneIndex] : RigTransform.Compose(_bind[space].Inverse(), _bind[control.BoneIndex]);
+        }
+
+        static bool Same(RigTransform a, RigTransform b) =>
+            (a.Translation - b.Translation).LengthSquared() < 1e-6f && Math.Abs(Quaternion.Dot(a.Rotation, b.Rotation)) > 0.9999f;
+
+        var expected = _controls.Select(LocalBind).ToArray();
+        List<int> repaired = new();
+        for (int i = 0; i < ControlCount; i++)
+        {
+            if (expected[i] is not RigTransform own || Same(_defaults[i], own))
+                continue;
+
+            bool misplaced = false;
+            for (int j = 0; j < ControlCount && !misplaced; j++)
+                misplaced = j != i && expected[j] is RigTransform other && Same(_defaults[i], other);
+
+            if (!misplaced)
+                continue;
+
+            _defaults[i] = new RigTransform(Quaternion.Normalize(own.Rotation), own.Translation, _defaults[i].Scale);
+            repaired.Add(i);
+        }
+
+        if (repaired.Count > 0)
+            Log.Debug($"Rig {rig.Hash}: defaults of controls {string.Join(", ", repaired)} are other bones local binds, using their own local bind");
     }
 
     public void CopyDefaults(RigTransform[] values) => Array.Copy(_defaults, values, ControlCount);
@@ -138,28 +177,59 @@ public class RigProgram
     // have isn't applied, those controls keep their rest pose
     public int[] ChannelMap(Animation clip)
     {
+        /// "game accurate" version
         var map = Enumerable.Repeat(-1, clip.RigControlCount).ToArray();
-
-        Dictionary<uint, int> rigStarts = new();
-        for (int i = 0, start = 0; i < _groupHashes.Length; start += _groupCounts[i], i++)
-            rigStarts.TryAdd(_groupHashes[i], start);
-
-        int clipStart = 0;
-        foreach (var group in clip.RigComponents)
-        {
-            int count = group.Unk04;
-            if (rigStarts.TryGetValue(group.Unk00.Hash32, out int rigStart))
-            {
-                int rigCount = _groupCounts[Array.IndexOf(_groupHashes, group.Unk00.Hash32)];
-
-                for (int i = 0; i < Math.Min(count, rigCount) && clipStart + i < map.Length; i++)
-                    map[clipStart + i] = rigStart + i;
-            }
-
-            clipStart += count;
-        }
+        int bound = CompatibleControlCount(clip);
+        for (int i = 0; i < bound && i < map.Length; i++)
+            map[i] = i;
 
         return map;
+
+        /// v1
+        //var map = Enumerable.Repeat(-1, clip.RigControlCount).ToArray();
+
+        //Dictionary<uint, int> rigStarts = new();
+        //for (int i = 0, start = 0; i < _groupHashes.Length; start += _groupCounts[i], i++)
+        //    rigStarts.TryAdd(_groupHashes[i], start);
+
+        //int clipStart = 0;
+        //foreach (var group in clip.RigComponents)
+        //{
+        //    int count = group.Unk04;
+        //    if (rigStarts.TryGetValue(group.Unk00.Hash32, out int rigStart))
+        //    {
+        //        int rigCount = _groupCounts[Array.IndexOf(_groupHashes, group.Unk00.Hash32)];
+
+        //        for (int i = 0; i < Math.Min(count, rigCount) && clipStart + i < map.Length; i++)
+        //            map[clipStart + i] = rigStart + i;
+        //    }
+
+        //    clipStart += count;
+        //}
+
+        //return map;
+
+        /// broken but also not broken, idfk
+        //var lead = CompatibleControlCount(clip);
+        //var map = Enumerable.Range(0, clip.RigControlCount).Select(x => x < lead ? x : -1).ToArray();
+
+        //int groups = 0;
+        //while (groups < Math.Min(clip.RigComponents.Count, _groupHashes.Length) && clip.RigComponents[groups].Unk00.Hash32 == _groupHashes[groups])
+        //    groups++;
+
+        //var trailing = clip.RigComponents.Skip(groups).Where(x => x.Unk04 != 0).ToList();
+        //var names = _groupHashes.ToHashSet();
+
+        //if (lead == 0 || trailing.Count == 0 || trailing.Any(x => names.Contains(x.Unk00.Hash32)) || trailing.Sum(x => x.Unk04) != ControlCount - lead)
+        //    return map;
+
+        //var remaining = Enumerable.Range(lead, ControlCount - lead).OrderBy(x => _controls[x].BoneIndex).ThenBy(x => x).ToArray();
+        //for (int i = 0; i < remaining.Length && lead + i < map.Length; i++)
+        //{
+        //    map[lead + i] = remaining[i];
+        //}
+
+        //return map;
     }
 
     public float TranslationScale(Animation clip)

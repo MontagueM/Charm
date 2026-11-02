@@ -19,6 +19,7 @@ public class CommonSettings
     public TigerStrategy CurrentStrategy { get; set; } = TigerStrategy.NONE;
     public string ExportPath { get; set; } = "";
     public bool SingleFolderMapAssetsEnabled { get; set; } = false;
+    public bool CombinedStaticMapFbxEnabled { get; set; } = false;
     public bool IndividualStaticsEnabled { get; set; } = false;
     public TextureExportFormat OutputTextureFormat { get; set; } = TextureExportFormat.PNG;
     public bool AnimatedBackground { get; set; } = true;
@@ -132,7 +133,23 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
 
     public bool GetSingleFolderMapAssetsEnabled()
     {
+        return _settings.Common.SingleFolderMapAssetsEnabled && !_settings.Common.CombinedStaticMapFbxEnabled;
+    }
+
+    public bool GetSingleFolderMapAssetsSetting()
+    {
         return _settings.Common.SingleFolderMapAssetsEnabled;
+    }
+
+    public void SetCombinedStaticMapFbxEnabled(bool enabled)
+    {
+        _settings.Common.CombinedStaticMapFbxEnabled = enabled;
+        Save();
+    }
+
+    public bool GetCombinedStaticMapFbxEnabled()
+    {
+        return _settings.Common.CombinedStaticMapFbxEnabled;
     }
 
     #endregion

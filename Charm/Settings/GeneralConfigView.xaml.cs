@@ -148,10 +148,21 @@ public partial class GeneralConfigView : UserControl
             SettingName = "Unified Map Asset Exports",
             SettingLabel = "Export all map assets to a single \"Maps/Assets/\" folder."
         };
-        bVal = _config.GetSingleFolderMapAssetsEnabled();
+        bVal = _config.GetSingleFolderMapAssetsSetting();
         cfe.SettingValue = bVal.ToString();
         cfe.ChangeButton.Click += SingleFolderMapAssetsEnabled_OnClick;
-        MiscConfigPanel.Children.Add(cfe);
+        ExportingConfigPanel.Children.Add(cfe);
+
+        // One FBX per static map instead of one per static mesh, imports into Blender much faster
+        ConfigSettingToggleControl combinedFbx = new()
+        {
+            SettingName = "Combined Static Map FBX",
+            SettingLabel = "Export each static map as a single FBX instead of one per static mesh.\n- Overrides \"Unified Map Asset Exports\" while enabled."
+        };
+        bVal = _config.GetCombinedStaticMapFbxEnabled();
+        combinedFbx.SettingValue = bVal.ToString();
+        combinedFbx.ChangeButton.Click += CombinedStaticMapFbxEnabled_OnClick;
+        ExportingConfigPanel.Children.Add(combinedFbx);
         #endregion
 
         #region Rendering
@@ -331,7 +342,13 @@ public partial class GeneralConfigView : UserControl
 
     private void SingleFolderMapAssetsEnabled_OnClick(object sender, RoutedEventArgs e)
     {
-        _config.SetSingleFolderMapAssetsEnabled(!_config.GetSingleFolderMapAssetsEnabled());
+        _config.SetSingleFolderMapAssetsEnabled(!_config.GetSingleFolderMapAssetsSetting());
+        PopulateConfigPanel();
+    }
+
+    private void CombinedStaticMapFbxEnabled_OnClick(object sender, RoutedEventArgs e)
+    {
+        _config.SetCombinedStaticMapFbxEnabled(!_config.GetCombinedStaticMapFbxEnabled());
         PopulateConfigPanel();
     }
 
