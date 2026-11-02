@@ -158,15 +158,22 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <StackPanel
+            <Grid
                 x:Name="ManualControls"
                 Grid.Row="1"
                 Grid.Column="1"
                 Margin="15"
                 d:Visibility="Visible"
-                Orientation="Vertical"
                 Visibility="Hidden">
-                <ContentControl Margin="0,0,0,15" Style="{StaticResource ColumnHeader}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <ContentControl
+                    Grid.Row="0"
+                    Margin="0,0,0,15"
+                    Style="{StaticResource ColumnHeader}">
                     <TextBlock
                         d:FontFamily="Haas Grot Text 55 Roman"
                         FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
@@ -176,6 +183,7 @@
 
                 <ListView
                     x:Name="StaticList"
+                    Grid.Row="1"
                     d:ItemsSource="{d:SampleData ItemCount=5}"
                     Background="Transparent"
                     BorderThickness="0,0,2,0">
@@ -191,7 +199,7 @@
                         </ItemsPanelTemplate>
                     </ListView.ItemsPanel>
                 </ListView>
-            </StackPanel>
+            </Grid>
 
             <Border
                 Grid.Row="1"

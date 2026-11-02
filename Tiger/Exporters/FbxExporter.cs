@@ -20,100 +20,115 @@ public class FbxExporter : AbstractExporter
     {
         foreach (ExporterScene scene in args.Scenes)
         {
-            FbxScene fbxScene = FbxScene.Create(_manager, scene.Name);
-            string outputDirectory = args.OutputDirectory;
-            string modelSubDirectory = $"Models/{scene.Type.ToString()}";
-
-            switch (scene.DataType)
+            try
             {
-                case DataExportType.Map:
-                    if (_config.GetSingleFolderMapAssetsEnabled())
-                        outputDirectory = Path.Join($"{_config.GetExportSavePath()}/Maps/Assets", modelSubDirectory);
-                    else
-                        outputDirectory = Path.Join(outputDirectory, modelSubDirectory);
-                    break;
-                default:
-                    outputDirectory = Path.Join(outputDirectory, scene.Name);
-                    break;
+                ExportSceneData(args, scene);
             }
-
-            if (scene.Type is ExportType.API or ExportType.D1API or ExportType.Emote)
+            catch (Exception e)
             {
-                if (args.AggregateOutput)
-                    outputDirectory = args.OutputDirectory;
-
-                FbxScene apiScene = FbxScene.Create(_manager, scene.Name);
-
-                List<FbxNode>? overrideSkele = scene.OverrideSkeleton != null ? AddSkeleton(apiScene, scene.OverrideSkeleton.GetBoneNodes()) : null;
-                foreach (ExporterEntity entity in scene.Entities)
-                {
-                    if (entity.Mesh.Parts.Count == 0)
-                        continue;
-                    AddEntity(apiScene, entity, scene, overrideSkele);
-                }
-
-                bool weaponAnimations = overrideSkele != null && scene.WeaponAnimationEntity != null && _config.GetExportAnimations();
-                if (weaponAnimations && scene.ExportAnimations)
-                    AddAnimations(apiScene, scene.WeaponAnimationEntity!, overrideSkele!, scene.UseAnimationSelection, scene.WeaponAnimationID, scene.OverrideSkeleton,
-                        weaponPoints: GetWeaponPoints(scene), pointsSkeleton: scene.OverrideSkeleton);
-                else if (scene.ExportAnimations && overrideSkele != null && scene.OverrideAnimationEntity != null && _config.GetExportAnimations())
-                    AddAnimations(apiScene, scene.OverrideAnimationEntity, overrideSkele, scene.UseAnimationSelection);
-
-                ExportScene(apiScene, Path.Join(outputDirectory, scene.Name));
-
-                if (weaponAnimations)
-                    ExportFirstPersonRig(scene, Path.Join(outputDirectory, $"{scene.Name}_FirstPerson"));
-                continue;
+                Log.Error($"Failed to export scene {scene.Name}: {e}");
             }
+        }
+    }
 
-            foreach (ExporterMesh mesh in scene.StaticMeshes)
-            {
-                if (mesh.Parts.Count == 0)
-                    continue;
+    private void ExportSceneData(Exporter.ExportEventArgs args, ExporterScene scene)
+    {
 
-                // this is dumb
-                string savePath = scene.Type == ExportType.Statics
-                && scene.DataType == DataExportType.Individual
-                && args.AggregateOutput ? args.OutputDirectory : outputDirectory;
+        FbxScene fbxScene = FbxScene.Create(_manager, scene.Name);
+        string outputDirectory = args.OutputDirectory;
+        string modelSubDirectory = $"Models/{scene.Type.ToString()}";
 
-                FbxScene fbxIndivScene = FbxScene.Create(_manager, mesh.Hash);
-                AddMesh(fbxIndivScene, mesh);
-                ExportScene(fbxIndivScene, Path.Join(savePath, mesh.Hash));
-            }
+        switch (scene.DataType)
+        {
+            case DataExportType.Map:
+                if (_config.GetSingleFolderMapAssetsEnabled())
+                    outputDirectory = Path.Join($"{_config.GetExportSavePath()}/Maps/Assets", modelSubDirectory);
+                else
+                    outputDirectory = Path.Join(outputDirectory, modelSubDirectory);
+                break;
+            default:
+                outputDirectory = Path.Join(outputDirectory, scene.Name);
+                break;
+        }
 
+        if (scene.Type is ExportType.API or ExportType.D1API or ExportType.Emote)
+        {
+            if (args.AggregateOutput)
+                outputDirectory = args.OutputDirectory;
+
+            FbxScene apiScene = FbxScene.Create(_manager, scene.Name);
+
+            List<FbxNode>? overrideSkele = scene.OverrideSkeleton != null ? AddSkeleton(apiScene, scene.OverrideSkeleton.GetBoneNodes()) : null;
             foreach (ExporterEntity entity in scene.Entities)
             {
                 if (entity.Mesh.Parts.Count == 0)
                     continue;
-
-                // this is dumb
-                string savePath = scene.Type == ExportType.Entities
-                && scene.DataType == DataExportType.Individual
-                && args.AggregateOutput ? args.OutputDirectory : outputDirectory;
-
-                string fileName = scene.MeshName ?? entity.Mesh.Hash;
-                FbxScene fbxIndivScene = FbxScene.Create(_manager, fileName);
-                AddEntity(fbxIndivScene, entity, scene);
-                ExportScene(fbxIndivScene, Path.Join(savePath, fileName));
+                AddEntity(apiScene, entity, scene, overrideSkele);
             }
 
-            foreach (ExporterMesh mesh in scene.TerrainMeshes)
-            {
-                if (mesh.ID != null)
-                    AddVertexAO(mesh, (ulong)mesh.ID);
+            bool weaponAnimations = overrideSkele != null && scene.WeaponAnimationEntity != null && _config.GetExportAnimations();
+            if (weaponAnimations && scene.ExportAnimations)
+                AddAnimations(apiScene, scene.WeaponAnimationEntity!, overrideSkele!, scene.UseAnimationSelection, scene.WeaponAnimationID, scene.OverrideSkeleton,
+                    weaponPoints: GetWeaponPoints(scene), pointsSkeleton: scene.OverrideSkeleton);
+            else if (scene.ExportAnimations && overrideSkele != null && scene.OverrideAnimationEntity != null && _config.GetExportAnimations())
+                AddAnimations(apiScene, scene.OverrideAnimationEntity, overrideSkele, scene.UseAnimationSelection);
 
-                FbxScene fbxIndivScene = FbxScene.Create(_manager, $"{mesh.Hash}_{mesh.Index}");
-                AddMesh(fbxIndivScene, mesh);
-                ExportScene(fbxIndivScene, Path.Join(outputDirectory, $"{mesh.Hash}_{mesh.Index}"));
-            }
+            ExportScene(apiScene, Path.Join(outputDirectory, scene.Name));
 
-            //foreach (var meshInstance in scene.ArrangedStaticMeshInstances)
-            //{
-            //    AddInstancedMesh(fbxScene, scene.StaticMeshes.First(s => s.Hash == meshInstance.Key).Parts, meshInstance.Value);
-            //}
+            if (weaponAnimations)
+                ExportFirstPersonRig(scene, Path.Join(outputDirectory, $"{scene.Name}_FirstPerson"));
 
-            //ExportScene(fbxScene, Path.Join(outputDirectory, scene.Name));
+            return;
         }
+
+        foreach (ExporterMesh mesh in scene.StaticMeshes)
+        {
+            if (mesh.Parts.Count == 0)
+                continue;
+
+            // this is dumb
+            string savePath = scene.Type == ExportType.Statics
+            && scene.DataType == DataExportType.Individual
+            && args.AggregateOutput ? args.OutputDirectory : outputDirectory;
+
+            FbxScene fbxIndivScene = FbxScene.Create(_manager, mesh.Hash);
+            AddMesh(fbxIndivScene, mesh);
+            ExportScene(fbxIndivScene, Path.Join(savePath, mesh.Hash));
+        }
+
+        foreach (ExporterEntity entity in scene.Entities)
+        {
+            if (entity.Mesh.Parts.Count == 0)
+                continue;
+
+            // this is dumb
+            string savePath = scene.Type == ExportType.Entities
+            && scene.DataType == DataExportType.Individual
+            && args.AggregateOutput ? args.OutputDirectory : outputDirectory;
+
+            string fileName = scene.MeshName ?? entity.Mesh.Hash;
+            FbxScene fbxIndivScene = FbxScene.Create(_manager, fileName);
+            AddEntity(fbxIndivScene, entity, scene);
+            ExportScene(fbxIndivScene, Path.Join(savePath, fileName));
+        }
+
+        foreach (ExporterMesh mesh in scene.TerrainMeshes)
+        {
+            if (mesh.ID != null)
+                AddVertexAO(mesh, (ulong)mesh.ID);
+
+            FbxScene fbxIndivScene = FbxScene.Create(_manager, $"{mesh.Hash}_{mesh.Index}");
+            AddMesh(fbxIndivScene, mesh);
+            ExportScene(fbxIndivScene, Path.Join(outputDirectory, $"{mesh.Hash}_{mesh.Index}"));
+        }
+
+        //foreach (var meshInstance in scene.ArrangedStaticMeshInstances)
+        //{
+        //    AddInstancedMesh(fbxScene, scene.StaticMeshes.First(s => s.Hash == meshInstance.Key).Parts, meshInstance.Value);
+        //}
+
+        //ExportScene(fbxScene, Path.Join(outputDirectory, scene.Name));
+
     }
 
     public void AddVertexAO(ExporterMesh mesh, ulong identifier)

@@ -73,6 +73,7 @@ public partial class ActivityMapView : UserControl
     {
         var bubble = (sender as ToggleButton).DataContext as DisplayBubble;
         _currentBubble = bubble;
+
         FileHash hash = bubble.Hash;
 
         Dispatcher.Invoke(() => MapControl.Visibility = Visibility.Hidden);
@@ -91,7 +92,8 @@ public partial class ActivityMapView : UserControl
     private void PopulateStaticList(Tag<SBubbleDefinition> bubbleMaps)
     {
         ConcurrentBag<DisplayStaticMap> items = new();
-        Parallel.ForEach(bubbleMaps.TagData.MapResources, m =>
+        //Parallel.ForEach(bubbleMaps.TagData.MapResources, m =>
+        foreach (var m in bubbleMaps.TagData.MapResources)
         {
             foreach (SMapDataTableEntry dataTable in m.MapContainer.TagData.MapDataTables)
             {
@@ -126,7 +128,8 @@ public partial class ActivityMapView : UserControl
                     }
                 }
             }
-        });
+        }
+        //});
 
         var sortedItems = new List<DisplayStaticMap>(items);
         sortedItems.Sort((a, b) => b.Instances.CompareTo(a.Instances));
@@ -207,7 +210,7 @@ public partial class ActivityMapView : UserControl
         notify.Show();
     }
 
-    public async void ExportStaticMap()
+    public void ExportStaticMap()
     {
         Log.Info($"Exporting Static Map: {_currentBubble.Name}, {_currentBubble.Hash}");
         Dispatcher.Invoke(() =>
@@ -246,7 +249,7 @@ public partial class ActivityMapView : UserControl
         Log.Info($"Exported Static Map: {_currentBubble.Name}, {_currentBubble.Hash}");
     }
 
-    public async void ExportResources(ConcurrentDictionary<FileHash, List<FileHash>> maps = null)
+    public void ExportResources(ConcurrentDictionary<FileHash, List<FileHash>> maps = null)
     {
         // this is dumb but whatever lol
         string type = maps == null ? "Map Resources" : "Activity Entities";

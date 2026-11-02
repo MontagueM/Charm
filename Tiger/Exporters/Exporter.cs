@@ -1,3 +1,4 @@
+using Arithmic;
 ﻿using System.Collections.Concurrent;
 using ConcurrentCollections;
 using Tiger.Schema;
@@ -88,14 +89,35 @@ public class Exporter : Subsystem<Exporter>
         if (outputDirectory is null)
             outputDirectory = TigerInstance.GetSubsystem<ConfigSubsystem>().GetExportSavePath();
 
-        ExportEvent(new ExportEventArgs(_scenes, outputDirectory, aggregateOutput));
-        Reset();
+        try
+        {
+            Log.Info($"Exporting {_scenes.Count} scenes to {outputDirectory}");
+            var args = new ExportEventArgs(_scenes, outputDirectory, aggregateOutput);
+
+            // One exporter failing shouldn't stop the others from running
+            foreach (ExportEventHandler handler in ExportEvent.GetInvocationList())
+            {
+                try
+                {
+                    handler(args);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Exporter {handler.Method.DeclaringType?.Name} failed: {e}");
+                }
+            }
+        }
+        finally
+        {
+            Reset();
+        }
     }
 }
 
 public class GlobalExporterScene : ExporterScene
 {
     private ConcurrentBag<dynamic> _objects = new();
+    private readonly object _lock = new();
 
     public GlobalExporterScene()
     {
@@ -110,15 +132,22 @@ public class GlobalExporterScene : ExporterScene
     /// <param name="isUnique">Should only one of this item exist?</param>
     public void AddToGlobalScene(dynamic item, bool isUnique = false)
     {
-        if (_objects == null)
-            _objects = new ConcurrentBag<dynamic>();
+        // Check and add must be atomic, this gets called from parallel loops
+        lock (_lock)
+        {
+            if (_objects == null)
+                _objects = new ConcurrentBag<dynamic>();
 
-        // Check if an item of the same type already exists (if there should only be one)
-        dynamic type = item.GetType();
-        if (isUnique && _objects.Any(existing => existing.GetType() == type))
-            throw new InvalidOperationException($"A unique item of type {type.Name} already exists in the Global Scene. This shouldn't happen.");
+            // Check if an item of the same type already exists (if there should only be one)
+            Type type = item.GetType();
+            if (isUnique && _objects.Any(existing => existing.GetType() == type))
+            {
+                Log.Warning($"A unique item of type {type.Name} already exists in the Global Scene, ignoring the duplicate.");
+                return;
+            }
 
-        _objects.Add(item);
+            _objects.Add(item);
+        }
     }
 
     /// <summary>

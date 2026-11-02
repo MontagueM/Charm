@@ -1,3 +1,4 @@
+using Arithmic;
 ﻿using System.Collections.Concurrent;
 using Newtonsoft.Json;
 using Tiger.Schema;
@@ -17,8 +18,15 @@ public class MetadataExporter : AbstractExporter
     {
         Parallel.ForEach(args.Scenes, scene =>
         {
-            MetadataScene metadataScene = new(scene, args);
-            metadataScene.WriteToFile(args);
+            try
+            {
+                MetadataScene metadataScene = new(scene, args);
+                metadataScene.WriteToFile(args);
+            }
+            catch (Exception e)
+            {
+                Log.Error($"Failed to write metadata for scene {scene.Name}: {e}");
+            }
         });
     }
 }
