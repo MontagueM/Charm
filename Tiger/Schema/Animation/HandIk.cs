@@ -14,12 +14,12 @@ public static class HandIk
         Dictionary<uint, (int Bone, RigTransform Point)> points = new();
         foreach (S808081A9 point in weaponPoints ?? Array.Empty<S808081A9>())
         {
-            if (point.Unk20 < 0 || point.Unk20 >= weaponBoneCount)
+            if (point.Bone < 0 || point.Bone >= weaponBoneCount)
                 continue;
 
             var rotation = new Quaternion(point.Rotation.X, point.Rotation.Y, point.Rotation.Z, point.Rotation.W);
             var translation = new Vector3(point.Translation.X, point.Translation.Y, point.Translation.Z);
-            points.TryAdd(point.Name.Hash32, (firstBone + point.Unk20, new RigTransform(Quaternion.Normalize(rotation), translation, 1)));
+            points.TryAdd(point.Name.Hash32, (firstBone + point.Bone, new RigTransform(Quaternion.Normalize(rotation), translation, 1)));
         }
 
         return points;

@@ -100,6 +100,22 @@ public class EntityAnimations : EntityComponent
         return result;
     }
 
+    public List<(Animation.Animation Clip, int Row, List<string> Names)>? GetWeaponRowClips(TigerHash weaponTag)
+    {
+        var rows = WeaponRows(weaponTag, out S808025F8 resource);
+        if (rows == null)
+            return null;
+
+        List<(Animation.Animation, int, List<string>)> result = new();
+        foreach (var (row, names) in rows)
+        {
+            if (RowClip(resource.Container.TagData, row) is { } clip)
+                result.Add((clip, row, names));
+        }
+
+        return result;
+    }
+
     public HashSet<uint> GetWeaponTagLineage(TigerHash weaponTag)
     {
         HashSet<uint> lineage = new() { weaponTag.Hash32 };
@@ -527,9 +543,11 @@ public sealed class WeaponAction
 }
 
 
-public sealed record WeaponLayerClip(string Track, int Layer, int Child, Animation.Animation Clip, TrackFrameMode FrameMode, LayerFrameSource Frame)
+public sealed record WeaponLayerClip(string Track, int Layer, int Child, Animation.Animation Clip, TrackFrameMode FrameMode, LayerFrameSource Frame, uint? WeightVariable = null)
 {
-    public bool Loops => FrameMode == TrackFrameMode.Clock;
+    public bool Loops => FrameMode is TrackFrameMode.Clock or TrackFrameMode.Speed;
+
+    public float Weight(LayerInputs? inputs) => WeightVariable is null ? 1f : inputs?.WeightOf(WeightVariable.Value) ?? 0f;
 
     public double FrameFor(double baseFrame, int baseFrames, int layerFrames)
     {
@@ -539,6 +557,7 @@ public sealed record WeaponLayerClip(string Track, int Layer, int Child, Animati
         switch (FrameMode)
         {
             case TrackFrameMode.Clock:
+            case TrackFrameMode.Speed:
                 return Math.Max(baseFrame, 0);
 
             case TrackFrameMode.Variable:
@@ -554,6 +573,42 @@ public sealed record WeaponLayerClip(string Track, int Layer, int Child, Animati
                 return 0;
         }
     }
+}
+
+public sealed class LayerInputs
+{
+    private const uint WalkWeightVariable = 0x10000 | 55; // global fp_walk_weight
+    private const uint RunWeightVariable = 0x10000 | 57; // global fp_run_weight
+    private const uint SprintWeightVariable = 0x10000 | 93; // global sprint_state_weight
+
+    public float Walk;
+    public float Run;
+    public float Sprint;
+
+    public static readonly string[] Names = { "walk", "run", "sprint" };
+
+    public static string? NameOf(uint variable) => variable switch
+    {
+        WalkWeightVariable => Names[0],
+        RunWeightVariable => Names[1],
+        SprintWeightVariable => Names[2],
+        _ => null,
+    };
+
+    public static LayerInputs Only(string name) => new()
+    {
+        Walk = name == Names[0] ? 1f : 0f,
+        Run = name == Names[1] ? 1f : 0f,
+        Sprint = name == Names[2] ? 1f : 0f,
+    };
+
+    public float WeightOf(uint variable) => variable switch
+    {
+        WalkWeightVariable => Walk,
+        RunWeightVariable => Run,
+        SprintWeightVariable => Sprint,
+        _ => 0f,
+    };
 }
 
 public enum TrackFrameMode
@@ -606,6 +661,11 @@ public sealed class WeaponLayerContext
     private readonly Dictionary<FileHash, int> _rows = new();
     private readonly Dictionary<int, Dictionary<int, uint>> _rowTags = new();
 
+    private readonly List<WeaponAnimationEntry> _entries = new();
+    public IReadOnlyList<WeaponAnimationEntry> Entries => _entries;
+
+    public IEnumerable<WeaponAnimationEntry> EntriesOf(FileHash clip) => _entries.Where(x => x.Clip.Hash == clip);
+
     private WeaponLayerContext(S8080269C tracks, S8080289F? container, AnimationVariables? variables, TigerHash weaponTag)
     {
         Tracks = tracks;
@@ -643,12 +703,15 @@ public sealed class WeaponLayerContext
         }
 
         var context = new WeaponLayerContext(graph.Tracks.TagData, graph.Container?.TagData, variables, weaponTag);
+        List<(Animation.Animation Clip, int Row, List<string> Names)> rowClips = new();
         foreach (EntityAnimations animations in rig.Animations ?? new())
         {
             try
             {
                 foreach (var (clip, row) in animations.GetWeaponAnimationRows(weaponTag) ?? new())
                     context._rows.TryAdd(clip, row);
+
+                rowClips.AddRange(animations.GetWeaponRowClips(weaponTag) ?? new());
 
                 context.Lineage.UnionWith(animations.GetWeaponTagLineage(weaponTag));
 
@@ -660,13 +723,68 @@ public sealed class WeaponLayerContext
                 Log.Warning($"Couldnt read the weapon rows of {animations.Hash}: {e.Message}");
             }
         }
+
+        context.BuildEntries(rowClips);
         return context;
+    }
+
+    private void BuildEntries(List<(Animation.Animation Clip, int Row, List<string> Names)> rowClips)
+    {
+        Dictionary<(FileHash, string), WeaponAnimationEntry> found = new();
+        foreach (var (clip, row, names) in rowClips.OrderBy(x => x.Clip.Hash).ThenBy(x => x.Row))
+        {
+            var key = (clip.Hash, LayerSignature(row));
+            if (!found.TryGetValue(key, out var entry))
+            {
+                entry = new WeaponAnimationEntry(clip, row);
+                found.Add(key, entry);
+                _entries.Add(entry);
+            }
+
+            foreach (string name in names)
+            {
+                if (!entry.Names.Contains(name))
+                    entry.Names.Add(name);
+            }
+        }
+
+        int clips = rowClips.Select(x => x.Clip.Hash).Distinct().Count();
+        Log.Debug($"Weapon {WeaponTag}: {clips} clips from {rowClips.Count} rows, {_entries.Count} animations ({_entries.Count - clips} extra for clips played with different layers)");
+    }
+
+    private string LayerSignature(int row)
+    {
+        try
+        {
+            return string.Join(",", ForRow(row).Select(x => $"{x.Clip.Hash}/{x.WeightVariable}/{(int)x.FrameMode}/{x.Frame.Kind}/{x.Frame.Value}"));
+        }
+        catch (Exception e)
+        {
+            Log.Debug($"Couldnt read the layers of row {row}: {e.Message}");
+            return $"row {row}";
+        }
     }
 
     // the first row the weapon plays the clip from
     public int? RowOf(FileHash clip) => _rows.TryGetValue(clip, out int row) ? row : null;
 
     public List<WeaponLayerClip> ForRow(int row) => WeaponLayers.ForRow(Tracks, row, WeaponTag, Lineage, Variables, Container, _rowTags.GetValueOrDefault(row));
+}
+
+public sealed class WeaponAnimationEntry
+{
+    public WeaponAnimationEntry(Animation.Animation clip, int row)
+    {
+        Clip = clip;
+        Row = row;
+    }
+
+    public Animation.Animation Clip { get; }
+    public int Row { get; }
+    public List<string> Names { get; } = new();
+
+    public string? Name => Names.Count > 0 ? Names[0] : null;
+    public string DisplayName => string.Join(" / ", Names);
 }
 
 public static class WeaponLayers
@@ -706,13 +824,13 @@ public static class WeaponLayers
                     continue;
 
                 // the first matching entry is the one that plays, even when off
-                if (entry.WeightSource == 1 && (entry.Animation ?? ContainerClip(entry, container)) is { } animation)
+                if (entry.WeightSource is 1 or 2 && (entry.Animation ?? ContainerClip(entry, container)) is { } animation)
                 {
                     int frameVariable = entry.FrameVariable;
                     // globals are gameplay inputs we have no value for, only locals index the variables we read
                     var frame = frameVariable == 0xFFFF || entry.FrameVariableIsGlobal || variables is null ? new(LayerFrameKind.Zero) : variables.FrameSource(frameVariable);
 
-                    clips.Add(new WeaponLayerClip(GlobalStrings.Get().GetString(track.Name), track.Layer, child, animation, entry.Mode, frame));
+                    clips.Add(new WeaponLayerClip(GlobalStrings.Get().GetString(track.Name), track.Layer, child, animation, entry.Mode, frame, entry.WeightSource == 2 ? entry.Unk28 : null));
                 }
                 break;
             }

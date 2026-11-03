@@ -1451,15 +1451,15 @@ public struct S808081A9
 
     [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x10, TigerStrategy.DESTINY2_LATEST)]
-    public Vector4 Translation; // relative to the weapons root bone?
+    public Vector4 Translation; // relative to the points weapon bone
 
     [SchemaField(0x00, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x20, TigerStrategy.DESTINY2_LATEST)]
-    public int Unk20; // weapon bone
+    public int Unk20;
 
     [SchemaField(0x04, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x24, TigerStrategy.DESTINY2_LATEST)]
-    public int Unk24;
+    public int Bone;
 
     [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x28, TigerStrategy.DESTINY2_LATEST)]

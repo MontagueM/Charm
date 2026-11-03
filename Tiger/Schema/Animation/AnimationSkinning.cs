@@ -30,6 +30,7 @@ public class SkinningFrames
 
     public IReadOnlyList<(SkinningFrames Frames, WeaponLayerClip Layer)>? TrackLayers;
     public bool UseTrackLayers;
+    public LayerInputs? LayerInputs;
 
     public SkinningFrames? FadeFrom;
     public double FadeFromFrame;
@@ -122,11 +123,11 @@ public class SkinningFrames
 
     private void ApplyTrackLayers(double frame, RigTransform[] values)
     {
-        foreach (var (track, trackFrame, loops) in TrackLayerFrames(frame))
-            track._clip.Apply(trackFrame, loops, values, 1f);
+        foreach (var (track, trackFrame, loops, weight) in TrackLayerFrames(frame))
+            track._clip.Apply(trackFrame, loops, values, weight);
     }
 
-    private IEnumerable<(SkinningFrames Track, double Frame, bool Loops)> TrackLayerFrames(double frame)
+    private IEnumerable<(SkinningFrames Track, double Frame, bool Loops, float Weight)> TrackLayerFrames(double frame)
     {
         if (TrackLayers is not { } tracks)
             yield break;
@@ -136,8 +137,9 @@ public class SkinningFrames
 
         foreach (var (track, layer) in tracks)
         {
-            if (track.FrameCount > 0 && track._program.ControlCount == _program.ControlCount)
-                yield return (track, layer.FrameFor(frame, FrameCount, track.FrameCount), layer.Loops);
+            float weight = layer.Weight(LayerInputs);
+            if (weight > 0f && track.FrameCount > 0 && track._program.ControlCount == _program.ControlCount)
+                yield return (track, layer.FrameFor(frame, FrameCount, track.FrameCount), layer.Loops, weight);
         }
     }
 
@@ -158,8 +160,8 @@ public class SkinningFrames
         List<HandIk.Source> sources = new() { new(HandConstraints, _clip, frame, loop, 1f) };
         if (UseTrackLayers)
         {
-            foreach (var (track, trackFrame, loops) in TrackLayerFrames(frame))
-                sources.Add(new(track.HandConstraints, track._clip, trackFrame, loops, 1f));
+            foreach (var (track, trackFrame, loops, weight) in TrackLayerFrames(frame))
+                sources.Add(new(track.HandConstraints, track._clip, trackFrame, loops, weight));
         }
 
         if (layer != null && layerWeight > 0f && layer._program.ControlCount == _program.ControlCount)

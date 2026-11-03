@@ -373,33 +373,61 @@ public class FbxExporter : AbstractExporter
                     continue;
                 }
 
-                string name = animation.Hash.ToString();
-                if (names != null && names.TryGetValue(animation.Hash, out var clipNames) && clipNames.Count > 0)
-                    name = $"{name}_{clipNames[0]}";
+                List<(int? Row, string? Name)> plays = new();
+                if (layerContext != null)
+                    plays.AddRange(layerContext.EntriesOf(animation.Hash).Select(x => ((int?)x.Row, x.Name)));
 
-                if (animPrefix != string.Empty)
-                    name = $"{animPrefix}_{name}";
-
-                try
+                if (plays.Count == 0)
                 {
-                    animation.LoadAnimation();
-
-                    bool additive = animation.LayerType == LayerType.Additive;
-                    List<WeaponLayerClip>? layers = layerContext != null && !additive ? layerContext.ForRow(layerContext.RowOf(animation.Hash) ?? -1) : null;
-                    HandIkSetup? clipHands = additive ? null : hands;
-
-                    var data = weaponSkeleton != null
-                        ? animation.EvaluateWeaponForFbx(entity.RuntimeRig, entity.Skeleton, weaponSkeleton, name, animation.LayerType, layers: layers, hands: clipHands)
-                        : animation.EvaluateForFbx(entity.RuntimeRig, entity.Skeleton, name, animation.LayerType, layers: layers, hands: clipHands);
-
-                    evaluated.Add((animation.Hash, data));
+                    string? clipName = names != null && names.TryGetValue(animation.Hash, out var clipNames) && clipNames.Count > 0 ? clipNames[0] : null;
+                    plays.Add((layerContext?.RowOf(animation.Hash), clipName));
                 }
-                catch (Exception e)
+
+                foreach (var (row, playName) in plays)
                 {
+                    string name = animation.Hash.ToString();
+                    if (playName != null)
+                        name = plays.Count(x => x.Name == playName) > 1 ? $"{name}_{playName}_row{row}" : $"{name}_{playName}";
+
+                    if (animPrefix != string.Empty)
+                        name = $"{animPrefix}_{name}";
+
+                    try
+                    {
+                        animation.LoadAnimation();
+
+                        bool additive = animation.LayerType == LayerType.Additive;
+                        List<WeaponLayerClip>? layers = layerContext != null && !additive ? layerContext.ForRow(row ?? -1) : null;
+                        HandIkSetup? clipHands = additive ? null : hands;
+
+                        FbxAnimationData Evaluate(string clipName, LayerInputs? inputs, int? frameCount = null) => weaponSkeleton != null
+                            ? animation.EvaluateWeaponForFbx(entity.RuntimeRig, entity.Skeleton, weaponSkeleton, clipName, animation.LayerType, layers: layers, hands: clipHands, inputs: inputs, frameCount: frameCount)
+                            : animation.EvaluateForFbx(entity.RuntimeRig, entity.Skeleton, clipName, animation.LayerType, layers: layers, hands: clipHands, inputs: inputs, frameCount: frameCount);
+
+                        evaluated.Add((animation.Hash, Evaluate(name, null)));
+
+                        var driven = layers?.Where(x => x.WeightVariable is not null).Select(x => LayerInputs.NameOf(x.WeightVariable!.Value)).Where(x => x != null).Distinct().ToList();
+                        foreach (string variant in driven ?? new())
+                        {
+                            int? cycle = null;
+                            if (animation.FrameCount <= 1)
+                            {
+                                int longest = layers!.Where(x => x.WeightVariable is uint v && LayerInputs.NameOf(v) == variant)
+                                    .Max(x => { x.Clip.LoadAnimation(); return x.Clip.FrameCount; });
+                                if (longest > 1)
+                                    cycle = longest;
+                            }
+
+                            evaluated.Add((animation.Hash, Evaluate($"{name}_{variant}", LayerInputs.Only(variant), cycle)));
+                        }
+                    }
+                    catch (Exception e)
+                    {
 #if DEBUG
-                    throw e;
+                        throw e;
 #endif
-                    Log.Error($"Skipping animation {animation.Hash}: {e.Message}");
+                        Log.Error($"Skipping animation {animation.Hash}: {e.Message}");
+                    }
                 }
             }
         }

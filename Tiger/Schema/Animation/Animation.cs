@@ -199,27 +199,27 @@ public class Animation : Tag<SAnimationClip>
     // decodes the clip and runs it on the rig
     public BoneAnimation[] Evaluate(
         EntityRuntimeRig rig, EntitySkeleton skeleton,
-        bool localSpace = true, IReadOnlyList<WeaponLayerClip>? layers = null, HandIkSetup? hands = null)
+        bool localSpace = true, IReadOnlyList<WeaponLayerClip>? layers = null, HandIkSetup? hands = null, LayerInputs? inputs = null, int? frameCount = null)
     {
         var controls = AnimationDecoder.Decode(this);
-        var objectSpace = RigRetarget.Retarget(this, controls, skeleton, rig, layers, hands);
+        var objectSpace = RigRetarget.Retarget(this, controls, skeleton, rig, layers, hands, inputs, frameCount);
         return localSpace ? RigRetarget.ToLocalSpace(this, objectSpace, skeleton) : objectSpace;
     }
 
     public FbxAnimationData EvaluateForFbx(
         EntityRuntimeRig rig, EntitySkeleton skeleton, string name, LayerType layerType,
-        double frameRate = 30, IReadOnlyList<WeaponLayerClip>? layers = null, HandIkSetup? hands = null)
+        double frameRate = 30, IReadOnlyList<WeaponLayerClip>? layers = null, HandIkSetup? hands = null, LayerInputs? inputs = null, int? frameCount = null)
     {
-        var objectSpace = Evaluate(rig, skeleton, false, layers, hands);
-        return FbxAnimationBuilder.Build(name, objectSpace, skeleton, layerType, FrameCount, frameRate);
+        var objectSpace = Evaluate(rig, skeleton, false, layers, hands, inputs, frameCount);
+        return FbxAnimationBuilder.Build(name, objectSpace, skeleton, layerType, frameCount ?? FrameCount, frameRate);
     }
 
     public FbxAnimationData EvaluateWeaponForFbx(
         EntityRuntimeRig rig, EntitySkeleton rigSkeleton, EntitySkeleton weaponSkeleton, string name, LayerType layerType,
-        double frameRate = 30, IReadOnlyList<WeaponLayerClip>? layers = null, HandIkSetup? hands = null)
+        double frameRate = 30, IReadOnlyList<WeaponLayerClip>? layers = null, HandIkSetup? hands = null, LayerInputs? inputs = null, int? frameCount = null)
     {
         int first = AnimationSkinning.WeaponFirstBone(rigSkeleton, weaponSkeleton);
-        var objectSpace = Evaluate(rig, rigSkeleton, false, layers, hands);
+        var objectSpace = Evaluate(rig, rigSkeleton, false, layers, hands, inputs, frameCount);
         var weaponBones = weaponSkeleton.BoneNodes;
 
         var anchor = RigTransform.Compose(
@@ -249,7 +249,7 @@ public class Animation : Tag<SAnimationClip>
             weapon[i] = bone;
         }
 
-        return FbxAnimationBuilder.Build(name, weapon, weaponSkeleton, layerType, FrameCount, frameRate);
+        return FbxAnimationBuilder.Build(name, weapon, weaponSkeleton, layerType, frameCount ?? FrameCount, frameRate);
     }
 
     private static RigTransform ToRigTransform(BoneAnimation bone, int frame)

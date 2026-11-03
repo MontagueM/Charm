@@ -19,7 +19,7 @@ public static class RigRetarget
 {
     // evaluates every frame of the clip, object space tracks per skeleton bone
     public static BoneAnimation[] Retarget(Animation clip, BoneTracks[] controls, EntitySkeleton skeleton, EntityRuntimeRig rig, IReadOnlyList<WeaponLayerClip>? layers = null,
-        HandIkSetup? hands = null)
+        HandIkSetup? hands = null, LayerInputs? inputs = null, int? frameCount = null)
     {
         RigProgram program = new(rig, skeleton);
         ClipChannels channels = new(clip, controls, program);
@@ -37,7 +37,8 @@ public static class RigRetarget
         bool solveHands = hands != null && (clipConstraints != null || layerChannels.Any(x => x.Constraints != null));
         List<HandIk.Source> sources = new();
 
-        int frames = clip.FrameCount;
+        int baseFrames = clip.FrameCount;
+        int frames = frameCount ?? baseFrames;
         var bones = skeleton.BoneNodes;
         var result = NewTracks(bones, frames);
 
@@ -49,7 +50,7 @@ public static class RigRetarget
             channels.Apply(frame, false, values, 1f);
 
             foreach (var (layer, track, _) in layerChannels)
-                layer.Apply(track.FrameFor(frame, frames, layer.FrameCount), track.Loops, values, 1f);
+                layer.Apply(track.FrameFor(frame, baseFrames, layer.FrameCount), track.Loops, values, track.Weight(inputs));
 
             program.Evaluate(values, pose);
 
@@ -58,7 +59,7 @@ public static class RigRetarget
                 sources.Clear();
                 sources.Add(new(clipConstraints, channels, frame, false, 1f));
                 foreach (var (layer, track, constraints) in layerChannels)
-                    sources.Add(new(constraints, layer, track.FrameFor(frame, frames, layer.FrameCount), track.Loops, 1f));
+                    sources.Add(new(constraints, layer, track.FrameFor(frame, baseFrames, layer.FrameCount), track.Loops, track.Weight(inputs)));
 
                 HandIk.Apply(program, pose, sources, hands!.Points, hands.WeaponSocket);
             }
@@ -72,7 +73,7 @@ public static class RigRetarget
 
     public static BoneAnimation[] ToLocalSpace(Animation clip, BoneAnimation[] objectSpace, EntitySkeleton skeleton)
     {
-        int frames = clip.FrameCount;
+        int frames = objectSpace.Length > 0 ? objectSpace[0].Rotations.Length : clip.FrameCount;
         var bones = skeleton.BoneNodes;
         var result = NewTracks(bones, frames);
 
