@@ -1,5 +1,28 @@
 [
     {
+        "version": "3.5.2",
+        "date": "11-6-2026",
+        "changes": [
+            {
+                "title": "Additions",
+                "notes": [
+                    "Gear: Added support to override default gear shaders on export.\n- You can drag and drop a shader onto an item to override its default shader.",
+                    "Gear: Weapon animations will export with baked in walk/run variants when available.",
+                    "Renderer: Added a Global Channel editor.\n- Options->Debug->Global Channel Editor",
+                    "Renderer: Added first person mode for weapon animations.",
+                    "Added an option to export a maps statics as combined FBX files instead of one FBX per static mesh.\n- Requires v1.6.2+ of the Blender addon."
+                ]
+            },
+            {
+                "title": "Fixes",
+                "notes": [
+                    "Fixed weapon animation issues. (Hand constraints/IK/layers)",
+                    "Some small exporting safeguards (Will log if a scene export fails)"
+                ]
+            }
+        ]
+    },
+    {
         "version": "3.5.0",
         "date": "10-27-2026",
         "changes": [
